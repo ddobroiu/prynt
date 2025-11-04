@@ -1,197 +1,365 @@
-// components/BannerConfigurator.tsx
 "use client";
 
 import { useMemo, useState } from "react";
-import { computeBannerPrice, type BannerMaterial } from "../lib/pricing-banner";
-import { useCart } from "./CartProvider";
-import { money } from "../lib/format";
 
-const MATERIALS: { value: BannerMaterial; label: string }[] = [
-  { value: "frontlit_440", label: "Frontlit 440 g/mp" },
-  { value: "frontlit_510", label: "Frontlit 510 g/mp" }, // +10% în calcule, invizibil în UI
+// --- INLINE LOGICĂ DE PREȚ (din fosta: pricing-banner.ts) ---
+
+// Tipuri de date pentru material și intrarea în funcția de preț
+type BannerMaterial = "frontlit_440" | "frontlit_510";
+
+type PriceInput = {
+  width_cm: number;
+  height_cm: number;
+  quantity: number;
+  material: BannerMaterial;
+  want_wind_holes: boolean;
+  want_hem_and_grommets: boolean; // Tiv + capse
+};
+
+// Structura de return
+type PriceOutput = {
+  sqm_per_unit: number; // Suprafața unei singure unități (m²)
+  total_sqm_calculated: number; // Suprafața totală reală (m²)
+  total_sqm_taxable: number; // Suprafața taxabilă (m²), cu min. 1m²
+  pricePerSqmBase: number; // Prețul de bază/mp pentru acel prag de cantitate (inclusiv multiplicatorii)
+  totalBasePrice: number; // Preț total înainte de TVA
+  finalPrice: number; // Preț final cu TVA
+  isMinAreaApplied: boolean; // Indicator dacă a fost aplicat minimum 1m²
+};
+
+
+// Constante
+const TVA = 0.19;
+const MINIMUM_AREA_PER_ORDER = 1.0; // Suprafața minimă taxabilă (în m²)
+
+// Prețurile de BAZĂ (Frontlit 440g) în RON, pe prag de suprafață totală taxabilă (fără finisaje/TVA)
+const TIERED_PRICES: { maxSqm: number, price: number }[] = [
+    { maxSqm: MINIMUM_AREA_PER_ORDER, price: 150.00 }, // Preț special pentru aria minima (dacă se ajunge la 1mp taxabil)
+    { maxSqm: 5, price: 100.00 },
+    { maxSqm: 20, price: 75.00 },
+    { maxSqm: Infinity, price: 50.00 }, // Peste 20 mp
 ];
 
-export default function BannerConfigurator() {
-  const [width, setWidth] = useState<number>(300);   // cm
-  const [height, setHeight] = useState<number>(100); // cm
-  const [qty, setQty] = useState<number>(1);
-  const [material, setMaterial] = useState<BannerMaterial>("frontlit_440");
-  const [wantWindHoles, setWantWindHoles] = useState<boolean>(false);          // Găuri de vânt (+10% invizibil)
-  const [wantHemAndGrommets, setWantHemAndGrommets] = useState<boolean>(false); // Tiv + capse (+10% invizibil)
-  const [justAdded, setJustAdded] = useState<boolean>(false);
+// Supra-taxe (multiplicator)
+const SURCHARGES = {
+    // Frontlit 510g este cu 15% mai scump
+    frontlit_510: 1.15,
+    // Găuri de vânt (adaugă 5% la costul de bază al suprafeței)
+    wind_holes: 1.05,
+    // Tiv + Capse (adaugă 10% la costul de bază al suprafeței)
+    hem_and_grommets: 1.10,
+    // TVA
+    tva_multiplier: 1 + TVA
+};
 
-  const cart = useCart();
+/**
+ * Rotunjeste suma la 2 zecimale.
+ */
+function roundMoney(n: number): number {
+  return Math.round(n * 100) / 100;
+}
 
-  const price = useMemo(() => {
-    return computeBannerPrice({
-      width_cm: width,
-      height_cm: height,
-      quantity: qty,
-      material,
-      want_wind_holes: wantWindHoles,
-      want_hem_and_grommets: wantHemAndGrommets,
-    });
-  }, [width, height, qty, material, wantWindHoles, wantHemAndGrommets]);
+/**
+ * Calculează prețul de bază pe metru pătrat în funcție de suprafața totală taxabilă.
+ */
+function getTierPricePerSqm(sqm: number): number {
+    for (const tier of TIERED_PRICES) {
+        if (sqm <= tier.maxSqm) {
+            return tier.price;
+        }
+    }
+    return TIERED_PRICES[TIERED_PRICES.length - 1].price;
+}
 
-  function clampNum(n: number, min = 1, max = 100000) {
-    if (Number.isNaN(n)) return min;
-    return Math.min(Math.max(n, min), max);
-  }
+/**
+ * Calculează prețul total al comenzii de bannere.
+ */
+function computeBannerPrice(input: PriceInput): PriceOutput {
+    // 1. Suprafața pe unitate (în m²). Presupunem lățimea și înălțimea > 0 pentru calcul.
+    const w_m = Math.max(0, input.width_cm) / 100;
+    const h_m = Math.max(0, input.height_cm) / 100;
+    const sqm_per_unit = w_m * h_m;
 
-  function addToCart() {
-    const safeWidth = clampNum(width, 10, 20000);
-    const safeHeight = clampNum(height, 10, 20000);
-    const safeQty = clampNum(qty, 1, 9999);
+    // 2. Suprafața totală reală (brută)
+    const total_sqm_calculated = sqm_per_unit * input.quantity;
 
-    // ID unic pe bază de configurație
-    const id = `banner-${safeWidth}x${safeHeight}-${material}-wind-${wantWindHoles}-hem-${wantHemAndGrommets}`;
+    // 3. Suprafața totală taxabilă (Minim 1m² regula)
+    const total_sqm_taxable = Math.max(total_sqm_calculated, MINIMUM_AREA_PER_ORDER);
+    const isMinAreaApplied = roundMoney(total_sqm_taxable) > roundMoney(total_sqm_calculated); // Comparăm rotunjit
 
-    const item = {
-      id,
-      name: "Banner personalizat",
-      description: `${safeWidth}×${safeHeight} cm • ${material} • ${wantWindHoles ? "găuri vânt" : "fără găuri"} • ${wantHemAndGrommets ? "tiv+capse" : "fără t/c"}`,
-      quantity: safeQty,
-      unitAmount: Number(price.unitPrice),            // fără TVA; setezi valuta în NEXT_PUBLIC_CURRENCY
-      totalAmount: Number(price.unitPrice) * safeQty,
-      meta: {
-        width_cm: safeWidth,
-        height_cm: safeHeight,
-        material,
-        wind: wantWindHoles,
-        hem_grommets: wantHemAndGrommets,
-        sqm: price.sqm,
-        pricePerSqm: price.pricePerSqm,
-      },
+    // 4. Prețul de bază pe metru pătrat (din tier-ul de cantitate)
+    let pricePerSqmBase = getTierPricePerSqm(total_sqm_taxable);
+
+    // 5. Aplicarea Multiplicatorilor (Surcharges)
+    let totalMultiplier = 1;
+    
+    // Multiplicator Material
+    if (input.material === "frontlit_510") {
+        totalMultiplier *= SURCHARGES.frontlit_510;
+    }
+
+    // Multiplicator Finisaj (se pot aplica ambele, cumulativ)
+    if (input.want_wind_holes) {
+        totalMultiplier *= SURCHARGES.wind_holes;
+    }
+    if (input.want_hem_and_grommets) {
+        totalMultiplier *= SURCHARGES.hem_and_grommets;
+    }
+    
+    // 6. Preț total FĂRĂ TVA
+    const totalBasePrice = total_sqm_taxable * pricePerSqmBase * totalMultiplier;
+
+    // 7. Preț total CU TVA
+    const finalPrice = totalBasePrice * SURCHARGES.tva_multiplier;
+    
+    // Prețul final per mp, ajustat cu toate supra-taxele, folosit pentru afișarea detaliată
+    const adjustedPricePerSqm = pricePerSqmBase * totalMultiplier;
+
+    return {
+        sqm_per_unit: roundMoney(sqm_per_unit),
+        total_sqm_calculated: roundMoney(total_sqm_calculated),
+        total_sqm_taxable: roundMoney(total_sqm_taxable),
+        pricePerSqmBase: roundMoney(adjustedPricePerSqm), 
+        totalBasePrice: roundMoney(totalBasePrice),
+        finalPrice: roundMoney(finalPrice),
+        isMinAreaApplied: isMinAreaApplied,
     };
+}
+// --- SFÂRȘIT LOGICĂ DE PREȚ ---
 
-    cart.addItem(item as any);
+// Funcție de formatare RON (pentru a fi self-contained)
+const money = (amount: number) => `${roundMoney(amount).toFixed(2)} RON`; 
+
+// Iconițe Lucide (sau echivalente inline SVG)
+const Check = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
+const AlertCircle = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>;
+const Ruler = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8z"></path><path d="M15 7H9"></path></svg>;
+
+// --- DATE CONFIGURARE ---
+const MATERIALS: { value: BannerMaterial; label: string; desc: string }[] = [
+  { value: "frontlit_440", label: "Frontlit 440 g/mp", desc: "Standard, preț de bază" },
+  { value: "frontlit_510", label: "Frontlit 510 g/mp", desc: "Premium, +15% rezistență" },
+];
+
+const FINISHES: { label: string; field: keyof PriceInput; desc: string }[] = [
+  { label: "Tiv + Capse la 50 cm", field: "want_hem_and_grommets", desc: "Recomandat, +10% la preț" },
+  { label: "Găuri de vânt (pentru exterior)", field: "want_wind_holes", desc: "Pentru zone expuse, +5% la preț" },
+];
+
+// --- COMPONENTE INTERNE ---
+
+const SelectCard = ({ label, desc, value, currentSelection, onClick }) => (
+    <button
+        onClick={() => onClick(value)}
+        className={`w-full text-left p-3 rounded-xl border-2 transition-all duration-200 
+            ${currentSelection === value 
+                ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20' 
+                : 'border-white/10 bg-gray-700/50 hover:border-white/20'
+            }`
+        }
+    >
+        <div className="flex justify-between items-center">
+            <span className="font-semibold text-white">{label}</span>
+            {currentSelection === value && <Check className="w-5 h-5 text-indigo-400" />}
+        </div>
+        <p className="text-xs text-white/60 mt-0.5">{desc}</p>
+    </button>
+);
+
+const CheckboxOption = ({ label, desc, checked, onChange }) => (
+    <label className="flex items-start p-3 rounded-lg border border-white/10 bg-gray-700/50 cursor-pointer hover:bg-gray-600/50 transition-colors">
+        <input 
+            type="checkbox"
+            checked={checked}
+            onChange={onChange}
+            className="mt-1 w-5 h-5 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500 shrink-0"
+        />
+        <div className="ml-3">
+            <span className="text-sm font-medium text-white/90">{label}</span>
+            <p className="text-xs text-white/60">{desc}</p>
+        </div>
+    </label>
+);
+
+// --- COMPONENTA PRINCIPALĂ ---
+export default function BannerConfigurator() {
+  const [widthInput, setWidthInput] = useState('100');
+  const [heightInput, setHeightInput] = useState('50');
+  const [qty, setQty] = useState(1);
+  
+  const [material, setMaterial] = useState<BannerMaterial>('frontlit_440');
+  const [wantWindHoles, setWantWindHoles] = useState<boolean>(false); 
+  const [wantHemAndGrommets, setWantHemAndGrommets] = useState<boolean>(true); // Implicit, recomandat
+
+  const width = parseFloat(widthInput) || 0;
+  const height = parseFloat(heightInput) || 0;
+  const quantity = Math.max(1, qty);
+  
+  const [justAdded, setJustAdded] = useState<boolean>(false);
+  // const cart = useCart(); // Comentat
+
+  // Calculul Prețului
+  const price: PriceOutput = useMemo(() => {
+    return computeBannerPrice({
+        width_cm: width,
+        height_cm: height,
+        quantity: quantity,
+        material: material,
+        want_hem_and_grommets: wantHemAndGrommets,
+        want_wind_holes: wantWindHoles,
+    });
+  }, [quantity, width, height, material, wantHemAndGrommets, wantWindHoles]);
+
+
+  // Handler pentru a permite ștergerea completă a valorii din input
+  const handleDimensionChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string>>) => {
+    const value = e.target.value;
+    // Permitem input gol sau numere pozitive
+    if (value === '' || (parseFloat(value) >= 0 && !isNaN(parseFloat(value)))) {
+      setter(value);
+    }
+  };
+
+  const handleAddToCart = () => {
+    // Aici se adaugă logica de adăugare în coș (e.g., cart.addItem)
+    // Vom simula doar feedback-ul vizual
+    console.log("Adaugă în coș: ", { qty: quantity, width, height, material, wantHemAndGrommets, wantWindHoles, price });
     setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 2500);
+    setTimeout(() => setJustAdded(false), 3000);
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-        <h2 className="text-2xl font-semibold mb-6">Configurează bannerul</h2>
-
-        {/* Dimensiuni */}
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold text-indigo-400">Configurează Produsul</h2>
+      
+      {/* 1. Dimensiuni și Cantitate */}
+      <div className="space-y-4 p-4 rounded-xl bg-gray-900 border border-white/10 shadow-inner">
+        <h3 className="text-xl font-semibold flex items-center gap-2 text-white/90">
+            <Ruler className="w-5 h-5 text-indigo-400" /> Dimensiuni & Cantitate
+        </h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm text-white/70">Lățime (cm)</label>
-            <input
-              type="number"
-              inputMode="numeric"
-              min={10}
-              value={width}
-              onChange={(e) => setWidth(Number(e.target.value))}
-              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
+            <label className="block text-sm font-medium mb-1 text-white/70">Lățime (cm)</label>
+            <input 
+              type="number" 
+              value={widthInput} 
+              onChange={(e) => handleDimensionChange(e, setWidthInput)}
+              min={0} 
+              placeholder="100"
+              className="w-full rounded-lg bg-gray-800 border border-white/20 p-2.5 text-white focus:ring-indigo-500 focus:border-indigo-500 appearance-none" 
             />
           </div>
           <div>
-            <label className="text-sm text-white/70">Lungime (cm)</label>
-            <input
-              type="number"
-              inputMode="numeric"
-              min={10}
-              value={height}
-              onChange={(e) => setHeight(Number(e.target.value))}
-              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
+            <label className="block text-sm font-medium mb-1 text-white/70">Înălțime (cm)</label>
+            <input 
+              type="number" 
+              value={heightInput} 
+              onChange={(e) => handleDimensionChange(e, setHeightInput)}
+              min={0} 
+              placeholder="50"
+              className="w-full rounded-lg bg-gray-800 border border-white/20 p-2.5 text-white focus:ring-indigo-500 focus:border-indigo-500 appearance-none" 
             />
           </div>
         </div>
-
-        {/* Cantitate */}
-        <div className="mt-4">
-          <label className="text-sm text-white/70">Cantitate</label>
-          <input
-            type="number"
-            inputMode="numeric"
-            min={1}
-            value={qty}
-            onChange={(e) => setQty(Number(e.target.value))}
-            className="mt-1 w-40 rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
+        
+        <div>
+          <label className="block text-sm font-medium mb-1 text-white/70">Bucăți</label>
+          <input 
+            type="number" 
+            value={qty} 
+            onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
+            min={1} 
+            className="w-full rounded-lg bg-gray-800 border border-white/20 p-2.5 text-white text-base focus:ring-indigo-500 focus:border-indigo-500" 
           />
         </div>
+      </div>
 
-        {/* Material */}
-        <div className="mt-4">
-          <label className="text-sm text-white/70">Material</label>
-          <select
-            value={material}
-            onChange={(e) => setMaterial(e.target.value as BannerMaterial)}
-            className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
-          >
-            {MATERIALS.map((m) => (
-              <option key={m.value} value={m.value}>{m.label}</option>
-            ))}
-          </select>
+
+      {/* 2. Opțiuni Material */}
+      <div className="space-y-3">
+        <label className="block text-lg font-semibold text-white/90">Alege Materialul</label>
+        <div className="grid grid-cols-2 gap-3">
+          {MATERIALS.map(opt => (
+            <SelectCard 
+                key={opt.value} 
+                label={opt.label} 
+                desc={opt.desc}
+                value={opt.value} 
+                currentSelection={material} 
+                onClick={setMaterial} 
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 3. Opțiuni Finisaj */}
+      <div className="space-y-3">
+        <label className="block text-lg font-semibold text-white/90">Alege Finisajul</label>
+        <div className="space-y-3">
+          <CheckboxOption 
+            label={FINISHES[0].label}
+            desc={FINISHES[0].desc}
+            checked={wantHemAndGrommets}
+            onChange={() => setWantHemAndGrommets(!wantHemAndGrommets)}
+          />
+          <CheckboxOption 
+            label={FINISHES[1].label}
+            desc={FINISHES[1].desc}
+            checked={wantWindHoles}
+            onChange={() => setWantWindHoles(!wantWindHoles)}
+          />
+        </div>
+      </div>
+      
+      {/* 4. PRICING BANNER / REZUMAT PREȚ FINAL */}
+      <div className="pt-6 border-t border-white/10 space-y-4">
+        
+        {/* Detalii de calcul (Mini Banner) */}
+        <div className="text-sm space-y-1 p-3 rounded-xl bg-indigo-900/40 border border-indigo-500/50 shadow-lg shadow-indigo-900/20">
+            {price.isMinAreaApplied && (
+                <div className="flex items-center justify-between text-yellow-300 font-semibold pb-2 border-b border-indigo-400/30">
+                    <span className="flex items-center gap-1"><AlertCircle className="w-4 h-4"/> ATENȚIE: Suprafață Minimă Taxabilă</span>
+                    <span>{price.total_sqm_taxable.toFixed(4)} mp</span>
+                </div>
+            )}
+            
+            <div className="flex justify-between items-center text-white/80">
+                <span>Suprafață reală ({quantity} buc):</span>
+                <span className={`${price.isMinAreaApplied ? 'line-through opacity-70' : 'text-indigo-300'}`}>
+                    {price.total_sqm_calculated.toFixed(4)} mp
+                </span>
+            </div>
+            
+            <div className="flex justify-between items-center text-white/80 font-medium pt-1">
+                <span>Preț final / mp (inclusiv finisaje):</span>
+                <span>{money(price.pricePerSqmBase)}</span>
+            </div>
         </div>
 
-        {/* Opțiuni (nu arătăm procente, doar selecția) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div>
-            <label className="text-sm text-white/70">Găuri de vânt</label>
-            <select
-              value={wantWindHoles ? "da" : "nu"}
-              onChange={(e) => setWantWindHoles(e.target.value === "da")}
-              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
+        {/* Preț Final Mare */}
+        <div className="text-center bg-indigo-700/60 p-4 rounded-xl shadow-2xl shadow-indigo-900/50">
+            <p className="text-lg font-normal text-white/80">Total de Plată (TVA inclus 19%)</p>
+            <span className="text-5xl font-extrabold text-white block mt-1 tracking-tight">
+                {money(price.finalPrice)}
+            </span>
+        </div>
+
+        {/* Butoane CTA */}
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <button
+                className="w-full px-5 py-3 rounded-xl bg-indigo-600/90 text-white font-extrabold text-lg hover:bg-indigo-500 transition-colors shadow-xl shadow-indigo-500/40"
+                onClick={handleAddToCart}
             >
-              <option value="nu">Nu doresc</option>
-              <option value="da">Doresc</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sm text-white/70">Tiv + capse</label>
-            <select
-              value={wantHemAndGrommets ? "da" : "nu"}
-              onChange={(e) => setWantHemAndGrommets(e.target.value === "da")}
-              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
-            >
-              <option value="nu">Nu doresc</option>
-              <option value="da">Doresc</option>
-            </select>
-          </div>
+                Adaugă în coș
+            </button>
         </div>
-
-        {/* CTA */}
-        <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:items-center">
-          <button
-            onClick={addToCart}
-            className="w-full sm:w-auto px-5 py-3 rounded-xl bg-white text-black font-semibold hover:bg-white/90"
-          >
-            Adaugă în coș
-          </button>
-          <a
-            href="/checkout"
-            className="w-full sm:w-auto px-5 py-3 rounded-xl border border-white/20 bg-white/0 text-white hover:bg-white/10 text-center"
-          >
-            Mergi la finalizare
-          </a>
-        </div>
-
-        {/* Mic feedback după adăugare */}
+        
+        {/* Feedback adăugare */}
         {justAdded && (
-          <div className="mt-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 px-3 py-2 text-sm">
+          <div className="mt-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 px-3 py-2 text-sm text-emerald-300">
             Produsul a fost adăugat în coș.
           </div>
         )}
-
-        {/* Rezumat minimalist – DOAR sub butoane */}
-        <div className="mt-5 rounded-xl border border-white/10 bg-black/20 p-4 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-white/70">Suprafață</span>
-            <span className="font-semibold">{price.sqm} m²</span>
-          </div>
-          <div className="mt-2 flex items-center justify-between">
-            <span className="text-white/70">Preț / m²</span>
-            <span className="font-semibold">{money(price.pricePerSqm)}</span>
-          </div>
-          <div className="mt-3 h-px bg-white/10" />
-          <div className="mt-3 flex items-center justify-between text-base">
-            <span>Total</span>
-            <span className="font-bold">{money(price.total)}</span>
-          </div>
-        </div>
       </div>
     </div>
   );
