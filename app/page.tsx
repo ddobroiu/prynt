@@ -2,9 +2,19 @@
 // Am înlocuit importurile Next.js specifice (Image, Link) cu echivalentele HTML/React
 // pentru a asigura compilarea corectă în mediul de lucru (Canvas).
 
-// Versiunea componentei ProductCard, definită aici pentru a rezolva eroarea de import.
-// Această versiune folosește stilul modernizat din fișierul ProductCard.tsx cel mai actualizat.
-const ProductCard = ({ href, title, desc, img, cta }) => (
+import React from 'react'; // Import necesar pentru React.FC
+
+// --- TIPARE (Interfață) PENTRU COMPONENTA ProductCard ---
+interface ProductCardProps {
+  href: string;
+  title: string;
+  desc: string;
+  img: string;
+  cta: string;
+}
+
+// Versiunea componentei ProductCard, tipată corect
+const ProductCard: React.FC<ProductCardProps> = ({ href, title, desc, img, cta }) => (
   <a 
     href={href} 
     // Stil modernizat: fundal închis, bordură de accent și umbră la hover (preluat din ProductCard.tsx)
