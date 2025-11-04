@@ -1,6 +1,20 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { CartItem } from "../lib/types";
+// Importul de tip 'CartItem' a fost eliminat, iar tipul este definit mai jos.
+// import type { CartItem } from "../lib/types"; 
+
+// --- DEFINIȚII DE TIP LOCALE ---
+
+// Am definit structura CartItem pentru a rezolva eroarea 'Cannot find module ../lib/types'
+interface CartItem {
+  id: string; // ID unic (de exemplu, ID-ul de produs + opțiuni configurate)
+  name: string;
+  quantity: number;
+  unitAmount: number; // Prețul pe bucată (fără TVA, de preferat)
+  totalAmount: number; // Prețul total al liniei (quantity * unitAmount)
+  // Pot fi adăugate și alte câmpuri: material, dimensiuni, optiuni etc.
+}
+
 
 type CartContextType = {
   items: CartItem[];
@@ -31,11 +45,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = (item: CartItem) => {
     setItems((prev) => {
+      // Regula de unire: Caută un element cu același ID.
       const idx = prev.findIndex((p) => p.id === item.id);
       if (idx >= 0) {
         const copy = [...prev];
         const mergedQty = copy[idx].quantity + item.quantity;
-        const unit = copy[idx].unitAmount;
+        // Folosește unitAmount din elementul existent pentru a menține consistența
+        const unit = copy[idx].unitAmount; 
+        
+        // Verificare suplimentară: Dacă unitAmount-ul din item-ul nou e diferit, 
+        // probabil că ar trebui tratat ca un produs nou (dar simplificăm aici).
+        
         copy[idx] = { ...copy[idx], quantity: mergedQty, totalAmount: unit * mergedQty };
         return copy;
       }
