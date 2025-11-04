@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 // --- INLINE LOGICĂ DE PREȚ (din fosta: pricing-banner.ts) ---
 
@@ -130,10 +130,12 @@ function computeBannerPrice(input: PriceInput): PriceOutput {
 // Funcție de formatare RON (pentru a fi self-contained)
 const money = (amount: number) => `${roundMoney(amount).toFixed(2)} RON`; 
 
-// Iconițe Lucide (sau echivalente inline SVG)
-const Check = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
-const AlertCircle = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>;
-const Ruler = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8z"></path><path d="M15 7H9"></path></svg>;
+// --- ICONIȚE (Tipare explicită pentru a rezolva eroarea TypeScript) ---
+type IconProps = React.SVGProps<SVGSVGElement>;
+
+const Check: React.FC<IconProps> = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
+const AlertCircle: React.FC<IconProps> = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>;
+const Ruler: React.FC<IconProps> = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8z"></path><path d="M15 7H9"></path></svg>;
 
 // --- DATE CONFIGURARE ---
 const MATERIALS: { value: BannerMaterial; label: string; desc: string }[] = [
@@ -146,9 +148,17 @@ const FINISHES: { label: string; field: keyof PriceInput; desc: string }[] = [
   { label: "Găuri de vânt (pentru exterior)", field: "want_wind_holes", desc: "Pentru zone expuse, +5% la preț" },
 ];
 
-// --- COMPONENTE INTERNE ---
+// --- COMPONENTE INTERNE (Tipare explicită pentru a rezolva eroarea TypeScript) ---
 
-const SelectCard = ({ label, desc, value, currentSelection, onClick }) => (
+interface SelectCardProps {
+    label: string;
+    desc: string;
+    value: BannerMaterial;
+    currentSelection: BannerMaterial;
+    onClick: (value: BannerMaterial) => void;
+}
+
+const SelectCard: React.FC<SelectCardProps> = ({ label, desc, value, currentSelection, onClick }) => (
     <button
         onClick={() => onClick(value)}
         className={`w-full text-left p-3 rounded-xl border-2 transition-all duration-200 
@@ -166,12 +176,20 @@ const SelectCard = ({ label, desc, value, currentSelection, onClick }) => (
     </button>
 );
 
-const CheckboxOption = ({ label, desc, checked, onChange }) => (
+interface CheckboxOptionProps {
+    label: string;
+    desc: string;
+    checked: boolean;
+    // Tiparea corectă a evenimentului onChange
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
+}
+
+const CheckboxOption: React.FC<CheckboxOptionProps> = ({ label, desc, checked, onChange }) => (
     <label className="flex items-start p-3 rounded-lg border border-white/10 bg-gray-700/50 cursor-pointer hover:bg-gray-600/50 transition-colors">
         <input 
             type="checkbox"
             checked={checked}
-            onChange={onChange}
+            onChange={onChange} // Acum folosește evenimentul complet
             className="mt-1 w-5 h-5 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500 shrink-0"
         />
         <div className="ml-3">
@@ -196,7 +214,6 @@ export default function BannerConfigurator() {
   const quantity = Math.max(1, qty);
   
   const [justAdded, setJustAdded] = useState<boolean>(false);
-  // const cart = useCart(); // Comentat
 
   // Calculul Prețului
   const price: PriceOutput = useMemo(() => {
@@ -300,13 +317,15 @@ export default function BannerConfigurator() {
             label={FINISHES[0].label}
             desc={FINISHES[0].desc}
             checked={wantHemAndGrommets}
-            onChange={() => setWantHemAndGrommets(!wantHemAndGrommets)}
+            // Utilizare a e.target.checked pentru a prelua valoarea
+            onChange={(e) => setWantHemAndGrommets(e.target.checked)} 
           />
           <CheckboxOption 
             label={FINISHES[1].label}
             desc={FINISHES[1].desc}
             checked={wantWindHoles}
-            onChange={() => setWantWindHoles(!wantWindHoles)}
+            // Utilizare a e.target.checked pentru a prelua valoarea
+            onChange={(e) => setWantWindHoles(e.target.checked)}
           />
         </div>
       </div>
