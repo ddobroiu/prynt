@@ -129,11 +129,13 @@ function computeBannerPrice(input: PriceInput): PriceOutput {
 // Funcție de formatare RON (pentru a fi self-contained)
 const money = (amount: number) => `${roundMoney(amount).toFixed(2)} RON`; 
 
-// Iconițe (pentru a fi self-contained)
-const Check = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
-const AlertCircle = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>;
-const Ruler = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8z"></path><path d="M15 7H9"></path></svg>;
-const ImageGrid = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="12" x2="21" y2="12"></line><line x1="12" y1="3" x2="12" y2="21"></line></svg>;
+// Iconițe (cu tipare corecte pentru a rezolva eroarea 'implicitly has an any type')
+type IconProps = React.SVGProps<SVGSVGElement>;
+
+const Check: React.FC<IconProps> = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
+const AlertCircle: React.FC<IconProps> = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>;
+const Ruler: React.FC<IconProps> = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8z"></path><path d="M15 7H9"></path></svg>;
+const ImageGrid: React.FC<IconProps> = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="12" x2="21" y2="12"></line><line x1="12" y1="3" x2="12" y2="21"></line></svg>;
 
 
 // --- DATE CONFIGURARE PENTRU CONFIGURATOR ---
@@ -148,7 +150,16 @@ const FINISHES: { label: string; field: keyof PriceInput; desc: string }[] = [
 ];
 
 // --- COMPONENTE INTERNE PENTRU CONFIGURATOR ---
-const SelectCard = ({ label, desc, value, currentSelection, onClick }) => (
+
+interface SelectCardProps {
+    label: string;
+    desc: string;
+    value: BannerMaterial;
+    currentSelection: BannerMaterial;
+    onClick: (value: BannerMaterial) => void;
+}
+
+const SelectCard: React.FC<SelectCardProps> = ({ label, desc, value, currentSelection, onClick }) => (
     <button
         onClick={() => onClick(value)}
         className={`w-full text-left p-3 rounded-xl border-2 transition-all duration-200 
@@ -166,7 +177,14 @@ const SelectCard = ({ label, desc, value, currentSelection, onClick }) => (
     </button>
 );
 
-const CheckboxOption = ({ label, desc, checked, onChange }) => (
+interface CheckboxOptionProps {
+    label: string;
+    desc: string;
+    checked: boolean;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const CheckboxOption: React.FC<CheckboxOptionProps> = ({ label, desc, checked, onChange }) => (
     <label className="flex items-start p-3 rounded-lg border border-white/10 bg-gray-700/50 cursor-pointer hover:bg-gray-600/50 transition-colors">
         <input 
             type="checkbox"
@@ -298,13 +316,13 @@ function BannerConfigurator() {
             label={FINISHES[0].label}
             desc={FINISHES[0].desc}
             checked={wantHemAndGrommets}
-            onChange={() => setWantHemAndGrommets(!wantHemAndGrommets)}
+            onChange={(e) => setWantHemAndGrommets(e.target.checked)}
           />
           <CheckboxOption 
             label={FINISHES[1].label}
             desc={FINISHES[1].desc}
             checked={wantWindHoles}
-            onChange={() => setWantWindHoles(!wantWindHoles)}
+            onChange={(e) => setWantWindHoles(e.target.checked)}
           />
         </div>
       </div>
@@ -366,7 +384,16 @@ function BannerConfigurator() {
 
 // --- COMPONENTE PENTRU PAGINA DE PRODUS ---
 // Mini Componentă Galerie (pentru a simula)
-const ProductGallery = ({ images }) => {
+interface Image {
+    src: string;
+    alt: string;
+}
+
+interface ProductGalleryProps {
+    images: Image[];
+}
+
+const ProductGallery: React.FC<ProductGalleryProps> = ({ images }) => {
     const [mainImage, setMainImage] = useState(images[0]);
     return (
         <div className="space-y-4">
@@ -398,10 +425,10 @@ const ProductGallery = ({ images }) => {
 
 
 // --- COMPONENTA PAGINĂ PRINCIPALĂ ---
-export default function BannerPage() {
+const BannerPage: React.FC = () => {
     
     // Simulare de date
-    const images = [
+    const images: Image[] = [
         // Am folosit un placeholder comun în loc de path-uri absolute /products/banner/1.jpg
         { src: "https://placehold.co/800x450/1e293b/a5b4fc?text=Banner+Exterior", alt: "Banner exterior" },
         { src: "https://placehold.co/800x450/1e293b/a5b4fc?text=Print+Calitate+UV", alt: "Print calitate UV" },
@@ -483,3 +510,5 @@ export default function BannerPage() {
     </main>
   );
 }
+
+export default BannerPage;
