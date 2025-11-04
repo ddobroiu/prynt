@@ -1,65 +1,89 @@
+// app/page.tsx
 import Image from "next/image";
+import ProductCard from "../components/ProductCard";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-screen bg-[#0b0f19] text-white">
+      {/* HERO */}
+      <section className="mx-auto max-w-6xl px-4 pt-12 pb-8 text-center">
+        <div className="flex flex-col items-center">
+          <Image src="/logo.png" alt="Prynt.ro" width={120} height={120} className="mb-5" priority />
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight">Prynt.ro — Tipar rapid & calitate</h1>
+          <p className="mt-3 text-white/80 max-w-2xl">
+            Configurezi online, vezi prețul în timp real și primești livrarea rapid cu DPD.
           </p>
+          <div className="mt-6">
+            <a href="/banner" className="inline-flex items-center rounded-xl bg-white px-5 py-3 text-black font-semibold hover:bg-white/90 transition">
+              Începe cu Banner →
+            </a>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* BENEFITS */}
+      <section className="mx-auto max-w-6xl px-4 py-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { title: "Tipar profesional", desc: "Echipamente UV & eco-solvent pentru culori puternice și durabile." },
+          { title: "Preț în timp real", desc: "Configurator la centimetru, calcule corecte pe m²/tiraj." },
+          { title: "Livrare 24–48h", desc: "Transport național prin DPD, tracking și AWB automat." },
+          { title: "Plată sigură", desc: "Stripe/OP/Ramburs. Facturare PF/PJ." },
+        ].map((b) => (
+          <div key={b.title} className="rounded-2xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition">
+            <h3 className="font-semibold text-lg mb-2">{b.title}</h3>
+            <p className="text-white/70 text-sm">{b.desc}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* PRODUSE */}
+      <section className="mx-auto max-w-6xl px-4 pb-6">
+        <h2 className="text-2xl font-semibold mb-6 text-center">Produse disponibile</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <ProductCard href="/banner" title="Banner" desc="Frontlit 440/510 g/mp · opțiuni: găuri de vânt, tiv + capse." img="/products/banner/1.jpg" cta="Configurează" />
+          <ProductCard href="/flayer" title="Flayer" desc="Flayere color, formate multiple și finisări profesionale." img="/products/flayer/1.jpg" cta="Vezi opțiuni" />
+          <ProductCard href="/roll-up" title="Roll-Up" desc="Sisteme roll-up premium cu print inclus. Montaj rapid." img="/products/rollup/1.jpg" cta="Vezi opțiuni" />
+          <ProductCard href="/canvas" title="Canvas" desc="Tablouri canvas pe șasiu de lemn, print premium." img="/products/canvas/1.jpg" cta="Vezi opțiuni" />
+          <ProductCard href="/autocolante" title="Autocolante" desc="Stickere personalizate, print UV, interior/exterior." img="/products/autocolante/1.jpg" cta="Vezi opțiuni" />
+          <ProductCard href="/materiale-rigide" title="Materiale rigide" desc="Forex, PVC, plexiglas, carton plume — print direct." img="/products/rigide/1.jpg" cta="Vezi opțiuni" />
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* ABOUT */}
+      <section className="mx-auto max-w-4xl px-4 py-12 text-center">
+        <h2 className="text-2xl font-bold mb-4">Despre Prynt.ro</h2>
+        <p className="text-white/70 leading-relaxed">
+          Suntem un centru de producție publicitară și tipar digital cu peste 10 ani de experiență.
+          Oferim print de calitate pe o gamă largă de materiale — totul cu prețuri transparente și livrare rapidă.
+        </p>
+      </section>
+
+      {/* REVIEWS */}
+      <section className="mx-auto max-w-6xl px-4 py-12">
+        <h2 className="text-2xl font-bold text-center mb-6">Ce spun clienții noștri</h2>
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            { name: "Andrei P.", text: "Print impecabil, livrare rapidă. Recomand cu încredere!" },
+            { name: "Mădălina S.", text: "Bannerele pentru eveniment au ieșit perfect. Mulțumesc!" },
+            { name: "George T.", text: "Preț corect, suport prompt. Comand din nou!" },
+          ].map((r) => (
+            <div key={r.name} className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <p className="text-white/80 italic mb-3">“{r.text}”</p>
+              <div className="text-white/60 text-sm">— {r.name}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* GALLERY */}
+      <section className="mx-auto max-w-6xl px-4 py-12">
+        <h2 className="text-2xl font-bold text-center mb-6">Exemple de lucrări</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[1,2,3,4,5,6].map((i) => (
+            <img key={i} src={`/gallery/${i}.jpg`} alt={`Lucrare ${i}`} className="rounded-2xl border border-white/10 hover:scale-105 transition" />
+          ))}
+        </div>
+      </section>
+    </main>
   );
 }
