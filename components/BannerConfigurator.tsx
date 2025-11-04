@@ -2,7 +2,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { computeBannerPrice, type BannerMaterial } from "../lib/pricing";
+import { computeBannerPrice, type BannerMaterial } from "../lib/pricing-banner";
 import { useCart } from "./CartProvider";
 import { money } from "../lib/format";
 
