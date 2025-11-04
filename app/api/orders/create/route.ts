@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { createOrderSchema } from '@/lib/validation';
 import { Decimal } from '@prisma/client/runtime/library';
+import { createOblioInvoice } from '@/lib/oblio';
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,15 +12,16 @@ export async function POST(req: NextRequest) {
     if (!parse.success) {
       return NextResponse.json({ error: 'Invalid payload', issues: parse.error.flatten() }, { status: 400 });
     }
-    const { items, customer, currency, shippingMethod, shippingCost, discountTotal } = parse.data;
+    const { items, customer, currency, discountTotal, paymentMethod } = parse.data;
 
-    // calcule
+    const SHIPPING_COST = 24;
+    const shippingMethod = 'dpd_standard' as const;
+
     const subtotal = items.reduce((s, it) => s + it.unitPrice * it.quantity, 0);
     const vatTotal = items.reduce((s, it) => s + (it.unitPrice * it.quantity * it.vatRate) / 100, 0);
     const totalWeightGr = items.reduce((s, it) => s + it.weightGr * it.quantity, 0);
-    const total = subtotal + vatTotal + shippingCost - discountTotal;
+    const total = subtotal + vatTotal + SHIPPING_COST - discountTotal;
 
-    // adrese
     const billing = await prisma.address.create({
       data: {
         name: customer.isCompany ? customer.companyName ?? undefined : customer.fullName ?? undefined,
@@ -65,9 +67,10 @@ export async function POST(req: NextRequest) {
     const order = await prisma.order.create({
       data: {
         status: 'PENDING_PAYMENT',
+        paymentMethod: paymentMethod ?? 'card',
         currency,
         subtotal: new Decimal(subtotal.toFixed(2)),
-        shippingCost: new Decimal(shippingCost.toFixed(2)),
+        shippingCost: new Decimal(SHIPPING_COST.toFixed(2)),
         vatTotal: new Decimal(vatTotal.toFixed(2)),
         discountTotal: new Decimal(discountTotal.toFixed(2)),
         total: new Decimal(total.toFixed(2)),
@@ -89,16 +92,62 @@ export async function POST(req: NextRequest) {
           })),
         },
         shipment: {
-          create: {
-            provider: 'dpd',
-            status: 'PENDING',
-          },
+          create: { provider: 'dpd', status: 'PENDING' },
         },
       },
-      include: { items: true },
+      include: { items: true, billingAddress: true, customer: true },
     });
 
-    return NextResponse.json({ orderId: order.id, total, currency, shippingMethod }, { status: 201 });
+    // 🟢 Dacă e plata la livrare — emitem factura imediat
+    if (paymentMethod === 'cash_on_delivery') {
+      const invoice = await createOblioInvoice({
+        currency: order.currency,
+        client: {
+          cif: order.customer?.cui ?? undefined,
+          name: order.customer?.isCompany ? order.customer?.companyName ?? '' : order.customer?.fullName ?? '',
+          address: order.billingAddress?.street ?? '',
+          state: order.billingAddress?.state ?? '',
+          city: order.billingAddress?.city ?? '',
+          country: order.billingAddress?.country ?? 'RO',
+          email: order.customer?.email ?? '',
+          phone: order.customer?.phone ?? '',
+          vatPayer: !!order.customer?.isCompany,
+        },
+        lines: order.items.map((it) => ({
+          name: it.name,
+          code: it.sku,
+          qty: it.quantity,
+          unitPrice: Number(it.unitPrice),
+          vatRate: Number(it.vatRate),
+        })),
+      });
+
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          status: 'AWAITING_SHIPMENT',
+          paymentMethod: 'cash_on_delivery',
+          oblioInvoiceId: `${invoice.seriesName}-${invoice.number}`,
+          oblioInvoiceUrl: invoice.link,
+        },
+      });
+
+      return NextResponse.json({
+        orderId: order.id,
+        total,
+        currency,
+        paymentMethod: 'cash_on_delivery',
+        message: 'Comandă plasată cu plată la livrare. Factura a fost emisă.',
+      });
+    }
+
+    // 💳 Plata cu card — continuă către Stripe
+    return NextResponse.json({
+      orderId: order.id,
+      total,
+      currency,
+      paymentMethod: 'card',
+    });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

@@ -1,19 +1,37 @@
 // app/checkout/page.tsx
 import CheckoutForm from '@/components/CheckoutForm';
+import { readCartFromCookies, calcTotals } from '@/lib/cart';
+import Link from 'next/link';
 
 export default function CheckoutPage() {
-  // TODO: înlocuiește cu coșul real din app
-  const demoCart = [
-    { sku: 'SKU-CHAIR-01', name: 'Scaun din lemn', quantity: 1, unitPrice: 199.9, vatRate: 19, weightGr: 2500 },
-    { sku: 'SKU-DESK-01',  name: 'Birou 120cm',    quantity: 1, unitPrice: 549.0, vatRate: 19, weightGr: 12000 },
-  ];
+  const items = readCartFromCookies();
 
-  const totals = { shippingCost: 29.99, currency: 'RON' };
+  if (!items.length) {
+    return (
+      <main className="max-w-5xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">Checkout</h1>
+        <div className="rounded-2xl border p-8 text-center">
+          <p>Coșul este gol.</p>
+          <Link
+            href="/"
+            className="inline-block mt-4 rounded-xl border px-5 py-3 hover:bg-black hover:text-white transition"
+          >
+            Înapoi la magazin
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const totals = calcTotals(items);
 
   return (
     <main className="max-w-5xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Checkout</h1>
-      <CheckoutForm initialCart={demoCart as any} initialTotals={totals} />
+      <CheckoutForm
+        initialCart={items as any}
+        initialTotals={{ shippingCost: totals.shipping, currency: 'RON' }}
+      />
     </main>
   );
 }

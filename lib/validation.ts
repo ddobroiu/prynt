@@ -1,4 +1,3 @@
-// lib/validation.ts
 import { z } from 'zod';
 
 export const addressSchema = z.object({
@@ -42,9 +41,10 @@ export const createOrderSchema = z.object({
   currency: z.string().default('RON'),
   items: z.array(cartItemSchema).min(1),
   customer: customerSchema,
-  shippingMethod: z.enum(['dpd_standard', 'dpd_express']).default('dpd_standard'),
-  shippingCost: z.number().min(0),
+  shippingMethod: z.literal('dpd_standard').default('dpd_standard'),
+  shippingCost: z.number().min(0).default(24),
   discountTotal: z.number().min(0).default(0),
+  paymentMethod: z.union([z.literal('card'), z.literal('cash_on_delivery')]).default('card'),
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
