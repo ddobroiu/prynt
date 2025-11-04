@@ -2,9 +2,8 @@
 // Am înlocuit importurile Next.js specifice (Image, Link) cu echivalentele HTML/React
 // pentru a asigura compilarea corectă în mediul de lucru (Canvas).
 
-import React from 'react'; // Import necesar pentru React.FC
+import React from 'react'; // Adăugat importul React pentru React.FC
 
-// --- TIPARE (Interfață) PENTRU COMPONENTA ProductCard ---
 interface ProductCardProps {
   href: string;
   title: string;
