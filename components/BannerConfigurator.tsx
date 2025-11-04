@@ -1,103 +1,139 @@
 "use client";
+
 import { useMemo, useState } from "react";
-import { computeBannerPrice, type BannerFinish, type BannerMaterial } from "../lib/pricing";
+import { computeBannerPrice, type BannerMaterial } from "../lib/pricing";
 
 const MATERIALS: { value: BannerMaterial; label: string }[] = [
-  { value: "frontlit_440", label: "Frontlit 440g (standard)" },
-  { value: "mesh_370", label: "Mesh 370g (rezistent vânt)" },
-  { value: "blackout_610", label: "Blackout 610g (opac)" },
-];
-
-const FINISHES: { value: BannerFinish; label: string }[] = [
-  { value: "fara_finisare", label: "Fără finisare" },
-  { value: "capse_30cm", label: "Capse din 30 în 30 cm" },
-  { value: "buzunar_5cm", label: "Buzunar 5 cm" },
-  { value: "tiv_termic", label: "Tiv termic" },
+  { value: "frontlit_440", label: "Frontlit 440 g/mp" },
+  { value: "frontlit_510", label: "Frontlit 510 g/mp" },
 ];
 
 export default function BannerConfigurator() {
-  const [width, setWidth] = useState(300);
-  const [height, setHeight] = useState(100);
-  const [material, setMaterial] = useState<BannerMaterial>("frontlit_440");
-  const [finish, setFinish] = useState<BannerFinish>("capse_30cm");
+  const [width, setWidth] = useState(300);   // cm
+  const [height, setHeight] = useState(100); // cm
   const [qty, setQty] = useState(1);
-  const [file, setFile] = useState<File | null>(null);
+  const [material, setMaterial] = useState<BannerMaterial>("frontlit_440");
+  const [wantWindHoles, setWantWindHoles] = useState(false);
+  const [wantHemAndGrommets, setWantHemAndGrommets] = useState(false);
 
-  const price = useMemo(() => computeBannerPrice({
-    width_cm: width, height_cm: height, material, finish, quantity: qty,
-  }), [width, height, material, finish, qty]);
+  const price = useMemo(() => {
+    return computeBannerPrice({
+      width_cm: width,
+      height_cm: height,
+      quantity: qty,
+      material,
+      want_wind_holes: wantWindHoles,
+      want_hem_and_grommets: wantHemAndGrommets,
+    });
+  }, [width, height, qty, material, wantWindHoles, wantHemAndGrommets]);
 
   function addToCart() {
-    alert(`Banner ${width}×${height} cm — ${qty} buc.\nTotal: ${price.total} RON`);
+    alert(
+      `Banner ${width}×${height} cm • ${qty} buc.\n` +
+      `Total: ${price.total} RON`
+    );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* configurator */}
+    <div className="max-w-3xl mx-auto">
+      {/* Card configurator */}
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-        <h2 className="text-2xl font-semibold mb-5">Configurare Banner</h2>
+        <h2 className="text-2xl font-semibold mb-6">Configurează bannerul</h2>
 
+        {/* Dimensiuni */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-sm text-white/70">Lățime (cm)</label>
-            <input type="number" min={10} value={width} onChange={e=>setWidth(Number(e.target.value))}
-              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"/>
+            <input
+              type="number" min={10} value={width}
+              onChange={(e) => setWidth(Number(e.target.value))}
+              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
+            />
           </div>
           <div>
-            <label className="text-sm text-white/70">Înălțime (cm)</label>
-            <input type="number" min={10} value={height} onChange={e=>setHeight(Number(e.target.value))}
-              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"/>
+            <label className="text-sm text-white/70">Lungime (cm)</label>
+            <input
+              type="number" min={10} value={height}
+              onChange={(e) => setHeight(Number(e.target.value))}
+              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
+            />
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <div>
-            <label className="text-sm text-white/70">Material</label>
-            <select value={material} onChange={e=>setMaterial(e.target.value as any)}
-              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none">
-              {MATERIALS.map(m=> <option key={m.value} value={m.value}>{m.label}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-sm text-white/70">Finisare</label>
-            <select value={finish} onChange={e=>setFinish(e.target.value as any)}
-              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none">
-              {FINISHES.map(f=> <option key={f.value} value={f.value}>{f.label}</option>)}
-            </select>
-          </div>
-        </div>
-
+        {/* Cantitate */}
         <div className="mt-4">
           <label className="text-sm text-white/70">Cantitate</label>
-          <input type="number" min={1} value={qty} onChange={e=>setQty(Number(e.target.value))}
-            className="mt-1 w-40 rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"/>
+          <input
+            type="number" min={1} value={qty}
+            onChange={(e) => setQty(Number(e.target.value))}
+            className="mt-1 w-40 rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
+          />
         </div>
 
+        {/* Material */}
         <div className="mt-4">
-          <label className="text-sm text-white/70">Fișier (PDF/PNG/JPG)</label>
-          <input type="file" accept=".pdf,.png,.jpg,.jpeg"
-            onChange={e=>setFile(e.target.files?.[0] ?? null)}
-            className="mt-1 block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-white file:px-4 file:py-2 file:text-black hover:file:bg-white/90"/>
-          {file && <p className="mt-2 text-sm text-white/70">Selectat: {file.name}</p>}
+          <label className="text-sm text-white/70">Material</label>
+          <select
+            value={material}
+            onChange={(e) => setMaterial(e.target.value as BannerMaterial)}
+            className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
+          >
+            {MATERIALS.map((m) => (
+              <option key={m.value} value={m.value}>{m.label}</option>
+            ))}
+          </select>
         </div>
 
-        <button onClick={addToCart} className="mt-6 px-5 py-3 rounded-xl bg-white text-black font-semibold hover:bg-white/90">
+        {/* Opțiuni (nu arătăm procente, doar selecția) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div>
+            <label className="text-sm text-white/70">Găuri de vânt</label>
+            <select
+              value={wantWindHoles ? "da" : "nu"}
+              onChange={(e) => setWantWindHoles(e.target.value === "da")}
+              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
+            >
+              <option value="nu">Nu doresc</option>
+              <option value="da">Doresc</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-sm text-white/70">Tiv + capse</label>
+            <select
+              value={wantHemAndGrommets ? "da" : "nu"}
+              onChange={(e) => setWantHemAndGrommets(e.target.value === "da")}
+              className="mt-1 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none"
+            >
+              <option value="nu">Nu doresc</option>
+              <option value="da">Doresc</option>
+            </select>
+          </div>
+        </div>
+
+        {/* CTA */}
+        <button
+          onClick={addToCart}
+          className="mt-6 w-full md:w-auto px-5 py-3 rounded-xl bg-white text-black font-semibold hover:bg-white/90"
+        >
           Adaugă în coș
         </button>
-      </div>
 
-      {/* rezumat */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-        <h3 className="text-2xl font-semibold mb-5">Rezumat & Preț</h3>
-        <ul className="space-y-2 text-sm text-white/80">
-          <li>Dimensiune: <b>{width}</b> × <b>{height}</b> cm</li>
-          <li>Suprafață: <b>{price.sqm}</b> m²</li>
-          <li>Perimetru: <b>{price.perimeterM}</b> m</li>
-          <li>Preț unitar: <b>{price.unitPrice}</b> RON</li>
-          <li>Subtotal: <b>{price.subtotal}</b> RON</li>
-          <li>Discount: <b>{price.discount}</b> RON</li>
-          <li>Total: <b>{price.total}</b> RON</li>
-        </ul>
+        {/* Rezumat minimalist – DOAR sub buton */}
+        <div className="mt-5 rounded-xl border border-white/10 bg-black/20 p-4 text-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-white/70">Suprafață</span>
+            <span className="font-semibold">{price.sqm} m²</span>
+          </div>
+          <div className="mt-2 flex items-center justify-between">
+            <span className="text-white/70">Preț / m²</span>
+            <span className="font-semibold">{price.pricePerSqm} RON</span>
+          </div>
+          <div className="mt-3 h-px bg-white/10" />
+          <div className="mt-3 flex items-center justify-between text-base">
+            <span>Total</span>
+            <span className="font-bold">{price.total} RON</span>
+          </div>
+        </div>
       </div>
     </div>
   );

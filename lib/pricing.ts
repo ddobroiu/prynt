@@ -1,53 +1,53 @@
-export type BannerMaterial = "frontlit_440" | "mesh_370" | "blackout_610";
-export type BannerFinish = "fara_finisare" | "capse_30cm" | "buzunar_5cm" | "tiv_termic";
+// lib/pricing.ts
+export type BannerMaterial = "frontlit_440" | "frontlit_510";
 
 export type PriceInput = {
   width_cm: number;
   height_cm: number;
-  material: BannerMaterial;
-  finish: BannerFinish;
   quantity: number;
+  material: BannerMaterial;
+  want_wind_holes: boolean;
+  want_hem_and_grommets: boolean;
 };
 
-const BASE_PRICE_PER_SQM: Record<BannerMaterial, number> = {
-  frontlit_440: 32,
-  mesh_370: 38,
-  blackout_610: 55,
-};
+export function roundMoney(n: number) {
+  return Math.round(n * 100) / 100;
+}
 
-const FINISHING_PRICE_PER_M: Record<BannerFinish, number> = {
-  fara_finisare: 0,
-  capse_30cm: 4,
-  buzunar_5cm: 6,
-  tiv_termic: 5,
-};
+export function computeSqm(width_cm: number, height_cm: number) {
+  const w = Math.max(1, width_cm) / 100;
+  const h = Math.max(1, height_cm) / 100;
+  return w * h;
+}
 
-export function roundMoney(n: number) { return Math.round(n * 100) / 100; }
-export function computeSqm(wcm: number, hcm: number) { return (Math.max(1,wcm)/100)*(Math.max(1,hcm)/100); }
-export function computePerimeterM(wcm: number, hcm: number) { return 2*((Math.max(1,wcm)/100)+(Math.max(1,hcm)/100)); }
+function tierPricePerSqm(sqm: number) {
+  if (sqm < 1) return 100;
+  if (sqm < 5) return 75;
+  if (sqm < 20) return 50;
+  return 30; // peste 20 mp
+}
 
 export function computeBannerPrice(input: PriceInput) {
   const sqm = computeSqm(input.width_cm, input.height_cm);
-  const perimeterM = computePerimeterM(input.width_cm, input.height_cm);
-  const materialBase = BASE_PRICE_PER_SQM[input.material] * sqm;
-  const finishing = FINISHING_PRICE_PER_M[input.finish] * perimeterM;
-  const processing = 2.5;
-  const unitPrice = Math.max(15, materialBase + finishing + processing);
-  const subtotal = unitPrice * input.quantity;
+  const pricePerSqm = tierPricePerSqm(sqm);
 
-  let discount = 0;
-  if (input.quantity >= 5 && input.quantity < 10) discount = 0.05 * subtotal;
-  else if (input.quantity >= 10 && input.quantity < 20) discount = 0.08 * subtotal;
-  else if (input.quantity >= 20) discount = 0.12 * subtotal;
+  let multiplier = 1;
 
-  const total = subtotal - discount;
+  // Material 510 = +10%
+  if (input.material === "frontlit_510") multiplier += 0.10;
+  // Găuri de vânt = +10%
+  if (input.want_wind_holes) multiplier += 0.10;
+  // Tiv + capse = +10%
+  if (input.want_hem_and_grommets) multiplier += 0.10;
+
+  const baseUnit = sqm * pricePerSqm;
+  const unitPrice = baseUnit * multiplier;
+  const total = unitPrice * Math.max(1, input.quantity);
 
   return {
     sqm: roundMoney(sqm),
-    perimeterM: roundMoney(perimeterM),
+    pricePerSqm,
     unitPrice: roundMoney(unitPrice),
-    subtotal: roundMoney(subtotal),
-    discount: roundMoney(discount),
     total: roundMoney(total),
   };
 }
