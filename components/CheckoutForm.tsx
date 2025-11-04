@@ -21,13 +21,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
       <span className="block text-sm font-medium text-neutral-700 mb-1">{label}</span>
@@ -74,9 +68,7 @@ function PayButton({ orderId }: { orderId: string }) {
 
     const { error } = await stripe.confirmPayment({
       elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/checkout/success?orderId=${orderId}`,
-      },
+      confirmParams: { return_url: `${window.location.origin}/checkout/success?orderId=${orderId}` },
       redirect: 'if_required',
     });
 
@@ -110,7 +102,7 @@ export default function CheckoutForm({
     resolver: zodResolver(createOrderSchema),
     defaultValues: {
       currency: initialTotals.currency,
-      items: initialCart,
+      items: initialCart, // ← trimitem coșul real către backend
       shippingMethod: 'dpd_standard',
       shippingCost: 24,
       discountTotal: 0,
@@ -130,14 +122,17 @@ export default function CheckoutForm({
   const [orderId, setOrderId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
-  const total = useMemo(() => {
-    const subtotal = initialCart.reduce((s, it) => s + it.unitPrice * it.quantity, 0);
-    const vat = initialCart.reduce((s, it) => s + (it.unitPrice * it.quantity * it.vatRate) / 100, 0);
-    return subtotal + vat + 24;
-  }, [initialCart]);
+  const subtotal = useMemo(
+    () => initialCart.reduce((s, it) => s + it.unitPrice * it.quantity, 0),
+    [initialCart]
+  );
+  const vat = useMemo(
+    () => initialCart.reduce((s, it) => s + (it.unitPrice * it.quantity * it.vatRate) / 100, 0),
+    [initialCart]
+  );
+  const total = useMemo(() => subtotal + vat + 24, [subtotal, vat]);
 
   const handleSubmit = async (values: CreateOrderInput) => {
-    // forțăm cost & metodă livrare
     values.shippingCost = 24;
     values.shippingMethod = 'dpd_standard';
 
@@ -153,12 +148,10 @@ export default function CheckoutForm({
     }
 
     if (values.paymentMethod === 'cash_on_delivery') {
-      // Ramburs => comanda e creată și factura emisă direct pe backend
       window.location.href = `/checkout/success?orderId=${data.orderId}`;
       return;
     }
 
-    // Card => pregătim Stripe
     setOrderId(data.orderId);
 
     const resPI = await fetch('/api/checkout/create-payment-intent', {
@@ -176,9 +169,8 @@ export default function CheckoutForm({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* COL STÂNGA: formular */}
+      {/* STÂNGA */}
       <form onSubmit={form.handleSubmit(handleSubmit)} className="lg:col-span-2 space-y-6">
-
         {/* Date client & facturare */}
         <Card title="Date client & facturare">
           <div className="flex items-center justify-between mb-4">
@@ -282,7 +274,6 @@ export default function CheckoutForm({
             </div>
           )}
 
-          {/* transportul afișat ca info (fix 24 RON) */}
           <div className="mt-6 flex items-center justify-between rounded-xl border px-4 py-3 bg-neutral-50">
             <div>
               <div className="font-medium">Livrare DPD Standard</div>
@@ -336,36 +327,43 @@ export default function CheckoutForm({
         </Card>
       </form>
 
-      {/* COL DREAPTA: rezumat + Stripe */}
+      {/* DREAPTA */}
       <div className="space-y-6">
-        <Card title="Rezumat comandă">
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span>Total produse</span>
-              <span>
-                {initialCart.reduce((s, it) => s + it.unitPrice * it.quantity, 0).toFixed(2)} {initialTotals.currency}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>TVA</span>
-              <span>
-                {initialCart.reduce((s, it) => s + (it.unitPrice * it.quantity * it.vatRate) / 100, 0).toFixed(2)}{' '}
-                {initialTotals.currency}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Transport (DPD Standard)</span>
-              <span>24.00 {initialTotals.currency}</span>
-            </div>
-            <div className="h-px bg-neutral-200 my-2" />
-            <div className="flex justify-between text-base font-semibold">
-              <span>Total de plată</span>
-              <span>{total.toFixed(2)} {initialTotals.currency}</span>
-            </div>
+        <Card title="Produse în coș">
+          <div className="space-y-3">
+            {initialCart.map((it, idx) => (
+              <div key={idx} className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  {it.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={it.imageUrl} alt={it.name} className="w-12 h-12 rounded-lg object-cover border" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg border bg-neutral-100" />
+                  )}
+                  <div className="text-sm">
+                    <div className="font-medium">{it.name}</div>
+                    <div className="text-neutral-600">SKU: {it.sku}</div>
+                    <div className="text-neutral-600">Cant: {it.quantity}</div>
+                  </div>
+                </div>
+                <div className="text-sm font-medium whitespace-nowrap">
+                  {(it.unitPrice * it.quantity).toFixed(2)} {initialTotals.currency}
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
 
-        {/* Afișăm elementul Stripe DOAR când e metoda card și există clientSecret */}
+        <Card title="Rezumat comandă">
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span>Total produse</span><span>{subtotal.toFixed(2)} {initialTotals.currency}</span></div>
+            <div className="flex justify-between"><span>TVA</span><span>{vat.toFixed(2)} {initialTotals.currency}</span></div>
+            <div className="flex justify-between"><span>Transport (DPD Standard)</span><span>24.00 {initialTotals.currency}</span></div>
+            <div className="h-px bg-neutral-200 my-2" />
+            <div className="flex justify-between text-base font-semibold"><span>Total de plată</span><span>{total.toFixed(2)} {initialTotals.currency}</span></div>
+          </div>
+        </Card>
+
         {orderId && clientSecret && (
           <Card title="Plată cu cardul">
             <Elements options={{ clientSecret }} stripe={stripePromise}>
