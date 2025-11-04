@@ -10,7 +10,7 @@ export default function Header() {
           <Image
             src="/logo.png"
             alt="Prynt.ro Logo"
-            width={60}  // mărim logo-ul
+            width={80}  // mărim logo-ul
             height={60}
             priority
           />

@@ -19,21 +19,7 @@ export default function HomePage() {
             </a>
           </div>
         </div>
-      </section>
 
-      {/* BENEFITS */}
-      <section className="mx-auto max-w-6xl px-4 py-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { title: "Tipar profesional", desc: "Echipamente UV & eco-solvent pentru culori puternice și durabile." },
-          { title: "Preț în timp real", desc: "Configurator la centimetru, calcule corecte pe m²/tiraj." },
-          { title: "Livrare 24–48h", desc: "Transport național prin DPD, tracking și AWB automat." },
-          { title: "Plată sigură", desc: "Stripe/OP/Ramburs. Facturare PF/PJ." },
-        ].map((b) => (
-          <div key={b.title} className="rounded-2xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition">
-            <h3 className="font-semibold text-lg mb-2">{b.title}</h3>
-            <p className="text-white/70 text-sm">{b.desc}</p>
-          </div>
-        ))}
       </section>
 
       {/* PRODUSE */}
