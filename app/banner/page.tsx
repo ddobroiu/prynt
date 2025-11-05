@@ -1,80 +1,201 @@
 "use client";
 
-import React, { useState, useMemo, FC } from 'react';
-import { Check, ShoppingCart, CheckCircle, Award, Zap, Shield } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { calculatePrice, PriceInput } from '../../lib/pricing-banner';
 import { useCart } from '../../components/CartProvider';
-import { calculatePrice, PriceInput, PriceOutput } from '../../lib/pricing-banner'; // Asigură-te că importurile sunt corecte
+import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart } from 'lucide-react';
 
-// Card de selecție modern
-const SelectionCard: FC<{ title: string; desc: string; isSelected: boolean; onClick: () => void; }> = ({ title, desc, isSelected, onClick }) => (
-    <button onClick={onClick} className={`group w-full text-left p-4 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 ring-offset-2 ring-offset-gray-900 ring-indigo-500 ${ isSelected ? 'border-indigo-500 bg-indigo-900/30 shadow-lg' : 'border-gray-700 bg-gray-800/50 hover:border-gray-500' }`}>
-        <div className="flex justify-between items-center"><span className="font-semibold text-white">{title}</span><div className={`w-6 h-6 flex items-center justify-center rounded-full transition-all duration-200 ${isSelected ? 'bg-indigo-600' : 'bg-gray-700 group-hover:bg-gray-600'}`}>{isSelected && <Check className="w-4 h-4 text-white" />}</div></div>
-        {desc && <p className="text-sm text-gray-400 mt-1">{desc}</p>}
-    </button>
-);
+// AM ȘTERS IMPORT-UL PENTRU SWITCH DE AICI
 
-// Componenta configuratorului, actualizată
-function BannerConfigurator() {
-    const [input, setInput] = useState<PriceInput>({ width_cm: 100, height_cm: 200, quantity: 1, material: "frontlit_440", want_wind_holes: false, want_hem_and_grommets: true });
-    const [showSuccess, setShowSuccess] = useState(false);
-    const priceResult: PriceOutput = useMemo(() => calculatePrice(input), [input]);
-    const cart = useCart();
-    
+const BannerConfiguratorPage = () => {
+    const { addItem } = useCart();
+    const [input, setInput] = useState<PriceInput>({
+        width_cm: 100,
+        height_cm: 100,
+        quantity: 1,
+        material: "frontlit_440",
+        want_wind_holes: false,
+        want_hem_and_grommets: true,
+    });
+
+    const priceDetails = calculatePrice(input);
+
     const handleAddToCart = () => {
-        if (priceResult.finalPrice <= 0) return;
-        const uniqueId = `banner-${input.material}-${input.width_cm}x${input.height_cm}-${input.want_hem_and_grommets}-${input.want_wind_holes}`;
-        cart.addItem({ id: uniqueId, name: `Banner ${input.material.replace(/_/g, ' ')} ${input.width_cm}x${input.height_cm}cm`, quantity: input.quantity, unitAmount: priceResult.finalPrice / input.quantity, totalAmount: priceResult.finalPrice });
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
+        if (!priceDetails || priceDetails.finalPrice <= 0) return;
+        const productName = `Banner personalizat ${input.width_cm}x${input.height_cm}cm`;
+        addItem({
+            id: crypto.randomUUID(),
+            name: productName,
+            quantity: input.quantity,
+            unitAmount: priceDetails.finalPrice / input.quantity,
+            totalAmount: priceDetails.finalPrice,
+        });
+        alert(`${productName} a fost adăugat în coș!`);
     };
 
-    const MATERIALS = [{ value: "frontlit_440", label: "Frontlit 440g", desc: "Standard, uz general" }, { value: "frontlit_510", label: "Frontlit 510g", desc: "Premium, extra-rezistent" }];
-    const FINISHES = [{ label: "Tiv și capse", field: "want_hem_and_grommets", desc: "Întăritură și prindere" }, { label: "Găuri de vânt", field: "want_wind_holes", desc: "Pentru zone expuse" }];
+    const updateInput = (field: keyof PriceInput, value: any) => {
+        setInput(prev => ({ ...prev, [field]: value }));
+    };
 
     return (
-        <div className="space-y-6">
-            <h2 className="text-3xl font-extrabold text-indigo-400 mb-4 text-center">Configurator Instant</h2>
-            <div>
-                <h3 className="text-md font-semibold text-gray-300 mb-3">Dimensiuni & Cantitate</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div><label className="text-xs text-gray-400">Lățime (cm)</label><input type="number" value={input.width_cm} onChange={e => setInput(p => ({ ...p, width_cm: parseInt(e.target.value) || 0 }))} className="w-full bg-gray-700/50 border border-indigo-700 rounded-lg p-2.5 text-white" /></div>
-                    <div><label className="text-xs text-gray-400">Înălțime (cm)</label><input type="number" value={input.height_cm} onChange={e => setInput(p => ({ ...p, height_cm: parseInt(e.target.value) || 0 }))} className="w-full bg-gray-700/50 border border-indigo-700 rounded-lg p-2.5 text-white" /></div>
-                    <div><label className="text-xs text-gray-400">Cantitate</label><input type="number" value={input.quantity} onChange={e => setInput(p => ({ ...p, quantity: parseInt(e.target.value) || 1 }))} className="w-full bg-gray-700/50 border border-indigo-700 rounded-lg p-2.5 text-white" /></div>
-                </div>
-            </div>
-            <div><h3 className="text-md font-semibold text-gray-300 mb-3">Material</h3><div className="grid grid-cols-1 gap-4">{MATERIALS.map(m => <SelectionCard key={m.value} title={m.label} desc={m.desc} isSelected={input.material === m.value} onClick={() => setInput(p => ({...p, material: m.value as any}))} />)}</div></div>
-            <div><h3 className="text-md font-semibold text-gray-300 mb-3">Finisaje</h3><div className="grid grid-cols-1 gap-4">{FINISHES.map(f => <SelectionCard key={f.field} title={f.label} desc={f.desc} isSelected={!!input[f.field as keyof PriceInput]} onClick={() => setInput(p => ({...p, [f.field]: !p[f.field as keyof PriceInput]}))} />)}</div></div>
-            <div className="border-t border-indigo-700/50 pt-6 space-y-3"><div className="flex justify-between items-center text-white/80 font-medium"><span>Preț final / mp:</span><span>{(priceResult.pricePerSqmBase).toFixed(2)} RON</span></div><div className="flex justify-between items-center text-white/80 font-medium"><span>Suprafață totală:</span><span>{priceResult.total_sqm_taxable.toFixed(2)} mp</span></div></div>
-            <div className="text-center bg-indigo-700/20 border border-indigo-600/50 p-4 rounded-xl">
-                {/* --- TEXTUL "TVA inclus" A FOST ELIMINAT --- */}
-                <p className="text-lg font-medium text-indigo-300">Total de Plată</p>
-                <span className="text-5xl font-extrabold text-white block mt-1 tracking-tight">{priceResult.finalPrice.toFixed(2)} RON</span>
-            </div>
-            <button onClick={handleAddToCart} disabled={priceResult.finalPrice <= 0} className="w-full px-5 py-4 rounded-xl bg-indigo-600 text-white font-bold text-lg hover:bg-indigo-500 transition-all duration-200 transform hover:scale-[1.02] shadow-xl shadow-indigo-500/30 disabled:bg-gray-600 disabled:shadow-none disabled:transform-none">Adaugă în coș</button>
-            {showSuccess && <div className="flex items-center justify-center text-green-400 mt-2 gap-2"><CheckCircle className="w-5 h-5" /><span>Produs adăugat cu succes!</span></div>}
-        </div>
-    );
-}
+        <div className="bg-gray-950 min-h-screen text-white">
+            <div className="container mx-auto px-4 py-16">
+                <header className="text-center mb-12">
+                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">
+                        Configurator Banner Publicitar
+                    </h1>
+                    <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
+                        Personalizează-ți bannerul pas cu pas și vezi prețul în timp real. Calitate garantată, livrare rapidă.
+                    </p>
+                </header>
 
-// Pagina principală, care include configuratorul
-export default function BannerPage() {
-    const badges = [ { icon: Award, title: "Calitate Premium", desc: "Print de înaltă rezoluție, culori vii." }, { icon: Zap, title: "Preț Instant", desc: "Fără cereri de ofertă, vezi prețul pe loc." }, { icon: Shield, title: "Livrare Rapidă", desc: "Producție în 1-3 zile lucrătoare." }];
-    return (
-        <div className="bg-gray-950 text-white">
-            <div className="mx-auto max-w-7xl px-4 md:px-8 py-12 md:py-16">
-                <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-8 border-b border-indigo-700/50 pb-6">Configurează Bannerul Tău</h1>
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
-                    <div className="lg:col-span-3">
-                        <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl shadow-indigo-900/20 border border-indigo-700/50"><img src="/products/banner/1.jpg" alt="Banner Frontlit Personalizat" className="w-full h-auto object-cover" /></div>
-                        <div className="bg-gray-900/70 p-6 md:p-8 rounded-2xl shadow-xl border border-indigo-700/50">
-                            <h2 className="text-2xl font-bold text-indigo-400 mb-4">Despre Bannerele Frontlit</h2>
-                            <div className="space-y-4 text-white/80 prose prose-invert max-w-none"><p>Bannerele Frontlit sunt cea mai populară soluție pentru publicitatea exterioară. Materialul din PVC este rezistent la intemperii (apă, soare) și la variații de temperatură. Sistemul nostru de calcul ia în considerare dimensiunile pentru a determina suprafața totală (mp) și a aplica prețul corespunzător.</p><p>Pentru o durată de viață maximă, recomandăm alegerea opțiunii <strong>Tiv + Capse</strong>, care rigidizează marginile și previne ruperea materialului în jurul capselor.</p></div>
-                            <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">{badges.map((b, i) => (<div key={i} className="rounded-xl border border-indigo-700/50 bg-gray-800/50 p-4 text-center"><b.icon className="w-8 h-8 text-indigo-400 mx-auto mb-3" /><div className="text-md font-bold text-indigo-300">{b.title}</div><div className="text-sm text-white/70 mt-1">{b.desc}</div></div>))}</div>
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
+                    {/* Coloana Stânga: Configurator */}
+                    <div className="lg:col-span-3 space-y-8">
+                        <ConfigSection icon={<Ruler />} title="1. Dimensiuni și Cantitate">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <NumberInput label="Lățime (cm)" value={input.width_cm} onChange={(v) => updateInput('width_cm', v)} />
+                                <NumberInput label="Înălțime (cm)" value={input.height_cm} onChange={(v) => updateInput('height_cm', v)} />
+                            </div>
+                            <div className="mt-6">
+                                <NumberInput label="Cantitate (buc)" value={input.quantity} onChange={(v) => updateInput('quantity', v)} />
+                            </div>
+                        </ConfigSection>
+
+                        <ConfigSection icon={<Layers />} title="2. Material Banner">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <MaterialOption
+                                    title="Frontlit 440g/mp"
+                                    description="Standard, cel mai bun raport calitate-preț."
+                                    selected={input.material === 'frontlit_440'}
+                                    onClick={() => updateInput('material', 'frontlit_440')}
+                                />
+                                <MaterialOption
+                                    title="Frontlit 510g/mp"
+                                    description="Premium, mai gros și mai rezistent."
+                                    selected={input.material === 'frontlit_510'}
+                                    onClick={() => updateInput('material', 'frontlit_510')}
+                                />
+                            </div>
+                        </ConfigSection>
+
+                        <ConfigSection icon={<CheckCircle />} title="3. Finisaje Incluse">
+                             <div className="space-y-4">
+                                <ToggleOption
+                                    label="Tiv și Capse de prindere"
+                                    description="Întărire pe margini și inele metalice pentru prindere."
+                                    checked={input.want_hem_and_grommets}
+                                    onCheckedChange={(c) => updateInput('want_hem_and_grommets', c)}
+                                />
+                                <ToggleOption
+                                    label="Găuri de vânt"
+                                    description="Decupaje speciale pentru a reduce presiunea vântului."
+                                    checked={input.want_wind_holes}
+                                    onCheckedChange={(c) => updateInput('want_wind_holes', c)}
+                                />
+                            </div>
+                        </ConfigSection>
+                    </div>
+
+                    {/* Coloana Dreapta: Sumar și Preț */}
+                    <div className="lg:col-span-2">
+                        <div className="sticky top-8 bg-gray-900 border border-gray-700 rounded-2xl p-6 shadow-2xl shadow-indigo-900/20">
+                            <h3 className="text-xl font-bold mb-4">Sumarul Comenzii</h3>
+                            
+                            <div className="aspect-video bg-gray-800 rounded-lg mb-6 flex items-center justify-center border border-dashed border-gray-600">
+                                <p className="text-gray-500 text-sm">Previzualizare Banner</p>
+                            </div>
+                            
+                            <div className="space-y-2 text-gray-300 mb-6">
+                                <p>Dimensiuni: <span className="font-semibold text-white">{input.width_cm} x {input.height_cm} cm</span></p>
+                                <p>Suprafață: <span className="font-semibold text-white">{priceDetails?.sqm_per_unit.toFixed(2)} mp/buc</span></p>
+                                <p>Cantitate: <span className="font-semibold text-white">{input.quantity} buc.</span></p>
+                                <p>Suprafață Totală: <span className="font-semibold text-white">{priceDetails?.total_sqm_taxable.toFixed(2)} mp</span></p>
+                            </div>
+
+                            <div className="border-t border-gray-700 pt-4">
+                                <p className="text-gray-400 text-sm">Preț Total (fără TVA)</p>
+                                <p className="text-4xl font-extrabold text-white my-2">
+                                    {priceDetails?.finalPrice.toFixed(2)} RON
+                                </p>
+                                <p className="text-gray-500 text-xs">Taxa pe valoarea adăugată (TVA) se va calcula în coș.</p>
+                            </div>
+                            
+                            <button 
+                                onClick={handleAddToCart}
+                                disabled={!priceDetails || priceDetails.finalPrice <= 0}
+                                className="w-full mt-6 bg-indigo-600 text-white font-bold py-3 text-lg rounded-lg hover:bg-indigo-700 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                <ShoppingCart size={20} />
+                                Adaugă în coș
+                            </button>
                         </div>
                     </div>
-                    <aside className="lg:col-span-2"><div className="lg:sticky lg:top-8"><div className="rounded-2xl border-2 border-indigo-500/30 bg-gray-900/50 backdrop-blur-md p-6 md:p-8 shadow-2xl shadow-indigo-900/40"><BannerConfigurator /></div></div></aside>
                 </div>
             </div>
         </div>
     );
-}
+};
+
+// --- Componente ajutătoare pentru un cod mai curat ---
+
+const ConfigSection: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
+    <div className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+            <div className="text-indigo-400">{icon}</div>
+            <h2 className="text-xl font-bold text-white">{title}</h2>
+        </div>
+        {children}
+    </div>
+);
+
+const NumberInput = ({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void; }) => {
+    const handleChange = (increment: number) => {
+        const newValue = Math.max(1, value + increment);
+        onChange(newValue);
+    };
+    return (
+        <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">{label}</label>
+            <div className="flex items-center">
+                <button onClick={() => handleChange(-1)} className="p-3 bg-gray-700 rounded-l-md hover:bg-gray-600"><Minus size={16} /></button>
+                <input
+                    type="number"
+                    value={value}
+                    onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-full text-center bg-gray-800 border-y border-gray-700 py-2.5 text-lg font-semibold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <button onClick={() => handleChange(1)} className="p-3 bg-gray-700 rounded-r-md hover:bg-gray-600"><Plus size={16} /></button>
+            </div>
+        </div>
+    );
+};
+
+const MaterialOption = ({ title, description, selected, onClick }: { title: string; description: string; selected: boolean; onClick: () => void; }) => (
+    <div
+        onClick={onClick}
+        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${selected ? 'border-indigo-500 bg-indigo-900/20' : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'}`}
+    >
+        <p className="font-bold text-white">{title}</p>
+        <p className="text-sm text-gray-400">{description}</p>
+    </div>
+);
+
+// --- AICI ESTE CORECȚIA PRINCIPALĂ ---
+// Am înlocuit componenta 'Switch' cu un 'input' de tip 'checkbox' standard, dar stilizat.
+const ToggleOption = ({ label, description, checked, onCheckedChange }: { label: string; description: string; checked: boolean; onCheckedChange: (checked: boolean) => void; }) => (
+     <label className="flex items-center justify-between p-4 rounded-lg bg-gray-800/50 border border-gray-700 cursor-pointer">
+        <div>
+            <p className="font-semibold text-white">{label}</p>
+            <p className="text-sm text-gray-400 max-w-xs">{description}</p>
+        </div>
+        <input
+            type="checkbox"
+            checked={checked}
+            onChange={(e) => onCheckedChange(e.target.checked)}
+            className="h-6 w-6 rounded-md bg-gray-700 border-gray-600 text-indigo-600 focus:ring-indigo-500"
+        />
+    </label>
+);
+
+export default BannerConfiguratorPage;
