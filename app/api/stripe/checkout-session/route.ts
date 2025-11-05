@@ -4,13 +4,17 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: NextRequest) {
-    const { cart } = await req.json();
+    // 1. Primește TOATE datele comenzii, nu doar coșul
+    const { cart, address, billing } = await req.json();
     const costLivrare = 19.99;
     const totalComanda = cart.reduce((acc: number, item: any) => acc + item.totalAmount, 0) + costLivrare;
 
+    if (!cart || cart.length === 0) {
+        return NextResponse.json({ error: "Coșul este gol." }, { status: 400 });
+    }
+
     try {
         const session = await stripe.checkout.sessions.create({
-            // Noua integrare necesită 'embedded'
             ui_mode: 'embedded',
             line_items: [
                 ...cart.map((item: any) => ({
@@ -31,11 +35,15 @@ export async function POST(req: NextRequest) {
                 }
             ],
             mode: 'payment',
-            // Return URL este acum necesar pentru embedded checkout
+            // 2. Adaugă datele comenzii în metadata pentru a le recupera după plată
+            metadata: {
+                cart: JSON.stringify(cart),
+                address: JSON.stringify(address),
+                billing: JSON.stringify(billing),
+            },
             return_url: `${req.headers.get('origin')}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
         });
 
-        // Returnează client_secret în loc de sessionId
         return NextResponse.json({ clientSecret: session.client_secret });
 
     } catch (err: any) {
