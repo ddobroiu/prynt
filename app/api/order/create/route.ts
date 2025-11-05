@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fulfillOrder } from '../../../lib/orderService'; // CALEA CORECTATĂ
+import { fulfillOrder } from '../../../../lib/orderService'; // CORECTAT: 4 puncte-puncte
 
 export async function POST(req: NextRequest) {
     const orderData = await req.json();

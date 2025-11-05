@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { fulfillOrder } from '../../../lib/orderService'; // CALEA CORECTATĂ
+import { fulfillOrder } from '../../../../lib/orderService'; // CORECTAT: 4 puncte-puncte
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
