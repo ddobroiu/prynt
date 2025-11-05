@@ -7,15 +7,19 @@ export interface Address {
   strada_nr: string;
 }
 
+// AICI ERA GREȘEALA - Am adăugat câmpurile de adresă și pentru facturare
 export interface Billing {
   tip_factura: 'persoana_fizica' | 'companie';
   cui?: string;
   name?: string;
-  address?: string;
+  // Am adăugat aceste câmpuri ca opționale
+  judet?: string;
+  localitate?: string;
+  strada_nr?: string;
 }
 
 export interface CartItem {
-  id: string; // sau number
+  id: string;
   name: string;
   quantity: number;
   unitAmount: number;

@@ -61,8 +61,8 @@ export default function CheckoutForm({
                     body: JSON.stringify(orderData) 
                 });
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.message || 'A apărut o eroare la crearea comenzii.');
-                alert(`Comandă ramburs plasată cu succes! Factura: ${result.invoiceLink}`);
+                if (!response.ok) throw new Error(result.message || 'Eroare la crearea comenzii.');
+                alert(`Comandă ramburs plasată! Factura: ${result.invoiceLink}`);
                 window.location.href = '/';
             } catch (error: any) {
                 setFormState('error');
@@ -94,9 +94,6 @@ export default function CheckoutForm({
             <div id="checkout"></div>
 
             <form onSubmit={handleSubmit} className="space-y-10">
-                {/* ======================================================== */}
-                {/* SECȚIUNEA 1: DATE LIVRARE (CU CÂMPURILE LA LOC) */}
-                {/* ======================================================== */}
                 <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
                     <h2 className="text-2xl font-bold text-white mb-6">1. Date Livrare</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
@@ -106,6 +103,7 @@ export default function CheckoutForm({
                         <div className="relative">
                             <label className="block text-sm font-medium text-gray-300 mb-2">Județ</label>
                             <select value={address.judet} onChange={(e) => setJudet(e.target.value, 'delivery')} className="block w-full pl-3 pr-10 py-2 bg-gray-800 border border-gray-600 rounded-md">
+                               <option value="">Alege județul</option>
                                {judete.map(j => <option key={`del-${j}`} value={j}>{j}</option>)}
                             </select>
                         </div>
@@ -114,9 +112,6 @@ export default function CheckoutForm({
                     </div>
                 </div>
 
-                {/* ======================================================== */}
-                {/* SECȚIUNEA 2: DATE FACTURARE (CU CÂMPURILE LA LOC) */}
-                {/* ======================================================== */}
                 <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
                     <h2 className="text-2xl font-bold text-white mb-6">2. Date Facturare</h2>
                     <div className="flex space-x-4 mb-6">
@@ -134,7 +129,8 @@ export default function CheckoutForm({
                                  {billing.tip_factura === 'companie' && <FormInput name="cui" label="CUI" icon={<></>} state={billing} setState={setBilling as any} />}
                                  <div className="relative">
                                     <label className="block text-sm font-medium text-gray-300 mb-2">Județ Facturare</label>
-                                    <select value={billing.judet} onChange={(e) => setJudet(e.target.value, 'billing')} className="block w-full pl-3 pr-10 py-2 bg-gray-800 border border-gray-600 rounded-md">
+                                    <select value={billing.judet || ''} onChange={(e) => setJudet(e.target.value, 'billing')} className="block w-full pl-3 pr-10 py-2 bg-gray-800 border border-gray-600 rounded-md">
+                                        <option value="">Alege județul</option>
                                         {judete.map(j => <option key={`bil-${j}`} value={j}>{j}</option>)}
                                     </select>
                                 </div>
@@ -150,12 +146,11 @@ export default function CheckoutForm({
                     </div>
                 </div>
 
-                {/* SECȚIUNEA 3: METODĂ DE PLATĂ */}
                 <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
                     <h2 className="text-2xl font-bold text-white mb-6">3. Metodă de Plată</h2>
                     <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                        <button type="button" onClick={() => setPaymentMethod('ramburs')} className={`flex-1 p-4 rounded-lg border text-center transition-colors ${paymentMethod === 'ramburs' ? 'bg-indigo-600' : 'bg-gray-800'}`}>Plată la livrare (Ramburs)</button>
-                        <button type="button" onClick={() => setPaymentMethod('card')} className={`flex-1 p-4 rounded-lg border text-center transition-colors ${paymentMethod === 'card' ? 'bg-indigo-600' : 'bg-gray-800'}`}>Plată cu Cardul Online</button>
+                        <button type="button" onClick={() => setPaymentMethod('ramburs')} className={`flex-1 p-4 rounded-lg border text-center ${paymentMethod === 'ramburs' ? 'bg-indigo-600' : 'bg-gray-800'}`}>Plată la livrare (Ramburs)</button>
+                        <button type="button" onClick={() => setPaymentMethod('card')} className={`flex-1 p-4 rounded-lg border text-center ${paymentMethod === 'card' ? 'bg-indigo-600' : 'bg-gray-800'}`}>Plată cu Cardul Online</button>
                     </div>
                 </div>
 
