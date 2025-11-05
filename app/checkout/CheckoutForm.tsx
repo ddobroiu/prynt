@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { useStripe } from '@stripe/react-stripe-js';
+import type { Stripe } from '@stripe/stripe-js'; // <-- ADAUGĂ ACEST IMPORT
 import { Address, Billing, CartItem, FormState } from '../../types';
 import FormInput from '../../components/FormInput';
 import { User, Mail, Phone } from 'lucide-react';
@@ -21,7 +22,7 @@ interface CheckoutFormProps {
 export default function CheckoutForm({
     address, setAddress, billing, setBilling, cart, paymentMethod, setPaymentMethod, sameAsDelivery, setSameAsDelivery
 }: CheckoutFormProps) {
-    const stripe = useStripe();
+    const stripe: Stripe | null = useStripe(); // <-- ADAUGĂ ASERȚIUNEA DE TIP AICI
     const [formState, setFormState] = useState<FormState>('idle');
     const [errorMessage, setErrorMessage] = useState('');
 
