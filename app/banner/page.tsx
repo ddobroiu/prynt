@@ -511,4 +511,4 @@ const BannerPage: React.FC = () => {
   );
 }
 
-export default BannerPage;
+export default BannerPage
