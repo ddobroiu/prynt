@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
-import { useStripe } from '@stripe/react-stripe-js';
+import { useStripe, useElements } from '@stripe/react-stripe-js';
 import { Address, Billing, CartItem, FormState } from '../../types';
-import FormInput from '../../components/FormInput'; // Asigură-te că acest component există și este corect
-import JudetSelector from '../../components/JudetSelector'; // Asigură-te că acest component există
-import { User, Mail, Phone, MapPin, Building, Hash } from 'lucide-react';
+import FormInput from '../../components/FormInput';
+import JudetSelector from '../../components/JudetSelector';
+import { User, Mail, Phone, MapPin, Building, Hash, Loader2 } from 'lucide-react';
 
 interface CheckoutFormProps {
     address: Address;
@@ -26,6 +26,7 @@ export default function CheckoutForm({
     address, setAddress, billing, setBilling, cart, paymentMethod, setPaymentMethod, sameAsDelivery, setSameAsDelivery, judete, setJudet, handleCUI
 }: CheckoutFormProps) {
     const stripe = useStripe();
+    const elements = useElements();
     const [formState, setFormState] = useState<FormState>('idle');
     const [errorMessage, setErrorMessage] = useState('');
     const [cuiValue, setCuiValue] = useState('');
@@ -41,7 +42,7 @@ export default function CheckoutForm({
             }));
         }
     }, [sameAsDelivery, address, setBilling, billing.tip_factura]);
-    
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormState('loading');
@@ -58,37 +59,43 @@ export default function CheckoutForm({
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message || 'Eroare la crearea comenzii.');
-                alert(`Comandă ramburs plasată! Factura: ${result.invoiceLink}`);
-                window.location.href = '/';
+                window.location.href = '/checkout/success'; // Redirect la succes
             } catch (error: any) {
                 setFormState('error');
                 setErrorMessage(error.message);
             }
         } else if (paymentMethod === 'card') {
-            if (!stripe || cart.length === 0) return;
+            if (!stripe || !elements || cart.length === 0) {
+                setErrorMessage("Formularul de plată nu este gata. Reîncearcă într-o secundă.");
+                setFormState('error');
+                return;
+            }
+
             try {
-                // Afișează container-ul Stripe și ascunde formularul
-                const formElement = e.target as HTMLFormElement;
+                const res = await fetch('/api/stripe/checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData),
+                });
+
+                const sessionData = await res.json();
+                if (!res.ok) throw new Error(sessionData.error || 'A apărut o eroare pe server.');
+                const { clientSecret } = sessionData;
+                if (!clientSecret) throw new Error("Client secret invalid de la server. Plata nu poate continua.");
+
+                const formElement = document.getElementById('checkout-form');
                 const stripeContainer = document.getElementById('stripe-checkout-container');
                 if (formElement) formElement.style.display = 'none';
                 if (stripeContainer) stripeContainer.style.display = 'block';
 
-                const res = await fetch('/api/stripe/checkout-session', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderData), // Trimitem toate datele
-                });
-                const { clientSecret, error } = await res.json();
-                if (error) throw new Error(error);
-                if (!clientSecret) throw new Error("Client secret invalid de la server.");
-                
                 await stripe.initEmbeddedCheckout({ clientSecret });
 
             } catch (error: any) {
-                setErrorMessage(error.message || 'Eroare la inițierea plății.');
+                console.error("EROARE LA PROCESUL DE PLATĂ:", error);
+                setErrorMessage(error.message || 'O eroare neașteptată a avut loc. Te rugăm să încerci din nou.');
                 setFormState('error');
-                 // Ascunde container-ul Stripe și afișează din nou formularul în caz de eroare
-                const formElement = e.target as HTMLFormElement;
+                
+                const formElement = document.getElementById('checkout-form');
                 const stripeContainer = document.getElementById('stripe-checkout-container');
                 if (formElement) formElement.style.display = 'block';
                 if (stripeContainer) stripeContainer.style.display = 'none';
@@ -96,15 +103,21 @@ export default function CheckoutForm({
         }
     };
 
+    useEffect(() => {
+        if (!stripe || !elements) {
+            setFormState('loading');
+        } else {
+            setFormState('idle');
+        }
+    }, [stripe, elements]);
+
     return (
         <>
-            {/* 1. Containerul pentru Stripe, inițial ascuns */}
             <div id="stripe-checkout-container" style={{ display: 'none' }}>
                 <div id="stripe-checkout"></div>
             </div>
 
-            {/* 2. Formularul tău, complet */}
-            <form onSubmit={handleSubmit} className="space-y-12">
+            <form onSubmit={handleSubmit} id="checkout-form" className="space-y-12">
                 {/* --- Date de livrare --- */}
                 <div className="space-y-6">
                     <h2 className="text-2xl font-bold border-b border-gray-700 pb-2">Date de livrare</h2>
@@ -120,13 +133,13 @@ export default function CheckoutForm({
                     <FormInput id="strada_nr" label="Stradă și număr" value={address.strada_nr} onChange={e => setAddress({...address, strada_nr: e.target.value})} icon={<MapPin size={18} />} required />
                 </div>
 
-                {/* --- Date de facturare --- */}
+                {/* --- Date de facturare (RESTAURAT) --- */}
                 <div className="space-y-6">
                     <h2 className="text-2xl font-bold border-b border-gray-700 pb-2">Date de facturare</h2>
                     <div className="flex items-center space-x-4">
-                        <input type="radio" id="persoana_fizica" name="tip_factura" value="persoana_fizica" checked={billing.tip_factura === 'persoana_fizica'} onChange={() => setBilling({ ...billing, tip_factura: 'persoana_fizica' })} />
+                        <input type="radio" id="persoana_fizica" name="tip_factura" value="persoana_fizica" checked={billing.tip_factura === 'persoana_fizica'} onChange={() => setBilling({ ...billing, tip_factura: 'persoana_fizica' })} className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"/>
                         <label htmlFor="persoana_fizica">Persoană fizică</label>
-                        <input type="radio" id="companie" name="tip_factura" value="companie" checked={billing.tip_factura === 'companie'} onChange={() => setBilling({ ...billing, tip_factura: 'companie' })} />
+                        <input type="radio" id="companie" name="tip_factura" value="companie" checked={billing.tip_factura === 'companie'} onChange={() => setBilling({ ...billing, tip_factura: 'companie' })} className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"/>
                         <label htmlFor="companie">Companie</label>
                     </div>
 
@@ -138,7 +151,7 @@ export default function CheckoutForm({
                     )}
 
                     <div className="flex items-center">
-                        <input type="checkbox" id="same_as_delivery" checked={sameAsDelivery} onChange={e => setSameAsDelivery(e.target.checked)} className="mr-2" />
+                        <input type="checkbox" id="same_as_delivery" checked={sameAsDelivery} onChange={e => setSameAsDelivery(e.target.checked)} className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 mr-2" />
                         <label htmlFor="same_as_delivery">Adresa de facturare este aceeași cu adresa de livrare</label>
                     </div>
 
@@ -156,17 +169,17 @@ export default function CheckoutForm({
                 <div className="space-y-4">
                     <h2 className="text-2xl font-bold border-b border-gray-700 pb-2">Metodă de plată</h2>
                      <div className="flex items-center space-x-4">
-                        <input type="radio" id="ramburs" name="payment_method" value="ramburs" checked={paymentMethod === 'ramburs'} onChange={() => setPaymentMethod('ramburs')} />
+                        <input type="radio" id="ramburs" name="payment_method" value="ramburs" checked={paymentMethod === 'ramburs'} onChange={() => setPaymentMethod('ramburs')} className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"/>
                         <label htmlFor="ramburs">Ramburs la livrare</label>
-                        <input type="radio" id="card" name="payment_method" value="card" checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} />
+                        <input type="radio" id="card" name="payment_method" value="card" checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"/>
                         <label htmlFor="card">Plată cu cardul</label>
                     </div>
                 </div>
 
-                {errorMessage && <p className="text-red-500 text-center">{errorMessage}</p>}
+                {errorMessage && <p className="text-red-500 text-center font-bold p-4 bg-red-900/20 rounded-lg">{errorMessage}</p>}
                 
-                <button type="submit" disabled={formState === 'loading' || cart.length === 0} className="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition disabled:bg-gray-500 disabled:cursor-not-allowed">
-                    {formState === 'loading' ? 'Se procesează...' : `Plasează comanda`}
+                <button type="submit" disabled={formState === 'loading'} className="w-full flex justify-center items-center bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition disabled:bg-gray-500 disabled:cursor-not-allowed">
+                    {formState === 'loading' ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Se încarcă...</> : `Plasează comanda`}
                 </button>
             </form>
         </>
