@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { fulfillOrder } from '../../../lib/orderService'; // Importăm funcția noastră centralizată
+import { fulfillOrder } from '../../../lib/orderService'; // CALEA CORECTATĂ
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -25,7 +25,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Metadata lipsă" }, { status: 400 });
         }
 
-        // Reconstituim datele comenzii din metadatele Stripe
         const orderData = {
             cart: JSON.parse(session.metadata.cart),
             address: JSON.parse(session.metadata.address),
@@ -33,15 +32,12 @@ export async function POST(req: NextRequest) {
         };
 
         try {
-            // Apelăm aceeași funcție centralizată, dar specificăm alt tip de plată
             await fulfillOrder(orderData, 'Card');
         } catch (err: any) {
             console.error("[Webhook] EROARE la procesarea comenzii după plată:", err.message);
-            // Putem adăuga aici o notificare specială dacă procesarea eșuează după plată
             return NextResponse.json({ error: "Eroare la procesarea internă a comenzii." }, { status: 500 });
         }
     }
 
-    // Confirmăm primirea evenimentului către Stripe
     return NextResponse.json({ received: true });
 }
