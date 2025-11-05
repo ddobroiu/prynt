@@ -72,7 +72,7 @@ export default function CheckoutForm({
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || 'Eroare la crearea comenzii.');
-        window.location.href = '/checkout/success'; // Redirect succes ramburs
+        window.location.href = '/checkout/success'; // Succes ramburs
       } catch (error: any) {
         setFormState('error');
         setErrorMessage(error.message);
@@ -104,7 +104,7 @@ export default function CheckoutForm({
       if (formElement) formElement.style.display = 'none';
       if (stripeContainer) stripeContainer.style.display = 'block';
 
-      // DIFERENȚA ESENȚIALĂ: montează embedded checkout în container
+      // Montează Embedded Checkout în containerul dedicat
       const embeddedCheckout = await stripe.initEmbeddedCheckout({ clientSecret });
       embeddedCheckout.mount('#stripe-checkout');
     } catch (error: any) {

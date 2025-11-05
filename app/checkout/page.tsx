@@ -1,15 +1,19 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { Address, Billing, CartItem } from '../../types';
 import CheckoutForm from './CheckoutForm';
 import { X } from 'lucide-react';
+import { useCart } from '../../components/CartProvider';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 export default function CheckoutPage() {
+  const { items, removeItem } = useCart(); // Folosește coșul real din context
+  const cart: CartItem[] = items;
+
   const [address, setAddress] = useState<Address>({
     nume_prenume: '',
     email: '',
@@ -21,34 +25,18 @@ export default function CheckoutPage() {
   const [billing, setBilling] = useState<Billing>({ tip_factura: 'persoana_fizica' });
   const [sameAsDelivery, setSameAsDelivery] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<'ramburs' | 'card'>('ramburs');
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [judete, setJudete] = useState<string[]>([]);
 
-  // Scoate produs din coș
-  const removeFromCart = (itemId: string) => {
-    setCart((currentCart) => currentCart.filter((item) => item.id !== itemId));
-  };
-
-  // Placeholder pentru validarea CUI (integrare ANAF/Oblio)
-  const handleCUI = async (_cui: string) => {
-    // TODO: implementează logica ta pentru validarea CUI
-  };
-
-  // Încărcare județe și coș (exemplu)
+  // Încărcare listă județe
   useEffect(() => {
     const listaJudete = [
-      'Alba', 'Arad', 'Arges', 'Bacau', 'Bihor', 'Bistrita-Nasaud', 'Botosani', 'Brasov', 'Braila',
-      'Bucuresti', 'Buzau', 'Caras-Severin', 'Calarasi', 'Cluj', 'Constanta', 'Covasna', 'Dambovita',
-      'Dolj', 'Galati', 'Giurgiu', 'Gorj', 'Harghita', 'Hunedoara', 'Ialomita', 'Iasi', 'Ilfov',
-      'Maramures', 'Mehedinti', 'Mures', 'Neamt', 'Olt', 'Prahova', 'Satu Mare', 'Salaj', 'Sibiu',
-      'Suceava', 'Teleorman', 'Timis', 'Tulcea', 'Vaslui', 'Valcea', 'Vrancea',
+      'Alba','Arad','Arges','Bacau','Bihor','Bistrita-Nasaud','Botosani','Brasov','Braila',
+      'Bucuresti','Buzau','Caras-Severin','Calarasi','Cluj','Constanta','Covasna','Dambovita',
+      'Dolj','Galati','Giurgiu','Gorj','Harghita','Hunedoara','Ialomita','Iasi','Ilfov',
+      'Maramures','Mehedinti','Mures','Neamt','Olt','Prahova','Satu Mare','Salaj','Sibiu',
+      'Suceava','Teleorman','Timis','Tulcea','Vaslui','Valcea','Vrancea',
     ];
     setJudete(listaJudete);
-
-    // Simulare coș
-    setCart([
-      { id: '1', name: 'Banner personalizat 100x100cm', quantity: 1, unitAmount: 38.5, totalAmount: 38.5 },
-    ]);
   }, []);
 
   // Setează județ pentru livrare/facturare
@@ -57,12 +45,12 @@ export default function CheckoutPage() {
     else setBilling((b) => ({ ...b, judet }));
   };
 
-  // Sumar
+  // Totaluri
   const subtotal = cart.reduce((acc, item) => acc + item.totalAmount, 0);
   const costLivrare = 19.99;
-  const totalPlata = subtotal > 0 ? subtotal + costLivrare : 0;
+  const totalPlata = cart.length > 0 ? subtotal + costLivrare : 0;
 
-  // Opțiuni Stripe Elements (nu sunt obligatorii pentru Embedded, dar pot rămâne)
+  // Opțiuni (Elements poate rămâne prezent și pentru Embedded)
   const stripeOptions = {
     mode: 'payment' as const,
     amount: Math.round(totalPlata * 100),
@@ -88,12 +76,12 @@ export default function CheckoutPage() {
                   setBilling={setBilling}
                   cart={cart}
                   paymentMethod={paymentMethod}
-                  setPaymentMethod={setPaymentMethod as any}
+                  setPaymentMethod={setPaymentMethod}
                   sameAsDelivery={sameAsDelivery}
                   setSameAsDelivery={setSameAsDelivery}
                   judete={judete}
                   setJudet={setJudet}
-                  handleCUI={handleCUI}
+                  handleCUI={async () => {}}
                 />
               </Elements>
             </div>
@@ -112,7 +100,12 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex items-center">
                       <p className="font-semibold mr-4">{item.totalAmount.toFixed(2)} RON</p>
-                      <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:text-red-400">
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="text-red-500 hover:text-red-400"
+                        aria-label="Elimină din coș"
+                        title="Elimină din coș"
+                      >
                         <X size={18} />
                       </button>
                     </div>
