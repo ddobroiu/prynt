@@ -30,7 +30,9 @@ const SURCHARGES = {
   hem_and_grommets: 1.10,
 };
 
-const roundMoney = (num: number): number => Math.round(num * 100) / 100;
+// --- MODIFICAREA ESTE AICI ---
+// Am adăugat 'export' pentru ca funcția să poată fi folosită în alte fișiere.
+export const roundMoney = (num: number): number => Math.round(num * 100) / 100;
 
 export const calculatePrice = (input: PriceInput): PriceOutput => {
   if (input.width_cm <= 0 || input.height_cm <= 0 || input.quantity <= 0) {
