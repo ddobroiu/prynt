@@ -1,4 +1,3 @@
-// app/layout.tsx
 import "./globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -20,16 +19,9 @@ export default function RootLayout({
     <html lang="ro">
       <body className="bg-[#0b0f19] text-white antialiased">
         <Providers>
-          {/* HEADER (folosește CartProvider) */}
           <Header />
-
-          {/* CONȚINUT PRINCIPAL */}
           <main>{children}</main>
-
-          {/* FOOTER */}
           <Footer />
-
-          {/* BUTON CONTACT RAPID (vizibil pe tot site-ul) */}
           <ContactButton />
         </Providers>
       </body>
