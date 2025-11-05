@@ -32,7 +32,7 @@ export default function FormInput<T>({
         {label}
       </label>
       <div className="relative">
-        <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
           {icon}
         </span>
         <input

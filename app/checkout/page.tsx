@@ -3,25 +3,26 @@
 import { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import CheckoutForm from './CheckoutForm';
-import { Address, Billing, CartItem } from '../../types';
+import CheckoutForm from './CheckoutForm'; // Importul trebuie să funcționeze acum
+import { Address, Billing, CartItem } from '../../types'; // Și acesta
 
-// Cheia publică Stripe trebuie să fie în variabile de mediu
+// Asigură-te că ai această variabilă în .env.local
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 export default function CheckoutPage() {
     const [address, setAddress] = useState<Address>({ nume_prenume: '', email: '', telefon: '', judet: '', localitate: '', strada_nr: '' });
     const [billing, setBilling] = useState<Billing>({ tip_factura: 'persoana_fizica' });
     const [sameAsDelivery, setSameAsDelivery] = useState(true);
-    const [paymentMethod, setPaymentMethod] = useState('ramburs');
+    const [paymentMethod, setPaymentMethod] = useState('card'); // Am setat 'card' ca default
     const [cart, setCart] = useState<CartItem[]>([]);
     
-    // Simulare încărcare coș de cumpărături din localStorage
     useEffect(() => {
-        const savedCart = localStorage.getItem('cart');
-        if (savedCart) {
-            setCart(JSON.parse(savedCart));
-        }
+        // Simulare încărcare coș de cumpărături la încărcarea paginii
+        const initialCart = [
+            { id: '1', name: 'Banner personalizat', quantity: 1, unitAmount: 225.00, totalAmount: 225.00 },
+            { id: '2', name: 'Banner personalizat 107x100cm', quantity: 1, unitAmount: 41.20, totalAmount: 41.20 },
+        ];
+        setCart(initialCart);
     }, []);
 
     const subtotal = cart.reduce((acc, item) => acc + item.totalAmount, 0);
@@ -55,18 +56,18 @@ export default function CheckoutPage() {
                                 <span>{item.totalAmount.toFixed(2)} RON</span>
                             </div>
                         ))}
-                        <hr className="border-gray-700" />
+                        <hr className="border-gray-700 my-4" />
                         <div className="flex justify-between">
-                            <span>Subtotal Produse:</span>
+                            <span>Subtotal:</span>
                             <span>{subtotal.toFixed(2)} RON</span>
                         </div>
                         <div className="flex justify-between">
-                            <span>Cost Livrare (DPD):</span>
+                            <span>Livrare:</span>
                             <span>{costLivrare.toFixed(2)} RON</span>
                         </div>
-                        <hr className="border-gray-700" />
+                        <hr className="border-gray-700 my-4" />
                         <div className="flex justify-between font-bold text-xl">
-                            <span>TOTAL PLATĂ:</span>
+                            <span>TOTAL:</span>
                             <span>{totalPlata.toFixed(2)} RON</span>
                         </div>
                     </div>
