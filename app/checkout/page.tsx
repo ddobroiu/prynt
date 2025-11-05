@@ -3,76 +3,87 @@
 import { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import CheckoutForm from './CheckoutForm'; // Importul trebuie să funcționeze acum
-import { Address, Billing, CartItem } from '../../types'; // Și acesta
+import CheckoutForm from './CheckoutForm';
+import { Address, Billing, CartItem } from '../../types';
 
-// Asigură-te că ai această variabilă în .env.local
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 export default function CheckoutPage() {
     const [address, setAddress] = useState<Address>({ nume_prenume: '', email: '', telefon: '', judet: '', localitate: '', strada_nr: '' });
     const [billing, setBilling] = useState<Billing>({ tip_factura: 'persoana_fizica' });
     const [sameAsDelivery, setSameAsDelivery] = useState(true);
-    const [paymentMethod, setPaymentMethod] = useState('card'); // Am setat 'card' ca default
+    const [paymentMethod, setPaymentMethod] = useState('card');
     const [cart, setCart] = useState<CartItem[]>([]);
+    const [judete, setJudete] = useState<string[]>([]);
     
+    // Funcția pentru a prelua datele de la Oblio pe baza CUI
+    const handleCUI = async (cui: string) => {
+        try {
+            const response = await fetch(`/api/oblio/cif?cif=${cui}`);
+            const data = await response.json();
+            if (data.status === 200 && data.data) {
+                const info = data.data;
+                setBilling(b => ({
+                    ...b,
+                    name: info.denumire,
+                    address: `${info.adresa}, ${info.judet}`
+                }));
+            }
+        } catch (error) {
+            console.error("Eroare la preluarea datelor CUI:", error);
+        }
+    };
+
+    // Preluare județe la încărcarea paginii
     useEffect(() => {
-        // Simulare încărcare coș de cumpărături la încărcarea paginii
-        const initialCart = [
+        const fetchJudete = async () => {
+            // Înlocuiește cu un API real dacă ai, sau lasă lista statică
+            const listaJudete = ["Alba", "Arad", "Arges", "Bacau", "Bihor", "Bistrita-Nasaud", "Botosani", "Brasov", "Braila", "Bucuresti", "Buzau", "Caras-Severin", "Calarasi", "Cluj", "Constanta", "Covasna", "Dambovita", "Dolj", "Galati", "Giurgiu", "Gorj", "Harghita", "Hunedoara", "Ialomita", "Iasi", "Ilfov", "Maramures", "Mehedinti", "Mures", "Neamt", "Olt", "Prahova", "Satu Mare", "Salaj", "Sibiu", "Suceava", "Teleorman", "Timis", "Tulcea", "Vaslui", "Valcea", "Vrancea"];
+            setJudete(listaJudete);
+        };
+        fetchJudete();
+
+        // Simulare încărcare coș de cumpărături
+        setCart([
             { id: '1', name: 'Banner personalizat', quantity: 1, unitAmount: 225.00, totalAmount: 225.00 },
             { id: '2', name: 'Banner personalizat 107x100cm', quantity: 1, unitAmount: 41.20, totalAmount: 41.20 },
-        ];
-        setCart(initialCart);
+        ]);
     }, []);
 
-    const subtotal = cart.reduce((acc, item) => acc + item.totalAmount, 0);
-    const costLivrare = 19.99;
-    const totalPlata = subtotal + costLivrare;
+    const setJudet = (judet: string) => {
+        setAddress(a => ({...a, judet: judet}));
+    }
+
+    const options = {
+        // Pasează clientSecret-ul de la server către componenta Elements
+        // Deoarece vom face asta în CheckoutForm, putem lăsa `mode` și `amount` goale aici
+        mode: 'payment' as const,
+        amount: 1099, // Suma trebuie calculată dinamic
+        currency: 'ron',
+        appearance: {
+            theme: 'night' as const,
+            labels: 'floating' as const,
+        },
+    };
 
     return (
         <div className="container mx-auto px-4 py-12 text-white">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                <div className="lg:col-span-2">
-                     <Elements stripe={stripePromise}>
-                        <CheckoutForm 
-                            address={address}
-                            setAddress={setAddress}
-                            billing={billing}
-                            setBilling={setBilling}
-                            cart={cart}
-                            paymentMethod={paymentMethod}
-                            setPaymentMethod={setPaymentMethod}
-                            sameAsDelivery={sameAsDelivery}
-                            setSameAsDelivery={setSameAsDelivery}
-                        />
-                    </Elements>
-                </div>
-                <div className="lg:col-span-1 bg-gray-900 border border-gray-700 rounded-2xl p-8 h-fit">
-                    <h2 className="text-2xl font-bold text-white mb-6">Sumar Comandă</h2>
-                    <div className="space-y-4">
-                        {cart.map(item => (
-                            <div key={item.id} className="flex justify-between items-center">
-                                <span>{item.name} x {item.quantity}</span>
-                                <span>{item.totalAmount.toFixed(2)} RON</span>
-                            </div>
-                        ))}
-                        <hr className="border-gray-700 my-4" />
-                        <div className="flex justify-between">
-                            <span>Subtotal:</span>
-                            <span>{subtotal.toFixed(2)} RON</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>Livrare:</span>
-                            <span>{costLivrare.toFixed(2)} RON</span>
-                        </div>
-                        <hr className="border-gray-700 my-4" />
-                        <div className="flex justify-between font-bold text-xl">
-                            <span>TOTAL:</span>
-                            <span>{totalPlata.toFixed(2)} RON</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <Elements stripe={stripePromise} options={options}>
+                <CheckoutForm 
+                    address={address}
+                    setAddress={setAddress}
+                    billing={billing}
+                    setBilling={setBilling}
+                    cart={cart}
+                    paymentMethod={paymentMethod}
+                    setPaymentMethod={setPaymentMethod}
+                    sameAsDelivery={sameAsDelivery}
+                    setSameAsDelivery={setSameAsDelivery}
+                    judete={judete}
+                    setJudet={setJudet}
+                    handleCUI={handleCUI}
+                />
+            </Elements>
         </div>
     );
 }
