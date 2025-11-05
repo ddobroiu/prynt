@@ -17,22 +17,34 @@ export default function CheckoutPage() {
     const [cart, setCart] = useState<CartItem[]>([]);
     const [judete, setJudete] = useState<string[]>([]);
     
+    // Funcție pentru a șterge un produs din coș ȘI din localStorage
     const removeFromCart = (itemId: string) => {
-        setCart(currentCart => currentCart.filter(item => item.id !== itemId));
+        const updatedCart = cart.filter(item => item.id !== itemId);
+        setCart(updatedCart);
+        localStorage.setItem('cart', JSON.stringify(updatedCart)); // Actualizează și localStorage
     };
     
-    const handleCUI = async (cui: string) => { /* ... logica ta Oblio ... */ };
+    const handleCUI = async (cui: string) => { /* Logica ta pentru Oblio */ };
 
+    // AICI ERA GREȘEALA MEA - ACUM ÎNCARCĂ DIN LOCALSTORAGE
     useEffect(() => {
+        // Populează lista de județe
         const listaJudete = ["Alba", "Arad", "Arges", "Bacau", "Bihor", "Bistrita-Nasaud", "Botosani", "Brasov", "Braila", "Bucuresti", "Buzau", "Caras-Severin", "Calarasi", "Cluj", "Constanta", "Covasna", "Dambovita", "Dolj", "Galati", "Giurgiu", "Gorj", "Harghita", "Hunedoara", "Ialomita", "Iasi", "Ilfov", "Maramures", "Mehedinti", "Mures", "Neamt", "Olt", "Prahova", "Satu Mare", "Salaj", "Sibiu", "Suceava", "Teleorman", "Timis", "Tulcea", "Vaslui", "Valcea", "Vrancea"];
         setJudete(listaJudete);
-        // Simulare încărcare coș de cumpărături
-        setTimeout(() => { // Adăugăm un mic delay pentru a simula o încărcare reală
-             setCart([
-                { id: '1', name: 'Banner personalizat', quantity: 1, unitAmount: 225.00, totalAmount: 225.00 },
-                { id: '2', name: 'Banner personalizat 107x100cm', quantity: 1, unitAmount: 41.20, totalAmount: 41.20 },
-            ]);
-        }, 100); // 100ms
+
+        // Încearcă să încarci COȘUL REAL din localStorage
+        const savedCart = localStorage.getItem('cart');
+        if (savedCart) {
+            try {
+                const parsedCart = JSON.parse(savedCart);
+                if (Array.isArray(parsedCart)) {
+                    setCart(parsedCart);
+                }
+            } catch (e) {
+                console.error("Eroare la parsarea coșului din localStorage:", e);
+                setCart([]); // Golește coșul dacă datele sunt corupte
+            }
+        }
     }, []);
 
     const setJudet = (judet: string, type: 'delivery' | 'billing') => {
@@ -54,34 +66,24 @@ export default function CheckoutPage() {
     return (
         <div className="container mx-auto px-4 py-12 text-white">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                
                 <div className="lg:col-span-2">
-                    {/* ======================= AICI ESTE REZOLVAREA ======================= */}
-                    {/* Afișăm formularul DOAR dacă există ceva de plătit. */}
                     {totalPlata > 0 ? (
                         <Elements stripe={stripePromise} options={stripeOptions}>
                             <CheckoutForm 
-                                address={address}
-                                setAddress={setAddress}
-                                billing={billing}
-                                setBilling={setBilling}
+                                address={address} setAddress={setAddress}
+                                billing={billing} setBilling={setBilling}
                                 cart={cart}
-                                paymentMethod={paymentMethod}
-                                setPaymentMethod={setPaymentMethod}
-                                sameAsDelivery={sameAsDelivery}
-                                setSameAsDelivery={setSameAsDelivery}
-                                judete={judete}
-                                setJudet={setJudet}
+                                paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod}
+                                sameAsDelivery={sameAsDelivery} setSameAsDelivery={setSameAsDelivery}
+                                judete={judete} setJudet={setJudet}
                                 handleCUI={handleCUI}
                             />
                         </Elements>
                     ) : (
-                        // Afișăm un mesaj de încărcare sau dacă coșul este gol.
                         <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8 text-center">
-                            <p className="text-gray-400">{cart.length === 0 ? "Adaugă produse în coș pentru a continua." : "Se calculează totalul..."}</p>
+                            <p className="text-gray-400">{cart.length === 0 ? "Coșul de cumpărături este gol." : "Se încarcă..."}</p>
                         </div>
                     )}
-                    {/* ======================================================================= */}
                 </div>
 
                 <div className="lg:col-span-1 bg-gray-900 border border-gray-700 rounded-2xl p-8 h-fit">
@@ -98,16 +100,10 @@ export default function CheckoutPage() {
                                 </div>
                             ))}
                             <hr className="border-gray-700 my-4" />
-                            <div className="flex justify-between">
-                                <span>Subtotal:</span><span>{subtotal.toFixed(2)} RON</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Livrare:</span><span>{costLivrare.toFixed(2)} RON</span>
-                            </div>
+                            <div className="flex justify-between"><span>Subtotal:</span><span>{subtotal.toFixed(2)} RON</span></div>
+                            <div className="flex justify-between"><span>Livrare:</span><span>{costLivrare.toFixed(2)} RON</span></div>
                             <hr className="border-gray-700 my-4" />
-                            <div className="flex justify-between font-bold text-xl">
-                                <span>TOTAL:</span><span>{totalPlata.toFixed(2)} RON</span>
-                            </div>
+                            <div className="flex justify-between font-bold text-xl"><span>TOTAL:</span><span>{totalPlata.toFixed(2)} RON</span></div>
                         </div>
                     ) : (
                         <p className="text-gray-400">Coșul de cumpărături este gol.</p>
