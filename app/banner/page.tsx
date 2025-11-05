@@ -1,201 +1,472 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { calculatePrice, PriceInput } from '../../lib/pricing-banner';
-import { useCart } from '../../components/CartProvider';
-import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart } from 'lucide-react';
+import React, { useMemo, useState } from "react";
+import { useCart } from "../../components/CartProvider";
+import { calculatePrice, roundMoney, PriceInput } from "../../lib/pricing-banner";
+import {
+  Star,
+  ShieldCheck,
+  Truck,
+  Ruler,
+  Layers,
+  Hammer,
+  Scissors,
+  BadgeCheck,
+  ShoppingCart,
+} from "lucide-react";
 
-// AM ȘTERS IMPORT-UL PENTRU SWITCH DE AICI
+type MaterialKey = "frontlit_440" | "frontlit_510";
+const MATERIALS: Record<
+  MaterialKey,
+  { title: string; desc: string; image: string; badge?: string }
+> = {
+  frontlit_440: {
+    title: "Frontlit 440g/mp",
+    desc: "Standard, cel mai bun raport calitate-preț.",
+    image: "/products/banner/frontlit-440.jpg",
+    badge: "Best value",
+  },
+  frontlit_510: {
+    title: "Frontlit 510g/mp",
+    desc: "Premium, durabilitate și rigiditate superioare.",
+    image: "/products/banner/frontlit-510.jpg",
+    badge: "Premium",
+  },
+};
 
-const BannerConfiguratorPage = () => {
-    const { addItem } = useCart();
-    const [input, setInput] = useState<PriceInput>({
-        width_cm: 100,
-        height_cm: 100,
-        quantity: 1,
-        material: "frontlit_440",
-        want_wind_holes: false,
-        want_hem_and_grommets: true,
+const BannerConfiguratorPage: React.FC = () => {
+  const { addItem } = useCart();
+
+  const [input, setInput] = useState<PriceInput>({
+    width_cm: 100,
+    height_cm: 100,
+    quantity: 1,
+    material: "frontlit_440",
+    want_wind_holes: false,
+    want_hem_and_grommets: true,
+  });
+
+  const price = useMemo(() => calculatePrice(input), [input]);
+  const [activeImage, setActiveImage] = useState<string>(
+    MATERIALS[input.material as MaterialKey].image
+  );
+
+  // Preț pe unitate (TVA inclus)
+  const pricePerUnit =
+    input.quantity > 0 && price.finalPrice > 0 ? roundMoney(price.finalPrice / input.quantity) : 0;
+
+  const updateInput = <K extends keyof PriceInput>(key: K, val: PriceInput[K]) => {
+    setInput((prev) => {
+      const next = { ...prev, [key]: val };
+      // dacă schimbăm materialul, actualizăm și imaginea principală
+      if (key === "material") {
+        const mat = MATERIALS[val as MaterialKey];
+        if (mat) setActiveImage(mat.image);
+      }
+      return next;
+    });
+  };
+
+  const setNumeric = (key: "width_cm" | "height_cm" | "quantity", value: number) => {
+    const safe = Number.isFinite(value) ? Math.max(1, Math.floor(value)) : 1;
+    updateInput(key, safe as any);
+  };
+
+  const handleAddToCart = () => {
+    if (input.width_cm < 1 || input.height_cm < 1 || input.quantity < 1 || price.finalPrice <= 0) {
+      alert("Te rugăm să setezi dimensiuni/cantitate valide și să aștepți calculul prețului (> 0 RON).");
+      return;
+    }
+
+    // ID determinist bazat pe configurație (permite agregare corectă în coș)
+    const uniqueId = [
+      "banner",
+      input.material,
+      input.width_cm,
+      input.height_cm,
+      input.want_wind_holes ? "g" : "f", // g=gauri vant, f=fara
+      input.want_hem_and_grommets ? "c" : "f", // c=capsare+tiv, f=fara
+    ].join("-");
+
+    const unitAmount = pricePerUnit;
+    const totalAmount = roundMoney(unitAmount * input.quantity);
+
+    addItem({
+      id: uniqueId,
+      name: `Banner ${MATERIALS[input.material as MaterialKey]?.title || input.material} - ${input.width_cm}x${input.height_cm}cm`,
+      quantity: input.quantity,
+      unitAmount,
+      totalAmount,
     });
 
-    const priceDetails = calculatePrice(input);
+    // feedback vizual simplu
+    const toast = document.getElementById("added-toast");
+    if (toast) {
+      toast.style.opacity = "1";
+      setTimeout(() => (toast.style.opacity = "0"), 1800);
+    } else {
+      alert("Produs adăugat în coș!");
+    }
+  };
 
-    const handleAddToCart = () => {
-        if (!priceDetails || priceDetails.finalPrice <= 0) return;
-        const productName = `Banner personalizat ${input.width_cm}x${input.height_cm}cm`;
-        addItem({
-            id: crypto.randomUUID(),
-            name: productName,
-            quantity: input.quantity,
-            unitAmount: priceDetails.finalPrice / input.quantity,
-            totalAmount: priceDetails.finalPrice,
-        });
-        alert(`${productName} a fost adăugat în coș!`);
-    };
+  const material = MATERIALS[input.material as MaterialKey];
 
-    const updateInput = (field: keyof PriceInput, value: any) => {
-        setInput(prev => ({ ...prev, [field]: value }));
-    };
-
-    return (
-        <div className="bg-gray-950 min-h-screen text-white">
-            <div className="container mx-auto px-4 py-16">
-                <header className="text-center mb-12">
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">
-                        Configurator Banner Publicitar
-                    </h1>
-                    <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
-                        Personalizează-ți bannerul pas cu pas și vezi prețul în timp real. Calitate garantată, livrare rapidă.
-                    </p>
-                </header>
-
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
-                    {/* Coloana Stânga: Configurator */}
-                    <div className="lg:col-span-3 space-y-8">
-                        <ConfigSection icon={<Ruler />} title="1. Dimensiuni și Cantitate">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <NumberInput label="Lățime (cm)" value={input.width_cm} onChange={(v) => updateInput('width_cm', v)} />
-                                <NumberInput label="Înălțime (cm)" value={input.height_cm} onChange={(v) => updateInput('height_cm', v)} />
-                            </div>
-                            <div className="mt-6">
-                                <NumberInput label="Cantitate (buc)" value={input.quantity} onChange={(v) => updateInput('quantity', v)} />
-                            </div>
-                        </ConfigSection>
-
-                        <ConfigSection icon={<Layers />} title="2. Material Banner">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <MaterialOption
-                                    title="Frontlit 440g/mp"
-                                    description="Standard, cel mai bun raport calitate-preț."
-                                    selected={input.material === 'frontlit_440'}
-                                    onClick={() => updateInput('material', 'frontlit_440')}
-                                />
-                                <MaterialOption
-                                    title="Frontlit 510g/mp"
-                                    description="Premium, mai gros și mai rezistent."
-                                    selected={input.material === 'frontlit_510'}
-                                    onClick={() => updateInput('material', 'frontlit_510')}
-                                />
-                            </div>
-                        </ConfigSection>
-
-                        <ConfigSection icon={<CheckCircle />} title="3. Finisaje Incluse">
-                             <div className="space-y-4">
-                                <ToggleOption
-                                    label="Tiv și Capse de prindere"
-                                    description="Întărire pe margini și inele metalice pentru prindere."
-                                    checked={input.want_hem_and_grommets}
-                                    onCheckedChange={(c) => updateInput('want_hem_and_grommets', c)}
-                                />
-                                <ToggleOption
-                                    label="Găuri de vânt"
-                                    description="Decupaje speciale pentru a reduce presiunea vântului."
-                                    checked={input.want_wind_holes}
-                                    onCheckedChange={(c) => updateInput('want_wind_holes', c)}
-                                />
-                            </div>
-                        </ConfigSection>
-                    </div>
-
-                    {/* Coloana Dreapta: Sumar și Preț */}
-                    <div className="lg:col-span-2">
-                        <div className="sticky top-8 bg-gray-900 border border-gray-700 rounded-2xl p-6 shadow-2xl shadow-indigo-900/20">
-                            <h3 className="text-xl font-bold mb-4">Sumarul Comenzii</h3>
-                            
-                            <div className="aspect-video bg-gray-800 rounded-lg mb-6 flex items-center justify-center border border-dashed border-gray-600">
-                                <p className="text-gray-500 text-sm">Previzualizare Banner</p>
-                            </div>
-                            
-                            <div className="space-y-2 text-gray-300 mb-6">
-                                <p>Dimensiuni: <span className="font-semibold text-white">{input.width_cm} x {input.height_cm} cm</span></p>
-                                <p>Suprafață: <span className="font-semibold text-white">{priceDetails?.sqm_per_unit.toFixed(2)} mp/buc</span></p>
-                                <p>Cantitate: <span className="font-semibold text-white">{input.quantity} buc.</span></p>
-                                <p>Suprafață Totală: <span className="font-semibold text-white">{priceDetails?.total_sqm_taxable.toFixed(2)} mp</span></p>
-                            </div>
-
-                            <div className="border-t border-gray-700 pt-4">
-                                <p className="text-gray-400 text-sm">Preț Total (fără TVA)</p>
-                                <p className="text-4xl font-extrabold text-white my-2">
-                                    {priceDetails?.finalPrice.toFixed(2)} RON
-                                </p>
-                                <p className="text-gray-500 text-xs">Taxa pe valoarea adăugată (TVA) se va calcula în coș.</p>
-                            </div>
-                            
-                            <button 
-                                onClick={handleAddToCart}
-                                disabled={!priceDetails || priceDetails.finalPrice <= 0}
-                                className="w-full mt-6 bg-indigo-600 text-white font-bold py-3 text-lg rounded-lg hover:bg-indigo-700 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                <ShoppingCart size={20} />
-                                Adaugă în coș
-                            </button>
-                        </div>
-                    </div>
-                </div>
+  return (
+    <main className="min-h-screen bg-gray-950 text-white">
+      {/* HERO vizual */}
+      <section className="relative">
+        <div className="absolute inset-0">
+          <img
+            src="/products/banner/hero-banner.jpg"
+            alt="Banner publicitar"
+            className="w-full h-[320px] object-cover opacity-40"
+            loading="lazy"
+          />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 py-12 md:py-16">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-indigo-600/20 text-indigo-200 px-3 py-1 text-xs mb-4">
+              <BadgeCheck className="h-4 w-4" />
+              Interfață modernizată
             </div>
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+              Banner publicitar — configurare rapidă, rezultate premium
+            </h1>
+            <p className="mt-4 text-white/80 text-lg">
+              Alege dimensiunile, materialul și finisajele. Vezi prețul în timp real și adaugă în coș
+              instant. Livrare rapidă în toată țara.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-6 text-white/80 text-sm">
+              <span className="inline-flex items-center gap-2">
+                <Star className="h-4 w-4 text-yellow-400" /> 4.9/5 din 120+ recenzii
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-emerald-400" /> Calitate garantată
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Truck className="h-4 w-4 text-cyan-400" /> Livrare 24–48h
+              </span>
+            </div>
+          </div>
         </div>
-    );
-};
+      </section>
 
-// --- Componente ajutătoare pentru un cod mai curat ---
-
-const ConfigSection: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
-    <div className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-5">
-            <div className="text-indigo-400">{icon}</div>
-            <h2 className="text-xl font-bold text-white">{title}</h2>
+      {/* Toast adăugat în coș */}
+      <div
+        id="added-toast"
+        className="pointer-events-none fixed left-1/2 -translate-x-1/2 top-4 z-50 transition-opacity duration-300 opacity-0"
+      >
+        <div className="rounded-full bg-emerald-600/90 text-white px-4 py-2 text-sm shadow-lg shadow-emerald-900/30">
+          Produs adăugat în coș!
         </div>
-        {children}
-    </div>
-);
+      </div>
 
-const NumberInput = ({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void; }) => {
-    const handleChange = (increment: number) => {
-        const newValue = Math.max(1, value + increment);
-        onChange(newValue);
-    };
-    return (
-        <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">{label}</label>
-            <div className="flex items-center">
-                <button onClick={() => handleChange(-1)} className="p-3 bg-gray-700 rounded-l-md hover:bg-gray-600"><Minus size={16} /></button>
-                <input
-                    type="number"
-                    value={value}
-                    onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full text-center bg-gray-800 border-y border-gray-700 py-2.5 text-lg font-semibold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+      {/* Conținut principal */}
+      <section className="max-w-7xl mx-auto px-4 py-10 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
+          {/* Stânga: Galerie + detalii produs */}
+          <div className="lg:col-span-3 space-y-8">
+            {/* Galerie */}
+            <div className="rounded-2xl border border-white/10 bg-gray-900/40 p-4">
+              <div className="aspect-video rounded-xl overflow-hidden bg-gray-900 border border-white/10">
+                <img
+                  src={activeImage}
+                  alt={material?.title || "Banner"}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
                 />
-                <button onClick={() => handleChange(1)} className="p-3 bg-gray-700 rounded-r-md hover:bg-gray-600"><Plus size={16} /></button>
+              </div>
+              <div className="mt-4 grid grid-cols-4 gap-3">
+                {[material.image, "/products/banner/closeup-print.jpg", "/products/banner/outdoor.jpg", "/products/banner/indoor.jpg"].map(
+                  (src, idx) => (
+                    <button
+                      key={idx}
+                      className={`rounded-lg overflow-hidden border ${
+                        activeImage === src ? "border-indigo-500" : "border-white/10 hover:border-white/30"
+                      }`}
+                      onClick={() => setActiveImage(src)}
+                      aria-label="Schimbă imaginea"
+                    >
+                      <img src={src} alt="Prezentare banner" className="w-full h-20 object-cover" loading="lazy" />
+                    </button>
+                  )
+                )}
+              </div>
             </div>
+
+            {/* Detalii / Features */}
+            <div className="rounded-2xl border border-white/10 bg-gray-900/40 p-6 space-y-6">
+              <h2 className="text-2xl font-bold">De ce să alegi bannerele noastre</h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                <Feature icon={<Layers />} title="Materiale de calitate">
+                  Frontlit 440g (standard) sau 510g (premium) pentru durabilitate și aspect impecabil.
+                </Feature>
+                <Feature icon={<Hammer />} title="Finisaje profesionale">
+                  Tiv și capse standard incluse; opțional, perforații pentru vânt (mesh-look).
+                </Feature>
+                <Feature icon={<Truck />} title="Livrare rapidă">
+                  Expediere în 24–48 ore. Ambalare sigură pentru protecție la transport.
+                </Feature>
+              </div>
+              <ul className="text-white/80 list-disc pl-5 space-y-2">
+                <li>Tipărire full-color, rezoluție înaltă, rezistentă la intemperii.</li>
+                <li>Consultanță gratuită pentru fișierele de print.</li>
+                <li>Prețuri transparente și TVA inclus.</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Dreapta: Configurator + sumar (sticky) */}
+          <div className="lg:col-span-2">
+            <div className="lg:sticky lg:top-8 space-y-6">
+              {/* Configurator */}
+              <div className="rounded-2xl border border-indigo-700/40 bg-gray-900/70 p-6">
+                <h2 className="text-xl font-bold mb-6">Configurează produsul</h2>
+
+                {/* Dimensiuni */}
+                <ConfigCard icon={<Ruler />} title="Dimensiuni și Cantitate">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <NumberInput
+                      label="Lățime (cm)"
+                      value={input.width_cm}
+                      onChange={(v) => setNumeric("width_cm", v)}
+                      min={10}
+                      step={5}
+                    />
+                    <NumberInput
+                      label="Înălțime (cm)"
+                      value={input.height_cm}
+                      onChange={(v) => setNumeric("height_cm", v)}
+                      min={10}
+                      step={5}
+                    />
+                    <NumberInput
+                      label="Cantitate (buc)"
+                      value={input.quantity}
+                      onChange={(v) => setNumeric("quantity", v)}
+                      min={1}
+                      step={1}
+                    />
+                  </div>
+                </ConfigCard>
+
+                {/* Material */}
+                <ConfigCard icon={<Layers />} title="Material">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {(Object.keys(MATERIALS) as MaterialKey[]).map((key) => {
+                      const m = MATERIALS[key];
+                      const selected = input.material === key;
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => updateInput("material", key)}
+                          className={`text-left rounded-xl border p-4 transition ${
+                            selected
+                              ? "border-indigo-500 bg-indigo-600/20 shadow-lg"
+                              : "border-white/10 bg-gray-800/70 hover:border-white/30"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={m.image}
+                              alt={m.title}
+                              className="w-14 h-14 object-cover rounded-lg border border-white/10"
+                              loading="lazy"
+                            />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold">{m.title}</p>
+                                {m.badge && (
+                                  <span className="text-[10px] uppercase tracking-wide bg-indigo-600/30 text-indigo-200 px-2 py-0.5 rounded-full">
+                                    {m.badge}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-white/70">{m.desc}</p>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </ConfigCard>
+
+                {/* Finisaje */}
+                <ConfigCard icon={<Scissors />} title="Finisaje">
+                  <div className="space-y-3">
+                    <Toggle
+                      label="Tiv și capse (Standard)"
+                      checked={input.want_hem_and_grommets}
+                      onChange={(v) => updateInput("want_hem_and_grommets", v)}
+                    />
+                    <Toggle
+                      label="Găuri pentru vânt (Mesh look)"
+                      checked={input.want_wind_holes}
+                      onChange={(v) => updateInput("want_wind_holes", v)}
+                    />
+                  </div>
+                </ConfigCard>
+
+                {/* Preț și CTA */}
+                <div className="mt-6 rounded-xl border border-white/10 bg-gray-900/80 p-5">
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <p className="text-white/60 text-sm">Preț total (TVA inclus)</p>
+                      <p className="text-3xl md:text-4xl font-extrabold mt-1">
+                        {price.finalPrice > 0 ? `${price.finalPrice.toFixed(2)} RON` : "—"}
+                      </p>
+                      {pricePerUnit > 0 && (
+                        <p className="text-white/60 text-xs mt-1">{pricePerUnit.toFixed(2)} RON / buc</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={price.finalPrice <= 0}
+                      className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white hover:bg-indigo-500 disabled:bg-gray-600"
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                      Adaugă în coș
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card încredere / shipping */}
+              <div className="rounded-2xl border border-white/10 bg-gray-900/60 p-6">
+                <h3 className="font-bold text-white mb-3">Informații livrare și suport</h3>
+                <ul className="text-sm text-white/80 space-y-2">
+                  <li className="flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-cyan-400" />
+                    Livrare națională 24–48h prin curier.
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                    Garantăm calitatea printului și a materialelor.
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Star className="h-4 w-4 text-yellow-400" />
+                    Suport rapid pe email: contact@prynt.ro
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-    );
+      </section>
+    </main>
+  );
 };
 
-const MaterialOption = ({ title, description, selected, onClick }: { title: string; description: string; selected: boolean; onClick: () => void; }) => (
-    <div
-        onClick={onClick}
-        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${selected ? 'border-indigo-500 bg-indigo-900/20' : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'}`}
-    >
-        <p className="font-bold text-white">{title}</p>
-        <p className="text-sm text-gray-400">{description}</p>
-    </div>
-);
+/* ==== Componente UI locale (fără a afecta logica) ==== */
 
-// --- AICI ESTE CORECȚIA PRINCIPALĂ ---
-// Am înlocuit componenta 'Switch' cu un 'input' de tip 'checkbox' standard, dar stilizat.
-const ToggleOption = ({ label, description, checked, onCheckedChange }: { label: string; description: string; checked: boolean; onCheckedChange: (checked: boolean) => void; }) => (
-     <label className="flex items-center justify-between p-4 rounded-lg bg-gray-800/50 border border-gray-700 cursor-pointer">
-        <div>
-            <p className="font-semibold text-white">{label}</p>
-            <p className="text-sm text-gray-400 max-w-xs">{description}</p>
-        </div>
+function Feature({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-gray-900/50 p-4">
+      <div className="flex items-center gap-3 mb-2">
+        <span className="text-indigo-400">{icon}</span>
+        <h3 className="font-semibold">{title}</h3>
+      </div>
+      <p className="text-sm text-white/80">{children}</p>
+    </div>
+  );
+}
+
+function ConfigCard({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-gray-900/60 p-5">
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-indigo-400">{icon}</span>
+        <h3 className="font-semibold text-white">{title}</h3>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function NumberInput({
+  label,
+  value,
+  onChange,
+  min = 1,
+  step = 1,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min?: number;
+  step?: number;
+}) {
+  const update = (delta: number) => onChange(Math.max(min, value + delta));
+  return (
+    <label className="block">
+      <span className="text-sm font-medium text-white/80">{label}</span>
+      <div className="mt-1 flex items-center rounded-lg border border-white/10 bg-gray-800/70">
+        <button
+          type="button"
+          onClick={() => update(-step)}
+          className="px-3 py-2 text-white/80 hover:text-white disabled:opacity-50"
+          disabled={value <= min}
+          aria-label="Scade"
+        >
+          −
+        </button>
         <input
-            type="checkbox"
-            checked={checked}
-            onChange={(e) => onCheckedChange(e.target.checked)}
-            className="h-6 w-6 rounded-md bg-gray-700 border-gray-600 text-indigo-600 focus:ring-indigo-500"
+          type="number"
+          min={min}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(Math.max(min, parseInt(e.target.value || "0", 10)))}
+          className="w-full bg-transparent px-2 py-2 text-center outline-none"
         />
+        <button
+          type="button"
+          onClick={() => update(step)}
+          className="px-3 py-2 text-white/80 hover:text-white"
+          aria-label="Crește"
+        >
+          +
+        </button>
+      </div>
     </label>
-);
+  );
+}
+
+function Toggle({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex items-center justify-between rounded-lg border border-white/10 bg-gray-800/60 px-4 py-3">
+      <span className="text-sm">{label}</span>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-5 w-5 accent-indigo-600"
+      />
+    </label>
+  );
+}
 
 export default BannerConfiguratorPage;
