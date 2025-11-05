@@ -46,10 +46,9 @@ export default function CheckoutForm({
         setFormState('loading');
         setErrorMessage('');
         
-        // Ascunde formularul vechi și pregătește containerul pentru Stripe dacă se plătește cu card
         if (paymentMethod === 'card') {
              const formElement = e.target as HTMLFormElement;
-             formElement.style.display = 'none'; // Ascunde formularul curent
+             formElement.style.display = 'none';
         }
 
         const orderData = { address, billing, cart };
@@ -70,11 +69,7 @@ export default function CheckoutForm({
                 setErrorMessage(error.message);
             }
         } else if (paymentMethod === 'card') {
-            if (!stripe || cart.length === 0) {
-                setErrorMessage("Stripe nu este gata sau coșul este gol.");
-                setFormState('error');
-                return;
-            }
+            if (!stripe || cart.length === 0) return;
             try {
                 const res = await fetch('/api/stripe/checkout-session', {
                     method: 'POST',
@@ -82,55 +77,89 @@ export default function CheckoutForm({
                     body: JSON.stringify(orderData),
                 });
                 const { clientSecret } = await res.json();
-                if (!clientSecret) throw new Error("Client secret invalid de la server.");
+                if (!clientSecret) throw new Error("Client secret invalid.");
                 await stripe.initEmbeddedCheckout({ clientSecret });
             } catch (error: any) {
-                setErrorMessage(error.message || 'A apărut o eroare la plată.');
+                setErrorMessage(error.message || 'Eroare la plată.');
                 setFormState('error');
                  const formElement = e.target as HTMLFormElement;
-                 formElement.style.display = 'block'; // Re-afișează formularul dacă apare o eroare
+                 formElement.style.display = 'block';
             }
         }
-         // Nu reseta starea la 'idle' pentru card, deoarece formularul Stripe preia controlul
-        if (paymentMethod !== 'card') {
-            setFormState('idle');
-        }
+        if (paymentMethod !== 'card') setFormState('idle');
     };
 
     return (
         <>
-            {/* Acest container va fi folosit de Stripe PENTRU A MONTA formularul de plată */}
             <div id="checkout"></div>
 
             <form onSubmit={handleSubmit} className="space-y-10">
-                {/* Secțiunea 1: Date Livrare */}
+                {/* ======================================================== */}
+                {/* SECȚIUNEA 1: DATE LIVRARE (CU CÂMPURILE LA LOC) */}
+                {/* ======================================================== */}
                 <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
                     <h2 className="text-2xl font-bold text-white mb-6">1. Date Livrare</h2>
-                    {/* ... câmpurile pentru livrare ... */}
-                </div>
-
-                {/* Secțiunea 2: Date Facturare */}
-                <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
-                    <h2 className="text-2xl font-bold text-white mb-6">2. Date Facturare</h2>
-                    {/* ... logica pentru facturare, checkbox, CUI etc. ... */}
-                </div>
-
-                {/* ======================================================== */}
-                {/* SECȚIUNEA 3: METODĂ DE PLATĂ (AM PUS-O LA LOC ACUM) */}
-                {/* ======================================================== */}
-                <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
-                    <h2 className="text-2xl font-bold text-white mb-6">3. Metodă de Plată</h2>
-                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                        <button type="button" onClick={() => setPaymentMethod('ramburs')} className={`flex-1 p-4 rounded-lg border text-center transition-colors ${paymentMethod === 'ramburs' ? 'bg-indigo-600 border-indigo-500' : 'bg-gray-800 border-gray-700 hover:bg-gray-700'}`}>
-                            Plată la livrare (Ramburs)
-                        </button>
-                        <button type="button" onClick={() => setPaymentMethod('card')} className={`flex-1 p-4 rounded-lg border text-center transition-colors ${paymentMethod === 'card' ? 'bg-indigo-600 border-indigo-500' : 'bg-gray-800 border-gray-700 hover:bg-gray-700'}`}>
-                            Plată cu Cardul Online
-                        </button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
+                        <FormInput name="nume_prenume" label="Nume și Prenume" icon={<User size={20} />} state={address} setState={setAddress} />
+                        <FormInput name="email" label="Adresă de Email" icon={<Mail size={20} />} state={address} setState={setAddress} />
+                        <FormInput name="telefon" label="Număr de Telefon" icon={<Phone size={20} />} state={address} setState={setAddress} />
+                        <div className="relative">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Județ</label>
+                            <select value={address.judet} onChange={(e) => setJudet(e.target.value, 'delivery')} className="block w-full pl-3 pr-10 py-2 bg-gray-800 border border-gray-600 rounded-md">
+                               {judete.map(j => <option key={`del-${j}`} value={j}>{j}</option>)}
+                            </select>
+                        </div>
+                        <FormInput name="localitate" label="Localitate" icon={<></>} state={address} setState={setAddress} />
+                        <FormInput name="strada_nr" label="Stradă și Număr" icon={<></>} state={address} setState={setAddress} />
                     </div>
                 </div>
 
-                <button type="submit" className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition-transform" disabled={formState === 'loading' || cart.length === 0}>
+                {/* ======================================================== */}
+                {/* SECȚIUNEA 2: DATE FACTURARE (CU CÂMPURILE LA LOC) */}
+                {/* ======================================================== */}
+                <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
+                    <h2 className="text-2xl font-bold text-white mb-6">2. Date Facturare</h2>
+                    <div className="flex space-x-4 mb-6">
+                        <button type="button" onClick={() => setBilling(b => ({...b, tip_factura: 'persoana_fizica'}))} className={`flex-1 p-4 rounded-lg border ${billing.tip_factura === 'persoana_fizica' ? 'bg-indigo-600' : 'bg-gray-800'}`}>Persoană Fizică</button>
+                        <button type="button" onClick={() => setBilling(b => ({...b, tip_factura: 'companie'}))} className={`flex-1 p-4 rounded-lg border ${billing.tip_factura === 'companie' ? 'bg-indigo-600' : 'bg-gray-800'}`}>Companie</button>
+                    </div>
+                    <div className="space-y-4">
+                        <label className="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" checked={sameAsDelivery} onChange={(e) => setSameAsDelivery(e.target.checked)} className="h-5 w-5 rounded bg-gray-700 border-gray-600"/>
+                            <span className="text-gray-300">Adresa de facturare este aceeași cu adresa de livrare</span>
+                        </label>
+                        {!sameAsDelivery && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8 pt-4 border-t border-gray-800">
+                                 <FormInput name="name" label={billing.tip_factura === 'companie' ? 'Nume Companie' : 'Nume și Prenume'} icon={billing.tip_factura === 'companie' ? <Building/> : <User/>} state={billing} setState={setBilling as any} />
+                                 {billing.tip_factura === 'companie' && <FormInput name="cui" label="CUI" icon={<></>} state={billing} setState={setBilling as any} />}
+                                 <div className="relative">
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Județ Facturare</label>
+                                    <select value={billing.judet} onChange={(e) => setJudet(e.target.value, 'billing')} className="block w-full pl-3 pr-10 py-2 bg-gray-800 border border-gray-600 rounded-md">
+                                        {judete.map(j => <option key={`bil-${j}`} value={j}>{j}</option>)}
+                                    </select>
+                                </div>
+                                <FormInput name="localitate" label="Localitate Facturare" icon={<></>} state={billing} setState={setBilling as any} />
+                                <FormInput name="strada_nr" label="Stradă și Număr Facturare" icon={<></>} state={billing} setState={setBilling as any} />
+                            </div>
+                        )}
+                         {sameAsDelivery && billing.tip_factura === 'companie' && (
+                             <div className="pt-4 border-t border-gray-800">
+                                 <FormInput name="cui" label="CUI" icon={<></>} state={billing} setState={setBilling as any} />
+                             </div>
+                         )}
+                    </div>
+                </div>
+
+                {/* SECȚIUNEA 3: METODĂ DE PLATĂ */}
+                <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
+                    <h2 className="text-2xl font-bold text-white mb-6">3. Metodă de Plată</h2>
+                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <button type="button" onClick={() => setPaymentMethod('ramburs')} className={`flex-1 p-4 rounded-lg border text-center transition-colors ${paymentMethod === 'ramburs' ? 'bg-indigo-600' : 'bg-gray-800'}`}>Plată la livrare (Ramburs)</button>
+                        <button type="button" onClick={() => setPaymentMethod('card')} className={`flex-1 p-4 rounded-lg border text-center transition-colors ${paymentMethod === 'card' ? 'bg-indigo-600' : 'bg-gray-800'}`}>Plată cu Cardul Online</button>
+                    </div>
+                </div>
+
+                <button type="submit" className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg" disabled={formState === 'loading' || cart.length === 0}>
                     {formState === 'loading' ? 'Se procesează...' : (paymentMethod === 'card' ? 'Continuă spre plată' : 'Plasează Comanda')}
                 </button>
                 {errorMessage && <p className="text-red-500 mt-4 text-center">{errorMessage}</p>}
