@@ -2,7 +2,7 @@
 
 import { SelectHTMLAttributes } from 'react';
 
-interface JudetSelectorProps extends SelectHTMLAttributes<HTMLSelectElement> {
+interface JudetSelectorProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
   label: string;
   options: string[];
   onChange: (value: string) => void;
