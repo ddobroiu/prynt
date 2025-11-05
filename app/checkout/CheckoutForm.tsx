@@ -35,7 +35,6 @@ export default function CheckoutForm({
         setErrorMessage('');
 
         if (paymentMethod !== 'card') {
-            // Logica pentru alte metode de plată (ex: ramburs)
             alert('Metoda de plată nu este implementată încă.');
             setFormState('idle');
             return;
@@ -48,7 +47,6 @@ export default function CheckoutForm({
         }
 
         try {
-            // 1. Creează o sesiune de checkout pe server-ul tău
             const res = await fetch('/api/stripe/checkout-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -59,16 +57,15 @@ export default function CheckoutForm({
             if (!clientSecret) {
                 throw new Error("Client secret invalid de la server.");
             }
-
-            // 2. Inițializează și montează noul Embedded Checkout
-            const { error } = await stripe.initEmbeddedCheckout({ clientSecret });
             
-            if (error) {
-                setErrorMessage(error.message);
-                setFormState('error');
-            }
-            // Checkout-ul va apărea automat pe pagină
+            // ====================== AICI ERA GREȘEALA ======================
+            // 'initEmbeddedCheckout' nu returnează un obiect { error }. 
+            // Pur și simplu se apelează cu 'await'. Orice eroare va fi prinsă de 'catch'.
+            await stripe.initEmbeddedCheckout({ clientSecret });
+            // ===============================================================
+
         } catch (error: any) {
+            // Orice eroare de la 'fetch' sau de la 'initEmbeddedCheckout' ajunge aici.
             setErrorMessage(error.message || 'A apărut o eroare neașteptată.');
             setFormState('error');
         }
@@ -76,11 +73,12 @@ export default function CheckoutForm({
 
     return (
         <>
-            {/* Container unde Stripe va monta formularul de plată */}
-            <div id="checkout"></div>
+            <div id="checkout">
+                {/* Stripe va monta aici formularul de plată */}
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-10">
-                <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
+                <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8 mt-6">
                     <h2 className="text-2xl font-bold text-white mb-6">1. Date Livrare</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
                         <FormInput name="nume_prenume" label="Nume și Prenume" icon={<User size={20} />} state={address} setState={setAddress} />
@@ -97,16 +95,13 @@ export default function CheckoutForm({
                         <FormInput name="strada_nr" label="Stradă și Număr" icon={<></>} state={address} setState={setAddress} />
                     </div>
                 </div>
+                
+                {/* Aici poți adăuga secțiunea de facturare dacă este separată */}
 
-                <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8">
-                    <h2 className="text-2xl font-bold text-white mb-6">2. Date Facturare</h2>
-                    {/* Aici adaugi logica pentru facturare, inclusiv CUI */}
-                </div>
-
-                <button type="submit" className="w-full bg-green-500 text-white font-bold py-3" disabled={formState === 'loading'}>
-                    {formState === 'loading' ? 'Se încarcă plata...' : 'Plătește cu cardul'}
+                <button type="submit" className="w-full bg-green-500 text-white font-bold py-3 rounded-lg" disabled={formState === 'loading'}>
+                    {formState === 'loading' ? 'Se încarcă plata...' : 'Continuă spre plată'}
                 </button>
-                {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
+                {errorMessage && <p className="text-red-500 mt-4 text-center">{errorMessage}</p>}
             </form>
         </>
     );
