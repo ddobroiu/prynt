@@ -2,10 +2,23 @@
 
 import React, { useState } from "react";
 import { useCart } from "./CartProvider";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { ShoppingCart, Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 
-const LINKS = [
-  { href: "/banner", label: "Banner" },
+type NavItem = {
+  href: string;
+  label: string;
+  children?: { href: string; label: string }[];
+};
+
+const LINKS: NavItem[] = [
+  {
+    href: "/banner",
+    label: "Banner",
+    children: [
+      { href: "/banner", label: "O față" },
+      { href: "/banner-verso", label: "Față-verso" },
+    ],
+  },
   { href: "/flayer", label: "Flayer" },
   { href: "/canvas", label: "Canvas" },
   { href: "/autocolante", label: "Autocolante" },
@@ -14,12 +27,13 @@ const LINKS = [
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const [openBannerMobile, setOpenBannerMobile] = useState(false);
   const { count, isLoaded } = useCart();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-gray-950/80 backdrop-blur">
       <div className="page">
-        {/* BARĂ MOBIL: burger stânga · logo centru · coș dreapta (meniul rămâne ca înainte) */}
+        {/* BARĂ MOBIL: burger · logo · coș */}
         <div className="flex items-center justify-between py-3 lg:hidden">
           <button
             type="button"
@@ -30,7 +44,6 @@ export default function Header() {
             {open ? <X size={22} /> : <Menu size={22} />}
           </button>
 
-          {/* Logo centrat */}
           <a href="/" className="inline-flex items-center gap-2" aria-label="Prynt.ro">
             <img
               src="/logo.png"
@@ -43,7 +56,6 @@ export default function Header() {
             <span className="sr-only">Prynt.ro</span>
           </a>
 
-          {/* Coș permanent (dreapta) */}
           <a
             href="/checkout"
             className="relative inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-white hover:bg-white/10 transition"
@@ -58,98 +70,130 @@ export default function Header() {
           </a>
         </div>
 
-        {/* MENIU MOBIL: panou centrat sub header, ca înainte (nu full-screen) */}
+        {/* MENIU MOBIL: panel sub header */}
         <div
           className={`lg:hidden overflow-hidden transition-[max-height,opacity] duration-300 ${
-            open ? "opacity-100 max-h-[420px]" : "opacity-0 max-h-0"
+            open ? "opacity-100 max-h-[600px]" : "opacity-0 max-h-0"
           }`}
         >
           <nav className="pb-3">
             <div className="mx-auto max-w-sm">
               <div className="card p-3 shadow-xl shadow-black/30">
-                <ul className="space-y-2 text-center">
-                  {LINKS.map((l) => (
-                    <li key={l.href}>
-                      <a
-                        href={l.href}
-                        className="block rounded-xl px-5 py-3 text-base font-semibold text-white/90 hover:bg-white/10 transition"
-                        onClick={() => setOpen(false)}
-                      >
-                        {l.label}
-                      </a>
-                    </li>
-                  ))}
+                <ul className="space-y-2">
+                  {LINKS.map((l) =>
+                    l.children ? (
+                      <li key={l.label}>
+                        <button
+                          type="button"
+                          onClick={() => setOpenBannerMobile((v) => !v)}
+                          className="w-full inline-flex items-center justify-between rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10"
+                        >
+                          <span>{l.label}</span>
+                          {openBannerMobile ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        </button>
+                        <div
+                          className={`grid transition-[grid-template-rows,opacity] duration-300 ${
+                            openBannerMobile ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0"
+                          }`}
+                        >
+                          <div className="overflow-hidden">
+                            <ul className="pl-3 space-y-2">
+                              {l.children.map((c) => (
+                                <li key={c.href}>
+                                  <a
+                                    href={c.href}
+                                    className="block rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm hover:bg-white/10"
+                                  >
+                                    {c.label}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </li>
+                    ) : (
+                      <li key={l.href} className="text-center">
+                        <a
+                          href={l.href}
+                          className="block rounded-md border border-white/10 bg-white/5 px-3 py-2 hover:bg-white/10"
+                        >
+                          {l.label}
+                        </a>
+                      </li>
+                    )
+                  )}
                 </ul>
-
-                {/* CTA coș (opțional, discret) */}
-                <div className="mt-3 flex justify-center">
-                  <a
-                    href="/checkout"
-                    className="btn-primary"
-                    onClick={() => setOpen(false)}
-                  >
-                    <ShoppingCart size={18} className="mr-2" />
-                    Coșul meu
-                    {isLoaded && count > 0 && (
-                      <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold">
-                        {count}
-                      </span>
-                    )}
-                  </a>
-                </div>
               </div>
             </div>
           </nav>
         </div>
 
-        {/* DESKTOP: logo · linkuri · coș */}
-        <div className="hidden items-center justify-between py-4 lg:flex">
-          <a href="/" className="inline-flex items-center gap-3">
+        {/* MENIU DESKTOP */}
+        <div className="hidden lg:flex items-center justify-between py-3">
+          <a href="/" className="inline-flex items-center gap-2" aria-label="Prynt.ro">
             <img
               src="/logo.png"
               alt="Prynt.ro"
-              width={48}
-              height={48}
+              width={36}
+              height={36}
               className="rounded-full border border-white/10"
               loading="lazy"
             />
-            <span className="text-lg font-bold tracking-tight">Prynt.ro</span>
+            <span className="sr-only">Prynt.ro</span>
           </a>
 
-          <nav className="flex items-center gap-6">
-            {LINKS.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                className="text-sm font-medium text-white/80 hover:text-white transition"
-              >
-                {l.label}
-              </a>
-            ))}
+          <nav className="flex items-center gap-4">
+            {LINKS.map((l) =>
+              l.children ? (
+                <div key={l.label} className="relative group">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10"
+                  >
+                    {l.label}
+                    <ChevronDown size={16} className="opacity-70 group-hover:opacity-100 transition" />
+                  </button>
+                  <div className="pointer-events-none absolute left-0 mt-2 w-44 opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition">
+                    <div className="rounded-md border border-white/10 bg-[#0b0f19] p-2 shadow-xl">
+                      {l.children.map((c) => (
+                        <a
+                          key={c.href}
+                          href={c.href}
+                          className="block rounded-md px-3 py-2 text-sm text-white hover:bg-white/10"
+                        >
+                          {c.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10"
+                >
+                  {l.label}
+                </a>
+              )
+            )}
           </nav>
 
-          <DesktopCartButton />
+          <a
+            href="/checkout"
+            className="relative inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition"
+            aria-label="Coșul meu"
+          >
+            <ShoppingCart size={20} />
+            {isLoaded && count > 0 && (
+              <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+                {count}
+              </span>
+            )}
+          </a>
         </div>
       </div>
     </header>
-  );
-}
-
-function DesktopCartButton() {
-  const { count, isLoaded } = useCart();
-  return (
-    <a
-      href="/checkout"
-      className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-500 transition"
-      aria-label="Coșul meu"
-    >
-      <ShoppingCart size={18} />
-      Coșul meu
-      {isLoaded && count > 0 && (
-        <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold">
-          {count}
-        </span>
-      )}
-    </a>
   );
 }

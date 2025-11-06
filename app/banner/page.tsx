@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { useCart } from "../../components/CartProvider";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info } from "lucide-react";
 import BannerModeSwitch from "../../components/BannerModeSwitch";
+import MobilePriceBar from "../../components/MobilePriceBar";
 
 /* GALLERY (exemplu) */
 const GALLERY = [
@@ -86,7 +87,7 @@ export default function BannerPage() {
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [textDesign, setTextDesign] = useState<string>(""); // pentru “text_only”
+  const [textDesign, setTextDesign] = useState<string>("");
 
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
@@ -116,7 +117,6 @@ export default function BannerPage() {
     updateInput("height_cm", d === "" ? 0 : parseInt(d, 10));
   };
 
-  // Upload la Cloudinary prin /api/upload
   const handleArtworkFileInput = async (file: File | null) => {
     setArtworkUrl(null);
     setUploadError(null);
@@ -176,13 +176,11 @@ export default function BannerPage() {
     setTimeout(() => setToastVisible(false), 1600);
   };
 
-  const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 });
   const scrollToSummary = () =>
     document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
     <main className="min-h-screen">
-      {/* TOAST VERDE — clar vizibil */}
       <div
         id="added-toast"
         className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`}
@@ -194,11 +192,9 @@ export default function BannerPage() {
       <div className="page py-10 pb-24 lg:pb-10">
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            {/* Comutator O față / Față-verso */}
             <div className="mb-2">
               <BannerModeSwitch />
             </div>
-
             <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Banner</h1>
             <p className="mt-2 text-white/70">
               Alege lungimea, înălțimea, materialul, finisajele și partea de grafică (încărcare fișier / text simplu / serviciu pro).
@@ -213,8 +209,6 @@ export default function BannerPage() {
             <span className="ml-2">Mai multe detalii</span>
           </button>
         </header>
-
-        {/* IMPORTANT: rezumatul compact de sus pe mobil e scos ca să nu dublăm bara fixă de jos */}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* STÂNGA — configurator */}
@@ -408,15 +402,11 @@ export default function BannerPage() {
                   )}
                 </div>
 
-                {/* Preț + CTA: doar desktop (pe mobil avem bara fixă jos) */}
                 <div className="hidden lg:block">
                   <div className="border-t border-white/10 mt-4 pt-4">
                     <p className="text-white/60 text-sm">Preț total</p>
                     <p className="text-4xl font-extrabold text-white my-2">{priceDetails.finalPrice.toFixed(2)} RON</p>
                     {pricePerUnit > 0 && <p className="text-xs text-white/60">{pricePerUnit.toFixed(2)} RON / buc</p>}
-                    {designOption === "pro" && !hasProDesign && (
-                      <p className="text-xs text-white/80 mt-2">+ {PRO_DESIGN_FEE.toFixed(2)} RON (grafică profesională — se va adăuga o singură dată)</p>
-                    )}
                   </div>
 
                   <button
@@ -438,52 +428,13 @@ export default function BannerPage() {
         </div>
       </div>
 
-      {/* BARĂ FIXĂ DE PREȚ (doar mobil) */}
+      {/* BARĂ FIXĂ DE PREȚ (mobil) */}
       <MobilePriceBar
         total={priceDetails.finalPrice}
         disabled={priceDetails.finalPrice <= 0}
         onAddToCart={handleAddToCart}
         onShowSummary={scrollToSummary}
       />
-
-      {/* MODAL: Mai multe detalii */}
-      {detailsOpen && (
-        <DetailsModal onClose={() => setDetailsOpen(false)}>
-          <h3 className="text-xl font-bold mb-3">Detalii produs</h3>
-          <div className="space-y-4 text-sm text-white/80">
-            <section>
-              <h4 className="font-semibold text-white mb-1">Materiale</h4>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Frontlit 440 g/mp: standard, flexibil, bun pentru majoritatea utilizărilor.</li>
-                <li>Frontlit 510 g/mp: mai rigid și mai durabil — recomandat pentru bannere mari sau expunere îndelungată.</li>
-              </ul>
-            </section>
-            <section>
-              <h4 className="font-semibold text-white mb-1">Finisaje</h4>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Tiv + capse: margini întărite, capse la ~30–50 cm, pentru prindere ușoară.</li>
-                <li>Găuri pentru vânt: pattern perforat pentru zone cu curenți de aer puternici.</li>
-              </ul>
-            </section>
-            <section>
-              <h4 className="font-semibold text-white mb-1">Fișiere/Grafică</h4>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Acceptăm: PDF, AI, PSD, JPG, PNG (profil CMYK recomandat).</li>
-                <li>Pentru “Banner cu text”: scrie textul, ne ocupăm noi de așezare (gratis).</li>
-                <li>Pentru grafică complexă, alege “Grafică profesională”.</li>
-              </ul>
-            </section>
-            <section>
-              <h4 className="font-semibold text-white mb-1">Producție & livrare</h4>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Producție uzuală: 1–2 zile lucrătoare.</li>
-                <li>Livrare națională prin curier (DPD).</li>
-                <li>Comanda minimă: 1 m² total taxabil/comandă.</li>
-              </ul>
-            </section>
-          </div>
-        </DetailsModal>
-      )}
     </main>
   );
 }
