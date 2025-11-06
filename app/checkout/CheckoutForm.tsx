@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import JudetSelector from "../../components/JudetSelector";
 
 type Address = {
@@ -41,6 +42,28 @@ export default function CheckoutForm({
   const onAddr = (k: keyof Address, v: string) => setAddress((a) => ({ ...a, [k]: v }));
   const onBill = <K extends keyof Billing>(k: K, v: Billing[K]) => setBilling((b) => ({ ...b, [k]: v }));
 
+  // 1) Sincronizare continuă când “aceeași adresă” este bifat
+  useEffect(() => {
+    if (sameAsDelivery) {
+      setBilling((b) => ({
+        ...b,
+        judet: address.judet,
+        localitate: address.localitate,
+        strada_nr: address.strada_nr,
+      }));
+    }
+  }, [sameAsDelivery, address.judet, address.localitate, address.strada_nr, setBilling]);
+
+  // 2) Copiere one-click când bifa e debifată (prefill fără a bloca editarea)
+  function copyBillingFromDeliveryOnce() {
+    setBilling((b) => ({
+      ...b,
+      judet: address.judet,
+      localitate: address.localitate,
+      strada_nr: address.strada_nr,
+    }));
+  }
+
   return (
     <div className="space-y-6">
       {/* LIVRARE */}
@@ -53,6 +76,7 @@ export default function CheckoutForm({
               className={inputCls(errors["address.nume_prenume"])}
               value={address.nume_prenume}
               onChange={(e) => onAddr("nume_prenume", e.target.value)}
+              autoComplete="section-shipping name"
             />
           </Field>
 
@@ -62,6 +86,8 @@ export default function CheckoutForm({
               className={inputCls(errors["address.telefon"])}
               value={address.telefon}
               onChange={(e) => onAddr("telefon", e.target.value)}
+              autoComplete="section-shipping tel"
+              inputMode="tel"
             />
           </Field>
 
@@ -71,6 +97,8 @@ export default function CheckoutForm({
               className={inputCls(errors["address.email"])}
               value={address.email}
               onChange={(e) => onAddr("email", e.target.value)}
+              autoComplete="section-shipping email"
+              inputMode="email"
             />
           </Field>
 
@@ -89,6 +117,7 @@ export default function CheckoutForm({
               className={inputCls(errors["address.localitate"])}
               value={address.localitate}
               onChange={(e) => onAddr("localitate", e.target.value)}
+              autoComplete="section-shipping address-level2"
             />
           </Field>
 
@@ -98,6 +127,7 @@ export default function CheckoutForm({
               className={inputCls(errors["address.strada_nr"])}
               value={address.strada_nr}
               onChange={(e) => onAddr("strada_nr", e.target.value)}
+              autoComplete="section-shipping street-address"
             />
           </Field>
         </div>
@@ -105,16 +135,30 @@ export default function CheckoutForm({
 
       {/* FACTURARE */}
       <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-xl font-bold">Facturare</h2>
-          <label className="flex select-none items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={sameAsDelivery}
-              onChange={(e) => setSameAsDelivery(e.target.checked)}
-            />
-            <span className="text-white/80">Adresa de facturare este aceeași</span>
-          </label>
+
+          <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+            <label className="flex select-none items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={sameAsDelivery}
+                onChange={(e) => setSameAsDelivery(e.target.checked)}
+              />
+              <span className="text-white/80">Adresa de facturare este aceeași</span>
+            </label>
+
+            {!sameAsDelivery && (
+              <button
+                type="button"
+                onClick={copyBillingFromDeliveryOnce}
+                className="rounded-md border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10 transition"
+                title="Completează câmpurile de mai jos cu adresa de livrare"
+              >
+                Completează automat din livrare
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Tip facturare */}
@@ -152,6 +196,7 @@ export default function CheckoutForm({
                 className={inputCls(errors["billing.denumire_companie"])}
                 value={billing.denumire_companie ?? ""}
                 onChange={(e) => onBill("denumire_companie", e.target.value)}
+                autoComplete="organization"
               />
             </Field>
             <Field id="billing.cui" label="CUI/CIF" error={errors["billing.cui"]}>
@@ -160,6 +205,7 @@ export default function CheckoutForm({
                 className={inputCls(errors["billing.cui"])}
                 value={billing.cui ?? ""}
                 onChange={(e) => onBill("cui", e.target.value)}
+                autoComplete="off"
               />
             </Field>
             <Field id="billing.reg_com" label="Nr. Reg. Com. (opțional)">
@@ -167,6 +213,7 @@ export default function CheckoutForm({
                 className={inputCls(undefined)}
                 value={billing.reg_com ?? ""}
                 onChange={(e) => onBill("reg_com", e.target.value)}
+                autoComplete="off"
               />
             </Field>
           </div>
@@ -191,6 +238,7 @@ export default function CheckoutForm({
               value={billing.localitate ?? ""}
               onChange={(e) => onBill("localitate", e.target.value)}
               disabled={sameAsDelivery}
+              autoComplete="section-billing address-level2"
             />
           </Field>
 
@@ -201,6 +249,7 @@ export default function CheckoutForm({
               value={billing.strada_nr ?? ""}
               onChange={(e) => onBill("strada_nr", e.target.value)}
               disabled={sameAsDelivery}
+              autoComplete="section-billing street-address"
             />
           </Field>
         </div>
