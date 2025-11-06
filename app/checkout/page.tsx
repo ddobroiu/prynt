@@ -1,14 +1,33 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
-import { Address, Billing, CartItem } from "../../types";
 import { useCart } from "../../components/CartProvider";
-import { X, ShoppingCart, Truck, ShieldCheck } from "lucide-react";
+import { ShieldCheck, Truck, X } from "lucide-react";
 import CheckoutForm from "./CheckoutForm";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
+type PaymentMethod = "ramburs" | "card";
+
+type Address = {
+  nume_prenume: string;
+  email: string;
+  telefon: string;
+  judet: string;
+  localitate: string;
+  strada_nr: string;
+};
+
+type Billing = {
+  tip_factura: "persoana_fizica" | "persoana_juridica";
+  denumire_companie?: string;
+  cui?: string;
+  reg_com?: string;
+  judet?: string;
+  localitate?: string;
+  strada_nr?: string;
+};
 
 export default function CheckoutPage() {
   const { items, removeItem, isLoaded } = useCart();
@@ -27,22 +46,148 @@ export default function CheckoutPage() {
   });
 
   const [sameAsDelivery, setSameAsDelivery] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState<"ramburs" | "card">("ramburs");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("ramburs");
 
-  // Totaluri
-  const subtotal = useMemo(() => items.reduce((acc, item) => acc + item.totalAmount, 0), [items]);
+  const [placing, setPlacing] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showEmbed, setShowEmbed] = useState(false);
+
+  // pentru scroll la primul câmp invalid
+  const firstInvalidRef = useRef<HTMLElement | null>(null);
+
+  const subtotal = useMemo(
+    () => items.reduce((acc, item) => acc + item.totalAmount, 0),
+    [items]
+  );
   const costLivrare = items.length > 0 ? 19.99 : 0;
   const totalPlata = items.length > 0 ? subtotal + costLivrare : 0;
-
-  // Opțiuni Stripe
-  const stripeOptions = {
-    mode: "payment" as const,
-    amount: Math.round(totalPlata * 100),
-    currency: "ron",
-  };
-
   const isEmpty = isLoaded && items.length === 0;
-  const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
+
+  const fmt = new Intl.NumberFormat("ro-RO", {
+    style: "currency",
+    currency: "RON",
+    maximumFractionDigits: 2,
+  }).format;
+
+  function validate(): { ok: boolean; errs: Record<string, string> } {
+    const e: Record<string, string> = {};
+
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const telRe = /^[0-9+()\-\s]{7,}$/;
+
+    // Livrare - obligatorii
+    if (!address.nume_prenume.trim()) e["address.nume_prenume"] = "Nume și prenume obligatoriu";
+    if (!emailRe.test(address.email)) e["address.email"] = "Email invalid";
+    if (!telRe.test(address.telefon)) e["address.telefon"] = "Telefon invalid";
+    if (!address.judet) e["address.judet"] = "Alege județul";
+    if (!address.localitate.trim()) e["address.localitate"] = "Localitate obligatorie";
+    if (!address.strada_nr.trim()) e["address.strada_nr"] = "Stradă și număr obligatorii";
+
+    // Facturare
+    if (billing.tip_factura === "persoana_juridica") {
+      if (!billing.denumire_companie?.trim())
+        e["billing.denumire_companie"] = "Denumire companie obligatorie";
+      if (!billing.cui?.trim()) e["billing.cui"] = "CUI/CIF obligatoriu";
+      // reg_com poate fi opțional
+    }
+
+    // Adresa de facturare (dacă nu e aceeași)
+    if (!sameAsDelivery) {
+      if (!billing.judet) e["billing.judet"] = "Alege județul (facturare)";
+      if (!billing.localitate?.trim())
+        e["billing.localitate"] = "Localitate facturare obligatorie";
+      if (!billing.strada_nr?.trim())
+        e["billing.strada_nr"] = "Stradă și număr facturare obligatorii";
+    }
+
+    // Coș
+    if (items.length === 0) e["cart.empty"] = "Coșul este gol";
+
+    return { ok: Object.keys(e).length === 0, errs: e };
+  }
+
+  async function placeOrder() {
+    if (placing) return;
+    setPlacing(true);
+    setErrors({});
+    firstInvalidRef.current = null;
+
+    const { ok, errs } = validate();
+    if (!ok) {
+      setErrors(errs);
+      // încearcă să derulezi la primul câmp invalid (după id-uri stabilite în CheckoutForm)
+      const firstKey = Object.keys(errs)[0];
+      const el = document.querySelector<HTMLElement>(
+        `[data-field="${firstKey}"]`
+      );
+      if (el) {
+        firstInvalidRef.current = el;
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      setPlacing(false);
+      return;
+    }
+
+    const orderData = {
+      cart: items,
+      address,
+      billing: {
+        ...billing,
+        // dacă e aceeași, copiem adresa de livrare în facturare (să existe valori)
+        ...(sameAsDelivery
+          ? {
+              judet: address.judet,
+              localitate: address.localitate,
+              strada_nr: address.strada_nr,
+            }
+          : {}),
+      },
+    };
+
+    try {
+      if (paymentMethod === "ramburs") {
+        const res = await fetch("/api/order/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderData),
+        });
+        const data = await res.json();
+        if (!res.ok || !data?.success) {
+          throw new Error(data?.message || "Eroare la crearea comenzii.");
+        }
+        window.location.href = "/checkout/success";
+        return;
+      }
+
+      // Card (Stripe Embedded Checkout)
+      const res = await fetch("/api/stripe/checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.clientSecret) {
+        throw new Error(data?.error || "Nu s-a putut iniția plata cu cardul.");
+      }
+
+      // Arată containerul pentru Embedded Checkout și montează
+      setShowEmbed(true);
+      const stripe = await stripePromise;
+      if (!stripe) throw new Error("Stripe nu a putut fi inițializat.");
+
+      const embeddedCheckout = await stripe.initEmbeddedCheckout({
+        clientSecret: data.clientSecret,
+      });
+      embeddedCheckout.mount("#stripe-embedded");
+      // UI rămâne blocat până la finalizarea plății (success redirect)
+    } catch (err: any) {
+      console.error("[placeOrder] error:", err?.message || err);
+      alert(err?.message || "A apărut o eroare. Reîncearcă.");
+      setShowEmbed(false);
+    } finally {
+      setPlacing(false);
+    }
+  }
 
   return (
     <main className="bg-[#0b0f19] min-h-screen text-white">
@@ -62,22 +207,23 @@ export default function CheckoutPage() {
           <EmptyCart />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Sumar primul pe mobil */}
+            {/* SUMAR primul pe mobil */}
             <aside className="order-1 lg:order-2 lg:col-span-1">
               <SummaryCard
-                items={items}
                 subtotal={subtotal}
                 shipping={costLivrare}
                 total={totalPlata}
                 paymentMethod={paymentMethod}
+                setPaymentMethod={setPaymentMethod}
+                onPlaceOrder={placeOrder}
+                placing={placing}
               />
             </aside>
 
-            {/* Lista produse + Formuri */}
-            <section className="order-2 lg:order-1 lg:col-span-2 space-y-6">
+            {/* FORM + PRODUSE */}
+            <section className={`order-2 lg:order-1 lg:col-span-2 space-y-6 ${showEmbed ? "hidden" : ""}`}>
               <CartItems items={items} onRemove={removeItem} />
 
-              {/* Formuri (livrare/facturare) reintroduse */}
               <CheckoutForm
                 address={address}
                 setAddress={(updater) => setAddress((prev) => updater(prev))}
@@ -85,45 +231,25 @@ export default function CheckoutPage() {
                 setBilling={(updater) => setBilling((prev) => updater(prev))}
                 sameAsDelivery={sameAsDelivery}
                 setSameAsDelivery={setSameAsDelivery}
+                errors={errors}
               />
-
-              {/* Plată */}
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <h2 className="text-xl font-bold mb-3">Plată</h2>
-                <div className="flex gap-3 mb-3">
-                  <button
-                    onClick={() => setPaymentMethod("ramburs")}
-                    className={`rounded-lg px-4 py-2 text-sm font-semibold border ${
-                      paymentMethod === "ramburs" ? "border-emerald-500 bg-emerald-500/10" : "border-white/10 bg-white/5 hover:bg-white/10"
-                    }`}
-                  >
-                    Ramburs
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod("card")}
-                    className={`rounded-lg px-4 py-2 text-sm font-semibold border ${
-                      paymentMethod === "card" ? "border-emerald-500 bg-emerald-500/10" : "border-white/10 bg-white/5 hover:bg-white/10"
-                    }`}
-                  >
-                    Card online
-                  </button>
-                </div>
-
-                {paymentMethod === "card" ? (
-                  <Elements stripe={stripePromise} options={stripeOptions}>
-                    {/* Aici la confirmare ar trebui redirect la /checkout/success sau /success */}
-                    {/* checkout de card existent */}
-                  </Elements>
-                ) : (
-                  <div className="text-sm text-white/70">
-                    Vei plăti cash sau cu cardul la curier. Pentru finalizare, apasă pe “Plasează comanda” din sumar.
-                  </div>
-                )}
-              </div>
             </section>
           </div>
         )}
       </div>
+
+      {/* CONTAINER Stripe Embedded Checkout */}
+      {showEmbed && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-gray-950 p-4">
+            <div className="mb-3 text-center text-white/80">Finalizează plata în siguranță</div>
+            <div id="stripe-embedded" />
+            <div className="mt-3 text-center text-xs text-white/50">
+              După finalizare, vei fi redirecționat înapoi pentru confirmare.
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -144,17 +270,21 @@ function EmptyCart() {
 }
 
 function SummaryCard({
-  items,
   subtotal,
   shipping,
   total,
   paymentMethod,
+  setPaymentMethod,
+  onPlaceOrder,
+  placing,
 }: {
-  items: CartItem[];
   subtotal: number;
   shipping: number;
   total: number;
   paymentMethod: "ramburs" | "card";
+  setPaymentMethod: (v: "ramburs" | "card") => void;
+  onPlaceOrder: () => void;
+  placing: boolean;
 }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
@@ -180,37 +310,46 @@ function SummaryCard({
         </div>
       </div>
 
-      <div className="mt-5 space-y-2">
-        <a
-          href="/"
-          className="inline-flex w-full items-center justify-center rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold hover:bg-white/10 transition"
-        >
-          Continuă cumpărăturile
-        </a>
+      {/* Plata */}
+      <div className="mt-5">
+        <div className="mb-3 flex gap-3">
+          <button
+            onClick={() => setPaymentMethod("ramburs")}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold border ${
+              paymentMethod === "ramburs" ? "border-emerald-500 bg-emerald-500/10" : "border-white/10 bg-white/5 hover:bg-white/10"
+            }`}
+          >
+            Ramburs
+          </button>
+          <button
+            onClick={() => setPaymentMethod("card")}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold border ${
+              paymentMethod === "card" ? "border-emerald-500 bg-emerald-500/10" : "border-white/10 bg-white/5 hover:bg-white/10"
+            }`}
+          >
+            Card online
+          </button>
+        </div>
 
-        {/* Pentru ramburs: finalizează comanda direct (poți înlocui cu un apel API) */}
         <button
           type="button"
-          onClick={() => {
-            if (paymentMethod === "ramburs") {
-              window.location.href = "/checkout/success";
-            }
-          }}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition"
+          onClick={onPlaceOrder}
+          disabled={placing}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition disabled:opacity-60"
         >
           <ShieldCheck size={16} />
-          Plasează comanda
+          {placing ? "Se procesează..." : "Plasează comanda"}
         </button>
 
-        <p className="text-[11px] text-white/50 text-center">
-          Plata cu cardul este securizată. Pentru ramburs, vei achita curierului.
+        <p className="mt-2 text-[11px] text-white/50 text-center">
+          Plata cu cardul este securizată. Pentru ramburs, plătești la curier.
         </p>
       </div>
     </div>
   );
 }
 
-function CartItems({ items, onRemove }: { items: CartItem[]; onRemove: (id: string) => void }) {
+function CartItems({ items, onRemove }: { items: Array<any>; onRemove: (id: string) => void }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
   return (
@@ -226,11 +365,16 @@ function CartItems({ items, onRemove }: { items: CartItem[]; onRemove: (id: stri
               </div>
               <div className="mt-1 text-sm text-white/70">
                 {item.artworkUrl && (
-                  <a className="underline text-indigo-300" href={item.artworkUrl} target="_blank" rel="noopener noreferrer">
+                  <a
+                    className="underline text-indigo-300"
+                    href={item.artworkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     fișier încărcat
                   </a>
                 )}
-                {"textDesign" in item && (item as any).textDesign && (
+                {"textDesign" in item && item.textDesign && (
                   <span className="ml-2 inline-block rounded bg-white/10 px-2 py-0.5 text-[11px]">
                     text inclus
                   </span>
