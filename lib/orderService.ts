@@ -106,15 +106,17 @@ export async function fulfillOrder(
     body: JSON.stringify(facturaData),
   });
   const oblioData = await oblioResponse.json();
+
   if (oblioData.status !== 200) throw new Error(`Eroare Oblio: ${oblioData.statusMessage}`);
   const invoiceLink = oblioData.data.link as string;
   console.log(`[OrderService] Factura Oblio generată: ${invoiceLink}`);
 
+  // --- Totaluri ---
+  const subtotal = cart.reduce((acc, item) => acc + item.totalAmount, 0);
+  const totalComanda = subtotal + SHIPPING_FEE;
+
   // --- Emailuri ---
   try {
-    const subtotal = cart.reduce((acc, item) => acc + item.totalAmount, 0);
-    const totalComanda = subtotal + SHIPPING_FEE;
-
     const produseListHTML = cart
       .map((item) => {
         const line = `${item.name} - <strong>${item.quantity} buc.</strong> - ${formatRON(item.totalAmount)} RON`;
