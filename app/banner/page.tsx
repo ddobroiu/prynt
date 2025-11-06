@@ -173,13 +173,8 @@ export default function BannerPage() {
   };
 
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 });
-  const PRESETS = [
-    { w: 100, h: 50, label: "100×50" },
-    { w: 200, h: 100, label: "200×100" },
-    { w: 300, h: 100, label: "300×100" },
-    { w: 300, h: 200, label: "300×200" },
-  ];
-  const scrollToSummary = () => document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const scrollToSummary = () =>
+    document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
     <main className="min-h-screen bg-gray-950 text-white">
@@ -227,26 +222,6 @@ export default function BannerPage() {
           {/* STÂNGA — configurator */}
           <div className="lg:col-span-3 space-y-8">
             <ConfigSection icon={<Ruler />} title="1. Dimensiuni și Cantitate">
-              {/* preset-uri rapide */}
-              <div className="mb-4 flex flex-wrap gap-2">
-                {PRESETS.map(p => (
-                  <button
-                    key={p.label}
-                    type="button"
-                    onClick={() => {
-                      updateInput("width_cm", p.w);
-                      updateInput("height_cm", p.h);
-                      setLengthText(String(p.w));
-                      setHeightText(String(p.h));
-                    }}
-                    className="px-3 py-1.5 rounded-full text-sm bg-white/5 hover:bg-white/10 border border-white/10"
-                    aria-label={`Setează ${p.label} cm`}
-                  >
-                    {p.label} cm
-                  </button>
-                ))}
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Lungime (cm)</label>

@@ -1,12 +1,16 @@
 "use client";
 import { useState } from "react";
-import { MessageCircle, Mail } from "lucide-react"; // librărie de iconițe modernă
+import { usePathname } from "next/navigation";
+import { MessageCircle, Mail } from "lucide-react";
 
 export default function ContactButton() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    // Pe mobil: vizibil doar pe prima pagină (isHome); pe desktop: mereu vizibil (lg:block)
+    <div className={`fixed bottom-6 right-6 z-50 ${isHome ? "block" : "hidden"} lg:block`}>
       {/* Meniul expandat */}
       {open && (
         <div className="mb-3 flex flex-col items-end gap-2 animate-fade-in">
