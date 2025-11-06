@@ -1,35 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+
+import React, { useState } from "react";
 import { useCart } from "./CartProvider";
-import Link from "next/link";
-
-type IconProps = React.SVGProps<SVGSVGElement>;
-
-function CartIcon(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="9" cy="21" r="1"></circle>
-      <circle cx="20" cy="21" r="1"></circle>
-      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-    </svg>
-  );
-}
-
-const BurgerIcon = (props: IconProps) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <line x1="3" y1="12" x2="21" y2="12"></line>
-    <line x1="3" y1="6" x2="21" y2="6"></line>
-    <line x1="3" y1="18" x2="21" y2="18"></line>
-  </svg>
-);
-
-const CloseIcon = (props: IconProps) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-);
+import { ShoppingCart, Menu, X } from "lucide-react";
 
 const LINKS = [
   { href: "/banner", label: "Banner" },
@@ -39,119 +12,126 @@ const LINKS = [
   { href: "/materiale-rigide", label: "Materiale rigide" },
 ];
 
-function CartButtonWithCount({ isMobile = false }: { isMobile?: boolean }) {
-  const cart = useCart();
-  const cartCount = cart.count;
-  const isLoaded = cart.isLoaded;
-
-  const baseClass = isMobile
-    ? "w-full px-5 py-3 rounded-xl bg-indigo-600/90 text-white font-extrabold text-lg hover:bg-indigo-500 transition-colors flex items-center justify-center gap-2 shadow-xl shadow-indigo-500/40"
-    : "px-5 py-2.5 rounded-full bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition-colors text-sm flex items-center gap-2 shadow-lg shadow-indigo-500/30";
-
-  return (
-    <a href="/checkout" className={baseClass}>
-      <CartIcon />
-      {isLoaded ? (
-        <>
-          Coșul meu
-          {cartCount > 0 && (
-            <span className="ml-1 inline-flex items-center justify-center h-5 w-5 rounded-full bg-red-500 text-xs font-bold text-white">
-              {cartCount}
-            </span>
-          )}
-        </>
-      ) : (
-        <>Coșul meu</>
-      )}
-    </a>
-  );
-}
-
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const { count, isLoaded } = useCart();
 
-  useEffect(() => setMounted(true), []);
-
-  const mobileMenuPortal = mounted && open
-    ? createPortal(
-        <div
-          className="fixed inset-0 z-[110] bg-gray-950/95 backdrop-blur-sm p-8 flex flex-col items-center justify-center transition-opacity"
-          onClick={() => setOpen(false)}
-        >
+  return (
+    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-gray-950/80 backdrop-blur">
+      <div className="mx-auto max-w-7xl px-4">
+        {/* Bara mobil: burger (stânga) + logo (centru) + coș (dreapta) */}
+        <div className="flex items-center justify-between py-3 lg:hidden">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen(false);
-            }}
-            className="absolute top-4 right-4 text-white hover:text-indigo-400 p-2 transition"
+            type="button"
+            onClick={() => setOpen(!open)}
+            aria-label={open ? "Închide meniul" : "Deschide meniul"}
+            className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-white hover:bg-white/10"
           >
-            <CloseIcon width={32} height={32} />
+            {open ? <X size={22} /> : <Menu size={22} />}
           </button>
-          <nav className="flex flex-col items-center gap-6 text-2xl text-white">
-            {LINKS.map((l) => (
+
+          <a href="/" className="inline-flex items-center gap-2" aria-label="Prynt.ro">
+            <img
+              src="/logo.png"
+              alt="Prynt.ro"
+              width={36}
+              height={36}
+              className="rounded-full border border-white/10"
+              loading="lazy"
+            />
+            <span className="sr-only">Prynt.ro</span>
+          </a>
+
+          <a
+            href="/checkout"
+            className="relative inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-white hover:bg-white/10"
+            aria-label="Coșul meu"
+          >
+            <ShoppingCart size={22} />
+            {isLoaded && count > 0 && (
+              <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+                {count}
+              </span>
+            )}
+          </a>
+        </div>
+
+        {/* Meniu mobil drop-down */}
+        {open && (
+          <nav className="lg:hidden pb-3">
+            <ul className="space-y-1">
+              {LINKS.map((l) => (
+                <li key={l.href}>
+                  <a
+                    href={l.href}
+                    className="block rounded-md px-3 py-2 text-white/90 hover:bg-white/10"
+                    onClick={() => setOpen(false)}
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-3">
               <a
-                key={l.href}
-                href={l.href}
-                className="font-bold hover:text-indigo-400 transition-colors"
+                href="/checkout"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 font-semibold text-white hover:bg-indigo-500"
                 onClick={() => setOpen(false)}
               >
+                <ShoppingCart size={18} /> Coșul meu
+                {isLoaded && count > 0 && (
+                  <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold">
+                    {count}
+                  </span>
+                )}
+              </a>
+            </div>
+          </nav>
+        )}
+
+        {/* Bara desktop: logo stânga + linkuri + buton coș */}
+        <div className="hidden items-center justify-between py-4 lg:flex">
+          <a href="/" className="inline-flex items-center gap-3">
+            <img
+              src="/logo.png"
+              alt="Prynt.ro"
+              width={48}
+              height={48}
+              className="rounded-full border border-white/10"
+              loading="lazy"
+            />
+            <span className="text-lg font-bold tracking-tight">Prynt.ro</span>
+          </a>
+
+          <nav className="flex items-center gap-6">
+            {LINKS.map((l) => (
+              <a key={l.href} href={l.href} className="text-sm font-medium text-white/80 hover:text-white">
                 {l.label}
               </a>
             ))}
           </nav>
 
-          <div className="w-full max-w-xs pt-8">
-            <CartButtonWithCount isMobile={true} />
-          </div>
-        </div>,
-        document.body
-      )
-    : null;
-
-  return (
-    <header className="sticky top-0 z-[100] bg-gray-950/90 backdrop-blur-md border-b border-indigo-700/50 shadow-lg">
-      <div className="mx-auto max-w-7xl px-4 md:px-8 py-4 flex items-center justify-between">
-        
-        {/* LOGO */}
-        <Link href="/" className="flex items-center gap-3">
-          <img
-            src="/logo.png"
-            alt="Prynt.ro"
-            width={60}
-            height={60}
-            style={{ objectFit: "contain" }}
-          />
-          <span className="hidden sm:inline text-xl font-bold text-white">Prynt.ro</span>
-        </Link>
-
-        {/* NAV DESKTOP */}
-        <nav className="hidden md:flex items-center gap-8 text-base text-white/80">
-          {LINKS.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="font-medium hover:text-indigo-400 transition-colors"
-            >
-              {l.label}
-            </a>
-          ))}
-        </nav>
-
-        {/* COȘ DESKTOP */}
-        <div className="hidden md:flex items-center">
-          <CartButtonWithCount />
+          <DesktopCartButton />
         </div>
-
-        {/* BUTON MENIU MOBIL */}
-        <button
-          className="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-xl border border-indigo-700/50 text-white hover:border-indigo-400 transition-colors"
-          onClick={() => setOpen(true)}
-        >
-          <BurgerIcon width={24} height={24} />
-        </button>
       </div>
-      {mobileMenuPortal}
     </header>
+  );
+}
+
+function DesktopCartButton() {
+  const { count, isLoaded } = useCart();
+  return (
+    <a
+      href="/checkout"
+      className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-500"
+    >
+      <ShoppingCart size={18} />
+      Coșul meu
+      {isLoaded && count > 0 && (
+        <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold">
+          {count}
+        </span>
+      )}
+    </a>
   );
 }
