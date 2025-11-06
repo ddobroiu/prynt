@@ -61,6 +61,15 @@ function formatRON(n: number) {
   return n.toFixed(2);
 }
 
+function escapeHtml(str: string) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 function buildAddressLine(
   src: { judet?: string; localitate?: string; strada_nr?: string } | undefined,
   fallback: { judet: string; localitate: string; strada_nr: string }
@@ -71,32 +80,21 @@ function buildAddressLine(
   return [s, l, j].filter(Boolean).join(', ');
 }
 
-// Escape pentru a nu permite HTML injectat
-function escapeHtml(str: string) {
-  return String(str)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
-
-// Apel Oblio – endpoint ca în proiectul care îți merge
-async function tryCreateOblioInvoice(payload: any, token: string) {
+// Apel Oblio – endpoint ca în proiectul care îți mergea
+async function createOblioInvoice(payload: any, token: string) {
   const resp = await fetch('https://www.oblio.eu/api/docs/invoice', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
   });
 
-  const contentType = resp.headers.get('content-type') || '';
-  if (contentType.includes('application/json')) {
+  const ct = resp.headers.get('content-type') || '';
+  if (ct.includes('application/json')) {
     return await resp.json();
   } else {
     const text = await resp.text();
-    // nu băgăm conținutul în email; doar scurt pentru loguri
-    const short = text.slice(0, 200);
-    throw new Error(`Răspuns Oblio non-JSON (status ${resp.status}): ${short}`);
+    // Nu injectăm în email; doar logăm scurt.
+    throw new Error(`Oblio răspuns non-JSON (status ${resp.status}): ${text.slice(0, 200)}`);
   }
 }
 
@@ -120,7 +118,7 @@ async function sendEmails(
     })
     .join('');
 
-  // Email ADMIN – COMPLET, cu CUI pentru firmă
+  // Email ADMIN – COMPLET, cu CUI la Companie
   await resend.emails.send({
     from: 'comenzi@prynt.ro',
     to: 'contact@prynt.ro',
@@ -162,7 +160,7 @@ async function sendEmails(
                    <a href="${invoiceLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Vezi Factura Oblio</a>
                  </p>`
               : `<p style="text-align:center;margin-top:20px;color:#b54708">
-                   Factura nu a putut fi generată automat. Emite manual în Oblio (client: ${escapeHtml(
+                   Factura va fi emisă manual în Oblio (client: ${escapeHtml(
                      billing.cui || billing.name || address.nume_prenume
                    )}).
                  </p>`
@@ -172,7 +170,7 @@ async function sendEmails(
     `,
   });
 
-  // Email CLIENT – COMPLET, ca “înainte”, CU CUI pentru Companie
+  // Email CLIENT – COMPLET, minimal cerut în UI, include CUI dacă e Companie
   await resend.emails.send({
     from: 'contact@prynt.ro',
     to: address.email,
@@ -182,7 +180,7 @@ async function sendEmails(
         <div style="max-width:640px; margin:auto; background:#ffffff; border-radius:10px; padding:24px;">
           <h1 style="margin:0 0 12px; color:#111;">Mulțumim pentru comandă!</h1>
           <p style="margin:0 0 16px; color:#444;">
-            Am primit comanda ta și am început procesarea. Mai jos ai un rezumat al detaliilor.
+            Am primit comanda ta și am început procesarea. Mai jos ai un rezumat.
           </p>
 
           <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Datele tale</h2>
@@ -217,12 +215,12 @@ async function sendEmails(
                    <a href="${invoiceLink}" style="display:inline-block; background:#4f46e5; color:#fff; padding:10px 18px; text-decoration:none; border-radius:8px;">Descarcă Factura</a>
                  </p>`
               : `<p style="text-align:center; margin-top:16px; color:#555;">
-                   Factura va fi emisă și trimisă pe email după validare.
+                   Factura va fi emisă și trimisă pe email ulterior.
                  </p>`
           }
 
           <div style="margin-top:20px; color:#555; font-size:14px;">
-            <p style="margin:6px 0;">Dacă ai întrebări, răspunde la acest email sau scrie-ne la <a href="mailto:contact@prynt.ro">contact@prynt.ro</a>.</p>
+            <p style="margin:6px 0;">Întrebări? Scrie-ne la <a href="mailto:contact@prynt.ro">contact@prynt.ro</a>.</p>
           </div>
         </div>
       </div>
@@ -231,28 +229,20 @@ async function sendEmails(
 }
 
 /**
- * Procesează comanda NON‑BLOCANT:
- * - Încearcă Oblio; dacă pică, continuă și trimite emailurile
+ * Procesează comanda NON‑BLOCANT și cu MINIM de date cerute în UI:
+ * - Companie: încearcă “doar CUI”; dacă cere client, reîncearcă cu nume+adresă+email generate din formular
+ * - Persoană fizică: nume + adresă + email
+ * - Emailuri se trimit oricum; dacă factura nu iese, nu blocăm comanda
  */
 export async function fulfillOrder(
   orderData: { address: Address; billing: Billing; cart: CartItem[] },
   paymentType: 'Ramburs' | 'Card'
-): Promise<{ invoiceLink: string | null; warnings: string[] }> {
+): Promise<{ invoiceLink: string | null }> {
   const { address, billing, cart } = orderData;
 
-  console.log(`[OrderService] Procesare comandă pentru ${address.email}, plată ${paymentType}.`);
-  const warnings: string[] = [];
   let invoiceLink: string | null = null;
 
-  // Token Oblio (dacă pică, continuăm fără factură)
-  let token: string | null = null;
-  try {
-    token = await getOblioAccessToken();
-  } catch (e: any) {
-    warnings.push(`[Oblio] Nu am putut obține token: ${e?.message || e}`);
-  }
-
-  // Adresă de facturare (din câmpurile de facturare sau fallback la livrare)
+  // Adresă de facturare din câmpurile disponibile (sau livrare ca fallback)
   const billingAddressLine = buildAddressLine(
     { judet: (billing as any).judet, localitate: (billing as any).localitate, strada_nr: (billing as any).strada_nr },
     { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr }
@@ -266,65 +256,65 @@ export async function fulfillOrder(
     quantity: item.quantity,
   }));
 
-  if (token) {
-    try {
-      // 1) Companie – încercare “doar CUI” dacă e furnizat
-      let client =
-        billing.tip_factura === 'companie' && billing.cui
-          ? { cif: billing.cui }
-          : {
-              name: billing.name || address.nume_prenume,
-              address: billingAddressLine,
-              email: address.email,
-            };
+  // Încercăm Oblio, dar nu blocăm dacă pică
+  try {
+    const token = await getOblioAccessToken();
 
-      const basePayload = {
-        cif: process.env.OBLIO_CIF_FIRMA,
-        client,
-        issueDate: new Date().toISOString().slice(0, 10),
-        seriesName: process.env.OBLIO_SERIE_FACTURA,
-        products,
-      };
-
-      let data = await tryCreateOblioInvoice(basePayload, token);
-
-      // 2) Dacă cere selectarea clientului, reîncercăm cu detalii minime (fără UI suplimentar)
-      if (data?.status !== 200) {
-        const msg = data?.statusMessage || data?.message || '';
-        const needDetails = /selecteaza clientul|alege clientul/i.test(msg) || data?.status === 422;
-
-        if (needDetails && billing.tip_factura === 'companie' && billing.cui) {
-          const payloadWithDetails = {
-            ...basePayload,
-            client: {
-              cif: billing.cui,
-              name: billing.name || address.nume_prenume,
-              address: billingAddressLine,
-              email: address.email,
-            },
+    // 1) Încercare “doar CUI” dacă e Companie și avem CUI
+    let client =
+      billing.tip_factura === 'companie' && billing.cui
+        ? { cif: billing.cui }
+        : {
+            name: billing.name || address.nume_prenume,
+            address: billingAddressLine,
+            email: address.email,
           };
-          data = await tryCreateOblioInvoice(payloadWithDetails, token);
-        }
-      }
 
-      if (data?.status === 200 && data?.data?.link) {
-        invoiceLink = data.data.link as string;
-        console.log(`[OrderService] Factura Oblio generată: ${invoiceLink}`);
-      } else {
-        const msg = data?.statusMessage || data?.message || 'Eșec creare factură.';
-        warnings.push(`[Oblio] ${msg}`);
+    const basePayload = {
+      cif: process.env.OBLIO_CIF_FIRMA,
+      client,
+      issueDate: new Date().toISOString().slice(0, 10),
+      seriesName: process.env.OBLIO_SERIE_FACTURA,
+      products,
+    };
+
+    let data = await createOblioInvoice(basePayload, token);
+
+    // 2) Dacă cere selectarea clientului, reîncercăm cu detalii minime
+    if (data?.status !== 200) {
+      const msg = (data?.statusMessage || data?.message || '').toString();
+      const needDetails = /selecteaza clientul|alege clientul/i.test(msg) || data?.status === 422;
+
+      if (needDetails && billing.tip_factura === 'companie' && billing.cui) {
+        const payloadWithDetails = {
+          ...basePayload,
+          client: {
+            cif: billing.cui,
+            name: billing.name || address.nume_prenume,
+            address: billingAddressLine,
+            email: address.email,
+          },
+        };
+        data = await createOblioInvoice(payloadWithDetails, token);
       }
-    } catch (e: any) {
-      warnings.push(`[Oblio] ${e?.message || 'Eroare la apelul API'}`);
     }
+
+    if (data?.status === 200 && data?.data?.link) {
+      invoiceLink = data.data.link as string;
+      console.log('[OrderService] Factura Oblio generată:', invoiceLink);
+    } else if (data) {
+      console.warn('[OrderService] Oblio nu a emis factura:', data?.statusMessage || data?.message || data);
+    }
+  } catch (e: any) {
+    console.warn('[OrderService] Oblio a eșuat (comanda continuă):', e?.message || e);
   }
 
-  // Emailuri – întotdeauna, chiar dacă Oblio a eșuat
+  // Emailuri – întotdeauna
   try {
     await sendEmails(address, billing, cart, invoiceLink, paymentType);
   } catch (e: any) {
     console.error('[OrderService] Eroare trimitere emailuri:', e?.message || e);
   }
 
-  return { invoiceLink, warnings };
+  return { invoiceLink };
 }
