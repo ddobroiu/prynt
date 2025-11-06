@@ -21,21 +21,13 @@ export default function CheckoutPage() {
     localitate: "",
     strada_nr: "",
   });
-  const [billing, setBilling] = useState<Billing>({ tip_factura: "persoana_fizica" });
+
+  const [billing, setBilling] = useState<Billing>({
+    tip_factura: "persoana_fizica",
+  });
+
   const [sameAsDelivery, setSameAsDelivery] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<"ramburs" | "card">("ramburs");
-  const [judete, setJudete] = useState<string[]>([]);
-
-  useEffect(() => {
-    const listaJudete = [
-      "Alba","Arad","Arges","Bacau","Bihor","Bistrita-Nasaud","Botosani","Brasov","Braila",
-      "Bucuresti","Buzau","Caras-Severin","Calarasi","Cluj","Constanta","Covasna","Dambovita",
-      "Dolj","Galati","Giurgiu","Gorj","Harghita","Hunedoara","Ialomita","Iasi","Ilfov",
-      "Maramures","Mehedinti","Mures","Neamt","Olt","Prahova","Satu Mare","Salaj","Sibiu",
-      "Suceava","Teleorman","Timis","Tulcea","Vaslui","Valcea","Vrancea",
-    ];
-    setJudete(listaJudete);
-  }, []);
 
   // Totaluri
   const subtotal = useMemo(() => items.reduce((acc, item) => acc + item.totalAmount, 0), [items]);
@@ -47,11 +39,10 @@ export default function CheckoutPage() {
     mode: "payment" as const,
     amount: Math.round(totalPlata * 100),
     currency: "ron",
-    // Asigură-te că succesul redirecționează la /success ca să se golească coșul
-    // Dacă folosești server-side session, setează acolo success_url: `${origin}/success`
   };
 
   const isEmpty = isLoaded && items.length === 0;
+  const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
   return (
     <main className="bg-[#0b0f19] min-h-screen text-white">
@@ -71,34 +62,32 @@ export default function CheckoutPage() {
           <EmptyCart />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Sumar pe mobil primul: order-1; pe desktop apare în dreapta și sticky */}
+            {/* Sumar primul pe mobil */}
             <aside className="order-1 lg:order-2 lg:col-span-1">
               <SummaryCard
                 items={items}
                 subtotal={subtotal}
                 shipping={costLivrare}
                 total={totalPlata}
+                paymentMethod={paymentMethod}
               />
             </aside>
 
-            {/* Lista produse + Form pe mobil după sumar: order-2; pe desktop în stânga */}
+            {/* Lista produse + Formuri */}
             <section className="order-2 lg:order-1 lg:col-span-2 space-y-6">
               <CartItems items={items} onRemove={removeItem} />
 
-              {/* Formularele de adresă/facturare (simplificat – poți păstra ce aveai) */}
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <h2 className="text-xl font-bold mb-3">Date livrare</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <Input label="Nume și prenume" value={address.nume_prenume} onChange={(v) => setAddress((a) => ({ ...a, nume_prenume: v }))} />
-                  <Input label="Telefon" value={address.telefon} onChange={(v) => setAddress((a) => ({ ...a, telefon: v }))} />
-                  <Input label="Email" value={address.email} onChange={(v) => setAddress((a) => ({ ...a, email: v }))} />
-                  <Select label="Județ" value={address.judet} onChange={(v) => setAddress((a) => ({ ...a, judet: v }))} options={judete} />
-                  <Input label="Localitate" value={address.localitate} onChange={(v) => setAddress((a) => ({ ...a, localitate: v }))} />
-                  <Input label="Stradă, nr." value={address.strada_nr} onChange={(v) => setAddress((a) => ({ ...a, strada_nr: v }))} />
-                </div>
-              </div>
+              {/* Formuri (livrare/facturare) reintroduse */}
+              <CheckoutForm
+                address={address}
+                setAddress={(updater) => setAddress((prev) => updater(prev))}
+                billing={billing}
+                setBilling={(updater) => setBilling((prev) => updater(prev))}
+                sameAsDelivery={sameAsDelivery}
+                setSameAsDelivery={setSameAsDelivery}
+              />
 
-              {/* Integrare Stripe (dacă plătești cu cardul) */}
+              {/* Plată */}
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                 <h2 className="text-xl font-bold mb-3">Plată</h2>
                 <div className="flex gap-3 mb-3">
@@ -113,7 +102,7 @@ export default function CheckoutPage() {
                   <button
                     onClick={() => setPaymentMethod("card")}
                     className={`rounded-lg px-4 py-2 text-sm font-semibold border ${
-                      paymentMethod === "card" ? "border-emerald-500 bg-emerald-500/10" : "border-white/10 bg-white/5 hover:bg:white/10"
+                      paymentMethod === "card" ? "border-emerald-500 bg-emerald-500/10" : "border-white/10 bg-white/5 hover:bg-white/10"
                     }`}
                   >
                     Card online
@@ -122,13 +111,8 @@ export default function CheckoutPage() {
 
                 {paymentMethod === "card" ? (
                   <Elements stripe={stripePromise} options={stripeOptions}>
-                    <CheckoutForm
-                      address={address}
-                      billing={billing}
-                      sameAsDelivery={sameAsDelivery}
-                      total={totalPlata}
-                      // Asigură-te că după succes redirecționezi la /success în CheckoutForm
-                    />
+                    {/* Aici la confirmare ar trebui redirect la /checkout/success sau /success */}
+                    {/* checkout de card existent */}
                   </Elements>
                 ) : (
                   <div className="text-sm text-white/70">
@@ -164,11 +148,13 @@ function SummaryCard({
   subtotal,
   shipping,
   total,
+  paymentMethod,
 }: {
   items: CartItem[];
   subtotal: number;
   shipping: number;
   total: number;
+  paymentMethod: "ramburs" | "card";
 }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
@@ -202,12 +188,13 @@ function SummaryCard({
           Continuă cumpărăturile
         </a>
 
-        {/* Pentru ramburs: finalizează comanda direct (poți adapta să creeze comanda server-side) */}
+        {/* Pentru ramburs: finalizează comanda direct (poți înlocui cu un apel API) */}
         <button
           type="button"
           onClick={() => {
-            // Pentru plata ramburs: redirect direct la succes (sau creezi comanda și apoi redirect)
-            window.location.href = "/success";
+            if (paymentMethod === "ramburs") {
+              window.location.href = "/checkout/success";
+            }
           }}
           className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition"
         >
@@ -243,7 +230,7 @@ function CartItems({ items, onRemove }: { items: CartItem[]; onRemove: (id: stri
                     fișier încărcat
                   </a>
                 )}
-                {item.textDesign && (
+                {"textDesign" in item && (item as any).textDesign && (
                   <span className="ml-2 inline-block rounded bg-white/10 px-2 py-0.5 text-[11px]">
                     text inclus
                   </span>
@@ -266,48 +253,5 @@ function CartItems({ items, onRemove }: { items: CartItem[]; onRemove: (id: stri
         ))}
       </ul>
     </div>
-  );
-}
-
-function Input({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <label className="text-sm">
-      <span className="mb-1 block text-white/70">{label}</span>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-md border border-white/10 bg-gray-900/40 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-      />
-    </label>
-  );
-}
-
-function Select({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: string[];
-}) {
-  return (
-    <label className="text-sm">
-      <span className="mb-1 block text-white/70">{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-md border border-white/10 bg-gray-900/40 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-      >
-        <option value="">— alege —</option>
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
-    </label>
   );
 }

@@ -1,4 +1,4 @@
-"use client";
+="use client";
 
 import { useEffect } from "react";
 import { useCart } from "../../components/CartProvider";
@@ -8,8 +8,7 @@ export default function SuccessPage() {
   const { clear } = useCart();
 
   useEffect(() => {
-    // Golește coșul când ajungem pe pagina de succes
-    clear();
+    clear(); // golește coșul la intrarea pe pagină
   }, [clear]);
 
   return (

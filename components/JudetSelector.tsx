@@ -1,33 +1,38 @@
 "use client";
 
-import { SelectHTMLAttributes } from 'react';
+type Props = {
+  label?: string;
+  value: string;
+  onChange: (v: string) => void;
+  options?: string[];
+  disabled?: boolean;
+};
 
-interface JudetSelectorProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
-  label: string;
-  options: string[];
-  onChange: (value: string) => void;
-}
+const DEFAULT_JUDETE = [
+  "Alba","Arad","Arges","Bacau","Bihor","Bistrita-Nasaud","Botosani","Brasov","Braila",
+  "Bucuresti","Buzau","Caras-Severin","Calarasi","Cluj","Constanta","Covasna","Dambovita",
+  "Dolj","Galati","Giurgiu","Gorj","Harghita","Hunedoara","Ialomita","Iasi","Ilfov",
+  "Maramures","Mehedinti","Mures","Neamt","Olt","Prahova","Satu Mare","Salaj","Sibiu",
+  "Suceava","Teleorman","Timis","Tulcea","Vaslui","Valcea","Vrancea",
+];
 
-export default function JudetSelector({ label, id, options, value, onChange, ...props }: JudetSelectorProps) {
+export default function JudetSelector({ label = "Județ", value, onChange, options, disabled }: Props) {
+  const list = options && Array.isArray(options) ? options : DEFAULT_JUDETE;
+
   return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-300 mb-1">
-        {label}
-      </label>
+    <label className="text-sm block">
+      <span className="mb-1 block text-white/70">{label}</span>
       <select
-        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-gray-800 border border-gray-600 rounded-lg py-2 pl-3 pr-10 text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-        {...props}
+        disabled={disabled}
+        className="w-full rounded-md border border-white/10 bg-gray-900/40 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-60"
       >
-        <option value="" disabled>Selectează un județ</option>
-        {options.map((judet) => (
-          <option key={judet} value={judet}>
-            {judet}
-          </option>
+        <option value="" disabled>— selectează un județ —</option>
+        {list.map((judet) => (
+          <option key={judet} value={judet}>{judet}</option>
         ))}
       </select>
-    </div>
+    </label>
   );
 }
