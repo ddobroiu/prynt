@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useCart } from "../../components/CartProvider";
-import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart } from "lucide-react";
+import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info } from "lucide-react";
 
 /* GALLERY (exemplu) */
 const GALLERY = [
@@ -62,7 +62,7 @@ const calculatePrice = (input: PriceInput): PriceOutput => {
 };
 
 /* GRAFICĂ */
-type DesignOption = "upload" | "pro";
+type DesignOption = "upload" | "pro" | "text_only";
 const PRO_DESIGN_FEE = 50;
 
 export default function BannerPage() {
@@ -85,6 +85,12 @@ export default function BannerPage() {
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Text pentru varianta "Banner cu text simplu" (gratis)
+  const [textDesign, setTextDesign] = useState<string>("");
+
+  // Modal "Mai multe detalii"
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const hasProDesign = items.some((i) => i.id === "design-pro");
 
@@ -141,6 +147,7 @@ export default function BannerPage() {
       input.height_cm,
       input.want_wind_holes ? "g" : "f",
       input.want_hem_and_grommets ? "c" : "f",
+      designOption,
     ].join("-");
 
     const unitAmount = pricePerUnit;
@@ -148,13 +155,15 @@ export default function BannerPage() {
 
     addItem({
       id: uniqueId,
-      name: `Banner ${input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"} - ${input.width_cm}x${input.height_cm}cm${artworkUrl ? " (cu grafică încărcată)" : ""}`,
+      name: `Banner ${input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"} - ${input.width_cm}x${input.height_cm}cm`,
       quantity: input.quantity,
       unitAmount,
       totalAmount,
       artworkUrl: artworkUrl ?? undefined,
+      textDesign: designOption === "text_only" ? textDesign : undefined,
     });
 
+    // Adaugă taxa de grafică doar pentru "pro"
     if (designOption === "pro" && !hasProDesign) {
       addItem({
         id: "design-pro",
@@ -186,9 +195,21 @@ export default function BannerPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-10 pb-24 lg:pb-10">
-        <header className="mb-6">
-          <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Banner</h1>
-          <p className="mt-2 text-white/70">Alege lungimea, înălțimea, materialul, finisajele și încarcă grafica (opțional).</p>
+        <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Banner</h1>
+            <p className="mt-2 text-white/70">
+              Alege lungimea, înălțimea, materialul, finisajele și partea de grafică (încărcare fișier / text simplu / serviciu pro).
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setDetailsOpen(true)}
+            className="inline-flex items-center gap-2 self-start rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm hover:bg-white/10"
+          >
+            <Info size={18} />
+            Mai multe detalii
+          </button>
         </header>
 
         {/* REZUMAT COMPACT — doar pe mobil */}
@@ -196,7 +217,9 @@ export default function BannerPage() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs text-white/60">Total</div>
-              <div className="text-2xl font-extrabold">{priceDetails.finalPrice > 0 ? fmt.format(priceDetails.finalPrice) : "—"}</div>
+              <div className="text-2xl font-extrabold">
+                {priceDetails.finalPrice > 0 ? fmt.format(priceDetails.finalPrice) : "—"}
+              </div>
             </div>
             <button
               type="button"
@@ -292,29 +315,28 @@ export default function BannerPage() {
             </ConfigSection>
 
             <ConfigSection icon={<CheckCircle />} title="4. Grafică">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button
-                  type="button"
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <SelectCard
+                  active={designOption === "upload"}
                   onClick={() => setDesignOption("upload")}
-                  className={`text-left p-4 rounded-lg border-2 transition-all ${
-                    designOption === "upload" ? "border-indigo-500 bg-indigo-900/20" : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
-                  }`}
-                >
-                  <div className="font-bold text-white">Am grafică</div>
-                  <div className="text-xs text-white/70">Încarcă fișierul tău (PDF, AI, PSD, JPG, PNG)</div>
-                </button>
-                <button
-                  type="button"
+                  title="Am grafică"
+                  subtitle="Încarcă fișierul (PDF, AI, PSD, JPG, PNG)"
+                />
+                <SelectCard
+                  active={designOption === "text_only"}
+                  onClick={() => setDesignOption("text_only")}
+                  title="Banner cu text"
+                  subtitle="Scrii textul, noi îl aranjăm (gratis)"
+                />
+                <SelectCard
+                  active={designOption === "pro"}
                   onClick={() => setDesignOption("pro")}
-                  className={`text-left p-4 rounded-lg border-2 transition-all ${
-                    designOption === "pro" ? "border-indigo-500 bg-indigo-900/20" : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
-                  }`}
-                >
-                  <div className="font-bold text-white">Cumpără grafică profesională</div>
-                  <div className="text-xs text-white/70">+{PRO_DESIGN_FEE} RON (o singură dată/comandă)</div>
-                </button>
+                  title="Grafică profesională"
+                  subtitle={`+${PRO_DESIGN_FEE} RON (o singură dată/comandă)`}
+                />
               </div>
 
+              {/* Upload fișier */}
               {designOption === "upload" && (
                 <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
                   <label className="block text-sm font-medium text-white/80 mb-2">Încarcă fișier</label>
@@ -336,16 +358,32 @@ export default function BannerPage() {
                       </span>
                     )}
                   </div>
+                  <p className="mt-2 text-xs text-white/60">Linkul fișierului ajunge automat în emailul de comandă.</p>
+                </div>
+              )}
+
+              {/* Banner cu text simplu (gratis) */}
+              {designOption === "text_only" && (
+                <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
+                  <label className="block text-sm font-medium text-white/80 mb-2">Text pentru banner</label>
+                  <textarea
+                    value={textDesign}
+                    onChange={(e) => setTextDesign(e.target.value)}
+                    rows={4}
+                    placeholder="Ex.: REDUCERI -50% • Deschis L-V 9:00-18:00 • www.exemplu.ro"
+                    className="w-full resize-y bg-gray-900/50 border border-gray-700 rounded-md p-3 placeholder-white/40"
+                  />
                   <p className="mt-2 text-xs text-white/60">
-                    Linkul fișierului ajunge automat în emailul de comandă.
+                    Gratuit: scrie textul, iar designerii noștri îl așază clar și lizibil. Dacă vrei machetare avansată, alege “Grafică profesională”.
                   </p>
                 </div>
               )}
 
+              {/* Grafică Pro */}
               {designOption === "pro" && (
                 <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
                   <p className="text-sm text-white/80">
-                    Un designer te va contacta după plasarea comenzii. Taxa se aplică o singură dată (+{PRO_DESIGN_FEE} RON).
+                    Un designer te va contacta după plasarea comenzii. Taxa se aplică o singură dată (+{PRO_DESIGN_FEE} RON) per comandă.
                   </p>
                   {hasProDesign && <p className="text-xs text-white/60 mt-2">Taxa este deja în coș.</p>}
                 </div>
@@ -391,6 +429,11 @@ export default function BannerPage() {
                       </a>
                     </p>
                   )}
+                  {designOption === "text_only" && textDesign && (
+                    <div className="text-xs text-white/70">
+                      Text banner: <span className="text-white">{textDesign}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="border-t border-gray-700 mt-4 pt-4">
@@ -427,6 +470,45 @@ export default function BannerPage() {
         onAddToCart={handleAddToCart}
         onShowSummary={scrollToSummary}
       />
+
+      {/* MODAL: Mai multe detalii */}
+      {detailsOpen && (
+        <DetailsModal onClose={() => setDetailsOpen(false)}>
+          <h3 className="text-xl font-bold mb-3">Detalii produs</h3>
+          <div className="space-y-4 text-sm text-white/80">
+            <section>
+              <h4 className="font-semibold text-white mb-1">Materiale</h4>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Frontlit 440 g/mp: standard, flexibil, bun pentru majoritatea utilizărilor.</li>
+                <li>Frontlit 510 g/mp: mai rigid și mai durabil — recomandat pentru bannere mari sau expunere îndelungată.</li>
+              </ul>
+            </section>
+            <section>
+              <h4 className="font-semibold text-white mb-1">Finisaje</h4>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Tiv + capse: margini întărite, capse la ~30–50 cm, pentru prindere ușoară.</li>
+                <li>Găuri pentru vânt: pattern perforat pentru zone cu curenți de aer puternici.</li>
+              </ul>
+            </section>
+            <section>
+              <h4 className="font-semibold text-white mb-1">Fișiere/Grafică</h4>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Acceptăm: PDF, AI, PSD, JPG, PNG (profil CMYK recomandat).</li>
+                <li>Pentru “Banner cu text”: scrie textul, ne ocupăm noi de așezare (gratis).</li>
+                <li>Pentru grafică complexă, alege “Grafică profesională”.</li>
+              </ul>
+            </section>
+            <section>
+              <h4 className="font-semibold text-white mb-1">Producție & livrare</h4>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Producție uzuală: 1–2 zile lucrătoare.</li>
+                <li>Livrare națională prin curier (DPD).</li>
+                <li>Comanda minimă: 1 m² total taxabil/comandă.</li>
+              </ul>
+            </section>
+          </div>
+        </DetailsModal>
+      )}
     </main>
   );
 }
@@ -491,6 +573,31 @@ function MaterialOption({
   );
 }
 
+function SelectCard({
+  active,
+  onClick,
+  title,
+  subtitle,
+}: {
+  active: boolean;
+  onClick: () => void;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`text-left p-4 rounded-lg border-2 transition-all w-full ${
+        active ? "border-indigo-500 bg-indigo-900/20" : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
+      }`}
+    >
+      <div className="font-bold text-white">{title}</div>
+      <div className="text-xs text-white/70">{subtitle}</div>
+    </button>
+  );
+}
+
 /* Bară mobilă fixă pentru total + CTA */
 function MobilePriceBar({
   total,
@@ -544,6 +651,30 @@ function MobilePriceBar({
             Adaugă în coș
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* Modal generic pentru “Mai multe detalii” */
+function DetailsModal({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      <div className="relative w-full sm:max-w-2xl bg-gray-900 border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-h-[85vh] overflow-y-auto">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-3 top-3 rounded-md bg-white/10 hover:bg-white/20 px-2 py-1 text-xs"
+          aria-label="Închide"
+        >
+          Închide
+        </button>
+        {children}
       </div>
     </div>
   );
