@@ -1,134 +1,81 @@
-// components/CheckoutProvider.tsx
 "use client";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-
-// --- 1. DEFINIȚII DE TIP ---
-
-// Tipuri pentru adresa de livrare și facturare
-interface Address {
-  nume_prenume: string;
-  telefon: string;
-  judet: string;
-  localitate: string;
-  strada_nr: string;
-  cod_postal?: string;
+interface CartItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unitAmount: number;
+  totalAmount: number;
+  artworkUrl?: string; // link către fișierul încărcat
 }
 
-// Tipuri pentru datele de facturare (persoană fizică sau companie)
-interface Billing {
-  tip_factura: 'persoana_fizica' | 'companie';
-  cui_cnp: string;
-  nume_companie?: string; // Doar pentru tip_factura = 'companie'
-  adresa_facturare: string; // Adresa completă, o poți separa mai târziu
+type CartContextType = {
+  items: CartItem[];
+  addItem: (item: CartItem) => void;
+  removeItem: (id: string) => void;
+  clear: () => void;
+  total: number;
+  count: number;
+  isLoaded: boolean;
+};
+
+const CartContext = createContext<CartContextType | null>(null);
+
+export function useCart() {
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error("useCart must be used within a CartProvider");
+  return ctx;
 }
 
-// Starea centrală a procesului de checkout
-interface CheckoutState {
-  step: 1 | 2 | 3; // 1: Livrare/Facturare, 2: Plată, 3: Confirmare
-  delivery: Address;
-  billing: Billing;
-  metoda_plata: 'ramburs' | 'card';
-}
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-// Starea inițială a formularului
-const initialCheckoutState: CheckoutState = {
-  step: 1, 
-  delivery: {
-    nume_prenume: '',
-    telefon: '',
-    judet: '',
-    localitate: '',
-    strada_nr: '',
-  },
-  billing: {
-    tip_factura: 'persoana_fizica',
-    cui_cnp: '', // CNP pentru PF, CUI pentru Companie
-    adresa_facturare: '',
-  },
-  metoda_plata: 'ramburs', // Default la plata la livrare
-};
-
-// Tipul Contextului
-type CheckoutContextType = {
-  state: CheckoutState;
-  updateDeliveryField: <T extends keyof Address>(key: T, value: Address[T]) => void;
-  updateBillingField: <T extends keyof Billing>(key: T, value: Billing[T]) => void;
-  setPaymentMethod: (method: CheckoutState['metoda_plata']) => void;
-  nextStep: () => void;
-  prevStep: () => void;
-  resetCheckout: () => void;
-};
-
-// Crearea Contextului
-const CheckoutContext = createContext<CheckoutContextType | undefined>(undefined);
-
-// --- 2. HOOK UTILITAR ---
-
-export const useCheckout = () => {
-  const context = useContext(CheckoutContext);
-  if (context === undefined) {
-    throw new Error('useCheckout trebuie folosit în interiorul unui CheckoutProvider');
-  }
-  return context;
-};
-
-// --- 3. PROVIDERUL ---
-
-export function CheckoutProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState(initialCheckoutState);
-
-  // Funcție generică pentru actualizarea câmpurilor de livrare
-  const updateDeliveryField = useCallback(<T extends keyof Address>(key: T, value: Address[T]) => {
-    setState(prevState => ({
-      ...prevState,
-      delivery: {
-        ...prevState.delivery,
-        [key]: value,
-      },
-    }));
+  useEffect(() => {
+    try {
+      if (typeof window === "undefined") return;
+      const raw = localStorage.getItem("cart");
+      if (raw) setItems(JSON.parse(raw));
+    } catch {}
+    setIsLoaded(true);
   }, []);
 
-  // Funcție generică pentru actualizarea câmpurilor de facturare
-  const updateBillingField = useCallback(<T extends keyof Billing>(key: T, value: Billing[T]) => {
-    setState(prevState => ({
-      ...prevState,
-      billing: {
-        ...prevState.billing,
-        [key]: value,
-      },
-    }));
-  }, []);
+  useEffect(() => {
+    if (!isLoaded) return;
+    try {
+      localStorage.setItem("cart", JSON.stringify(items));
+    } catch {}
+  }, [items, isLoaded]);
 
-  const setPaymentMethod = useCallback((method: CheckoutState['metoda_plata']) => {
-    setState(prevState => ({ ...prevState, metoda_plata: method }));
-  }, []);
+  const addItem = (item: CartItem) => {
+    setItems((prev) => {
+      const idx = prev.findIndex((p) => p.id === item.id);
+      if (idx >= 0) {
+        const copy = [...prev];
+        const mergedQty = copy[idx].quantity + item.quantity;
+        const unit = copy[idx].unitAmount;
+        copy[idx] = {
+          ...copy[idx],
+          quantity: mergedQty,
+          totalAmount: unit * mergedQty,
+          artworkUrl: item.artworkUrl ?? copy[idx].artworkUrl,
+        };
+        return copy;
+      }
+      return [...prev, item];
+    });
+  };
 
-  const nextStep = useCallback(() => {
-    setState(prevState => ({ ...prevState, step: (prevState.step + 1) as CheckoutState['step'] }));
-  }, []);
-  
-  const prevStep = useCallback(() => {
-    setState(prevState => ({ ...prevState, step: (prevState.step - 1) as CheckoutState['step'] }));
-  }, []);
+  const removeItem = (id: string) => setItems((p) => p.filter((i) => i.id !== id));
+  const clear = () => setItems([]);
 
-  const resetCheckout = useCallback(() => {
-    setState(initialCheckoutState);
-  }, []);
+  const total = useMemo(() => items.reduce((s, i) => s + i.totalAmount, 0), [items]);
+  const count = useMemo(() => items.reduce((s, i) => s + i.quantity, 0), [items]);
 
   return (
-    <CheckoutContext.Provider 
-      value={{ 
-        state, 
-        updateDeliveryField, 
-        updateBillingField, 
-        setPaymentMethod,
-        nextStep,
-        prevStep,
-        resetCheckout
-      }}
-    >
+    <CartContext.Provider value={{ items, addItem, removeItem, clear, total, count, isLoaded }}>
       {children}
-    </CheckoutContext.Provider>
+    </CartContext.Provider>
   );
 }

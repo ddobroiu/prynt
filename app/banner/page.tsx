@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { useCart } from "../../components/CartProvider";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart } from "lucide-react";
 
-/* ——— GALLERY ——— */
+/* GALLERY (exemplu) */
 const GALLERY = [
   "/products/banner/1.jpg",
   "/products/banner/2.jpg",
@@ -12,7 +12,7 @@ const GALLERY = [
   "/products/banner/4.jpg",
 ] as const;
 
-/* ——— LOGICA DE PREȚ (integrată în pagină) ——— */
+/* LOGICA PREȚ (integrată) */
 type BannerMaterial = "frontlit_440" | "frontlit_510";
 type PriceInput = {
   width_cm: number;
@@ -25,8 +25,8 @@ type PriceInput = {
 type PriceOutput = {
   sqm_per_unit: number;
   total_sqm_taxable: number;
-  pricePerSqmBase: number; // preț pe mp ajustat
-  finalPrice: number; // total (conform logicii inițiale)
+  pricePerSqmBase: number;
+  finalPrice: number;
 };
 
 const MINIMUM_AREA_PER_ORDER = 1.0;
@@ -37,48 +37,35 @@ const PRICING_TIERS = [
   { maxSqm: 50, price: 28.0 },
   { maxSqm: Infinity, price: 26.0 },
 ];
-const SURCHARGES = {
-  frontlit_510: 1.15,
-  wind_holes: 1.05,
-  hem_and_grommets: 1.10,
-};
-
-const roundMoney = (num: number): number => Math.round(num * 100) / 100;
-
+const SURCHARGES = { frontlit_510: 1.15, wind_holes: 1.05, hem_and_grommets: 1.10 };
+const roundMoney = (n: number) => Math.round(n * 100) / 100;
 const calculatePrice = (input: PriceInput): PriceOutput => {
   if (input.width_cm <= 0 || input.height_cm <= 0 || input.quantity <= 0) {
     return { sqm_per_unit: 0, total_sqm_taxable: 0, pricePerSqmBase: 0, finalPrice: 0 };
   }
-
   const sqm_per_unit = (input.width_cm / 100) * (input.height_cm / 100);
-  const total_sqm_calculated = sqm_per_unit * input.quantity;
-  const total_sqm_taxable = Math.max(total_sqm_calculated, MINIMUM_AREA_PER_ORDER);
-
-  let pricePerSqmBase =
-    PRICING_TIERS.find((t) => total_sqm_taxable <= t.maxSqm)?.price ??
-    PRICING_TIERS[PRICING_TIERS.length - 1].price;
-
-  let totalMultiplier = 1;
-  if (input.material === "frontlit_510") totalMultiplier *= SURCHARGES.frontlit_510;
-  if (input.want_wind_holes) totalMultiplier *= SURCHARGES.wind_holes;
-  if (input.want_hem_and_grommets) totalMultiplier *= SURCHARGES.hem_and_grommets;
-
-  const pricePerSqmAdjusted = pricePerSqmBase * totalMultiplier;
-  const finalPrice = total_sqm_taxable * pricePerSqmAdjusted;
-
+  const total_sqm = sqm_per_unit * input.quantity;
+  const total_sqm_taxable = Math.max(total_sqm, MINIMUM_AREA_PER_ORDER);
+  let base = PRICING_TIERS.find((t) => total_sqm_taxable <= t.maxSqm)?.price ?? PRICING_TIERS.at(-1)!.price;
+  let mult = 1;
+  if (input.material === "frontlit_510") mult *= SURCHARGES.frontlit_510;
+  if (input.want_wind_holes) mult *= SURCHARGES.wind_holes;
+  if (input.want_hem_and_grommets) mult *= SURCHARGES.hem_and_grommets;
+  const adj = base * mult;
+  const final = total_sqm_taxable * adj;
   return {
     sqm_per_unit: roundMoney(sqm_per_unit),
     total_sqm_taxable: roundMoney(total_sqm_taxable),
-    pricePerSqmBase: roundMoney(pricePerSqmAdjusted),
-    finalPrice: roundMoney(finalPrice),
+    pricePerSqmBase: roundMoney(adj),
+    finalPrice: roundMoney(final),
   };
 };
 
-/* ——— OPȚIUNI GRAFICĂ ——— */
-type DesignOption = "upload" | "pro"; // fără “configure online” momentan
-const PRO_DESIGN_FEE = 50; // RON (o singură dată pe comandă)
+/* GRAFICĂ */
+type DesignOption = "upload" | "pro";
+const PRO_DESIGN_FEE = 50;
 
-const BannerConfiguratorPage: React.FC = () => {
+export default function BannerPage() {
   const { addItem, items } = useCart();
 
   const [input, setInput] = useState<PriceInput>({
@@ -90,76 +77,53 @@ const BannerConfiguratorPage: React.FC = () => {
     want_hem_and_grommets: true,
   });
 
-  // Text pentru a permite golirea completă
-  const [lengthText, setLengthText] = useState<string>("");
-  const [heightText, setHeightText] = useState<string>("");
-
+  const [lengthText, setLengthText] = useState("");
+  const [heightText, setHeightText] = useState("");
   const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
-  const priceDetails = useMemo(() => calculatePrice(input), [input]);
-
-  // Upload status + URL
   const [designOption, setDesignOption] = useState<DesignOption>("upload");
+
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
-  const [uploading, setUploading] = useState<boolean>(false);
+  const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const hasProDesignInCart = items.some((i) => i.id === "design-pro");
+  const hasProDesign = items.some((i) => i.id === "design-pro");
 
+  const priceDetails = useMemo(() => calculatePrice(input), [input]);
   const pricePerUnit =
     input.quantity > 0 && priceDetails.finalPrice > 0
       ? roundMoney(priceDetails.finalPrice / input.quantity)
       : 0;
 
-  const updateInput = <K extends keyof PriceInput>(key: K, val: PriceInput[K]) => {
-    setInput((prev) => ({ ...prev, [key]: val }));
-  };
+  const updateInput = <K extends keyof PriceInput>(k: K, v: PriceInput[K]) =>
+    setInput((p) => ({ ...p, [k]: v }));
 
-  const setNumericQuantity = (value: number) => {
-    const safe = Number.isFinite(value) ? Math.max(1, Math.floor(value)) : 1;
-    updateInput("quantity", safe);
-  };
+  const setQty = (v: number) =>
+    updateInput("quantity", Math.max(1, Math.floor(Number.isFinite(v) ? v : 1)));
 
-  // Handlere ce permit golirea completă și doar cifre
   const onChangeLength = (v: string) => {
-    const digits = v.replace(/\D/g, "");
-    setLengthText(digits);
-    updateInput("width_cm", digits === "" ? 0 : parseInt(digits, 10));
+    const d = v.replace(/\D/g, "");
+    setLengthText(d);
+    updateInput("width_cm", d === "" ? 0 : parseInt(d, 10));
   };
-
   const onChangeHeight = (v: string) => {
-    const digits = v.replace(/\D/g, "");
-    setHeightText(digits);
-    updateInput("height_cm", digits === "" ? 0 : parseInt(digits, 10));
+    const d = v.replace(/\D/g, "");
+    setHeightText(d);
+    updateInput("height_cm", d === "" ? 0 : parseInt(d, 10));
   };
 
-  // Upload: presign + PUT direct în S3 (Railway friendly)
+  // Upload la Cloudinary prin /api/upload
   const handleArtworkFileInput = async (file: File | null) => {
     setArtworkUrl(null);
     setUploadError(null);
     if (!file) return;
-
     try {
       setUploading(true);
-
-      // 1) cere URL semnat
-      const presignRes = await fetch("/api/upload/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
-      });
-      if (!presignRes.ok) throw new Error("Presign eșuat");
-      const { uploadUrl, objectUrl } = await presignRes.json();
-
-      // 2) upload direct în S3
-      const putRes = await fetch(uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type || "application/octet-stream" },
-        body: file,
-      });
-      if (!putRes.ok) throw new Error("Upload în storage eșuat");
-
-      // 3) salvează URL-ul public
-      setArtworkUrl(objectUrl);
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (!res.ok) throw new Error("Upload eșuat");
+      const data = await res.json();
+      setArtworkUrl(data.url);
     } catch (e: any) {
       setUploadError(e?.message ?? "Eroare la upload");
     } finally {
@@ -182,18 +146,16 @@ const BannerConfiguratorPage: React.FC = () => {
     const unitAmount = pricePerUnit;
     const totalAmount = roundMoney(unitAmount * input.quantity);
 
-    const artworkSuffix = artworkUrl ? " (cu grafică încărcată)" : "";
-
     addItem({
       id: uniqueId,
-      name: `Banner ${input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"} - ${input.width_cm}x${input.height_cm}cm${artworkSuffix}`,
+      name: `Banner ${input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"} - ${input.width_cm}x${input.height_cm}cm${artworkUrl ? " (cu grafică încărcată)" : ""}`,
       quantity: input.quantity,
       unitAmount,
       totalAmount,
       artworkUrl: artworkUrl ?? undefined,
     });
 
-    if (designOption === "pro" && !hasProDesignInCart) {
+    if (designOption === "pro" && !hasProDesign) {
       addItem({
         id: "design-pro",
         name: "Serviciu grafică profesională",
@@ -212,7 +174,6 @@ const BannerConfiguratorPage: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-gray-950 text-white">
-      {/* Toast scurt */}
       <div
         id="added-toast"
         className="pointer-events-none fixed left-1/2 top-6 z-50 -translate-x-1/2 rounded-full bg-emerald-600/90 px-4 py-2 text-sm font-medium text-white shadow-2xl shadow-emerald-900/40 opacity-0 transition-opacity"
@@ -222,18 +183,14 @@ const BannerConfiguratorPage: React.FC = () => {
 
       <div className="mx-auto max-w-7xl px-4 py-10">
         <header className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Configurator Banner</h1>
-          <p className="mt-2 text-white/70">
-            Alege lungimea, înălțimea, materialul, finisajele și încarcă grafica (opțional). Vezi prețul în timp real.
-          </p>
+          <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Banner</h1>
+          <p className="mt-2 text-white/70">Alege lungimea, înălțimea, materialul, finisajele și încarcă grafica (opțional).</p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* STÂNGA: CONFIGURATOR */}
           <div className="lg:col-span-3 space-y-8">
             <ConfigSection icon={<Ruler />} title="1. Dimensiuni și Cantitate">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Lungime (cm) — poate fi gol */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Lungime (cm)</label>
                   <input
@@ -243,11 +200,9 @@ const BannerConfiguratorPage: React.FC = () => {
                     value={lengthText}
                     onChange={(e) => onChangeLength(e.target.value)}
                     placeholder="ex: 100"
-                    className="w-full text-left bg-gray-800 border border-gray-700 py-2.5 px-3 text-lg font-semibold outline-none rounded-md"
+                    className="w-full bg-gray-800 border border-gray-700 py-2.5 px-3 text-lg font-semibold rounded-md"
                   />
                 </div>
-
-                {/* Înălțime (cm) — poate fi gol */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Înălțime (cm)</label>
                   <input
@@ -257,12 +212,10 @@ const BannerConfiguratorPage: React.FC = () => {
                     value={heightText}
                     onChange={(e) => onChangeHeight(e.target.value)}
                     placeholder="ex: 100"
-                    className="w-full text-left bg-gray-800 border border-gray-700 py-2.5 px-3 text-lg font-semibold outline-none rounded-md"
+                    className="w-full bg-gray-800 border border-gray-700 py-2.5 px-3 text-lg font-semibold rounded-md"
                   />
                 </div>
-
-                {/* Cantitate */}
-                <NumberInput label="Cantitate (buc)" value={input.quantity} onChange={(v) => setNumericQuantity(v)} />
+                <NumberInput label="Cantitate (buc)" value={input.quantity} onChange={(v) => setQty(v)} />
               </div>
             </ConfigSection>
 
@@ -318,7 +271,6 @@ const BannerConfiguratorPage: React.FC = () => {
                   <div className="font-bold text-white">Am grafică</div>
                   <div className="text-xs text-white/70">Încarcă fișierul tău (PDF, AI, PSD, JPG, PNG)</div>
                 </button>
-
                 <button
                   type="button"
                   onClick={() => setDesignOption("pro")}
@@ -345,12 +297,15 @@ const BannerConfiguratorPage: React.FC = () => {
                     {uploadError && <span className="text-red-400">Eroare: {uploadError}</span>}
                     {artworkUrl && (
                       <span className="text-emerald-400">
-                        Încărcat: <a className="underline" href={artworkUrl} target="_blank" rel="noopener noreferrer">deschide fișier</a>
+                        Încărcat:{" "}
+                        <a className="underline" href={artworkUrl} target="_blank" rel="noopener noreferrer">
+                          deschide fișier
+                        </a>
                       </span>
                     )}
                   </div>
                   <p className="mt-2 text-xs text-white/60">
-                    Notă: linkul fișierului ajunge automat la noi în emailul comenzii.
+                    Linkul fișierului ajunge automat în emailul de comandă.
                   </p>
                 </div>
               )}
@@ -358,9 +313,9 @@ const BannerConfiguratorPage: React.FC = () => {
               {designOption === "pro" && (
                 <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
                   <p className="text-sm text-white/80">
-                    Un designer te va contacta pentru detalii grafice după plasarea comenzii. Taxa se aplică o singură dată (+{PRO_DESIGN_FEE} RON).
+                    Un designer te va contacta după plasarea comenzii. Taxa se aplică o singură dată (+{PRO_DESIGN_FEE} RON).
                   </p>
-                  {hasProDesignInCart && <p className="text-xs text-white/60 mt-2">Taxa este deja în coș.</p>}
+                  {hasProDesign && <p className="text-xs text-white/60 mt-2">Taxa este deja în coș.</p>}
                 </div>
               )}
             </ConfigSection>
@@ -369,15 +324,9 @@ const BannerConfiguratorPage: React.FC = () => {
           {/* DREAPTA: SUMAR + GALERIE */}
           <div className="lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
-              {/* Galerie */}
               <div className="rounded-2xl bg-gray-900/50 border border-gray-700/60 p-4">
                 <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
-                  <img
-                    src={activeImage}
-                    alt="Banner preview"
-                    className="h-full w-full object-cover"
-                    loading="eager"
-                  />
+                  <img src={activeImage} alt="Banner preview" className="h-full w-full object-cover" loading="eager" />
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
                   {GALLERY.map((src) => (
@@ -395,51 +344,31 @@ const BannerConfiguratorPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Sumar */}
               <div className="rounded-2xl bg-gray-900/50 border border-gray-700/60 p-6">
                 <h2 className="text-xl font-bold border-b border-gray-700 pb-4 mb-4">Sumar Comandă</h2>
 
                 <div className="space-y-2 text-white/80 text-sm">
                   <p>
-                    Dimensiuni:{" "}
-                    <span className="text-white font-semibold">
-                      {lengthText || "—"} x {heightText || "—"} cm
-                    </span>
+                    Dimensiuni: <span className="text-white font-semibold">{lengthText || "—"} x {heightText || "—"} cm</span>
                   </p>
-                  <p>
-                    Cantitate: <span className="text-white font-semibold">{input.quantity} buc</span>
-                  </p>
-                  <p>
-                    Material:{" "}
-                    <span className="text-white font-semibold">
-                      {input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"}
-                    </span>
-                  </p>
+                  <p>Cantitate: <span className="text-white font-semibold">{input.quantity} buc</span></p>
+                  <p>Material: <span className="text-white font-semibold">{input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"}</span></p>
                   {artworkUrl && (
                     <p className="text-xs">
                       Fișier încărcat:{" "}
-                      <a className="underline text-indigo-300" href={artworkUrl} target="_blank" rel="noopener noreferrer">deschide</a>
+                      <a className="underline text-indigo-300" href={artworkUrl} target="_blank" rel="noopener noreferrer">
+                        deschide
+                      </a>
                     </p>
                   )}
                 </div>
 
                 <div className="border-t border-gray-700 mt-4 pt-4">
                   <p className="text-white/60 text-sm">Preț total</p>
-                  <p className="text-4xl font-extrabold text-white my-2">
-                    {priceDetails?.finalPrice.toFixed(2)} RON
-                  </p>
-                  {pricePerUnit > 0 && (
-                    <p className="text-xs text-white/60">{pricePerUnit.toFixed(2)} RON / buc</p>
-                  )}
-                  {designOption === "pro" && !hasProDesignInCart && (
-                    <p className="text-xs text-white/80 mt-2">
-                      + {PRO_DESIGN_FEE.toFixed(2)} RON (grafică profesională — se va adăuga o singură dată la coș)
-                    </p>
-                  )}
-                  {designOption === "pro" && hasProDesignInCart && (
-                    <p className="text-xs text-white/60 mt-2">
-                      Taxa de grafică profesională este deja în coș (o singură dată pe comandă).
-                    </p>
+                  <p className="text-4xl font-extrabold text-white my-2">{priceDetails?.finalPrice.toFixed(2)} RON</p>
+                  {pricePerUnit > 0 && <p className="text-xs text-white/60">{pricePerUnit.toFixed(2)} RON / buc</p>}
+                  {designOption === "pro" && !hasProDesign && (
+                    <p className="text-xs text-white/80 mt-2">+ {PRO_DESIGN_FEE.toFixed(2)} RON (grafică profesională — se va adăuga o singură dată)</p>
                   )}
                 </div>
 
@@ -462,37 +391,22 @@ const BannerConfiguratorPage: React.FC = () => {
       </div>
     </main>
   );
-};
+}
 
-/* ——— Componente UI ——— */
-
-const ConfigSection: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({
-  icon,
-  title,
-  children,
-}) => (
-  <div className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-6">
-    <div className="flex items-center gap-3 mb-5">
-      <div className="text-indigo-400">{icon}</div>
-      <h2 className="text-xl font-bold text-white">{title}</h2>
+function ConfigSection({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-6">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="text-indigo-400">{icon}</div>
+        <h2 className="text-xl font-bold text-white">{title}</h2>
+      </div>
+      {children}
     </div>
-    {children}
-  </div>
-);
+  );
+}
 
-const NumberInput = ({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (value: number) => void;
-}) => {
-  const inc = (d: number) => {
-    const next = Math.max(1, value + d);
-    onChange(next);
-  };
+function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  const inc = (d: number) => onChange(Math.max(1, value + d));
   return (
     <div>
       <label className="block text-sm font-medium text-gray-300 mb-2">{label}</label>
@@ -512,9 +426,9 @@ const NumberInput = ({
       </div>
     </div>
   );
-};
+}
 
-const MaterialOption = ({
+function MaterialOption({
   title,
   description,
   selected,
@@ -524,16 +438,16 @@ const MaterialOption = ({
   description: string;
   selected: boolean;
   onClick: () => void;
-}) => (
-  <button
-    onClick={onClick}
-    className={`text-left p-4 rounded-lg border-2 transition-all ${
-      selected ? "border-indigo-500 bg-indigo-900/20" : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
-    }`}
-  >
-    <p className="font-bold text-white">{title}</p>
-    <p className="text-sm text-gray-400">{description}</p>
-  </button>
-);
-
-export default BannerConfiguratorPage;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`text-left p-4 rounded-lg border-2 transition-all ${
+        selected ? "border-indigo-500 bg-indigo-900/20" : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
+      }`}
+    >
+      <p className="font-bold text-white">{title}</p>
+      <p className="text-sm text-gray-400">{description}</p>
+    </button>
+  );
+}
