@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    // IMPORTANT: Stripe vrea raw body ca Buffer
+    // Stripe are nevoie de raw body ca Buffer
     const buf = Buffer.from(await req.arrayBuffer());
     event = stripe.webhooks.constructEvent(buf, signature, webhookSecret);
   } catch (err: any) {
@@ -31,7 +31,8 @@ export async function POST(req: NextRequest) {
 
       if (!session.metadata) {
         console.error('[Stripe Webhook] Metadata lipsă pe session');
-        return NextResponse.json({ error: 'Metadata lipsă' }, { status: 400 });
+        // Răspund 200 ca să nu tot retrimită Stripe, dar loghez
+        return NextResponse.json({ received: true, warning: 'metadata-missing' });
       }
 
       const orderData = {
@@ -40,11 +41,12 @@ export async function POST(req: NextRequest) {
         billing: JSON.parse(session.metadata.billing),
       };
 
+      // NU aruncăm dacă Oblio pică – comanda merge oricum
       await fulfillOrder(orderData, 'Card');
     }
   } catch (err: any) {
+    // Loghez, dar nu mai întorc 500 – nu blocăm livrarea Stripe și nu duplicăm comenzi
     console.error('[Stripe Webhook] Handler error:', err?.message || err);
-    return NextResponse.json({ error: 'Eroare la procesarea internă a comenzii.' }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });
