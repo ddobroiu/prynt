@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fulfillOrder } from '../../../../lib/orderService';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const orderData = await req.json();
@@ -19,7 +22,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('[API /order/create] EROARE:', error?.message || error);
-    // Întotdeauna JSON, ca front-end-ul să nu mai vadă “Unexpected token '<'...”
     return NextResponse.json({ success: false, message: 'Eroare internă.' }, { status: 500 });
   }
 }
