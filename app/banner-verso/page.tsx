@@ -5,7 +5,7 @@ import { useCart } from "../../components/CartProvider";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info } from "lucide-react";
 import BannerModeSwitch from "../../components/BannerModeSwitch";
 
-/* GALLERY (exemplu) */
+/* GALLERY (exemplu — putem reutiliza imaginile de banner) */
 const GALLERY = [
   "/products/banner/1.jpg",
   "/products/banner/2.jpg",
@@ -13,13 +13,13 @@ const GALLERY = [
   "/products/banner/4.jpg",
 ] as const;
 
-/* LOGICA PREȚ (integrată) */
-type BannerMaterial = "frontlit_440" | "frontlit_510";
+/* LOGICA PREȚ (Față-verso: alte materiale și tarife) */
+type BannerMaterialDouble = "blockout_650" | "frontlit_510_double";
 type PriceInput = {
   width_cm: number;
   height_cm: number;
   quantity: number;
-  material: BannerMaterial;
+  material: BannerMaterialDouble;
   want_wind_holes: boolean;
   want_hem_and_grommets: boolean;
 };
@@ -32,14 +32,22 @@ type PriceOutput = {
 
 const MINIMUM_AREA_PER_ORDER = 1.0;
 const PRICING_TIERS = [
-  { maxSqm: 5, price: 35.0 },
-  { maxSqm: 10, price: 32.0 },
-  { maxSqm: 20, price: 30.0 },
-  { maxSqm: 50, price: 28.0 },
-  { maxSqm: Infinity, price: 26.0 },
+  { maxSqm: 5, price: 45.0 },
+  { maxSqm: 10, price: 42.0 },
+  { maxSqm: 20, price: 40.0 },
+  { maxSqm: 50, price: 38.0 },
+  { maxSqm: Infinity, price: 36.0 },
 ];
-const SURCHARGES = { frontlit_510: 1.15, wind_holes: 1.05, hem_and_grommets: 1.10 };
+// coeficienți specifici față-verso
+const SURCHARGES = {
+  blockout_650: 1.25,        // material special anti-transparență (double print)
+  frontlit_510_double: 1.18, // alternativă (double print acceptabil)
+  wind_holes: 1.05,
+  hem_and_grommets: 1.10,
+};
+
 const roundMoney = (n: number) => Math.round(n * 100) / 100;
+
 const calculatePrice = (input: PriceInput): PriceOutput => {
   if (input.width_cm <= 0 || input.height_cm <= 0 || input.quantity <= 0) {
     return { sqm_per_unit: 0, total_sqm_taxable: 0, pricePerSqmBase: 0, finalPrice: 0 };
@@ -47,13 +55,18 @@ const calculatePrice = (input: PriceInput): PriceOutput => {
   const sqm_per_unit = (input.width_cm / 100) * (input.height_cm / 100);
   const total_sqm = sqm_per_unit * input.quantity;
   const total_sqm_taxable = Math.max(total_sqm, MINIMUM_AREA_PER_ORDER);
+
   let base = PRICING_TIERS.find((t) => total_sqm_taxable <= t.maxSqm)?.price ?? PRICING_TIERS.at(-1)!.price;
+
   let mult = 1;
-  if (input.material === "frontlit_510") mult *= SURCHARGES.frontlit_510;
+  if (input.material === "blockout_650") mult *= SURCHARGES.blockout_650;
+  if (input.material === "frontlit_510_double") mult *= SURCHARGES.frontlit_510_double;
   if (input.want_wind_holes) mult *= SURCHARGES.wind_holes;
   if (input.want_hem_and_grommets) mult *= SURCHARGES.hem_and_grommets;
+
   const adj = base * mult;
   const final = total_sqm_taxable * adj;
+
   return {
     sqm_per_unit: roundMoney(sqm_per_unit),
     total_sqm_taxable: roundMoney(total_sqm_taxable),
@@ -66,14 +79,14 @@ const calculatePrice = (input: PriceInput): PriceOutput => {
 type DesignOption = "upload" | "pro" | "text_only";
 const PRO_DESIGN_FEE = 50;
 
-export default function BannerPage() {
+export default function BannerDoublePage() {
   const { addItem, items } = useCart();
 
   const [input, setInput] = useState<PriceInput>({
     width_cm: 0,
     height_cm: 0,
     quantity: 1,
-    material: "frontlit_440",
+    material: "blockout_650",
     want_wind_holes: false,
     want_hem_and_grommets: true,
   });
@@ -86,7 +99,7 @@ export default function BannerPage() {
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [textDesign, setTextDesign] = useState<string>(""); // pentru “text_only”
+  const [textDesign, setTextDesign] = useState<string>("");
 
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
@@ -140,7 +153,7 @@ export default function BannerPage() {
     if (!priceDetails || priceDetails.finalPrice <= 0) return;
 
     const uniqueId = [
-      "banner",
+      "banner-ds", // double-sided
       input.material,
       input.width_cm,
       input.height_cm,
@@ -154,7 +167,7 @@ export default function BannerPage() {
 
     addItem({
       id: uniqueId,
-      name: `Banner ${input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"} - ${input.width_cm}x${input.height_cm}cm`,
+      name: `Banner Față-verso ${input.material === "blockout_650" ? "Blockout 650g/mp" : "Frontlit 510g/mp (dublă față)"} - ${input.width_cm}x${input.height_cm}cm`,
       quantity: input.quantity,
       unitAmount,
       totalAmount,
@@ -182,7 +195,7 @@ export default function BannerPage() {
 
   return (
     <main className="min-h-screen">
-      {/* TOAST VERDE — clar vizibil */}
+      {/* TOAST VERDE */}
       <div
         id="added-toast"
         className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`}
@@ -199,9 +212,9 @@ export default function BannerPage() {
               <BannerModeSwitch />
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Banner</h1>
+            <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Banner Față-verso</h1>
             <p className="mt-2 text-white/70">
-              Alege lungimea, înălțimea, materialul, finisajele și partea de grafică (încărcare fișier / text simplu / serviciu pro).
+              Alege lungimea, înălțimea, materialul special pentru dublă față, finisajele și partea de grafică (încărcare fișier / text / serviciu pro).
             </p>
           </div>
           <button
@@ -213,8 +226,6 @@ export default function BannerPage() {
             <span className="ml-2">Mai multe detalii</span>
           </button>
         </header>
-
-        {/* IMPORTANT: rezumatul compact de sus pe mobil e scos ca să nu dublăm bara fixă de jos */}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* STÂNGA — configurator */}
@@ -249,19 +260,19 @@ export default function BannerPage() {
               </div>
             </ConfigSection>
 
-            <ConfigSection icon={<Layers />} title="2. Material Banner">
+            <ConfigSection icon={<Layers />} title="2. Material Banner (Față-verso)">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <MaterialOption
-                  title="Frontlit 440g/mp"
-                  description="Standard, echilibru bun calitate-preț"
-                  selected={input.material === "frontlit_440"}
-                  onClick={() => updateInput("material", "frontlit_440")}
+                  title="Blockout 650g/mp"
+                  description="Recomandat pentru print dublă față (anti-transparență)"
+                  selected={input.material === "blockout_650"}
+                  onClick={() => updateInput("material", "blockout_650")}
                 />
                 <MaterialOption
-                  title="Frontlit 510g/mp"
-                  description="Premium, mai rigid și mai durabil"
-                  selected={input.material === "frontlit_510"}
-                  onClick={() => updateInput("material", "frontlit_510")}
+                  title="Frontlit 510g/mp (față-verso)"
+                  description="Alternativă pentru dublă față (proces special de print)"
+                  selected={input.material === "frontlit_510_double"}
+                  onClick={() => updateInput("material", "frontlit_510_double")}
                 />
               </div>
             </ConfigSection>
@@ -392,7 +403,7 @@ export default function BannerPage() {
                 <div className="space-y-2 text-white/80 text-sm">
                   <p>Dimensiuni: <span className="text-white font-semibold">{lengthText || "—"} x {heightText || "—"} cm</span></p>
                   <p>Cantitate: <span className="text-white font-semibold">{input.quantity} buc</span></p>
-                  <p>Material: <span className="text-white font-semibold">{input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"}</span></p>
+                  <p>Material: <span className="text-white font-semibold">{input.material === "blockout_650" ? "Blockout 650g/mp" : "Frontlit 510g/mp (față-verso)"}</span></p>
                   {artworkUrl && (
                     <p className="text-xs">
                       Fișier încărcat:{" "}
@@ -408,7 +419,7 @@ export default function BannerPage() {
                   )}
                 </div>
 
-                {/* Preț + CTA: doar desktop (pe mobil avem bara fixă jos) */}
+                {/* Preț + CTA: doar desktop */}
                 <div className="hidden lg:block">
                   <div className="border-t border-white/10 mt-4 pt-4">
                     <p className="text-white/60 text-sm">Preț total</p>
@@ -431,7 +442,7 @@ export default function BannerPage() {
               </div>
 
               <div className="card-muted p-4 text-xs text-white/60">
-                Print durabil. Livrare rapidă. Suport: contact@prynt.ro
+                Banner față-verso cu material dedicat. Livrare rapidă. Suport: contact@prynt.ro
               </div>
             </div>
           </aside>
@@ -449,13 +460,13 @@ export default function BannerPage() {
       {/* MODAL: Mai multe detalii */}
       {detailsOpen && (
         <DetailsModal onClose={() => setDetailsOpen(false)}>
-          <h3 className="text-xl font-bold mb-3">Detalii produs</h3>
+          <h3 className="text-xl font-bold mb-3">Detalii produs (Față-verso)</h3>
           <div className="space-y-4 text-sm text-white/80">
             <section>
               <h4 className="font-semibold text-white mb-1">Materiale</h4>
               <ul className="list-disc pl-5 space-y-1">
-                <li>Frontlit 440 g/mp: standard, flexibil, bun pentru majoritatea utilizărilor.</li>
-                <li>Frontlit 510 g/mp: mai rigid și mai durabil — recomandat pentru bannere mari sau expunere îndelungată.</li>
+                <li>Blockout 650 g/mp: material opac, ideal pentru print dublă față (anti-transparență).</li>
+                <li>Frontlit 510 g/mp (față-verso): alternativă cu proces special de dublă imprimare.</li>
               </ul>
             </section>
             <section>
@@ -469,7 +480,7 @@ export default function BannerPage() {
               <h4 className="font-semibold text-white mb-1">Fișiere/Grafică</h4>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Acceptăm: PDF, AI, PSD, JPG, PNG (profil CMYK recomandat).</li>
-                <li>Pentru “Banner cu text”: scrie textul, ne ocupăm noi de așezare (gratis).</li>
+                <li>“Banner cu text”: scrie textul, ne ocupăm noi de așezare (gratis).</li>
                 <li>Pentru grafică complexă, alege “Grafică profesională”.</li>
               </ul>
             </section>
@@ -488,7 +499,7 @@ export default function BannerPage() {
   );
 }
 
-/* UI mici și reutilizabile */
+/* UI mici și reutilizabile — la fel ca în pagina standard */
 function ConfigSection({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
     <div className="card p-6">
@@ -577,5 +588,56 @@ function SelectCard({
       <div className="font-semibold">{title}</div>
       <div className="text-xs text-white/70">{subtitle}</div>
     </button>
+  );
+}
+
+/* Modal simplu (aceeași interfață așteptată de pagină) */
+function DetailsModal({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-black/70">
+      <div className="max-w-2xl w-full rounded-xl border border-white/10 bg-[#0b0f19] p-6 shadow-2xl">
+        <div className="flex justify-end">
+          <button className="btn-outline text-xs" onClick={onClose}>Închide</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* Bară de preț mobil minimală (fallback în caz că nu există componenta globală) */
+function MobilePriceBar({
+  total,
+  disabled,
+  onAddToCart,
+  onShowSummary,
+}: {
+  total: number;
+  disabled: boolean;
+  onAddToCart: () => void;
+  onShowSummary: () => void;
+}) {
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0b0f19] p-3 lg:hidden">
+      <div className="page flex items-center gap-3">
+        <button
+          className="btn-outline flex-1"
+          onClick={onShowSummary}
+          aria-label="Vezi sumar"
+        >
+          Sumar
+        </button>
+        <div className="flex-1 text-right">
+          <div className="text-base font-bold">{total > 0 ? `${total.toFixed(2)} RON` : "—"}</div>
+          <button
+            onClick={onAddToCart}
+            disabled={disabled}
+            className="btn-primary mt-1 w-full"
+          >
+            Adaugă în coș
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
