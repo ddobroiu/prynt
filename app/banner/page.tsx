@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import Link from "next/link";
 import { useCart } from "../../components/CartProvider";
 import { calculatePrice, roundMoney, PriceInput } from "../../lib/pricing-banner";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart } from "lucide-react";
@@ -13,9 +14,11 @@ const GALLERY = [
 ] as const;
 
 type MaterialKey = "frontlit_440" | "frontlit_510";
+type DesignOption = "upload" | "configure" | "pro";
+const PRO_DESIGN_FEE = 50; // RON (o singură dată pe comandă)
 
 const BannerConfiguratorPage: React.FC = () => {
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
 
   const [input, setInput] = useState<PriceInput>({
     width_cm: 100,
@@ -26,8 +29,14 @@ const BannerConfiguratorPage: React.FC = () => {
     want_hem_and_grommets: true,
   });
 
-  const priceDetails = useMemo(() => calculatePrice(input), [input]);
   const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
+  const priceDetails = useMemo(() => calculatePrice(input), [input]);
+
+  // Grafică
+  const [designOption, setDesignOption] = useState<DesignOption>("upload");
+  const [artworkFile, setArtworkFile] = useState<File | null>(null);
+  const [artworkPreview, setArtworkPreview] = useState<string | null>(null);
+  const hasProDesignInCart = items.some((i) => i.id === "design-pro");
 
   const pricePerUnit =
     input.quantity > 0 && priceDetails.finalPrice > 0
@@ -41,6 +50,16 @@ const BannerConfiguratorPage: React.FC = () => {
   const setNumeric = (key: "width_cm" | "height_cm" | "quantity", value: number) => {
     const safe = Number.isFinite(value) ? Math.max(1, Math.floor(value)) : 1;
     updateInput(key, safe as any);
+  };
+
+  const handleArtworkChange = (file: File | null) => {
+    setArtworkFile(file);
+    if (file && file.type.startsWith("image/")) {
+      const url = URL.createObjectURL(file);
+      setArtworkPreview(url);
+    } else {
+      setArtworkPreview(null);
+    }
   };
 
   const handleAddToCart = () => {
@@ -59,13 +78,29 @@ const BannerConfiguratorPage: React.FC = () => {
     const unitAmount = pricePerUnit;
     const totalAmount = roundMoney(unitAmount * input.quantity);
 
+    const artworkSuffix =
+      designOption === "upload" && artworkFile
+        ? ` (cu grafică încărcată: ${artworkFile.name})`
+        : "";
+
     addItem({
       id: uniqueId,
-      name: `Banner ${input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"} - ${input.width_cm}x${input.height_cm}cm`,
+      name: `Banner ${input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"} - ${input.width_cm}x${input.height_cm}cm${artworkSuffix}`,
       quantity: input.quantity,
       unitAmount,
       totalAmount,
     });
+
+    // Taxa de grafică profesională — o singură dată pe comandă
+    if (designOption === "pro" && !hasProDesignInCart) {
+      addItem({
+        id: "design-pro",
+        name: "Serviciu grafică profesională",
+        quantity: 1,
+        unitAmount: PRO_DESIGN_FEE,
+        totalAmount: PRO_DESIGN_FEE,
+      });
+    }
 
     const toast = document.getElementById("added-toast");
     if (toast) {
@@ -85,14 +120,13 @@ const BannerConfiguratorPage: React.FC = () => {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-10">
-        {/* Header sobru, ca înainte */}
         <header className="mb-8">
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Configurator Banner</h1>
-          <p className="mt-2 text-white/70">Alege dimensiunile, materialul și finisajele. Vezi prețul în timp real.</p>
+          <p className="mt-2 text-white/70">Alege dimensiunile, materialul, finisajele și opțiunile de grafică. Vezi prețul în timp real.</p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* STÂNGA: CONFIGURATOR (stil apropiat de cel vechi) */}
+          {/* STÂNGA: CONFIGURATOR */}
           <div className="lg:col-span-3 space-y-8">
             <ConfigSection icon={<Ruler />} title="1. Dimensiuni și Cantitate">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -141,12 +175,110 @@ const BannerConfiguratorPage: React.FC = () => {
                 </label>
               </div>
             </ConfigSection>
+
+            {/* 4. Grafică */}
+            <ConfigSection icon={<CheckCircle />} title="4. Grafică">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Am grafică (upload) */}
+                <button
+                  type="button"
+                  onClick={() => setDesignOption("upload")}
+                  className={`text-left p-4 rounded-lg border-2 transition-all ${
+                    designOption === "upload" ? "border-indigo-500 bg-indigo-900/20" : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
+                  }`}
+                >
+                  <div className="font-bold text-white">Am grafică</div>
+                  <div className="text-xs text-white/70">Încarcă fișierul tău (PDF, AI, PSD, JPG, PNG)</div>
+                </button>
+
+                {/* Configurează online */}
+                <button
+                  type="button"
+                  onClick={() => setDesignOption("configure")}
+                  className={`text-left p-4 rounded-lg border-2 transition-all ${
+                    designOption === "configure" ? "border-indigo-500 bg-indigo-900/20" : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
+                  }`}
+                >
+                  <div className="font-bold text-white">Configurează online</div>
+                  <div className="text-xs text-white/70">Creează grafica în browser (în curând)</div>
+                </button>
+
+                {/* Cumpără grafică profesională */}
+                <button
+                  type="button"
+                  onClick={() => setDesignOption("pro")}
+                  className={`text-left p-4 rounded-lg border-2 transition-all ${
+                    designOption === "pro" ? "border-indigo-500 bg-indigo-900/20" : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
+                  }`}
+                >
+                  <div className="font-bold text-white">Cumpără grafică profesională</div>
+                  <div className="text-xs text-white/70">+{PRO_DESIGN_FEE} RON (o singură dată/comandă)</div>
+                </button>
+              </div>
+
+              {/* Sub-opțiuni */}
+              {designOption === "upload" && (
+                <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
+                  <label className="block text-sm font-medium text-white/80 mb-2">Încarcă fișier</label>
+                  <input
+                    type="file"
+                    accept=".pdf,.ai,.psd,.jpg,.jpeg,.png"
+                    onChange={(e) => handleArtworkChange(e.target.files?.[0] || null)}
+                    className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-white hover:file:bg-indigo-500"
+                  />
+                  {artworkFile && (
+                    <div className="mt-3 text-white/80 text-sm">
+                      Selectat: <strong>{artworkFile.name}</strong>
+                    </div>
+                  )}
+                  {artworkPreview && (
+                    <div className="mt-3">
+                      <img
+                        src={artworkPreview}
+                        alt="Previzualizare grafică"
+                        className="max-h-48 rounded-lg border border-gray-700"
+                      />
+                    </div>
+                  )}
+                  <p className="mt-2 text-xs text-white/60">
+                    Notă: încărcarea finală a fișierului se va face la checkout sau prin email după plasarea comenzii.
+                  </p>
+                </div>
+              )}
+
+              {designOption === "configure" && (
+                <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
+                  <p className="text-sm text-white/80 mb-3">
+                    Vei putea crea grafica ta direct în browser. Pagina de configurator urmează în curând.
+                  </p>
+                  <Link
+                    href="/banner/editor"
+                    className="inline-block rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-500"
+                  >
+                    Configurează
+                  </Link>
+                </div>
+              )}
+
+              {designOption === "pro" && (
+                <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
+                  <p className="text-sm text-white/80">
+                    Un designer te va contacta pentru a prelua detaliile grafice după plasarea comenzii. Taxa se aplică o singură dată pe comandă (+{PRO_DESIGN_FEE} RON).
+                  </p>
+                  {hasProDesignInCart && (
+                    <p className="text-xs text-white/60 mt-2">
+                      Taxa de grafică profesională este deja în coș.
+                    </p>
+                  )}
+                </div>
+              )}
+            </ConfigSection>
           </div>
 
-          {/* DREAPTA: SUMAR + GALERIE (în spiritul “Sumar Comandă” anterior) */}
+          {/* DREAPTA: SUMAR + GALERIE */}
           <div className="lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
-              {/* Galerie modernă dar discretă */}
+              {/* Galerie */}
               <div className="rounded-2xl bg-gray-900/50 border border-gray-700/60 p-4">
                 <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
                   <img
@@ -172,7 +304,7 @@ const BannerConfiguratorPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Sumar ca înainte, cu detalii esențiale */}
+              {/* Sumar */}
               <div className="rounded-2xl bg-gray-900/50 border border-gray-700/60 p-6">
                 <h2 className="text-xl font-bold border-b border-gray-700 pb-4 mb-4">Sumar Comandă</h2>
 
@@ -202,6 +334,16 @@ const BannerConfiguratorPage: React.FC = () => {
                   {pricePerUnit > 0 && (
                     <p className="text-xs text-white/60">{pricePerUnit.toFixed(2)} RON / buc</p>
                   )}
+                  {designOption === "pro" && !hasProDesignInCart && (
+                    <p className="text-xs text-white/80 mt-2">
+                      + {PRO_DESIGN_FEE.toFixed(2)} RON (grafică profesională — se va adăuga o singură dată la coș)
+                    </p>
+                  )}
+                  {designOption === "pro" && hasProDesignInCart && (
+                    <p className="text-xs text-white/60 mt-2">
+                      Taxa de grafică profesională este deja în coș (o singură dată pe comandă).
+                    </p>
+                  )}
                 </div>
 
                 <button
@@ -214,7 +356,6 @@ const BannerConfiguratorPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Notă scurtă, discretă */}
               <div className="rounded-2xl bg-gray-900/40 border border-gray-700/50 p-4 text-xs text-white/60">
                 Print durabil. Livrare rapidă. Suport: contact@prynt.ro
               </div>
@@ -226,7 +367,7 @@ const BannerConfiguratorPage: React.FC = () => {
   );
 };
 
-/* ——— Componente UI (ca în varianta veche) ——— */
+/* ——— Componente UI ——— */
 
 const ConfigSection: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({
   icon,

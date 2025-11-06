@@ -7,12 +7,10 @@ export interface Address {
   strada_nr: string;
 }
 
-// AICI ERA GREȘEALA - Am adăugat câmpurile de adresă și pentru facturare
 export interface Billing {
   tip_factura: 'persoana_fizica' | 'companie';
   cui?: string;
   name?: string;
-  // Am adăugat aceste câmpuri ca opționale
   judet?: string;
   localitate?: string;
   strada_nr?: string;
