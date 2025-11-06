@@ -172,6 +172,15 @@ export default function BannerPage() {
     }
   };
 
+  const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 });
+  const PRESETS = [
+    { w: 100, h: 50, label: "100×50" },
+    { w: 200, h: 100, label: "200×100" },
+    { w: 300, h: 100, label: "300×100" },
+    { w: 300, h: 200, label: "300×200" },
+  ];
+  const scrollToSummary = () => document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
+
   return (
     <main className="min-h-screen bg-gray-950 text-white">
       <div
@@ -181,15 +190,63 @@ export default function BannerPage() {
         Produs adăugat în coș
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-10">
-        <header className="mb-8">
+      <div className="mx-auto max-w-7xl px-4 py-10 pb-24 lg:pb-10">
+        <header className="mb-6">
           <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Banner</h1>
           <p className="mt-2 text-white/70">Alege lungimea, înălțimea, materialul, finisajele și încarcă grafica (opțional).</p>
         </header>
 
+        {/* REZUMAT COMPACT — doar pe mobil */}
+        <section className="lg:hidden mb-6 rounded-xl border border-white/10 bg-gray-900/60 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs text-white/60">Total</div>
+              <div className="text-2xl font-extrabold">{priceDetails.finalPrice > 0 ? fmt.format(priceDetails.finalPrice) : "—"}</div>
+            </div>
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={priceDetails.finalPrice <= 0}
+              className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-500 disabled:opacity-50"
+            >
+              Adaugă în coș
+            </button>
+          </div>
+          <div className="mt-3 text-sm text-white/70">
+            {input.width_cm || input.height_cm ? (
+              <span>
+                Dimensiuni: <b>{input.width_cm || 0} × {input.height_cm || 0} cm</b> · Cantitate: <b>{input.quantity}</b>
+              </span>
+            ) : (
+              <span>Setează dimensiunile ca să vezi prețul.</span>
+            )}
+          </div>
+        </section>
+
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          {/* STÂNGA — configurator */}
           <div className="lg:col-span-3 space-y-8">
             <ConfigSection icon={<Ruler />} title="1. Dimensiuni și Cantitate">
+              {/* preset-uri rapide */}
+              <div className="mb-4 flex flex-wrap gap-2">
+                {PRESETS.map(p => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => {
+                      updateInput("width_cm", p.w);
+                      updateInput("height_cm", p.h);
+                      setLengthText(String(p.w));
+                      setHeightText(String(p.h));
+                    }}
+                    className="px-3 py-1.5 rounded-full text-sm bg-white/5 hover:bg-white/10 border border-white/10"
+                    aria-label={`Setează ${p.label} cm`}
+                  >
+                    {p.label} cm
+                  </button>
+                ))}
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Lungime (cm)</label>
@@ -321,8 +378,8 @@ export default function BannerPage() {
             </ConfigSection>
           </div>
 
-          {/* DREAPTA: SUMAR + GALERIE */}
-          <div className="lg:col-span-2">
+          {/* DREAPTA — SUMAR + GALERIE */}
+          <aside id="order-summary" className="lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="rounded-2xl bg-gray-900/50 border border-gray-700/60 p-4">
                 <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
@@ -348,9 +405,7 @@ export default function BannerPage() {
                 <h2 className="text-xl font-bold border-b border-gray-700 pb-4 mb-4">Sumar Comandă</h2>
 
                 <div className="space-y-2 text-white/80 text-sm">
-                  <p>
-                    Dimensiuni: <span className="text-white font-semibold">{lengthText || "—"} x {heightText || "—"} cm</span>
-                  </p>
+                  <p>Dimensiuni: <span className="text-white font-semibold">{lengthText || "—"} x {heightText || "—"} cm</span></p>
                   <p>Cantitate: <span className="text-white font-semibold">{input.quantity} buc</span></p>
                   <p>Material: <span className="text-white font-semibold">{input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"}</span></p>
                   {artworkUrl && (
@@ -365,7 +420,7 @@ export default function BannerPage() {
 
                 <div className="border-t border-gray-700 mt-4 pt-4">
                   <p className="text-white/60 text-sm">Preț total</p>
-                  <p className="text-4xl font-extrabold text-white my-2">{priceDetails?.finalPrice.toFixed(2)} RON</p>
+                  <p className="text-4xl font-extrabold text-white my-2">{priceDetails.finalPrice.toFixed(2)} RON</p>
                   {pricePerUnit > 0 && <p className="text-xs text-white/60">{pricePerUnit.toFixed(2)} RON / buc</p>}
                   {designOption === "pro" && !hasProDesign && (
                     <p className="text-xs text-white/80 mt-2">+ {PRO_DESIGN_FEE.toFixed(2)} RON (grafică profesională — se va adăuga o singură dată)</p>
@@ -374,7 +429,7 @@ export default function BannerPage() {
 
                 <button
                   onClick={handleAddToCart}
-                  disabled={!priceDetails || priceDetails.finalPrice <= 0}
+                  disabled={priceDetails.finalPrice <= 0}
                   className="w-full mt-6 bg-indigo-600 text-white font-bold py-3 text-lg rounded-lg hover:bg-indigo-500 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <ShoppingCart size={20} />
@@ -386,13 +441,22 @@ export default function BannerPage() {
                 Print durabil. Livrare rapidă. Suport: contact@prynt.ro
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
+
+      {/* BARĂ FIXĂ DE PREȚ (doar mobil) */}
+      <MobilePriceBar
+        total={priceDetails.finalPrice}
+        disabled={priceDetails.finalPrice <= 0}
+        onAddToCart={handleAddToCart}
+        onShowSummary={scrollToSummary}
+      />
     </main>
   );
 }
 
+/* UI mici și reutilizabile */
 function ConfigSection({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
     <div className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-6">
@@ -411,7 +475,7 @@ function NumberInput({ label, value, onChange }: { label: string; value: number;
     <div>
       <label className="block text-sm font-medium text-gray-300 mb-2">{label}</label>
       <div className="flex items-center">
-        <button onClick={() => inc(-1)} className="p-3 bg-gray-700 rounded-l-md hover:bg-gray-600">
+        <button onClick={() => inc(-1)} className="p-3 bg-gray-700 rounded-l-md hover:bg-gray-600" aria-label="Decrement">
           <Minus size={16} />
         </button>
         <input
@@ -420,7 +484,7 @@ function NumberInput({ label, value, onChange }: { label: string; value: number;
           onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))}
           className="w-full text-center bg-gray-800 border-y border-gray-700 py-2.5 text-lg font-semibold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
-        <button onClick={() => inc(1)} className="p-3 bg-gray-700 rounded-r-md hover:bg-gray-600">
+        <button onClick={() => inc(1)} className="p-3 bg-gray-700 rounded-r-md hover:bg-gray-600" aria-label="Increment">
           <Plus size={16} />
         </button>
       </div>
@@ -449,5 +513,63 @@ function MaterialOption({
       <p className="font-bold text-white">{title}</p>
       <p className="text-sm text-gray-400">{description}</p>
     </button>
+  );
+}
+
+/* Bară mobilă fixă pentru total + CTA */
+function MobilePriceBar({
+  total,
+  currency = "RON",
+  disabled,
+  onAddToCart,
+  onShowSummary,
+}: {
+  total: number;
+  currency?: string;
+  disabled?: boolean;
+  onAddToCart?: () => void;
+  onShowSummary?: () => void;
+}) {
+  const fmt = new Intl.NumberFormat("ro-RO", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  }).format;
+
+  return (
+    <div
+      className="fixed inset-x-0 bottom-0 z-50 lg:hidden border-t border-gray-800 bg-gray-950/95 backdrop-blur"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <div className="mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
+        <div className="flex-1">
+          <div className="text-xs text-white/60">Total</div>
+          <div className="text-2xl font-extrabold text-white tracking-tight">
+            {total > 0 ? fmt(total) : "—"}
+          </div>
+        </div>
+
+        {onShowSummary && (
+          <button
+            type="button"
+            onClick={onShowSummary}
+            className="px-4 py-2 rounded-lg border border-white/10 text-white/90 hover:bg-white/5 text-sm"
+          >
+            Vezi sumar
+          </button>
+        )}
+
+        {onAddToCart && (
+          <button
+            type="button"
+            onClick={onAddToCart}
+            disabled={disabled}
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/30"
+          >
+            Adaugă în coș
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
