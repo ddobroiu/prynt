@@ -9,7 +9,8 @@ interface CartItem {
   quantity: number;
   unitAmount: number;
   totalAmount: number;
-  artworkUrl?: string; // link public către fișierul de grafică (dacă există)
+  artworkUrl?: string;    // link public către fișierul de grafică (dacă există)
+  textDesign?: string;    // TEXT pentru varianta "banner cu text" (opțional)
 }
 
 // --- DEFINIȚII DE TIP (CartContext) ---
@@ -63,7 +64,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  // Adăugare + merge cantități + păstrează artworkUrl dacă vine
+  // Adăugare + merge cantități + păstrează artworkUrl/textDesign dacă vin
   const addItem = (item: CartItem) => {
     setItems((prev) => {
       const idx = prev.findIndex((p) => p.id === item.id);
@@ -76,6 +77,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           quantity: mergedQty,
           totalAmount: unit * mergedQty,
           artworkUrl: item.artworkUrl ?? copy[idx].artworkUrl,
+          textDesign: item.textDesign ?? copy[idx].textDesign,
         };
         return copy;
       }
