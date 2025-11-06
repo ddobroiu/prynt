@@ -48,9 +48,9 @@ export default function CheckoutForm({
       setBilling((b) => ({
         ...b,
         name: b.tip_factura === 'companie' ? b.name : address.nume_prenume,
-        judet: address.judet,
-        localitate: address.localitate,
-        strada_nr: address.strada_nr,
+        judet: (b as any).judet ?? address.judet,
+        localitate: (b as any).localitate ?? address.localitate,
+        strada_nr: (b as any).strada_nr ?? address.strada_nr,
       }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -232,14 +232,7 @@ export default function CheckoutForm({
                 icon={<Hash size={18} />}
                 required
               />
-              <FormInput
-                id="company_name"
-                label="Nume Companie"
-                value={billing.name || ''}
-                onChange={(e) => setBilling({ ...billing, name: e.target.value })}
-                icon={<Building size={18} />}
-                required
-              />
+              {/* Eliminat câmpul “Nume Companie” – nu mai este necesar */}
             </div>
           )}
 
@@ -269,7 +262,7 @@ export default function CheckoutForm({
               <JudetSelector
                 id="billing_judet"
                 label="Județ"
-                value={billing.judet || ''}
+                value={(billing as any).judet || ''}
                 onChange={(val) => setJudet(val, 'billing')}
                 options={judete}
                 required
@@ -277,16 +270,16 @@ export default function CheckoutForm({
               <FormInput
                 id="billing_localitate"
                 label="Localitate"
-                value={billing.localitate || ''}
-                onChange={(e) => setBilling({ ...billing, localitate: e.target.value })}
+                value={(billing as any).localitate || ''}
+                onChange={(e) => setBilling({ ...billing, localitate: (e.target as any).value })}
                 icon={<MapPin size={18} />}
                 required
               />
               <FormInput
                 id="billing_strada_nr"
                 label="Stradă și număr"
-                value={billing.strada_nr || ''}
-                onChange={(e) => setBilling({ ...billing, strada_nr: e.target.value })}
+                value={(billing as any).strada_nr || ''}
+                onChange={(e) => setBilling({ ...billing, strada_nr: (e.target as any).value })}
                 icon={<MapPin size={18} />}
                 required
               />
