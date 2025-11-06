@@ -1,6 +1,5 @@
 import { Resend } from 'resend';
 
-// Tipuri locale (nu depind de types.ts ca să nu stricăm alt cod)
 interface CartItem {
   name: string;
   quantity: number;
@@ -28,7 +27,6 @@ interface Billing {
 const resend = new Resend(process.env.RESEND_API_KEY);
 const SHIPPING_FEE = 19.99;
 
-// Cache token Oblio
 let oblioTokenCache: { token: string; expiresAt: number } | null = null;
 
 async function getOblioAccessToken() {
@@ -40,9 +38,9 @@ async function getOblioAccessToken() {
     client_secret: process.env.OBLIO_CLIENT_SECRET!,
   });
 
-  const response = await fetch("https://www.oblio.eu/api/authorize/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  const response = await fetch('https://www.oblio.eu/api/authorize/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params,
   });
 
@@ -51,9 +49,9 @@ async function getOblioAccessToken() {
     throw new Error(`Eroare obținere token Oblio: ${response.status}. Răspuns: ${err}`);
   }
   const data = (await response.json()) as { access_token?: string; expires_in?: string };
-  if (!data.access_token) throw new Error("Token API Oblio invalid.");
+  if (!data.access_token) throw new Error('Token API Oblio invalid.');
 
-  const expiresIn = parseInt(data.expires_in || "3600", 10);
+  const expiresIn = parseInt(data.expires_in || '3600', 10);
   oblioTokenCache = { token: data.access_token, expiresAt: now + expiresIn * 1000 - 60000 };
   return data.access_token;
 }
@@ -72,52 +70,68 @@ function buildAddressLine(
   return [s, l, j].filter(Boolean).join(', ');
 }
 
+// ESCAPE pt. a nu băga HTML în email
+function escapeHtml(str: string) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+// Apel robust Oblio – revenim la endpointul /api/docs/invoice
 async function tryCreateOblioInvoice(payload: any, token: string) {
-  // Endpoint corect: /api/invoice (nu /api/docs/invoice)
-  const resp = await fetch("https://www.oblio.eu/api/invoice", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+  const resp = await fetch('https://www.oblio.eu/api/docs/invoice', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
   });
 
   const contentType = resp.headers.get('content-type') || '';
-  let data: any;
   if (contentType.includes('application/json')) {
-    data = await resp.json();
+    return await resp.json();
   } else {
-    // Evită "Unexpected token '<' ..." în UI – păstrăm textul pt. loguri
     const text = await resp.text();
-    throw new Error(`Răspuns Oblio non-JSON (status ${resp.status}): ${text.slice(0, 200)}`);
+    // arunc mesaj scurt, fără HTML neescapat
+    const short = text.slice(0, 200);
+    throw new Error(`Răspuns Oblio non-JSON (status ${resp.status}): ${short}`);
   }
-
-  return data;
 }
 
-async function sendEmails(address: Address, billing: Billing, cart: CartItem[], invoiceLink: string | null, paymentType: 'Ramburs' | 'Card', warnings: string[]) {
+async function sendEmails(
+  address: Address,
+  billing: Billing,
+  cart: CartItem[],
+  invoiceLink: string | null,
+  paymentType: 'Ramburs' | 'Card',
+  warnings: string[]
+) {
   const subtotal = cart.reduce((acc, item) => acc + item.totalAmount, 0);
   const totalComanda = subtotal + SHIPPING_FEE;
 
   const produseListHTML = cart
     .map((item) => {
       const line = `${item.name} - <strong>${item.quantity} buc.</strong> - ${formatRON(item.totalAmount)} RON`;
-      const artwork =
-        item.artworkUrl
-          ? ` — <a href="${item.artworkUrl}" target="_blank" rel="noopener noreferrer">Fișier grafică</a>`
-          : "";
+      const artwork = item.artworkUrl
+        ? ` — <a href="${item.artworkUrl}" target="_blank" rel="noopener noreferrer">Fișier grafică</a>`
+        : '';
       return `<li>${line}${artwork}</li>`;
     })
-    .join("");
+    .join('');
 
-  const warningHtml = warnings.length
-    ? `<div style="background:#fff3cd;color:#664d03;padding:10px;border-radius:6px;margin:14px 0">
-         <strong>Atenție:</strong> ${warnings.join(' ')}
-       </div>`
-    : '';
+  const safeWarnings = warnings.map(escapeHtml);
+  const warningHtml =
+    safeWarnings.length > 0
+      ? `<div style="background:#fff3cd;color:#664d03;padding:10px;border-radius:6px;margin:14px 0">
+           <strong>Atenție:</strong> ${safeWarnings.join(' ')}
+         </div>`
+      : '';
 
   // Admin
   await resend.emails.send({
-    from: "comenzi@prynt.ro",
-    to: "contact@prynt.ro",
+    from: 'comenzi@prynt.ro',
+    to: 'contact@prynt.ro',
     subject: `Comandă Nouă (${paymentType}) - ${address.nume_prenume}`,
     html: `
       <div style="font-family: sans-serif; padding: 20px; background-color: #f4f4f4;">
@@ -127,19 +141,19 @@ async function sendEmails(address: Address, billing: Billing, cart: CartItem[], 
           ${warningHtml}
 
           <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Date Client</h2>
-          <p><strong>Nume:</strong> ${address.nume_prenume}</p>
-          <p><strong>Email:</strong> ${address.email}</p>
-          <p><strong>Telefon:</strong> ${address.telefon}</p>
+          <p><strong>Nume:</strong> ${escapeHtml(address.nume_prenume)}</p>
+          <p><strong>Email:</strong> ${escapeHtml(address.email)}</p>
+          <p><strong>Telefon:</strong> ${escapeHtml(address.telefon)}</p>
 
           <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Adresă Livrare</h2>
-          <p>${address.strada_nr}, ${address.localitate}, ${address.judet}</p>
+          <p>${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}</p>
 
           <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Detalii Facturare</h2>
           <p><strong>Tip:</strong> ${billing.tip_factura === 'companie' ? 'Companie' : 'Persoană Fizică'}</p>
           ${
             billing.tip_factura === 'companie'
-              ? `<p><strong>CUI:</strong> ${billing.cui ?? ''}</p>`
-              : `<p><strong>Nume Factură:</strong> ${billing.name ?? ''}</p>`
+              ? `<p><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
+              : `<p><strong>Nume Factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`
           }
 
           <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Produse Comandate</h2>
@@ -158,7 +172,9 @@ async function sendEmails(address: Address, billing: Billing, cart: CartItem[], 
                    <a href="${invoiceLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Vezi Factura Oblio</a>
                  </p>`
               : `<p style="text-align:center;margin-top:20px;color:#b54708">
-                   Factura nu a putut fi generată automat. Emite manual în Oblio (clientul: ${billing.cui || billing.name || address.nume_prenume}).
+                   Factura nu a putut fi generată automat. Emite manual în Oblio (client: ${escapeHtml(
+                     billing.cui || billing.name || address.nume_prenume
+                   )}).
                  </p>`
           }
         </div>
@@ -168,9 +184,9 @@ async function sendEmails(address: Address, billing: Billing, cart: CartItem[], 
 
   // Client
   await resend.emails.send({
-    from: "contact@prynt.ro",
+    from: 'contact@prynt.ro',
     to: address.email,
-    subject: "Confirmare comandă Prynt.ro",
+    subject: 'Confirmare comandă Prynt.ro',
     html: `
       <p>Mulțumim pentru comandă!</p>
       ${
@@ -183,10 +199,8 @@ async function sendEmails(address: Address, billing: Billing, cart: CartItem[], 
 }
 
 /**
- * Procesează comanda NON-BLOCANT:
- * - Încearcă să genereze factura în Oblio; dacă pică, continuă oricum
- * - Trimite email Admin și Client indiferent de statusul Oblio
- * Returnează mereu 200 către caller (în afară de validări de input).
+ * Procesează comanda NON‑BLOCANT:
+ * - Încearcă Oblio; dacă pică, continuă și trimite emailurile
  */
 export async function fulfillOrder(
   orderData: { address: Address; billing: Billing; cart: CartItem[] },
@@ -198,7 +212,7 @@ export async function fulfillOrder(
   const warnings: string[] = [];
   let invoiceLink: string | null = null;
 
-  // Token Oblio (dacă pică aici, marcăm warning și mergem mai departe)
+  // Token Oblio (dacă pică, doar logăm)
   let token: string | null = null;
   try {
     token = await getOblioAccessToken();
@@ -206,7 +220,7 @@ export async function fulfillOrder(
     warnings.push(`[Oblio] Nu am putut obține token: ${e?.message || e}`);
   }
 
-  // Construim date client – pentru “doar CUI” folosește client existent; dacă nu există, folosim și name+address+email ca fallback
+  // Pregătește adresa de facturare
   const billingAddressLine = buildAddressLine(
     { judet: (billing as any).judet, localitate: (billing as any).localitate, strada_nr: (billing as any).strada_nr },
     { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr }
@@ -215,21 +229,22 @@ export async function fulfillOrder(
   const products = cart.map((item) => ({
     name: item.name,
     price: item.unitAmount,
-    measuringUnitName: "buc",
-    vatName: "S",
+    measuringUnitName: 'buc',
+    vatName: 'S',
     quantity: item.quantity,
   }));
 
   if (token) {
     try {
-      // 1) încercare “doar CUI”
-      let client = billing.tip_factura === 'companie' && billing.cui
-        ? { cif: billing.cui }
-        : {
-            name: billing.name || address.nume_prenume,
-            address: billingAddressLine,
-            email: address.email,
-          };
+      // 1) încercare “doar CUI” pentru companii
+      let client =
+        billing.tip_factura === 'companie' && billing.cui
+          ? { cif: billing.cui }
+          : {
+              name: billing.name || address.nume_prenume,
+              address: billingAddressLine,
+              email: address.email,
+            };
 
       const basePayload = {
         cif: process.env.OBLIO_CIF_FIRMA,
@@ -241,11 +256,11 @@ export async function fulfillOrder(
 
       let data = await tryCreateOblioInvoice(basePayload, token);
 
+      // fallback dacă cere selectarea clientului
       if (data?.status !== 200) {
         const msg = data?.statusMessage || data?.message || '';
         const needDetails = /selecteaza clientul|alege clientul/i.test(msg) || data?.status === 422;
         if (needDetails && billing.tip_factura === 'companie' && billing.cui) {
-          // 2) fallback cu detalii minime
           const payloadWithDetails = {
             ...basePayload,
             client: {
@@ -271,11 +286,10 @@ export async function fulfillOrder(
     }
   }
 
-  // Trimite emailuri indiferent de Oblio
+  // Emailuri – indiferent de Oblio
   try {
     await sendEmails(address, billing, cart, invoiceLink, paymentType, warnings);
   } catch (e: any) {
-    // Chiar și dacă emailurile pică, nu aruncăm – doar logăm
     console.error('[OrderService] Eroare trimitere emailuri:', e?.message || e);
   }
 
