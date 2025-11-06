@@ -85,7 +85,7 @@ export default function BannerPage() {
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [textDesign, setTextDesign] = useState<string>(""); // pentru “text_only”
+  const [textDesign, setTextDesign] = useState<string>("");
 
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
@@ -115,7 +115,6 @@ export default function BannerPage() {
     updateInput("height_cm", d === "" ? 0 : parseInt(d, 10));
   };
 
-  // Upload la Cloudinary prin /api/upload
   const handleArtworkFileInput = async (file: File | null) => {
     setArtworkUrl(null);
     setUploadError(null);
@@ -175,13 +174,11 @@ export default function BannerPage() {
     setTimeout(() => setToastVisible(false), 1600);
   };
 
-  const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 });
   const scrollToSummary = () =>
     document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
     <main className="min-h-screen">
-      {/* TOAST VERDE — clar vizibil */}
       <div
         id="added-toast"
         className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`}
@@ -208,37 +205,22 @@ export default function BannerPage() {
           </button>
         </header>
 
-        {/* IMPORTANT: rezumatul compact de sus pe mobil e scos ca să nu dublăm bara fixă de jos */}
-
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* STÂNGA — configurator */}
           <div className="lg:col-span-3 space-y-8">
             <ConfigSection icon={<Ruler />} title="1. Dimensiuni și Cantitate">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="field-label">Lungime (cm)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={lengthText}
-                    onChange={(e) => onChangeLength(e.target.value)}
-                    placeholder="ex: 100"
-                    className="input text-lg font-semibold"
-                  />
-                </div>
-                <div>
-                  <label className="field-label">Înălțime (cm)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={heightText}
-                    onChange={(e) => onChangeHeight(e.target.value)}
-                    placeholder="ex: 100"
-                    className="input text-lg font-semibold"
-                  />
-                </div>
+                <TextNumber
+                  label="Lungime (cm)"
+                  value={lengthText}
+                  onChange={onChangeLength}
+                  placeholder="ex: 100"
+                />
+                <TextNumber
+                  label="Înălțime (cm)"
+                  value={heightText}
+                  onChange={onChangeHeight}
+                  placeholder="ex: 100"
+                />
                 <NumberInput label="Cantitate (buc)" value={input.quantity} onChange={(v) => setQty(v)} />
               </div>
             </ConfigSection>
@@ -262,24 +244,16 @@ export default function BannerPage() {
 
             <ConfigSection icon={<CheckCircle />} title="3. Finisaje">
               <div className="space-y-3">
-                <label className="relative flex items-center gap-3 rounded-lg bg-white/5 border border-white/10 px-4 py-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="checkbox"
-                    checked={input.want_hem_and_grommets}
-                    onChange={(e) => updateInput("want_hem_and_grommets", e.target.checked)}
-                  />
-                  <span className="text-sm">Tiv și capse (standard)</span>
-                </label>
-                <label className="relative flex items-center gap-3 rounded-lg bg-white/5 border border-white/10 px-4 py-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="checkbox"
-                    checked={input.want_wind_holes}
-                    onChange={(e) => updateInput("want_wind_holes", e.target.checked)}
-                  />
-                  <span className="text-sm">Găuri pentru vânt (mesh-look)</span>
-                </label>
+                <CheckboxRow
+                  checked={input.want_hem_and_grommets}
+                  onChange={(v) => updateInput("want_hem_and_grommets", v)}
+                  label="Tiv și capse (standard)"
+                />
+                <CheckboxRow
+                  checked={input.want_wind_holes}
+                  onChange={(v) => updateInput("want_wind_holes", v)}
+                  label="Găuri pentru vânt (mesh-look)"
+                />
               </div>
             </ConfigSection>
 
@@ -357,7 +331,6 @@ export default function BannerPage() {
             </ConfigSection>
           </div>
 
-          {/* DREAPTA — SUMAR + GALERIE */}
           <aside id="order-summary" className="lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
@@ -402,7 +375,6 @@ export default function BannerPage() {
                   )}
                 </div>
 
-                {/* Preț + CTA: doar desktop (pe mobil avem bara fixă jos) */}
                 <div className="hidden lg:block">
                   <div className="border-t border-white/10 mt-4 pt-4">
                     <p className="text-white/60 text-sm">Preț total</p>
@@ -432,7 +404,6 @@ export default function BannerPage() {
         </div>
       </div>
 
-      {/* BARĂ FIXĂ DE PREȚ (doar mobil) */}
       <MobilePriceBar
         total={priceDetails.finalPrice}
         disabled={priceDetails.finalPrice <= 0}
@@ -440,7 +411,6 @@ export default function BannerPage() {
         onShowSummary={scrollToSummary}
       />
 
-      {/* MODAL: Mai multe detalii */}
       {detailsOpen && (
         <DetailsModal onClose={() => setDetailsOpen(false)}>
           <h3 className="text-xl font-bold mb-3">Detalii produs</h3>
@@ -482,7 +452,6 @@ export default function BannerPage() {
   );
 }
 
-/* UI mici și reutilizabile */
 function ConfigSection({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
     <div className="card p-6">
@@ -491,6 +460,33 @@ function ConfigSection({ icon, title, children }: { icon: React.ReactNode; title
         <h2 className="text-xl font-bold text-white">{title}</h2>
       </div>
       {children}
+    </div>
+  );
+}
+
+function TextNumber({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <div>
+      <label className="field-label">{label}</label>
+      <input
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="input text-lg font-semibold"
+      />
     </div>
   );
 }
@@ -515,6 +511,28 @@ function NumberInput({ label, value, onChange }: { label: string; value: number;
         </button>
       </div>
     </div>
+  );
+}
+
+function CheckboxRow({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+}) {
+  return (
+    <label className="relative flex items-center gap-3 rounded-lg bg-white/5 border border-white/10 px-4 py-3 cursor-pointer">
+      <input
+        type="checkbox"
+        className="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      <span className="text-sm">{label}</span>
+    </label>
   );
 }
 
@@ -581,7 +599,6 @@ function SelectCard({
   );
 }
 
-/* Bară mobilă fixă pentru total + CTA */
 function MobilePriceBar({
   total,
   currency = "RON",
@@ -635,7 +652,6 @@ function MobilePriceBar({
   );
 }
 
-/* Modal generic pentru “Mai multe detalii” */
 function DetailsModal({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
   return (
     <div
@@ -644,7 +660,7 @@ function DetailsModal({ onClose, children }: { onClose: () => void; children: Re
       role="dialog"
     >
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="relative w-full sm:max-w-2xl card p-6 rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-y-auto">
+      <div className="relative w-full sm:max-w-2xl max-h-[85vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-gray-900 border border-white/10 shadow-2xl p-6">
         <button
           type="button"
           onClick={onClose}
