@@ -85,12 +85,10 @@ export default function BannerPage() {
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [textDesign, setTextDesign] = useState<string>(""); // pentru “text_only”
 
-  // Text pentru varianta "Banner cu text simplu" (gratis)
-  const [textDesign, setTextDesign] = useState<string>("");
-
-  // Modal "Mai multe detalii"
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
 
   const hasProDesign = items.some((i) => i.id === "design-pro");
 
@@ -163,7 +161,6 @@ export default function BannerPage() {
       textDesign: designOption === "text_only" ? textDesign : undefined,
     });
 
-    // Adaugă taxa de grafică doar pentru "pro"
     if (designOption === "pro" && !hasProDesign) {
       addItem({
         id: "design-pro",
@@ -174,11 +171,8 @@ export default function BannerPage() {
       });
     }
 
-    const toast = document.getElementById("added-toast");
-    if (toast) {
-      toast.style.opacity = "1";
-      setTimeout(() => (toast.style.opacity = "0"), 1400);
-    }
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 1600);
   };
 
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 });
@@ -187,9 +181,13 @@ export default function BannerPage() {
 
   return (
     <main className="min-h-screen bg-gray-950 text-white">
+      {/* TOAST VERDE — clar vizibil */}
       <div
         id="added-toast"
-        className="pointer-events-none fixed left-1/2 top-6 z-50 -translate-x-1/2 rounded-full bg-emerald-600/90 px-4 py-2 text-sm font-medium text-white shadow-2xl shadow-emerald-900/40 opacity-0 transition-opacity"
+        className={`pointer-events-none fixed left-1/2 top-6 z-50 -translate-x-1/2 transform rounded-full bg-emerald-600/95 px-4 py-2 text-sm font-semibold text-white shadow-2xl shadow-emerald-900/40 transition-all duration-200 ${
+          toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+        }`}
+        aria-live="polite"
       >
         Produs adăugat în coș
       </div>
@@ -212,34 +210,7 @@ export default function BannerPage() {
           </button>
         </header>
 
-        {/* REZUMAT COMPACT — doar pe mobil */}
-        <section className="lg:hidden mb-6 rounded-xl border border-white/10 bg-gray-900/60 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs text-white/60">Total</div>
-              <div className="text-2xl font-extrabold">
-                {priceDetails.finalPrice > 0 ? fmt.format(priceDetails.finalPrice) : "—"}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              disabled={priceDetails.finalPrice <= 0}
-              className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-500 disabled:opacity-50"
-            >
-              Adaugă în coș
-            </button>
-          </div>
-          <div className="mt-3 text-sm text-white/70">
-            {input.width_cm || input.height_cm ? (
-              <span>
-                Dimensiuni: <b>{input.width_cm || 0} × {input.height_cm || 0} cm</b> · Cantitate: <b>{input.quantity}</b>
-              </span>
-            ) : (
-              <span>Setează dimensiunile ca să vezi prețul.</span>
-            )}
-          </div>
-        </section>
+        {/* IMPORTANT: am eliminat rezumatul compact de sus pe mobil pentru a evita dublarea cu bara fixă de jos */}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* STÂNGA — configurator */}
@@ -293,7 +264,7 @@ export default function BannerPage() {
 
             <ConfigSection icon={<CheckCircle />} title="3. Finisaje">
               <div className="space-y-3">
-                <label className="flex items-center gap-3 rounded-lg bg-gray-800/60 border border-gray-700 px-4 py-3 cursor-pointer">
+                <label className="relative flex items-center gap-3 rounded-lg bg-gray-800/60 border border-gray-700 px-4 py-3 cursor-pointer">
                   <input
                     type="checkbox"
                     className="h-5 w-5"
@@ -302,7 +273,7 @@ export default function BannerPage() {
                   />
                   <span className="text-sm">Tiv și capse (standard)</span>
                 </label>
-                <label className="flex items-center gap-3 rounded-lg bg-gray-800/60 border border-gray-700 px-4 py-3 cursor-pointer">
+                <label className="relative flex items-center gap-3 rounded-lg bg-gray-800/60 border border-gray-700 px-4 py-3 cursor-pointer">
                   <input
                     type="checkbox"
                     className="h-5 w-5"
@@ -336,7 +307,6 @@ export default function BannerPage() {
                 />
               </div>
 
-              {/* Upload fișier */}
               {designOption === "upload" && (
                 <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
                   <label className="block text-sm font-medium text-white/80 mb-2">Încarcă fișier</label>
@@ -362,7 +332,6 @@ export default function BannerPage() {
                 </div>
               )}
 
-              {/* Banner cu text simplu (gratis) */}
               {designOption === "text_only" && (
                 <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
                   <label className="block text-sm font-medium text-white/80 mb-2">Text pentru banner</label>
@@ -379,7 +348,6 @@ export default function BannerPage() {
                 </div>
               )}
 
-              {/* Grafică Pro */}
               {designOption === "pro" && (
                 <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
                   <p className="text-sm text-white/80">
@@ -403,8 +371,8 @@ export default function BannerPage() {
                     <button
                       key={src}
                       onClick={() => setActiveImage(src)}
-                      className={`overflow-hidden rounded-md border transition ${
-                        activeImage === src ? "border-indigo-500" : "border-white/10 hover:border-white/30"
+                      className={`relative overflow-hidden rounded-md border transition ${
+                        activeImage === src ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"
                       }`}
                       aria-label="Previzualizare"
                     >
@@ -436,23 +404,26 @@ export default function BannerPage() {
                   )}
                 </div>
 
-                <div className="border-t border-gray-700 mt-4 pt-4">
-                  <p className="text-white/60 text-sm">Preț total</p>
-                  <p className="text-4xl font-extrabold text-white my-2">{priceDetails.finalPrice.toFixed(2)} RON</p>
-                  {pricePerUnit > 0 && <p className="text-xs text-white/60">{pricePerUnit.toFixed(2)} RON / buc</p>}
-                  {designOption === "pro" && !hasProDesign && (
-                    <p className="text-xs text-white/80 mt-2">+ {PRO_DESIGN_FEE.toFixed(2)} RON (grafică profesională — se va adăuga o singură dată)</p>
-                  )}
-                </div>
+                {/* Preț + CTA: doar desktop (pe mobil avem bara fixă jos) */}
+                <div className="hidden lg:block">
+                  <div className="border-t border-gray-700 mt-4 pt-4">
+                    <p className="text-white/60 text-sm">Preț total</p>
+                    <p className="text-4xl font-extrabold text-white my-2">{priceDetails.finalPrice.toFixed(2)} RON</p>
+                    {pricePerUnit > 0 && <p className="text-xs text-white/60">{pricePerUnit.toFixed(2)} RON / buc</p>}
+                    {designOption === "pro" && !hasProDesign && (
+                      <p className="text-xs text-white/80 mt-2">+ {PRO_DESIGN_FEE.toFixed(2)} RON (grafică profesională — se va adăuga o singură dată)</p>
+                    )}
+                  </div>
 
-                <button
-                  onClick={handleAddToCart}
-                  disabled={priceDetails.finalPrice <= 0}
-                  className="w-full mt-6 bg-indigo-600 text-white font-bold py-3 text-lg rounded-lg hover:bg-indigo-500 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <ShoppingCart size={20} />
-                  Adaugă în coș
-                </button>
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={priceDetails.finalPrice <= 0}
+                    className="w-full mt-6 bg-indigo-600 text-white font-bold py-3 text-lg rounded-lg hover:bg-indigo-500 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <ShoppingCart size={20} />
+                    Adaugă în coș
+                  </button>
+                </div>
               </div>
 
               <div className="rounded-2xl bg-gray-900/40 border border-gray-700/50 p-4 text-xs text-white/60">
@@ -563,10 +534,17 @@ function MaterialOption({
   return (
     <button
       onClick={onClick}
-      className={`text-left p-4 rounded-lg border-2 transition-all ${
-        selected ? "border-indigo-500 bg-indigo-900/20" : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
+      className={`relative text-left p-4 rounded-lg transition-all ${
+        selected
+          ? "border-2 border-indigo-500 bg-indigo-900/30 ring-4 ring-indigo-500/20"
+          : "border border-gray-700 bg-gray-800/50 hover:border-gray-600 hover:bg-gray-800/70"
       }`}
     >
+      {selected && (
+        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500/90 text-white text-[11px] font-bold px-2 py-0.5">
+          <CheckCircle size={12} /> Selectat
+        </span>
+      )}
       <p className="font-bold text-white">{title}</p>
       <p className="text-sm text-gray-400">{description}</p>
     </button>
@@ -588,10 +566,17 @@ function SelectCard({
     <button
       type="button"
       onClick={onClick}
-      className={`text-left p-4 rounded-lg border-2 transition-all w-full ${
-        active ? "border-indigo-500 bg-indigo-900/20" : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
+      className={`relative text-left p-4 rounded-lg w-full transition-all ${
+        active
+          ? "border-2 border-indigo-500 bg-indigo-900/30 ring-4 ring-indigo-500/20"
+          : "border border-gray-700 bg-gray-800/50 hover:border-gray-600 hover:bg-gray-800/70"
       }`}
     >
+      {active && (
+        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500/90 text-white text-[11px] font-bold px-2 py-0.5">
+          <CheckCircle size={12} /> Selectat
+        </span>
+      )}
       <div className="font-bold text-white">{title}</div>
       <div className="text-xs text-white/70">{subtitle}</div>
     </button>
