@@ -1,5 +1,5 @@
-"use client";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+'use client';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 interface CartItem {
   id: string;
@@ -8,7 +8,7 @@ interface CartItem {
   unitAmount: number;
   totalAmount: number;
   artworkUrl?: string;
-  textDesign?: string;
+  textDesign?: string; // pentru “banner cu text”
 }
 
 type CartContextType = {
@@ -24,9 +24,9 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | null>(null);
 
 export function useCart() {
-  const context = useContext(CartContext);
-  if (!context) throw new Error("useCart must be used within a CartProvider");
-  return context;
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error('useCart must be used within a CartProvider');
+  return ctx;
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -35,11 +35,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      if (typeof window === "undefined") return;
-      const raw = localStorage.getItem("cart");
+      if (typeof window === 'undefined') return;
+      const raw = localStorage.getItem('cart');
       if (raw) setItems(JSON.parse(raw));
     } catch (e) {
-      console.error("Eroare la citirea coșului din localStorage:", e);
+      console.error('Eroare la citirea coșului din localStorage:', e);
     } finally {
       setIsLoaded(true);
     }
@@ -48,9 +48,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoaded) return;
     try {
-      localStorage.setItem("cart", JSON.stringify(items));
+      localStorage.setItem('cart', JSON.stringify(items));
     } catch (e) {
-      console.error("Eroare la salvarea coșului în localStorage:", e);
+      console.error('Eroare la salvarea coșului în localStorage:', e);
     }
   }, [items, isLoaded]);
 

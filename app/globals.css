@@ -9,7 +9,7 @@ body {
   @apply bg-[#0b0f19] text-white antialiased;
 }
 
-/* Utilitare de stil reutilizabile */
+/* Utilitare de stil reutilizabile (NUMAI utilitare Tailwind în @apply) */
 @layer components {
   /* Layout */
   .page {
@@ -27,21 +27,25 @@ body {
     @apply rounded-xl border border-white/10 bg-white/5;
   }
 
-  /* Butoane */
+  /* Butoane (fără @apply pe .btn în alte clase) */
   .btn {
     @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition;
   }
   .btn-primary {
-    @apply btn bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/30;
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition
+           bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/30;
   }
   .btn-outline {
-    @apply btn border border-white/15 bg-white/5 hover:bg-white/10 text-white;
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition
+           border border-white/15 bg-white/5 hover:bg-white/10 text-white;
   }
   .btn-ghost {
-    @apply btn bg-transparent hover:bg-white/5 text-white;
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition
+           bg-transparent hover:bg-white/5 text-white;
   }
   .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-500;
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition
+           bg-red-600 text-white hover:bg-red-500;
   }
 
   /* Form (inputs/select/checkbox) */
@@ -55,7 +59,7 @@ body {
     @apply border-red-500/70 ring-1 ring-red-500/40;
   }
   .select {
-    @apply input appearance-none;
+    @apply w-full rounded-md border border-white/10 bg-gray-900/40 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 appearance-none;
   }
   .checkbox {
     @apply h-5 w-5 accent-indigo-500;
@@ -71,6 +75,8 @@ body {
 
   /* Toast succes */
   .toast-success {
-    @apply pointer-events-none fixed left-1/2 top-6 z-50 -translate-x-1/2 transform rounded-full bg-emerald-600/95 px-4 py-2 text-sm font-semibold text-white shadow-2xl shadow-emerald-900/40 transition-all duration-200;
+    @apply pointer-events-none fixed left-1/2 top-6 z-50 -translate-x-1/2 transform
+           rounded-full bg-emerald-600/95 px-4 py-2 text-sm font-semibold text-white
+           shadow-2xl shadow-emerald-900/40 transition-all duration-200;
   }
 }
