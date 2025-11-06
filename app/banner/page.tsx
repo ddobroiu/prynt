@@ -180,19 +180,17 @@ export default function BannerPage() {
     document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white">
+    <main className="min-h-screen">
       {/* TOAST VERDE — clar vizibil */}
       <div
         id="added-toast"
-        className={`pointer-events-none fixed left-1/2 top-6 z-50 -translate-x-1/2 transform rounded-full bg-emerald-600/95 px-4 py-2 text-sm font-semibold text-white shadow-2xl shadow-emerald-900/40 transition-all duration-200 ${
-          toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
-        }`}
+        className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`}
         aria-live="polite"
       >
         Produs adăugat în coș
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-10 pb-24 lg:pb-10">
+      <div className="page py-10 pb-24 lg:pb-10">
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Banner</h1>
@@ -203,14 +201,14 @@ export default function BannerPage() {
           <button
             type="button"
             onClick={() => setDetailsOpen(true)}
-            className="inline-flex items-center gap-2 self-start rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm hover:bg-white/10"
+            className="btn-outline text-sm self-start"
           >
             <Info size={18} />
-            Mai multe detalii
+            <span className="ml-2">Mai multe detalii</span>
           </button>
         </header>
 
-        {/* IMPORTANT: am eliminat rezumatul compact de sus pe mobil pentru a evita dublarea cu bara fixă de jos */}
+        {/* IMPORTANT: rezumatul compact de sus pe mobil e scos ca să nu dublăm bara fixă de jos */}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* STÂNGA — configurator */}
@@ -218,7 +216,7 @@ export default function BannerPage() {
             <ConfigSection icon={<Ruler />} title="1. Dimensiuni și Cantitate">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Lungime (cm)</label>
+                  <label className="field-label">Lungime (cm)</label>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -226,11 +224,11 @@ export default function BannerPage() {
                     value={lengthText}
                     onChange={(e) => onChangeLength(e.target.value)}
                     placeholder="ex: 100"
-                    className="w-full bg-gray-800 border border-gray-700 py-2.5 px-3 text-lg font-semibold rounded-md"
+                    className="input text-lg font-semibold"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Înălțime (cm)</label>
+                  <label className="field-label">Înălțime (cm)</label>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -238,7 +236,7 @@ export default function BannerPage() {
                     value={heightText}
                     onChange={(e) => onChangeHeight(e.target.value)}
                     placeholder="ex: 100"
-                    className="w-full bg-gray-800 border border-gray-700 py-2.5 px-3 text-lg font-semibold rounded-md"
+                    className="input text-lg font-semibold"
                   />
                 </div>
                 <NumberInput label="Cantitate (buc)" value={input.quantity} onChange={(v) => setQty(v)} />
@@ -264,19 +262,19 @@ export default function BannerPage() {
 
             <ConfigSection icon={<CheckCircle />} title="3. Finisaje">
               <div className="space-y-3">
-                <label className="relative flex items-center gap-3 rounded-lg bg-gray-800/60 border border-gray-700 px-4 py-3 cursor-pointer">
+                <label className="relative flex items-center gap-3 rounded-lg bg-white/5 border border-white/10 px-4 py-3 cursor-pointer">
                   <input
                     type="checkbox"
-                    className="h-5 w-5"
+                    className="checkbox"
                     checked={input.want_hem_and_grommets}
                     onChange={(e) => updateInput("want_hem_and_grommets", e.target.checked)}
                   />
                   <span className="text-sm">Tiv și capse (standard)</span>
                 </label>
-                <label className="relative flex items-center gap-3 rounded-lg bg-gray-800/60 border border-gray-700 px-4 py-3 cursor-pointer">
+                <label className="relative flex items-center gap-3 rounded-lg bg-white/5 border border-white/10 px-4 py-3 cursor-pointer">
                   <input
                     type="checkbox"
-                    className="h-5 w-5"
+                    className="checkbox"
                     checked={input.want_wind_holes}
                     onChange={(e) => updateInput("want_wind_holes", e.target.checked)}
                   />
@@ -308,8 +306,8 @@ export default function BannerPage() {
               </div>
 
               {designOption === "upload" && (
-                <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
-                  <label className="block text-sm font-medium text-white/80 mb-2">Încarcă fișier</label>
+                <div className="panel p-4 mt-4">
+                  <label className="field-label">Încarcă fișier</label>
                   <input
                     type="file"
                     accept=".pdf,.ai,.psd,.jpg,.jpeg,.png"
@@ -333,14 +331,14 @@ export default function BannerPage() {
               )}
 
               {designOption === "text_only" && (
-                <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
-                  <label className="block text-sm font-medium text-white/80 mb-2">Text pentru banner</label>
+                <div className="panel p-4 mt-4">
+                  <label className="field-label">Text pentru banner</label>
                   <textarea
                     value={textDesign}
                     onChange={(e) => setTextDesign(e.target.value)}
                     rows={4}
                     placeholder="Ex.: REDUCERI -50% • Deschis L-V 9:00-18:00 • www.exemplu.ro"
-                    className="w-full resize-y bg-gray-900/50 border border-gray-700 rounded-md p-3 placeholder-white/40"
+                    className="input resize-y min-h-[120px]"
                   />
                   <p className="mt-2 text-xs text-white/60">
                     Gratuit: scrie textul, iar designerii noștri îl așază clar și lizibil. Dacă vrei machetare avansată, alege “Grafică profesională”.
@@ -349,7 +347,7 @@ export default function BannerPage() {
               )}
 
               {designOption === "pro" && (
-                <div className="rounded-lg mt-4 p-4 bg-gray-800/60 border border-gray-700">
+                <div className="panel p-4 mt-4">
                   <p className="text-sm text-white/80">
                     Un designer te va contacta după plasarea comenzii. Taxa se aplică o singură dată (+{PRO_DESIGN_FEE} RON) per comandă.
                   </p>
@@ -362,7 +360,7 @@ export default function BannerPage() {
           {/* DREAPTA — SUMAR + GALERIE */}
           <aside id="order-summary" className="lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
-              <div className="rounded-2xl bg-gray-900/50 border border-gray-700/60 p-4">
+              <div className="card p-4">
                 <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
                   <img src={activeImage} alt="Banner preview" className="h-full w-full object-cover" loading="eager" />
                 </div>
@@ -382,8 +380,8 @@ export default function BannerPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl bg-gray-900/50 border border-gray-700/60 p-6">
-                <h2 className="text-xl font-bold border-b border-gray-700 pb-4 mb-4">Sumar Comandă</h2>
+              <div className="card p-6">
+                <h2 className="text-xl font-bold border-b border-white/10 pb-4 mb-4">Sumar Comandă</h2>
 
                 <div className="space-y-2 text-white/80 text-sm">
                   <p>Dimensiuni: <span className="text-white font-semibold">{lengthText || "—"} x {heightText || "—"} cm</span></p>
@@ -406,7 +404,7 @@ export default function BannerPage() {
 
                 {/* Preț + CTA: doar desktop (pe mobil avem bara fixă jos) */}
                 <div className="hidden lg:block">
-                  <div className="border-t border-gray-700 mt-4 pt-4">
+                  <div className="border-t border-white/10 mt-4 pt-4">
                     <p className="text-white/60 text-sm">Preț total</p>
                     <p className="text-4xl font-extrabold text-white my-2">{priceDetails.finalPrice.toFixed(2)} RON</p>
                     {pricePerUnit > 0 && <p className="text-xs text-white/60">{pricePerUnit.toFixed(2)} RON / buc</p>}
@@ -418,15 +416,15 @@ export default function BannerPage() {
                   <button
                     onClick={handleAddToCart}
                     disabled={priceDetails.finalPrice <= 0}
-                    className="w-full mt-6 bg-indigo-600 text-white font-bold py-3 text-lg rounded-lg hover:bg-indigo-500 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="btn-primary w-full mt-6 py-3 text-lg"
                   >
                     <ShoppingCart size={20} />
-                    Adaugă în coș
+                    <span className="ml-2">Adaugă în coș</span>
                   </button>
                 </div>
               </div>
 
-              <div className="rounded-2xl bg-gray-900/40 border border-gray-700/50 p-4 text-xs text-white/60">
+              <div className="card-muted p-4 text-xs text-white/60">
                 Print durabil. Livrare rapidă. Suport: contact@prynt.ro
               </div>
             </div>
@@ -487,7 +485,7 @@ export default function BannerPage() {
 /* UI mici și reutilizabile */
 function ConfigSection({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-6">
+    <div className="card p-6">
       <div className="flex items-center gap-3 mb-5">
         <div className="text-indigo-400">{icon}</div>
         <h2 className="text-xl font-bold text-white">{title}</h2>
@@ -501,18 +499,18 @@ function NumberInput({ label, value, onChange }: { label: string; value: number;
   const inc = (d: number) => onChange(Math.max(1, value + d));
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-300 mb-2">{label}</label>
+      <label className="field-label">{label}</label>
       <div className="flex items-center">
-        <button onClick={() => inc(-1)} className="p-3 bg-gray-700 rounded-l-md hover:bg-gray-600" aria-label="Decrement">
+        <button onClick={() => inc(-1)} className="p-3 bg-white/10 rounded-l-md hover:bg-white/15" aria-label="Decrement">
           <Minus size={16} />
         </button>
         <input
           type="number"
           value={value}
           onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))}
-          className="w-full text-center bg-gray-800 border-y border-gray-700 py-2.5 text-lg font-semibold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="input text-lg font-semibold text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-y-0 rounded-none"
         />
-        <button onClick={() => inc(1)} className="p-3 bg-gray-700 rounded-r-md hover:bg-gray-600" aria-label="Increment">
+        <button onClick={() => inc(1)} className="p-3 bg-white/10 rounded-r-md hover:bg-white/15" aria-label="Increment">
           <Plus size={16} />
         </button>
       </div>
@@ -537,12 +535,12 @@ function MaterialOption({
       className={`relative text-left p-4 rounded-lg transition-all ${
         selected
           ? "border-2 border-indigo-500 bg-indigo-900/30 ring-4 ring-indigo-500/20"
-          : "border border-gray-700 bg-gray-800/50 hover:border-gray-600 hover:bg-gray-800/70"
+          : "border border-white/10 bg-white/5 hover:bg-white/10"
       }`}
     >
       {selected && (
-        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500/90 text-white text-[11px] font-bold px-2 py-0.5">
-          <CheckCircle size={12} /> Selectat
+        <span className="absolute right-3 top-3 badge badge-success">
+          <CheckCircle size={12} className="mr-1" /> Selectat
         </span>
       )}
       <p className="font-bold text-white">{title}</p>
@@ -569,12 +567,12 @@ function SelectCard({
       className={`relative text-left p-4 rounded-lg w-full transition-all ${
         active
           ? "border-2 border-indigo-500 bg-indigo-900/30 ring-4 ring-indigo-500/20"
-          : "border border-gray-700 bg-gray-800/50 hover:border-gray-600 hover:bg-gray-800/70"
+          : "border border-white/10 bg-white/5 hover:bg-white/10"
       }`}
     >
       {active && (
-        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500/90 text-white text-[11px] font-bold px-2 py-0.5">
-          <CheckCircle size={12} /> Selectat
+        <span className="absolute right-3 top-3 badge badge-success">
+          <CheckCircle size={12} className="mr-1" /> Selectat
         </span>
       )}
       <div className="font-bold text-white">{title}</div>
@@ -608,7 +606,7 @@ function MobilePriceBar({
       className="fixed inset-x-0 bottom-0 z-50 lg:hidden border-t border-gray-800 bg-gray-950/95 backdrop-blur"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
+      <div className="page flex items-center gap-3 py-3">
         <div className="flex-1">
           <div className="text-xs text-white/60">Total</div>
           <div className="text-2xl font-extrabold text-white tracking-tight">
@@ -617,11 +615,7 @@ function MobilePriceBar({
         </div>
 
         {onShowSummary && (
-          <button
-            type="button"
-            onClick={onShowSummary}
-            className="px-4 py-2 rounded-lg border border-white/10 text-white/90 hover:bg-white/5 text-sm"
-          >
+          <button type="button" onClick={onShowSummary} className="btn-outline text-sm">
             Vezi sumar
           </button>
         )}
@@ -631,7 +625,7 @@ function MobilePriceBar({
             type="button"
             onClick={onAddToCart}
             disabled={disabled}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/30"
+            className="btn-primary"
           >
             Adaugă în coș
           </button>
@@ -650,7 +644,7 @@ function DetailsModal({ onClose, children }: { onClose: () => void; children: Re
       role="dialog"
     >
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="relative w-full sm:max-w-2xl bg-gray-900 border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-h-[85vh] overflow-y-auto">
+      <div className="relative w-full sm:max-w-2xl card p-6 rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-y-auto">
         <button
           type="button"
           onClick={onClose}

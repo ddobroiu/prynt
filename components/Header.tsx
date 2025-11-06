@@ -18,8 +18,8 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-gray-950/80 backdrop-blur">
-      <div className="mx-auto max-w-7xl px-4">
-        {/* BARĂ MOBIL (structura rămâne ca înainte): burger stânga · logo centru · coș dreapta */}
+      <div className="page">
+        {/* BARĂ MOBIL: burger stânga · logo centru · coș dreapta (meniul rămâne ca înainte) */}
         <div className="flex items-center justify-between py-3 lg:hidden">
           <button
             type="button"
@@ -66,7 +66,7 @@ export default function Header() {
         >
           <nav className="pb-3">
             <div className="mx-auto max-w-sm">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-xl shadow-black/30">
+              <div className="card p-3 shadow-xl shadow-black/30">
                 <ul className="space-y-2 text-center">
                   {LINKS.map((l) => (
                     <li key={l.href}>
@@ -85,10 +85,10 @@ export default function Header() {
                 <div className="mt-3 flex justify-center">
                   <a
                     href="/checkout"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 font-semibold text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-500 transition"
+                    className="btn-primary"
                     onClick={() => setOpen(false)}
                   >
-                    <ShoppingCart size={18} />
+                    <ShoppingCart size={18} className="mr-2" />
                     Coșul meu
                     {isLoaded && count > 0 && (
                       <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold">

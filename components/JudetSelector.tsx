@@ -21,12 +21,12 @@ export default function JudetSelector({ label = "Județ", value, onChange, optio
 
   return (
     <label className="text-sm block">
-      <span className="mb-1 block text-white/70">{label}</span>
+      <span className="field-label">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="w-full rounded-md border border-white/10 bg-gray-900/40 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-60"
+        className="select disabled:opacity-60"
       >
         <option value="" disabled>— selectează un județ —</option>
         {list.map((judet) => (

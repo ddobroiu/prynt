@@ -1,26 +1,76 @@
 @import "tailwindcss";
 
+/* Temă dark globală, unificată cu stilul din coș */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-[#0b0f19] text-white antialiased;
+}
+
+/* Utilitare de stil reutilizabile */
+@layer components {
+  /* Layout */
+  .page {
+    @apply mx-auto max-w-7xl px-4;
+  }
+
+  /* Carduri */
+  .card {
+    @apply rounded-2xl border border-white/10 bg-white/5;
+  }
+  .card-muted {
+    @apply rounded-2xl border border-white/10 bg-white/4;
+  }
+  .panel {
+    @apply rounded-xl border border-white/10 bg-white/5;
+  }
+
+  /* Butoane */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition;
+  }
+  .btn-primary {
+    @apply btn bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/30;
+  }
+  .btn-outline {
+    @apply btn border border-white/15 bg-white/5 hover:bg-white/10 text-white;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent hover:bg-white/5 text-white;
+  }
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-500;
+  }
+
+  /* Form (inputs/select/checkbox) */
+  .field-label {
+    @apply mb-1 block text-sm text-white/70;
+  }
+  .input {
+    @apply w-full rounded-md border border-white/10 bg-gray-900/40 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/40;
+  }
+  .input-error {
+    @apply border-red-500/70 ring-1 ring-red-500/40;
+  }
+  .select {
+    @apply input appearance-none;
+  }
+  .checkbox {
+    @apply h-5 w-5 accent-indigo-500;
+  }
+
+  /* Badge/Tag */
+  .badge {
+    @apply inline-flex items-center rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold;
+  }
+  .badge-success {
+    @apply bg-emerald-500/90 text-white;
+  }
+
+  /* Toast succes */
+  .toast-success {
+    @apply pointer-events-none fixed left-1/2 top-6 z-50 -translate-x-1/2 transform rounded-full bg-emerald-600/95 px-4 py-2 text-sm font-semibold text-white shadow-2xl shadow-emerald-900/40 transition-all duration-200;
+  }
 }
