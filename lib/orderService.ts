@@ -7,7 +7,6 @@ interface CartItem {
   totalAmount: number;
   artworkUrl?: string;
 }
-
 interface Address {
   nume_prenume: string;
   email: string;
@@ -16,12 +15,10 @@ interface Address {
   localitate: string;
   strada_nr: string;
 }
-
 interface Billing {
   tip_factura: 'persoana_fizica' | 'companie';
   cui?: string;
   name?: string;
-  // UI-ul are câmpuri structurate pt adresă de facturare
   judet?: string;
   localitate?: string;
   strada_nr?: string;
@@ -46,6 +43,7 @@ async function getOblioAccessToken() {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params,
   });
+
   if (!response.ok) {
     const err = await response.text();
     throw new Error(`Eroare obținere token Oblio: ${response.status}. Răspuns: ${err}`);
@@ -72,6 +70,11 @@ function buildAddressLine(
   return [s, l, j].filter(Boolean).join(', ');
 }
 
+/**
+ * Procesează comanda:
+ * - Generează factura în Oblio
+ * - Trimite email Admin + Client
+ */
 export async function fulfillOrder(
   orderData: { address: Address; billing: Billing; cart: CartItem[] },
   paymentType: 'Ramburs' | 'Card'
@@ -81,19 +84,17 @@ export async function fulfillOrder(
   console.log(`[OrderService] Procesare comandă pentru ${address.email}, plată ${paymentType}.`);
   const token = await getOblioAccessToken();
 
-  // Construim o adresă de facturare lizibilă (sau folosim livrarea)
   const billingAddressLine = buildAddressLine(
     { judet: (billing as any).judet, localitate: (billing as any).localitate, strada_nr: (billing as any).strada_nr },
     { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr }
   );
 
-  // Dacă clientul există deja în Oblio, ajunge DOAR CUI.
-  // Dacă NU există, Oblio poate crea clientul din datele de mai jos (fără să ceri câmpuri noi în UI).
   const clientPayload =
     billing.tip_factura === 'companie'
       ? {
           cif: billing.cui,
-          name: (billing as any).companyName || billing.name || address.nume_prenume,
+          // ATENȚIE: pentru cazurile când clientul nu există în Oblio:
+          name: billing.name || address.nume_prenume,
           address: billingAddressLine,
           email: address.email,
         }
@@ -117,7 +118,7 @@ export async function fulfillOrder(
     })),
   };
 
-  // Endpoint corect pentru creare factură
+  // Endpointul corect pt emitere factură:
   const oblioResponse = await fetch('https://www.oblio.eu/api/invoice', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -125,16 +126,12 @@ export async function fulfillOrder(
   });
   const oblioData = await oblioResponse.json();
 
-  if (oblioData.status !== 200) {
-    // Dacă totuși primești “Selecteaza Clientul”, înseamnă că în contul Oblio curent clientul nu există
-    // și payload-ul trimis nu este suficient. Verifică name/adresă/email construite mai sus și OBLIO_* corecte.
-    throw new Error(`Eroare Oblio: ${oblioData.statusMessage || 'Selecteaza Clientul'}`);
-  }
+  if (oblioData.status !== 200) throw new Error(`Eroare Oblio: ${oblioData.statusMessage}`);
 
   const invoiceLink = oblioData.data.link as string;
   console.log(`[OrderService] Factura Oblio generată: ${invoiceLink}`);
 
-  // Totaluri și emailuri (nemodificate)
+  // Totaluri
   const subtotal = cart.reduce((acc, item) => acc + item.totalAmount, 0);
   const totalComanda = subtotal + SHIPPING_FEE;
 
@@ -146,6 +143,7 @@ export async function fulfillOrder(
     })
     .join('');
 
+  // Admin
   await resend.emails.send({
     from: 'comenzi@prynt.ro',
     to: 'contact@prynt.ro',
@@ -177,6 +175,7 @@ export async function fulfillOrder(
     `,
   });
 
+  // Client
   await resend.emails.send({
     from: 'contact@prynt.ro',
     to: address.email,
