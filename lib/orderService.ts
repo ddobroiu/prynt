@@ -27,6 +27,7 @@ interface Billing {
 const resend = new Resend(process.env.RESEND_API_KEY);
 const SHIPPING_FEE = 19.99;
 
+// Cache token Oblio
 let oblioTokenCache: { token: string; expiresAt: number } | null = null;
 
 async function getOblioAccessToken() {
@@ -70,7 +71,7 @@ function buildAddressLine(
   return [s, l, j].filter(Boolean).join(', ');
 }
 
-// ESCAPE pt. a nu băga HTML în email
+// Escape pentru a nu permite HTML injectat
 function escapeHtml(str: string) {
   return String(str)
     .replaceAll('&', '&amp;')
@@ -80,7 +81,7 @@ function escapeHtml(str: string) {
     .replaceAll("'", '&#39;');
 }
 
-// Apel robust Oblio – revenim la endpointul /api/docs/invoice
+// Apel Oblio – endpoint ca în proiectul care îți merge
 async function tryCreateOblioInvoice(payload: any, token: string) {
   const resp = await fetch('https://www.oblio.eu/api/docs/invoice', {
     method: 'POST',
@@ -93,7 +94,7 @@ async function tryCreateOblioInvoice(payload: any, token: string) {
     return await resp.json();
   } else {
     const text = await resp.text();
-    // arunc mesaj scurt, fără HTML neescapat
+    // nu băgăm conținutul în email; doar scurt pentru loguri
     const short = text.slice(0, 200);
     throw new Error(`Răspuns Oblio non-JSON (status ${resp.status}): ${short}`);
   }
@@ -104,15 +105,14 @@ async function sendEmails(
   billing: Billing,
   cart: CartItem[],
   invoiceLink: string | null,
-  paymentType: 'Ramburs' | 'Card',
-  warnings: string[]
+  paymentType: 'Ramburs' | 'Card'
 ) {
   const subtotal = cart.reduce((acc, item) => acc + item.totalAmount, 0);
   const totalComanda = subtotal + SHIPPING_FEE;
 
   const produseListHTML = cart
     .map((item) => {
-      const line = `${item.name} - <strong>${item.quantity} buc.</strong> - ${formatRON(item.totalAmount)} RON`;
+      const line = `${escapeHtml(item.name)} - <strong>${item.quantity} buc.</strong> - ${formatRON(item.totalAmount)} RON`;
       const artwork = item.artworkUrl
         ? ` — <a href="${item.artworkUrl}" target="_blank" rel="noopener noreferrer">Fișier grafică</a>`
         : '';
@@ -120,25 +120,15 @@ async function sendEmails(
     })
     .join('');
 
-  const safeWarnings = warnings.map(escapeHtml);
-  const warningHtml =
-    safeWarnings.length > 0
-      ? `<div style="background:#fff3cd;color:#664d03;padding:10px;border-radius:6px;margin:14px 0">
-           <strong>Atenție:</strong> ${safeWarnings.join(' ')}
-         </div>`
-      : '';
-
-  // Admin
+  // Email ADMIN – COMPLET, cu CUI pentru firmă
   await resend.emails.send({
     from: 'comenzi@prynt.ro',
     to: 'contact@prynt.ro',
-    subject: `Comandă Nouă (${paymentType}) - ${address.nume_prenume}`,
+    subject: `Comandă Nouă (${paymentType}) - ${escapeHtml(address.nume_prenume)}`,
     html: `
       <div style="font-family: sans-serif; padding: 20px; background-color: #f4f4f4;">
         <div style="max-width: 640px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 8px;">
           <h1 style="color: #333; margin: 0 0 12px;">Comandă Nouă (${paymentType})</h1>
-
-          ${warningHtml}
 
           <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Date Client</h2>
           <p><strong>Nume:</strong> ${escapeHtml(address.nume_prenume)}</p>
@@ -182,18 +172,60 @@ async function sendEmails(
     `,
   });
 
-  // Client
+  // Email CLIENT – COMPLET, ca “înainte”, CU CUI pentru Companie
   await resend.emails.send({
     from: 'contact@prynt.ro',
     to: address.email,
     subject: 'Confirmare comandă Prynt.ro',
     html: `
-      <p>Mulțumim pentru comandă!</p>
-      ${
-        invoiceLink
-          ? `<p>Poți vizualiza factura aici: <a href="${invoiceLink}">Factura Oblio</a></p>`
-          : `<p>Factura va fi emisă și trimisă pe email în scurt timp.</p>`
-      }
+      <div style="font-family:sans-serif; background:#f7f7fb; padding:24px;">
+        <div style="max-width:640px; margin:auto; background:#ffffff; border-radius:10px; padding:24px;">
+          <h1 style="margin:0 0 12px; color:#111;">Mulțumim pentru comandă!</h1>
+          <p style="margin:0 0 16px; color:#444;">
+            Am primit comanda ta și am început procesarea. Mai jos ai un rezumat al detaliilor.
+          </p>
+
+          <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Datele tale</h2>
+          <p style="margin:4px 0;"><strong>Nume:</strong> ${escapeHtml(address.nume_prenume)}</p>
+          <p style="margin:4px 0;"><strong>Email:</strong> ${escapeHtml(address.email)}</p>
+          <p style="margin:4px 0;"><strong>Telefon:</strong> ${escapeHtml(address.telefon)}</p>
+
+          <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Adresă livrare</h2>
+          <p style="margin:4px 0;">${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}</p>
+
+          <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Facturare</h2>
+          <p style="margin:4px 0;"><strong>Tip:</strong> ${billing.tip_factura === 'companie' ? 'Companie' : 'Persoană Fizică'}</p>
+          ${
+            billing.tip_factura === 'companie'
+              ? `<p style="margin:4px 0;"><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
+              : `<p style="margin:4px 0;"><strong>Nume factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`
+          }
+
+          <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Produse</h2>
+          <ul style="padding-left:18px; margin:8px 0 0;">
+            ${produseListHTML}
+          </ul>
+
+          <div style="border-top:1px solid #eee; margin:16px 0; padding-top:12px;">
+            <p style="margin:4px 0; color:#333;">Taxă livrare: ${formatRON(SHIPPING_FEE)} RON</p>
+            <h3 style="text-align:right; color:#111; margin:8px 0 0;">Total: ${formatRON(totalComanda)} RON</h3>
+          </div>
+
+          ${
+            invoiceLink
+              ? `<p style="text-align:center; margin-top:16px;">
+                   <a href="${invoiceLink}" style="display:inline-block; background:#4f46e5; color:#fff; padding:10px 18px; text-decoration:none; border-radius:8px;">Descarcă Factura</a>
+                 </p>`
+              : `<p style="text-align:center; margin-top:16px; color:#555;">
+                   Factura va fi emisă și trimisă pe email după validare.
+                 </p>`
+          }
+
+          <div style="margin-top:20px; color:#555; font-size:14px;">
+            <p style="margin:6px 0;">Dacă ai întrebări, răspunde la acest email sau scrie-ne la <a href="mailto:contact@prynt.ro">contact@prynt.ro</a>.</p>
+          </div>
+        </div>
+      </div>
     `,
   });
 }
@@ -212,7 +244,7 @@ export async function fulfillOrder(
   const warnings: string[] = [];
   let invoiceLink: string | null = null;
 
-  // Token Oblio (dacă pică, doar logăm)
+  // Token Oblio (dacă pică, continuăm fără factură)
   let token: string | null = null;
   try {
     token = await getOblioAccessToken();
@@ -220,7 +252,7 @@ export async function fulfillOrder(
     warnings.push(`[Oblio] Nu am putut obține token: ${e?.message || e}`);
   }
 
-  // Pregătește adresa de facturare
+  // Adresă de facturare (din câmpurile de facturare sau fallback la livrare)
   const billingAddressLine = buildAddressLine(
     { judet: (billing as any).judet, localitate: (billing as any).localitate, strada_nr: (billing as any).strada_nr },
     { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr }
@@ -236,7 +268,7 @@ export async function fulfillOrder(
 
   if (token) {
     try {
-      // 1) încercare “doar CUI” pentru companii
+      // 1) Companie – încercare “doar CUI” dacă e furnizat
       let client =
         billing.tip_factura === 'companie' && billing.cui
           ? { cif: billing.cui }
@@ -256,10 +288,11 @@ export async function fulfillOrder(
 
       let data = await tryCreateOblioInvoice(basePayload, token);
 
-      // fallback dacă cere selectarea clientului
+      // 2) Dacă cere selectarea clientului, reîncercăm cu detalii minime (fără UI suplimentar)
       if (data?.status !== 200) {
         const msg = data?.statusMessage || data?.message || '';
         const needDetails = /selecteaza clientul|alege clientul/i.test(msg) || data?.status === 422;
+
         if (needDetails && billing.tip_factura === 'companie' && billing.cui) {
           const payloadWithDetails = {
             ...basePayload,
@@ -286,9 +319,9 @@ export async function fulfillOrder(
     }
   }
 
-  // Emailuri – indiferent de Oblio
+  // Emailuri – întotdeauna, chiar dacă Oblio a eșuat
   try {
-    await sendEmails(address, billing, cart, invoiceLink, paymentType, warnings);
+    await sendEmails(address, billing, cart, invoiceLink, paymentType);
   } catch (e: any) {
     console.error('[OrderService] Eroare trimitere emailuri:', e?.message || e);
   }
