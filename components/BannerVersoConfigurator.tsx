@@ -2,8 +2,8 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
-import BannerModeSwitch from "./BannerModeSwitch";
 import MobilePriceBar from "./MobilePriceBar";
+import { usePathname, useRouter } from "next/navigation";
 
 /* GALLERY (exemplu pentru verso) */
 const GALLERY = [
@@ -73,6 +73,46 @@ type Props = {
   initialWidth?: number;
   initialHeight?: number;
 };
+
+/* Inline ModeSwitch - integrat */
+function BannerModeSwitchInline() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const isDouble = pathname?.startsWith("/banner-verso");
+
+  const goSingle = () => {
+    if (isDouble) router.push("/banner");
+  };
+  const goDouble = () => {
+    if (!isDouble) router.push("/banner-verso");
+  };
+
+  return (
+    <div className="inline-flex rounded-lg border border-white/10 bg-white/5 p-1">
+      <button
+        type="button"
+        onClick={goSingle}
+        className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+          !isDouble ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/10"
+        }`}
+        aria-pressed={!isDouble}
+      >
+        O față
+      </button>
+      <button
+        type="button"
+        onClick={goDouble}
+        className={`ml-1 px-3 py-1.5 rounded-md text-sm font-medium transition ${
+          isDouble ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/10"
+        }`}
+        aria-pressed={isDouble}
+      >
+        Față-verso
+      </button>
+    </div>
+  );
+}
 
 export default function BannerVersoConfigurator({ productSlug, initialWidth: initW, initialHeight: initH }: Props) {
   const { addItem } = useCart();
@@ -307,7 +347,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       <div className="page py-10 pb-24 lg:pb-10">
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <div className="mb-2"><BannerModeSwitch /></div>
+            <div className="mb-2"><BannerModeSwitchInline /></div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Banner Verso</h1>
             <p className="mt-2 text-white/70">Material: Blockout 610 (pretensionat)</p>
           </div>

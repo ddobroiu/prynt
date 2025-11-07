@@ -1,17 +1,16 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import AutocolanteConfigurator from "@/components/AutocolanteConfigurator";
+import CanvasConfigurator from "@/components/CanvasConfigurator";
 import { getAllProductSlugs, getProductBySlug, resolveProductForRequestedSlug } from "@/lib/products";
 import type { Product } from "@/lib/products";
 
 type Props = { params?: any };
 
 export async function generateStaticParams() {
-  // preluăm toate slug-urile existente și trimitem doar pe cele din categoria autocolante
   const slugs = getAllProductSlugs();
   const filtered = slugs.filter((s) => {
     const p = getProductBySlug(s);
-    return !!p && p.metadata?.category === "autocolante";
+    return !!p && p.metadata?.category === "canvas";
   });
   return filtered.map((slug) => ({ slug: [slug] }));
 }
@@ -35,24 +34,21 @@ export default async function Page({ params }: Props) {
 
   const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug));
 
-  if (!product || product.metadata?.category !== "autocolante") {
+  if (!product || product.metadata?.category !== "canvas") {
     return notFound();
   }
 
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/autocolante/${joinedSlug}`;
-
   return (
     <main style={{ padding: 16 }}>
-      {/* SEO structured data / optional */}
       <section style={{ marginTop: 18 }}>
         <header style={{ marginBottom: 18 }}>
           <h1 style={{ fontSize: 28, fontWeight: 700, textAlign: "center", margin: 0 }}>
-            {product.title || `Autocolant ${joinedSlug}`}
+            {product.title || `Canvas ${joinedSlug}`}
           </h1>
           <p style={{ marginTop: 8, color: "#9ca3af", textAlign: "center", marginBottom: 0 }}>{product.description}</p>
         </header>
 
-        <AutocolanteConfigurator productSlug={product.slug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
+        <CanvasConfigurator productSlug={product.slug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
       </section>
     </main>
   );

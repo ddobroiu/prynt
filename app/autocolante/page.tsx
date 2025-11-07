@@ -7,6 +7,7 @@ export const metadata = {
 };
 
 export default function Page() {
+  // Pagina server care reia componenta client AutocolanteConfigurator
   return (
     <main style={{ padding: 16 }}>
       <section>
