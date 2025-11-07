@@ -1,43 +1,43 @@
 "use client";
-import React from "react";
-import { useCart } from "./CartProvider";
-
-function formatRon(value: number) {
-  return value.toLocaleString("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " RON";
-}
+import React, { useEffect } from "react";
+import { useCart } from "./CartContext";
 
 export default function CartWidget() {
-  const { items, removeItem, total, isLoaded } = useCart();
+  const { items, total, removeItem, clearCart } = useCart();
 
-  if (!isLoaded) return null; // așteptăm încărcarea din localStorage
-  if (!items || items.length === 0) return <div>Coș gol</div>;
+  useEffect(() => {
+    console.log("[CartWidget] items changed", items, "total", total);
+  }, [items, total]);
 
   return (
-    <div style={{ maxWidth: 320 }}>
-      {items.map((item) => {
-        const title = item.title || item.slug || "Produs fără nume";
-        const price = Number(item.price) || 0;
-        const qty = Number(item.quantity) || 1;
-        const lineTotal = price * qty;
+    <div id="cart-widget-root" style={{ position: "fixed", right: 20, bottom: 88, zIndex: 9999 }}>
+      <button
+        onClick={() => {
+          const el = document.getElementById("cart-panel");
+          if (el) el.style.display = el.style.display === "block" ? "none" : "block";
+        }}
+        style={{ background: "#0f1724", color: "#fff", padding: "10px 14px", borderRadius: 8, border: "none", cursor: "pointer" }}
+      >
+        Coș ({items.reduce((s, i) => s + (i.quantity ?? 1), 0)})
+      </button>
 
-        return (
-          <div key={item.id} style={{ marginBottom: 12, borderBottom: "1px solid #eee", paddingBottom: 8 }}>
-            <div style={{ fontWeight: 700 }}>{title}</div>
-            <div style={{ color: "#666", fontSize: 13 }}>
-              {formatRon(price)} × {qty} = <strong>{formatRon(lineTotal)}</strong>
-            </div>
+      <div id="cart-panel" style={{ display: "none", width: 360, maxHeight: "70vh", overflow: "auto", background: "#fff", color: "#000", borderRadius: 8, boxShadow: "0 10px 30px rgba(0,0,0,0.2)", marginTop: 8, padding: 12 }}>
+        <h3>Coș</h3>
+        {items.length === 0 && <div>Coșul este gol</div>}
+        {items.map((it) => (
+          <div key={it.id} style={{ padding: 8, borderBottom: "1px solid #eee" }}>
+            <div style={{ fontWeight: 600 }}>{it.title}</div>
+            <div>{it.width} x {it.height} cm — {it.price.toFixed(2)} {it.currency} × {it.quantity}</div>
             <div style={{ marginTop: 6 }}>
-              <button onClick={() => removeItem(item.id)} style={{ color: "#c00", background: "transparent", border: "none", cursor: "pointer" }}>
-                Șterge
-              </button>
+              <button onClick={() => removeItem(it.id)} style={{ background: "#ef4444", color: "#fff", border: "none", padding: "6px 8px", borderRadius: 6 }}>Șterge</button>
             </div>
           </div>
-        );
-      })}
-
-      <hr />
-      <div style={{ marginTop: 8, fontWeight: 700 }}>
-        Total: {formatRon(Number(total) || 0)}
+        ))}
+        <div style={{ marginTop: 10, fontWeight: 700 }}>Total: {total.toFixed(2)} RON</div>
+        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+          <button onClick={() => { alert("Checkout simulat"); console.log("Checkout items:", items); }} style={{ flex: 1, padding: "8px 10px", background: "#0ea5a4", color: "#fff", border: "none", borderRadius: 6 }}>Checkout</button>
+          <button onClick={() => clearCart()} style={{ padding: "8px 10px", background: "#6b7280", color: "#fff", border: "none", borderRadius: 6 }}>Golește</button>
+        </div>
       </div>
     </div>
   );
