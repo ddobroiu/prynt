@@ -1,45 +1,56 @@
+export type MaterialOption = {
+  id: string;
+  name: string;
+  priceModifierPerCm2: number; // supliment per cm2 sau multiplicator
+  fixedExtra?: number; // cost fix
+};
+
 export type Product = {
   id: string;
   slug: string;
   title: string;
   description: string;
-  priceBase: number; // preț fix de bază
-  pricePerCm2: number; // preț pe cm^2
-  currency: string;
   images: string[];
-  sku?: string;
-  inStock?: boolean;
-  minWidthCm?: number;
-  maxWidthCm?: number;
-  minHeightCm?: number;
-  maxHeightCm?: number;
+  priceBase: number; // cost fix
+  pricePerCm2: number; // baza per cm2
+  minWidthCm: number;
+  maxWidthCm: number;
+  minHeightCm: number;
+  maxHeightCm: number;
+  currency: string;
+  materials?: MaterialOption[]; // ex: PVC, Mesh, Backlit
+  bothSidesSupported?: boolean; // true dacă pot fi printate față+verso
 };
 
-const PRODUCTS: Product[] = [
+// Example data
+export const PRODUCTS: Product[] = [
   {
-    id: "1",
+    id: "banner-1",
     slug: "banner-modern-120x60",
     title: "Banner modern 120x60 cm",
-    description: "Banner PVC 510g, print UV, margini sudate. Potrivit pentru exterior.",
-    priceBase: 40.0,
-    pricePerCm2: 0.02,
-    currency: "RON",
-    images: [
-      "https://res.cloudinary.com/your-cloud-name/image/upload/v000/banner-120x60.jpg"
-    ],
-    sku: "BANNER-120-60",
-    inStock: true,
-    minWidthCm: 10,
+    description: "Banner PVC 510g, print UV...",
+    images: ["https://res.cloudinary.com/.../banner-120x60.jpg"],
+    priceBase: 40,
+    pricePerCm2: 0.0025,
+    minWidthCm: 20,
     maxWidthCm: 500,
     minHeightCm: 10,
-    maxHeightCm: 300
-  }
+    maxHeightCm: 300,
+    currency: "RON",
+    materials: [
+      { id: "pvc-510", name: "PVC 510g", priceModifierPerCm2: 0 },
+      { id: "mesh", name: "Mesh", priceModifierPerCm2: -0.0005 },
+      { id: "backlit", name: "Backlit", priceModifierPerCm2: 0.001 },
+    ],
+    bothSidesSupported: true,
+  },
+  // other products...
 ];
 
-export async function getAllProducts(): Promise<Product[]> {
-  return PRODUCTS;
+export async function getProductBySlug(slug: string) {
+  return PRODUCTS.find((p) => p.slug === slug) ?? null;
 }
 
-export async function getProductBySlug(slug: string): Promise<Product | null> {
-  return PRODUCTS.find((p) => p.slug === slug) ?? null;
+export async function getAllProducts() {
+  return PRODUCTS;
 }
