@@ -2,19 +2,30 @@
 import React from "react";
 import DimensionEditor from "./DimensionEditor";
 import { Product } from "@/lib/products";
+import { useCart } from "./CartContext";
 
 type Props = {
   product: Product;
 };
 
 export default function ProductClient({ product }: Props) {
-  // Aici definim handler-ele interactive — sunt în client, deci ok
+  const { addItem } = useCart();
+
   function handleAddToCart(payload: { width: number; height: number; price: number }) {
-    // Exemplu simplu: trimitem la un API sau la localStorage
-    // fetch('/api/cart', { method: 'POST', body: JSON.stringify({ productId: product.id, ...payload }) })
-    console.log("Add to cart (client):", { productId: product.id, ...payload });
-    // poți afișa toast sau actualiza contextul de cart
-    alert(`Produs adăugat: ${product.title} — ${payload.width}x${payload.height} cm — ${payload.price} ${product.currency}`);
+    const id = `${product.id}-${payload.width}x${payload.height}`;
+    addItem({
+      id,
+      productId: product.id,
+      slug: product.slug,
+      title: product.title,
+      width: payload.width,
+      height: payload.height,
+      price: payload.price,
+      quantity: 1,
+      currency: product.currency,
+    });
+    // feedback vizual
+    alert(`Produs adăugat în coș: ${product.title} — ${payload.width}x${payload.height} cm — ${payload.price} ${product.currency}`);
   }
 
   return (
