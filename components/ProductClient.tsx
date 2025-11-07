@@ -1,10 +1,10 @@
 "use client";
 import React, { useState } from "react";
 import DimensionEditor from "./DimensionEditor";
-import MaterialSelector from "./MaterialSelector.tsx";
+import MaterialSelector from "./MaterialSelector";
 import SideSelector from "./SideSelector";
 import GraphicUpload from "./GraphicUpload";
-import { Product } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
 
 type Props = { product: Product; initialWidth?: number; initialHeight?: number };
@@ -13,8 +13,8 @@ export default function ProductClient({ product, initialWidth, initialHeight }: 
   const { addItem } = useCart();
   const [materialId, setMaterialId] = useState<string>(product.materials?.[0]?.id ?? "");
   const [side, setSide] = useState<"single" | "double">("single");
-  const [width, setWidth] = useState<number>(initialWidth ?? product.minWidthCm);
-  const [height, setHeight] = useState<number>(initialHeight ?? product.minHeightCm);
+  const [width, setWidth] = useState<number>(initialWidth ?? Math.max(product.minWidthCm, 120));
+  const [height, setHeight] = useState<number>(initialHeight ?? Math.max(product.minHeightCm, 60));
   const [price, setPrice] = useState<number | null>(null);
   const [graphicFile, setGraphicFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -29,8 +29,11 @@ export default function ProductClient({ product, initialWidth, initialHeight }: 
         body: JSON.stringify({ widthCm: width, heightCm: height, slug: product.slug, materialId, side }),
       });
       const data = await res.json();
-      if (res.ok && data.ok) setPrice(data.price);
-      else alert(data.message || "Eroare calcul");
+      if (res.ok && data.ok) {
+        setPrice(data.price);
+      } else {
+        alert(data.message || "Eroare calcul");
+      }
     } catch (e) {
       alert("Eroare rețea");
     } finally {
@@ -38,13 +41,13 @@ export default function ProductClient({ product, initialWidth, initialHeight }: 
     }
   }
 
-  function handleFile(file?: File | null, url?: string | null) {
-    setGraphicFile(file ?? null);
+  function handleFile(file: File | null, url?: string | null) {
+    setGraphicFile(file);
     setPreviewUrl(url ?? null);
   }
 
   function handleAddToCart() {
-    if (!price) {
+    if (price == null) {
       alert("Calculează prețul mai întâi");
       return;
     }
@@ -60,7 +63,7 @@ export default function ProductClient({ product, initialWidth, initialHeight }: 
       quantity: 1,
       currency: product.currency,
     });
-    alert("Adăugat în coș");
+    alert("Produs adăugat în coș");
   }
 
   return (
@@ -83,7 +86,7 @@ export default function ProductClient({ product, initialWidth, initialHeight }: 
 
       <div style={{ marginTop: 12 }}>
         <button onClick={calculate} disabled={loading} style={{ marginRight: 8 }}>
-          {loading ? "Calculating..." : "Calculează preț"}
+          {loading ? "Se calculează…" : "Calculează preț"}
         </button>
         {price !== null && <strong>Preț: {price.toFixed(2)} {product.currency}</strong>}
       </div>

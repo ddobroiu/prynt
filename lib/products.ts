@@ -1,8 +1,8 @@
 export type MaterialOption = {
   id: string;
   name: string;
-  priceModifierPerCm2: number; // supliment per cm2 sau multiplicator
-  fixedExtra?: number; // cost fix
+  priceModifierPerCm2?: number; // add/sub per cm^2
+  fixedExtra?: number; // fixed extra cost
 };
 
 export type Product = {
@@ -11,25 +11,24 @@ export type Product = {
   title: string;
   description: string;
   images: string[];
-  priceBase: number; // cost fix
-  pricePerCm2: number; // baza per cm2
+  priceBase: number;
+  pricePerCm2: number;
   minWidthCm: number;
   maxWidthCm: number;
   minHeightCm: number;
   maxHeightCm: number;
   currency: string;
-  materials?: MaterialOption[]; // ex: PVC, Mesh, Backlit
-  bothSidesSupported?: boolean; // true dacă pot fi printate față+verso
+  materials?: MaterialOption[];
+  bothSidesSupported?: boolean;
 };
 
-// Example data
 export const PRODUCTS: Product[] = [
   {
     id: "banner-1",
     slug: "banner-modern-120x60",
     title: "Banner modern 120x60 cm",
-    description: "Banner PVC 510g, print UV...",
-    images: ["https://res.cloudinary.com/.../banner-120x60.jpg"],
+    description: "Banner PVC 510g, print UV, margini sudate. Potrivit pentru exterior.",
+    images: ["https://res.cloudinary.com/your-cloud-name/image/upload/v000/banner-120x60.jpg"],
     priceBase: 40,
     pricePerCm2: 0.0025,
     minWidthCm: 20,
@@ -44,13 +43,14 @@ export const PRODUCTS: Product[] = [
     ],
     bothSidesSupported: true,
   },
-  // other products...
+  // adauga alte produse aici
 ];
 
-export async function getProductBySlug(slug: string) {
-  return PRODUCTS.find((p) => p.slug === slug) ?? null;
+export async function getAllProducts(): Promise<Product[]> {
+  // în proiect real ai fetch DB; aici staticul
+  return PRODUCTS;
 }
 
-export async function getAllProducts() {
-  return PRODUCTS;
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  return PRODUCTS.find((p) => p.slug === slug) ?? null;
 }

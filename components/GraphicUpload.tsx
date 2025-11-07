@@ -6,7 +6,7 @@ export default function GraphicUpload({ onChange, initialPreview }: { onChange: 
 
   useEffect(() => {
     return () => {
-      // cleanup object URLs if any
+      // cleanup object URLs if created
     };
   }, []);
 
@@ -25,7 +25,7 @@ export default function GraphicUpload({ onChange, initialPreview }: { onChange: 
   return (
     <div style={{ marginTop: 12 }}>
       <label>Încarcă grafică (opțional)</label>
-      <input type="file" accept="image/*,application/pdf" onChange={handleFile} />
+      <input type="file" accept="image/*,application/pdf" onChange={handleFile} style={{ display: "block", marginTop: 8 }} />
       {preview && <div style={{ marginTop: 8 }}><img src={preview} alt="preview" style={{ maxWidth: 240 }} /></div>}
     </div>
   );
