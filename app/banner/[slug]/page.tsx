@@ -7,17 +7,17 @@ import { resolveProductForRequestedSlug, getAllProductSlugs } from "@/lib/produc
 import type { Product } from "@/lib/products";
 import BannerConfigurator from "@/components/BannerConfigurator";
 
-// restul fișierului rămâne neschimbat...
-type Props = { params: { slug: string } };
+type Props = { params: { slug?: string[] } };
 
 export async function generateStaticParams() {
+  // păstrăm SSG pentru slugs din catalog (opțional)
   const slugs = getAllProductSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return slugs.map((slug) => ({ slug: [slug] }));
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { slug } = params as { slug: string };
-  const { product, isFallback } = await resolveProductForRequestedSlug(String(slug));
+  const raw = (params.slug ?? []).join("/");
+  const { product, isFallback } = await resolveProductForRequestedSlug(String(raw));
   if (!product) return {};
 
   const metadata: any = {
@@ -34,12 +34,20 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function Page({ params }: Props) {
-  const { slug } = params as { slug: string };
-  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(slug));
+  const slugParts = params.slug ?? [];
+  const joinedSlug = slugParts.join("/");
 
-  if (!product) return notFound();
+  // Debug: logăm slugul la server (vezi Railway logs) pentru diagnostic
+  console.log(`[banner page] Requested slug: ${joinedSlug}`);
 
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/banner/${slug}`;
+  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug));
+
+  if (!product) {
+    console.log(`[banner page] No product resolved for slug: ${joinedSlug} → 404`);
+    return notFound();
+  }
+
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/banner/${joinedSlug}`;
 
   return (
     <main style={{ padding: 16 }}>
