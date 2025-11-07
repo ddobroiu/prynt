@@ -10,7 +10,7 @@ import BannerConfigurator from "@/components/BannerConfigurator";
 type Props = { params: { slug?: string[] } };
 
 export async function generateStaticParams() {
-  // păstrăm SSG pentru slugs din catalog (opțional)
+  // păstrăm SSG pentru slugs din catalog (optional)
   const slugs = getAllProductSlugs();
   return slugs.map((slug) => ({ slug: [slug] }));
 }
@@ -37,7 +37,6 @@ export default async function Page({ params }: Props) {
   const slugParts = params.slug ?? [];
   const joinedSlug = slugParts.join("/");
 
-  // Debug: logăm slugul la server (vezi Railway logs) pentru diagnostic
   console.log(`[banner page] Requested slug: ${joinedSlug}`);
 
   const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug));

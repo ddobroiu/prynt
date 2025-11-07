@@ -18,14 +18,13 @@ export async function GET() {
 
   const productPages = slugs.map((s) => {
     const prod = getProductBySlug(s);
-    // încercăm să citim un lastUpdated din product.metadata.updatedAt (dacă există)
     let lastmod = undefined;
     if (prod?.metadata?.updatedAt) {
       try {
         lastmod = formatDateISO(new Date(prod.metadata.updatedAt));
       } catch {}
     }
-    if (!lastmod) lastmod = formatDateISO(new Date()); // fallback = azi
+    if (!lastmod) lastmod = formatDateISO(new Date());
     return { url: `${base}/banner/${s}`, priority: 0.8, lastmod };
   });
 

@@ -1,7 +1,6 @@
 /**
- * Central product model + resolver used by pages and sitemap generation.
- * Păstrează lista de produse (dimensiuni uzuale) aici; e sursa de adevăr
- * folosită de app/banner/[slug]/page.tsx și de sitemap.
+ * lib/products.ts
+ * Catalog de produse + utilitare folosite de pagini, sitemap și API.
  */
 
 /* exportăm tipul MaterialOption pentru a-l folosi în componente */
@@ -157,7 +156,7 @@ export function getProductBySlug(slug: string): Product | undefined {
 }
 
 /**
- * Rezolvator folosit de pagina /banner/[slug]
+ * Rezolvator folosit de paginile banner:
  * - dacă există produs cu slug returnează product + initialWidth/Height
  * - altfel, încearcă să parseze dimensiuni din slug (ex: "120x20" sau "banner-120x20")
  *   și returnează fallback product (isFallback = true)
@@ -169,7 +168,7 @@ export async function resolveProductForRequestedSlug(requestedSlug: string) {
     return { product, initialWidth: product.width_cm ?? product.minWidthCm ?? null, initialHeight: product.height_cm ?? product.minHeightCm ?? null, isFallback: false };
   }
 
-  // try parse dimensions pattern
+  // try parse dimensions pattern anywhere in slug
   const m = slug.match(/(\d{2,4})[x×-](\d{2,4})/);
   if (m) {
     const width = Number(m[1]);
