@@ -7,7 +7,7 @@ import { resolveProductForRequestedSlug, getAllProductSlugs } from "@/lib/produc
 import type { Product } from "@/lib/products";
 import BannerConfigurator from "@/components/BannerConfigurator";
 
-type Props = { params: { slug?: string[] } };
+type Props = { params?: any }; // params poate fi Promise, folosim any și await
 
 export async function generateStaticParams() {
   const slugs = getAllProductSlugs();
@@ -15,7 +15,9 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props) {
-  const raw = (params.slug ?? []).join("/");
+  // params poate fi Promise — trebuie să facem await
+  const resolved = await params;
+  const raw = (resolved?.slug ?? []).join("/");
   const { product, isFallback } = await resolveProductForRequestedSlug(String(raw));
   if (!product) return {};
 
@@ -33,7 +35,9 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function Page({ params }: Props) {
-  const slugParts = params.slug ?? [];
+  // params poate fi Promise — îl rezolvăm cu await
+  const resolved = await params;
+  const slugParts: string[] = resolved?.slug ?? [];
   const joinedSlug = slugParts.join("/");
 
   console.log(`[banner page] Requested slug: ${joinedSlug}`);
@@ -50,11 +54,13 @@ export default async function Page({ params }: Props) {
   return (
     <main style={{ padding: 16 }}>
       <ProductJsonLd product={(product as Product)} url={url} />
+
       <section style={{ marginTop: 18 }}>
         <header style={{ marginBottom: 18 }}>
           <h1 style={{ fontSize: 28, fontWeight: 700 }}>{product.title}</h1>
           <p style={{ marginTop: 8, color: "#9ca3af" }}>{product.description}</p>
         </header>
+
         <BannerConfigurator productSlug={product.slug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
       </section>
     </main>
