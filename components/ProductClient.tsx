@@ -2,18 +2,17 @@
 import React from "react";
 import DimensionEditor from "./DimensionEditor";
 import { Product } from "@/lib/products";
-import { useCart } from "@/components/CartContext";
+// IMPORTANT: import relativ, nu alias, pentru a folosi aceeași instanță de context
+import { useCart } from "./CartContext";
 
-type Props = {
-  product: Product;
-};
+type Props = { product: Product };
 
 export default function ProductClient({ product }: Props) {
   const { addItem } = useCart();
 
   function handleAddToCart(payload: { width: number; height: number; price: number }) {
     const id = `${product.id}-${payload.width}x${payload.height}`;
-    console.log("[ProductClient] handleAddToCart", { id, productId: product.id, payload });
+    console.log("[ProductClient] handleAddToCart", { id, payload });
     addItem({
       id,
       productId: product.id,
@@ -25,7 +24,6 @@ export default function ProductClient({ product }: Props) {
       quantity: 1,
       currency: product.currency,
     });
-    // keep feedback for user
     alert(`Produs adăugat în coș: ${product.title} — ${payload.width}x${payload.height} cm — ${payload.price} ${product.currency}`);
   }
 

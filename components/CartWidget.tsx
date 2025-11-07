@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import { useCart } from "@/components/CartContext";
+import { useCart } from "./CartContext";
 
 export default function CartWidget() {
   const { items, total, removeItem, clearCart } = useCart();
@@ -10,7 +10,7 @@ export default function CartWidget() {
   }, [items, total]);
 
   return (
-    <div style={{ position: "fixed", right: 20, bottom: 20, zIndex: 9999 }}>
+    <div style={{ position: "fixed", right: 20, bottom: 88, zIndex: 9999 }}>
       <button
         onClick={() => {
           const el = document.getElementById("cart-panel");
@@ -45,22 +45,29 @@ export default function CartWidget() {
       >
         <h3>Coș</h3>
         {items.length === 0 && <div>Coșul este gol</div>}
-        {items.map((it) => (
-          <div key={it.id} style={{ padding: 8, borderBottom: "1px solid #eee" }}>
-            <div style={{ fontWeight: 600 }}>{it.title}</div>
-            <div>
-              {it.width} x {it.height} cm — {it.price.toFixed(2)} {it.currency} × {it.quantity}
+        {items.map((it) => {
+          const width = typeof it.width === "number" ? it.width : 0;
+          const height = typeof it.height === "number" ? it.height : 0;
+          const price = typeof it.price === "number" ? it.price : 0;
+          return (
+            <div key={it.id} style={{ padding: 8, borderBottom: "1px solid #eee" }}>
+              <div style={{ fontWeight: 600 }}>{it.title ?? "Produs"}</div>
+              <div>
+                {width > 0 && height > 0 ? `${width} x ${height} cm` : "Dimensiune: -"}
+                {" — "}
+                {price.toFixed(2)} {it.currency ?? "RON"} × {it.quantity ?? 1}
+              </div>
+              <div style={{ marginTop: 6 }}>
+                <button
+                  onClick={() => removeItem(it.id)}
+                  style={{ background: "#ef4444", color: "#fff", border: "none", padding: "6px 8px", borderRadius: 6 }}
+                >
+                  Șterge
+                </button>
+              </div>
             </div>
-            <div style={{ marginTop: 6 }}>
-              <button
-                onClick={() => removeItem(it.id)}
-                style={{ background: "#ef4444", color: "#fff", border: "none", padding: "6px 8px", borderRadius: 6 }}
-              >
-                Șterge
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
 
         <div style={{ marginTop: 10, fontWeight: 700 }}>Total: {total.toFixed(2)} RON</div>
 
