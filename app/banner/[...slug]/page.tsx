@@ -10,7 +10,6 @@ import BannerConfigurator from "@/components/BannerConfigurator";
 type Props = { params: { slug?: string[] } };
 
 export async function generateStaticParams() {
-  // păstrăm SSG pentru slugs din catalog (optional)
   const slugs = getAllProductSlugs();
   return slugs.map((slug) => ({ slug: [slug] }));
 }
@@ -51,13 +50,11 @@ export default async function Page({ params }: Props) {
   return (
     <main style={{ padding: 16 }}>
       <ProductJsonLd product={(product as Product)} url={url} />
-
       <section style={{ marginTop: 18 }}>
         <header style={{ marginBottom: 18 }}>
           <h1 style={{ fontSize: 28, fontWeight: 700 }}>{product.title}</h1>
           <p style={{ marginTop: 8, color: "#9ca3af" }}>{product.description}</p>
         </header>
-
         <BannerConfigurator productSlug={product.slug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
       </section>
     </main>
