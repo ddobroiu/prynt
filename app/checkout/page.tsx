@@ -30,7 +30,8 @@ type Billing = {
 };
 
 export default function CheckoutPage() {
-  const { items, removeItem, isLoaded, total } = useCart();
+  // Use CartProvider hook (items shape: title, price, quantity, metadata...)
+  const { items = [], removeItem, isLoaded, total } = useCart();
 
   const [address, setAddress] = useState<Address>({
     nume_prenume: "",
@@ -54,15 +55,19 @@ export default function CheckoutPage() {
 
   const firstInvalidRef = useRef<HTMLElement | null>(null);
 
-  // protecție: folosim fallback [] și convertim la număr
-  const subtotal = useMemo(
-    () =>
-      (items ?? []).reduce(
-        (acc, item) => acc + Number(item?.totalAmount ?? 0),
-        0
-      ),
-    [items]
-  );
+  // subtotal - robust: support both current CartProvider shape (price * quantity)
+  // and legacy shapes that stored unitAmount/totalAmount.
+  const subtotal = useMemo(() => {
+    return (items ?? []).reduce((acc: number, item: any) => {
+      const qty = Number(item.quantity ?? 1) || 1;
+      // prefer explicit price, fallback to unitAmount, then fallback to totalAmount/qty
+      const unit = Number(item.price ?? item.unitAmount ?? 0) || 0;
+      if (unit > 0) return acc + unit * qty;
+      const totalAmount = Number(item.totalAmount ?? 0) || 0;
+      if (totalAmount > 0) return acc + totalAmount;
+      return acc;
+    }, 0);
+  }, [items]);
 
   const costLivrare = (items ?? []).length > 0 ? 19.99 : 0;
   const totalPlata = (items ?? []).length > 0 ? subtotal + costLivrare : 0;
@@ -116,9 +121,7 @@ export default function CheckoutPage() {
     if (!ok) {
       setErrors(errs);
       const firstKey = Object.keys(errs)[0];
-      const el = document.querySelector<HTMLElement>(
-        `[data-field="${firstKey}"]`
-      );
+      const el = document.querySelector<HTMLElement>(`[data-field="${firstKey}"]`);
       if (el) {
         firstInvalidRef.current = el;
         el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -346,45 +349,65 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
     <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
       <h2 className="text-xl font-bold mb-4">Produsele tale</h2>
       <ul className="divide-y divide-white/10">
-        {(items ?? []).map((item) => (
-          <li key={item.id} className="py-4 flex items-start gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className="font-semibold truncate pr-2">{item.name}</p>
-                <span className="text-white/70 text-sm">x{item.quantity}</span>
+        {(items ?? []).map((item) => {
+          // Support both shapes:
+          // - current CartProvider: { id, title, price, quantity, metadata }
+          // - legacy/other: { id, name, unitAmount, totalAmount, artworkUrl, textDesign }
+          const title = item.title ?? item.name ?? item.slug ?? "Produs";
+          const qty = Number(item.quantity ?? 1) || 1;
+          const unit = Number(item.price ?? item.unitAmount ?? 0) || 0;
+          const lineTotal = unit > 0 ? unit * qty : Number(item.totalAmount ?? 0) || 0;
+          return (
+            <li key={item.id} className="py-4 flex items-start gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <p className="font-semibold truncate pr-2">{title}</p>
+                  <span className="text-white/70 text-sm">x{qty}</span>
+                </div>
+                <div className="mt-1 text-sm text-white/70">
+                  {item.artworkUrl && (
+                    <a
+                      className="underline text-indigo-300"
+                      href={item.artworkUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      fișier încărcat
+                    </a>
+                  )}
+                  {(!item.artworkUrl && item.metadata?.artworkLink) && (
+                    <a className="underline text-indigo-300" href={item.metadata.artworkLink} target="_blank" rel="noopener noreferrer">
+                      link grafică
+                    </a>
+                  )}
+                  {"textDesign" in item && item.textDesign && (
+                    <span className="ml-2 inline-block rounded bg-white/10 px-2 py-0.5 text-[11px]">
+                      text inclus
+                    </span>
+                  )}
+                  {/* unit price + line total */}
+                  <div className="mt-2">
+                    <div className="text-xs text-white/60">
+                      {unit > 0 ? `Preț unitar: ${fmt(unit)}` : "Preț unitar: —"}
+                    </div>
+                    <div className="text-sm text-white/80 mt-1">{fmt(Number(lineTotal))}</div>
+                  </div>
+                </div>
               </div>
-              <div className="mt-1 text-sm text-white/70">
-                {item.artworkUrl && (
-                  <a
-                    className="underline text-indigo-300"
-                    href={item.artworkUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    fișier încărcat
-                  </a>
-                )}
-                {"textDesign" in item && item.textDesign && (
-                  <span className="ml-2 inline-block rounded bg-white/10 px-2 py-0.5 text-[11px]">
-                    text inclus
-                  </span>
-                )}
-              </div>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <span className="font-semibold">{fmt(Number(item.totalAmount ?? 0))}</span>
-              <button
-                onClick={() => onRemove(item.id)}
-                className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-white/80 hover:bg-white/10"
-                aria-label="Elimină"
-                title="Elimină"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          </li>
-        ))}
+              <div>
+                <button
+                  onClick={() => onRemove(item.id)}
+                  className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-white/80 hover:bg-white/10"
+                  aria-label="Elimină"
+                  title="Elimină"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

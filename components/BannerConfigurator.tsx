@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
-import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info } from "lucide-react";
+import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import BannerModeSwitch from "./BannerModeSwitch";
 import MobilePriceBar from "./MobilePriceBar";
 
@@ -32,6 +32,8 @@ type LocalPriceOutput = {
 };
 
 const roundMoney = (n: number) => Math.round(n * 100) / 100;
+const formatMoneyDisplay = (n: number) => (n && n > 0 ? n.toFixed(2) : "0");
+const formatAreaDisplay = (n: number) => (n && n > 0 ? String(n) : "0");
 
 /**
  * Pricing rules:
@@ -46,7 +48,7 @@ const roundMoney = (n: number) => Math.round(n * 100) / 100;
  * - tiv & capse -> +10% (always applied)
  * - găuri pentru vânt -> +10% (optional)
  *
- * Design "pro" fee is a separate cart item (+50 RON).
+ * Design "pro" fee is added on top of product price (+50 RON).
  */
 const localCalculatePrice = (input: PriceInput): LocalPriceOutput => {
   if (input.width_cm <= 0 || input.height_cm <= 0 || input.quantity <= 0) {
@@ -91,20 +93,24 @@ type Props = {
 };
 
 export default function BannerConfigurator({ productSlug, initialWidth: initW, initialHeight: initH }: Props) {
-  const { addItem, items } = useCart();
+  const { addItem } = useCart();
 
+  // Important change: defaults must be empty (0) so price is 0 until user fills values.
+  // If the page passes initialWidth/initialHeight we use them; otherwise start with 0.
   const [input, setInput] = useState<PriceInput>({
-    width_cm: initW ?? 120,
-    height_cm: initH ?? 60,
+    width_cm: initW ?? 0,
+    height_cm: initH ?? 0,
     quantity: 1,
     material: "frontlit_440",
     want_wind_holes: false,
-    // tiv & capse rămân incluse implicit
+    // tiv & capse incluse implicit (nu editabil)
     want_hem_and_grommets: true,
   });
 
-  const [lengthText, setLengthText] = useState(String(initW ?? ""));
-  const [heightText, setHeightText] = useState(String(initH ?? ""));
+  // Show empty fields if no initial values provided (so user sees blank inputs)
+  const [lengthText, setLengthText] = useState(initW ? String(initW) : "");
+  const [heightText, setHeightText] = useState(initH ? String(initH) : "");
+  const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
   const [designOption, setDesignOption] = useState<DesignOption>("upload");
 
@@ -121,14 +127,18 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const [materialOpen, setMaterialOpen] = useState<boolean>(false);
   const [graphicsOpen, setGraphicsOpen] = useState<boolean>(false);
 
-  const hasProDesign = items.some((i) => i.id === "design-pro");
-
   const priceDetailsLocal = useMemo(() => localCalculatePrice(input), [input]);
-  const pricePerUnitLocal =
-    input.quantity > 0 && priceDetailsLocal.finalPrice > 0
-      ? roundMoney(priceDetailsLocal.finalPrice / input.quantity)
-      : 0;
 
+  // displayed total includes pro fee if selected
+  const displayedTotal = useMemo(() => {
+    const base = priceDetailsLocal.finalPrice || 0;
+    return designOption === "pro" ? roundMoney(base + PRO_DESIGN_FEE) : base;
+  }, [priceDetailsLocal, designOption]);
+
+  const pricePerUnitLocal =
+    input.quantity > 0 && displayedTotal > 0 ? roundMoney(displayedTotal / input.quantity) : 0;
+
+  // "serverPrice" represents user-triggered authoritative calc; include PRO fee if selected
   const [serverPrice, setServerPrice] = useState<number | null>(null);
   const [calcLoading, setCalcLoading] = useState(false);
 
@@ -175,8 +185,10 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     setCalcLoading(true);
     setServerPrice(null);
     try {
+      // local calculation + pro fee if selected
       const result = localCalculatePrice(input);
-      setServerPrice(result.finalPrice);
+      const total = designOption === "pro" ? roundMoney(result.finalPrice + PRO_DESIGN_FEE) : result.finalPrice;
+      setServerPrice(total);
     } catch (err) {
       console.error("calc error", err);
       alert("Eroare la calcul preț");
@@ -186,7 +198,13 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   }
 
   function handleAddToCart() {
-    const totalForOrder = serverPrice ?? priceDetailsLocal.finalPrice;
+    // Validation: require dimensions
+    if (!input.width_cm || !input.height_cm) {
+      alert("Completează lungimea și înălțimea (în cm) înainte de a adăuga în coș.");
+      return;
+    }
+
+    const totalForOrder = serverPrice ?? displayedTotal;
     if (!totalForOrder || totalForOrder <= 0) {
       alert("Calculează prețul înainte de a adăuga în coș");
       return;
@@ -206,6 +224,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
     const title = `Banner personalizat - ${input.width_cm}x${input.height_cm} cm`;
 
+    // include pro fee inside main product price (no separate item) so cart total matches shown total
     addItem({
       id: uniqueId,
       productId: productSlug ?? "banner-generic",
@@ -221,24 +240,11 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         artworkLink,
         designOption,
         textDesign,
+        proDesignFee: designOption === "pro" ? PRO_DESIGN_FEE : 0,
         totalSqm: priceDetailsLocal.total_sqm,
         pricePerSqm: priceDetailsLocal.pricePerSqmAfterSurcharges,
       },
     });
-
-    if (designOption === "pro" && !hasProDesign) {
-      addItem({
-        id: "design-pro",
-        productId: "design-service",
-        slug: "design-pro",
-        title: "Serviciu grafică profesională",
-        width: 0,
-        height: 0,
-        price: PRO_DESIGN_FEE,
-        quantity: 1,
-        currency: "RON",
-      });
-    }
 
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 1600);
@@ -255,6 +261,22 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
+
+  // auto-advance gallery every 3s
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActiveIndex((i) => {
+        const next = (i + 1) % GALLERY.length;
+        setActiveImage(GALLERY[next]);
+        return next;
+      });
+    }, 3000);
+    return () => clearInterval(id);
+  }, []);
+
+  // canAdd computed for disabling add button
+  const totalShown = serverPrice ?? displayedTotal;
+  const canAdd = totalShown > 0 && input.width_cm > 0 && input.height_cm > 0;
 
   return (
     <main className="min-h-screen">
@@ -367,19 +389,31 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               {/* only show inputs when the option is active (compact) */}
               {designOption === "upload" && (
                 <div className="panel p-3 mt-3 space-y-2 border-t border-white/5">
-                  <input
-                    type="url"
-                    value={artworkLink}
-                    onChange={(e) => setArtworkLink(e.target.value)}
-                    placeholder="Link descărcare (opțional)"
-                    className="input"
-                  />
-                  <input
-                    type="file"
-                    accept=".pdf,.ai,.psd,.jpg,.jpeg,.png"
-                    onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)}
-                    className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500"
-                  />
+                  {/* Upload shown first */}
+                  <div>
+                    <label className="field-label">Încarcă fișier</label>
+                    <input
+                      type="file"
+                      accept=".pdf,.ai,.psd,.jpg,.jpeg,.png"
+                      onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)}
+                      className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500"
+                    />
+                    <div className="text-xs text-white/60 mt-1">sau</div>
+                  </div>
+
+                  {/* Link moved below upload */}
+                  <div>
+                    <label className="field-label">Link descărcare (opțional)</label>
+                    <input
+                      type="url"
+                      value={artworkLink}
+                      onChange={(e) => setArtworkLink(e.target.value)}
+                      placeholder="Ex: https://.../fisier.pdf"
+                      className="input"
+                    />
+                    <div className="text-xs text-white/60 mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
+                  </div>
+
                   <div className="text-xs text-white/60">
                     {uploading && "Se încarcă…"}
                     {uploadError && "Eroare upload"}
@@ -410,18 +444,25 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                 <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
                   <img src={activeImage} alt="Banner preview" className="h-full w-full object-cover" loading="eager" />
                 </div>
+                <div className="mt-3 grid grid-cols-4 gap-3">
+                  {GALLERY.map((src, i) => (
+                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
+                      <img src={src} alt="Thumb" className="h-20 w-full object-cover" loading="lazy" />
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
                 <div className="space-y-2 text-white/80 text-sm">
-                  <p>Suprafață: <span className="text-white font-semibold">{priceDetailsLocal.total_sqm} m²</span></p>
-                  <p>Preț: <span className="text-2xl font-extrabold text-white">{(serverPrice ?? priceDetailsLocal.finalPrice).toFixed(2)} RON</span></p>
+                  <p>Suprafață: <span className="text-white font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
+                  <p>Preț: <span className="text-2xl font-extrabold text-white">{formatMoneyDisplay(totalShown)} RON</span></p>
                 </div>
 
                 <div className="hidden lg:block mt-4">
                   <button onClick={calculateServer} disabled={calcLoading} className="btn-secondary mr-2">Calculează</button>
-                  <button onClick={handleAddToCart} disabled={(serverPrice ?? priceDetailsLocal.finalPrice) <= 0} className="btn-primary w-full mt-3 py-2">
+                  <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-full mt-3 py-2">
                     <ShoppingCart size={18} /><span className="ml-2">Adaugă</span>
                   </button>
                 </div>
@@ -433,7 +474,30 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         </div>
       </div>
 
-      <MobilePriceBar total={(serverPrice ?? priceDetailsLocal.finalPrice)} disabled={(serverPrice ?? priceDetailsLocal.finalPrice) <= 0} onAddToCart={handleAddToCart} onShowSummary={() => document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth" })} />
+      {/* Mobile price bar */}
+      <MobilePriceBar total={totalShown} disabled={!canAdd} onAddToCart={handleAddToCart} onShowSummary={() => document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth" })} />
+
+      {/* Details modal */}
+      {detailsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setDetailsOpen(false)} />
+          <div className="relative z-10 w-full max-w-2xl bg-[#0b0b0b] rounded-md border border-white/10 p-6">
+            <button className="absolute right-3 top-3 p-1" onClick={() => setDetailsOpen(false)} aria-label="Închide">
+              <X size={18} className="text-white/80" />
+            </button>
+            <h3 className="text-xl font-bold text-white mb-3">Detalii comandă</h3>
+            <div className="text-sm text-white/70 space-y-2">
+              <p>- Toate bannerele vin cu tiv și capse incluse.</p>
+              <p>- Găuri pentru vânt (mesh-look) sunt opționale și adaugă +10%.</p>
+              <p>- Dacă alegi „Pro”, se adaugă +{PRO_DESIGN_FEE} RON pentru servicii grafice.</p>
+              <p>- Trimite link de descărcare sau încarcă fișierul; linkul/fișierul va fi inclus în comanda finală.</p>
+            </div>
+            <div className="mt-6 text-right">
+              <button onClick={() => setDetailsOpen(false)} className="btn-primary py-2 px-4">Închide</button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
