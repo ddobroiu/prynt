@@ -1,99 +1,121 @@
 "use client";
 import React, { useState } from "react";
-import DimensionEditor from "./DimensionEditor";
-import MaterialSelector from "./MaterialSelector";
-import SideSelector from "./SideSelector";
-import GraphicUpload from "./GraphicUpload";
 import type { Product } from "@/lib/products";
-import { useCart } from "./CartContext";
+import { useCart } from "@/components/CartContext";
 
-type Props = { product: Product; initialWidth?: number; initialHeight?: number };
+/**
+ * Helper: returnează un number sigur.
+ * - v poate fi number | undefined | null | string
+ * - fallback este valoarea returnată dacă v nu e "valid number"
+ */
+function safeNumber(v: any, fallback: number): number {
+  if (typeof v === "number" && !Number.isNaN(v)) return v;
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v);
+    if (!Number.isNaN(n)) return n;
+  }
+  return fallback;
+}
 
-export default function ProductClient({ product, initialWidth, initialHeight }: Props) {
+export default function ProductClient({
+  product,
+  initialWidth,
+  initialHeight,
+}: {
+  product: Product;
+  initialWidth?: number | null;
+  initialHeight?: number | null;
+}) {
   const { addItem } = useCart();
+
+  // fallback-uri logice: folosim initialWidth/initialHeight dacă există,
+  // altfel product.width_cm / product.minWidthCm / 120 (sau alt fallback)
+  const defaultWidthFallback = 120;
+  const defaultHeightFallback = 60;
+
+  const computedInitialWidth = safeNumber(
+    initialWidth ?? product.width_cm ?? product.minWidthCm,
+    defaultWidthFallback
+  );
+
+  const computedInitialHeight = safeNumber(
+    initialHeight ?? product.height_cm ?? product.minHeightCm,
+    defaultHeightFallback
+  );
+
   const [materialId, setMaterialId] = useState<string>(product.materials?.[0]?.id ?? "");
   const [side, setSide] = useState<"single" | "double">("single");
-  const [width, setWidth] = useState<number>(initialWidth ?? Math.max(product.minWidthCm, 120));
-  const [height, setHeight] = useState<number>(initialHeight ?? Math.max(product.minHeightCm, 60));
-  const [price, setPrice] = useState<number | null>(null);
-  const [graphicFile, setGraphicFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  async function calculate() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/calc-price", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ widthCm: width, heightCm: height, slug: product.slug, materialId, side }),
-      });
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        setPrice(data.price);
-      } else {
-        alert(data.message || "Eroare calcul");
-      }
-    } catch (e) {
-      alert("Eroare rețea");
-    } finally {
-      setLoading(false);
-    }
-  }
+  // Folosim numai numere sigure.
+  const [width, setWidth] = useState<number>(() => Math.max(computedInitialWidth, product.minWidthCm ?? computedInitialWidth));
+  const [height, setHeight] = useState<number>(() => Math.max(computedInitialHeight, product.minHeightCm ?? computedInitialHeight));
 
-  function handleFile(file: File | null, url?: string | null) {
-    setGraphicFile(file);
-    setPreviewUrl(url ?? null);
-  }
+  // Price poate fi calculat ulterior; inițial folosim priceBase fallback
+  const [price, setPrice] = useState<number>(() => safeNumber(product.priceBase, 0));
 
+  // Exemplu simplu: adăugare în coș (normalizăm forma)
   function handleAddToCart() {
-    if (price == null) {
-      alert("Calculează prețul mai întâi");
-      return;
-    }
-    const id = `${product.id}-${width}x${height}-${materialId}-${side}`;
+    // recalculăm unitPrice/total etc. (aici folosește logica ta de calcul)
+    const qty = 1;
+    const unitPrice = Math.max(0, price);
+
+    const id = `banner-${product.slug}-${materialId}-${width}x${height}-${side}`;
+
     addItem({
       id,
       productId: product.id,
       slug: product.slug,
-      title: product.title,
-      width,
-      height,
-      price,
-      quantity: 1,
-      currency: product.currency,
+      title: `${product.title} - ${width}x${height} cm`,
+      price: unitPrice,
+      quantity: qty,
+      currency: product.currency ?? "RON",
+      metadata: {
+        width_cm: width,
+        height_cm: height,
+        materialId,
+        side,
+      },
     });
+    // poți afișa toast/feedback aici
     alert("Produs adăugat în coș");
   }
 
   return (
-    <div>
-      <MaterialSelector materials={product.materials ?? []} value={materialId} onChange={setMaterialId} />
-      {product.bothSidesSupported && <SideSelector value={side} onChange={setSide} />}
-
-      <DimensionEditor
-        minWidth={product.minWidthCm}
-        maxWidth={product.maxWidthCm}
-        minHeight={product.minHeightCm}
-        maxHeight={product.maxHeightCm}
-        width={width}
-        height={height}
-        onWidthChange={setWidth}
-        onHeightChange={setHeight}
-      />
-
-      <GraphicUpload onChange={handleFile} initialPreview={product.images?.[0]} />
-
-      <div style={{ marginTop: 12 }}>
-        <button onClick={calculate} disabled={loading} style={{ marginRight: 8 }}>
-          {loading ? "Se calculează…" : "Calculează preț"}
-        </button>
-        {price !== null && <strong>Preț: {price.toFixed(2)} {product.currency}</strong>}
+    <div className="product-client">
+      <div style={{ marginBottom: 12 }}>
+        <label>Lățime (cm)</label>
+        <input
+          type="number"
+          value={String(width)}
+          onChange={(e) => setWidth(Math.max(1, safeNumber(e.target.value, computedInitialWidth)))}
+          className="input"
+        />
       </div>
 
-      <div style={{ marginTop: 12 }}>
-        <button onClick={handleAddToCart} style={{ background: "#0ea5a4", color: "#fff", padding: "8px 12px", borderRadius: 6 }}>
-          Adaugă în coș
+      <div style={{ marginBottom: 12 }}>
+        <label>Înălțime (cm)</label>
+        <input
+          type="number"
+          value={String(height)}
+          onChange={(e) => setHeight(Math.max(1, safeNumber(e.target.value, computedInitialHeight)))}
+          className="input"
+        />
+      </div>
+
+      <div style={{ marginBottom: 12 }}>
+        <label>Material</label>
+        <select value={materialId} onChange={(e) => setMaterialId(e.target.value)} className="input">
+          {product.materials?.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          )) ?? <option value="">Standard</option>}
+        </select>
+      </div>
+
+      <div style={{ marginBottom: 12 }}>
+        <button className="btn-primary" onClick={handleAddToCart}>
+          Adaugă în coș — {price.toFixed(2)} {product.currency ?? "RON"}
         </button>
       </div>
     </div>
