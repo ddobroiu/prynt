@@ -22,7 +22,7 @@ const PRODUCTS: Product[] = [
     title: "Banner modern 120x60 cm",
     description: "Banner PVC 510g, print UV, margini sudate. Potrivit pentru exterior.",
     priceBase: 40.0,
-    pricePerCm2: 0.02, // exemplu: 0.02 RON per cm^2
+    pricePerCm2: 0.02,
     currency: "RON",
     images: [
       "https://res.cloudinary.com/your-cloud-name/image/upload/v000/banner-120x60.jpg"

@@ -1,4 +1,4 @@
-import Head from "next/head";
+import React from "react";
 import { Product } from "../lib/products";
 
 type Props = { product: Product; url: string };
@@ -22,8 +22,10 @@ export default function ProductJsonLd({ product, url }: Props) {
   };
 
   return (
-    <Head>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-    </Head>
+    <script
+      type="application/ld+json"
+      // server component: safe to inject
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
   );
 }
