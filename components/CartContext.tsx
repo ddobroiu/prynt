@@ -1,13 +1,17 @@
 "use client";
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 
+/**
+ * Cart item shape used across the app.
+ */
 export type CartItem = {
   id: string;
-  productId: string;
+  productId?: string;
   slug?: string;
-  title: string;
-  width: number;
-  height: number;
+  title?: string;
+  width?: number;
+  height?: number;
   price: number; // unit price
   quantity?: number;
   currency?: string;
@@ -16,43 +20,76 @@ export type CartItem = {
 
 type CartContextType = {
   items: CartItem[];
-  addItem: (item: CartItem) => void;
+  addItem: (item: Partial<CartItem> & { price: number; id?: string }) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
   total: number;
+  count: number;
   isLoaded: boolean;
 };
 
 const STORAGE_KEY = "cart";
-
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-function normalizeLoadedItem(raw: any): CartItem {
+/**
+ * Normalize an incoming "raw" object into a CartItem.
+ * This accepts different shapes (legacy payloads in localStorage) to avoid NaN/undefined issues.
+ */
+function normalizeItem(raw: Partial<CartItem> & { price?: number; id?: string }): CartItem {
+  const id =
+    String(
+      raw.id ??
+        raw.productId ??
+        `${raw.slug ?? "item"}-${Math.random().toString(36).slice(2, 9)}`
+    ) || `${Math.random().toString(36).slice(2, 9)}`;
+
+  const price = Number(raw.price ?? 0) || 0;
+  const quantity = Math.max(1, Number(raw.quantity ?? 1) || 1);
+
   return {
-    id: String(raw?.id ?? `${raw?.productId ?? "item"}-${Math.random().toString(36).slice(2, 9)}`),
-    productId: String(raw?.productId ?? raw?.id ?? ""),
-    slug: raw?.slug ?? raw?.productSlug ?? undefined,
-    title: raw?.title ?? raw?.name ?? "Produs",
-    width: Number(raw?.width ?? raw?.w ?? 0),
-    height: Number(raw?.height ?? raw?.h ?? 0),
-    price: Number(raw?.price ?? raw?.unitAmount ?? 0),
-    quantity: Number(raw?.quantity ?? 1),
-    currency: raw?.currency ?? "RON",
-    metadata: raw?.metadata ?? raw?.extras ?? undefined,
+    id,
+    productId: raw.productId ? String(raw.productId) : undefined,
+    slug: raw.slug,
+    title: raw.title ?? raw.slug ?? "Produs",
+    width: raw.width ? Number(raw.width) : undefined,
+    height: raw.height ? Number(raw.height) : undefined,
+    price,
+    quantity,
+    currency: raw.currency ?? "RON",
+    metadata: raw.metadata,
   };
 }
 
+/**
+ * CartProvider - wraps the app and persists cart to localStorage.
+ * Exposes a safe API: items, addItem, removeItem, clearCart, total, count, isLoaded.
+ */
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Load once from localStorage and normalize items
   useEffect(() => {
     try {
+      if (typeof window === "undefined") return;
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          const normalized = parsed.map((p) => normalizeLoadedItem(p));
+          const normalized = parsed.map((p) =>
+            normalizeItem({
+              id: p.id,
+              productId: p.productId ?? p.productId,
+              slug: p.slug ?? p.productSlug,
+              title: p.title ?? p.name,
+              width: p.width ?? p.w,
+              height: p.height ?? p.h,
+              price: p.price ?? p.unitAmount ?? 0,
+              quantity: p.quantity ?? 1,
+              metadata: p.metadata ?? p.extras,
+              currency: p.currency,
+            })
+          );
           setItems(normalized);
         }
       }
@@ -63,8 +100,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Persist to localStorage once loaded
   useEffect(() => {
-    if (!isLoaded) return; // nu scriem înainte să fim încărcați
+    if (!isLoaded) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch (e) {
@@ -72,25 +110,37 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  function addItem(item: CartItem) {
+  /**
+   * Add an item to cart. If a matching item exists (by productId/slug/id + metadata),
+   * increment quantity instead of duplicating.
+   */
+  function addItem(raw: Partial<CartItem> & { price: number; id?: string }) {
+    const item = normalizeItem(raw);
     setItems((prev) => {
-      const existingIndex = prev.findIndex(
+      const idx = prev.findIndex(
         (p) =>
-          p.productId === item.productId &&
-          p.width === item.width &&
-          p.height === item.height &&
-          p.slug === item.slug &&
-          JSON.stringify(p.metadata ?? {}) === JSON.stringify(item.metadata ?? {})
+          (p.productId && item.productId && p.productId === item.productId) ||
+          (p.slug && item.slug && p.slug === item.slug) ||
+          p.id === item.id
       );
-      if (existingIndex >= 0) {
+
+      if (idx >= 0) {
         const copy = [...prev];
-        copy[existingIndex] = {
-          ...copy[existingIndex],
-          quantity: (copy[existingIndex].quantity || 1) + (item.quantity || 1),
-        };
-        return copy;
+        const sameMetadata =
+          JSON.stringify(copy[idx].metadata ?? {}) === JSON.stringify(item.metadata ?? {});
+        if (sameMetadata) {
+          copy[idx] = {
+            ...copy[idx],
+            quantity:
+              (Number(copy[idx].quantity ?? 1) || 1) + (Number(item.quantity ?? 1) || 1),
+            price: Number(item.price) || copy[idx].price,
+            title: item.title || copy[idx].title,
+          };
+          return copy;
+        }
       }
-      return [...prev, { ...item, quantity: item.quantity ?? 1 }];
+
+      return [...prev, item];
     });
   }
 
@@ -102,16 +152,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems([]);
   }
 
-  const total = items.reduce((s, i) => s + (Number(i.price) || 0) * (i.quantity ?? 1), 0);
+  const total = items.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
+  const count = items.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, clearCart, total, isLoaded }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, clearCart, total, count, isLoaded }}>
       {children}
     </CartContext.Provider>
   );
 }
 
-export function useCart() {
+/**
+ * useCart hook for consumers. Throws a clear error when used outside provider.
+ */
+export function useCart(): CartContextType {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error("useCart must be used within CartProvider");
   return ctx;

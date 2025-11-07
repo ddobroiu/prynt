@@ -14,7 +14,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ro">
       <body className="bg-[#0b0f19] text-white antialiased">
-        {/* Providers este un Client Component și conține CartProvider */}
         <Providers>
           <Header />
           <main>{children}</main>
