@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { notFound } from "next/navigation";
 import React from "react";
 import ProductJsonLd from "@/components/ProductJsonLd";
@@ -5,10 +7,10 @@ import { resolveProductForRequestedSlug, getAllProductSlugs } from "@/lib/produc
 import type { Product } from "@/lib/products";
 import BannerConfigurator from "@/components/BannerConfigurator";
 
+// restul fișierului rămâne neschimbat...
 type Props = { params: { slug: string } };
 
 export async function generateStaticParams() {
-  // statically generate pages for all products in PRODUCTS (top pages)
   const slugs = getAllProductSlugs();
   return slugs.map((slug) => ({ slug }));
 }
@@ -24,7 +26,6 @@ export async function generateMetadata({ params }: Props) {
     openGraph: { title: product.seo?.title || product.title, description: product.description, images: product.images },
   };
 
-  // If page is fallback (generated from slug parse) tell bots not to index (optional)
   if (isFallback) {
     metadata.robots = { index: false, follow: true };
   }
@@ -42,17 +43,14 @@ export default async function Page({ params }: Props) {
 
   return (
     <main style={{ padding: 16 }}>
-      {/* JSON-LD for Product (improves indexability) */}
       <ProductJsonLd product={(product as Product)} url={url} />
 
       <section style={{ marginTop: 18 }}>
-        {/* Page header / SEO visible content */}
         <header style={{ marginBottom: 18 }}>
           <h1 style={{ fontSize: 28, fontWeight: 700 }}>{product.title}</h1>
           <p style={{ marginTop: 8, color: "#9ca3af" }}>{product.description}</p>
         </header>
 
-        {/* Configurator prefilled with product dims */}
         <BannerConfigurator productSlug={product.slug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
       </section>
     </main>
