@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function Page({ params }: Props) {
   const { slug } = params as { slug: string };
-  const { product, initialWidth, initialHeight, isFallback } = await resolveProductForRequestedSlug(String(slug));
+  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(slug));
 
   if (!product) return notFound();
 
@@ -36,20 +36,12 @@ export default async function Page({ params }: Props) {
 
   return (
     <main style={{ padding: 16 }}>
-      {/* JSON-LD pentru SEO (păstrăm) */}
+      {/* JSON-LD pentru SEO */}
       <ProductJsonLd product={product as Product} url={url} />
 
-      {/* AM SCOS blocul <Image> care afișa acea poză mică sus */}
-
+      {/* Am eliminat avertizarea fallback — pagina afișează doar configuratorul */}
       <section style={{ marginTop: 18 }}>
-        {/* Refolosim configuratorul client (afișează titlu / UI) */}
         <BannerConfigurator productSlug={product.slug} initialWidth={initialWidth} initialHeight={initialHeight} />
-
-        {isFallback && (
-          <div style={{ marginTop: 10, color: "#ffa500" }}>
-            Observație: nu s‑a găsit un produs exact pentru această denumire — se folosește configuratorul generic.
-          </div>
-        )}
       </section>
     </main>
   );
