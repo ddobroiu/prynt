@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { useCart } from "../../components/CartProvider";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, Square, Circle, Scissors } from "lucide-react";
+import MobilePriceBar from "../../components/MobilePriceBar";
 
 /* GALLERY (exemplu) */
 const GALLERY = [
@@ -206,6 +207,12 @@ export default function StickersPage() {
   };
 
   const unitLabel = input.shape === "circle" ? "Diametru (cm)" : "Lungime (cm) / Înălțime (cm)";
+
+  // scroll către sumar (pentru bara de jos de pe mobil, comună tuturor configuratoarelor)
+  const scrollToSummary = () => {
+    const el = document.getElementById("order-summary");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <>
@@ -618,6 +625,14 @@ export default function StickersPage() {
           </aside>
         </div>
       </div>
+
+      {/* BARĂ FIXĂ DE PREȚ (comună tuturor configuratoarelor, vizibilă doar pe mobil) */}
+      <MobilePriceBar
+        total={price.finalPrice}
+        disabled={price.finalPrice <= 0}
+        onAddToCart={addToCart}
+        onShowSummary={scrollToSummary}
+      />
     </>
   );
 }

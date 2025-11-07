@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { useCart } from "../../components/CartProvider";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, Image as ImageIcon, Brush } from "lucide-react";
+import MobilePriceBar from "../../components/MobilePriceBar";
 
 /* GALLERY (exemplu) */
 const GALLERY = [
@@ -524,6 +525,14 @@ export default function CanvasPage() {
           </div>
         </DetailsModal>
       )}
+
+      {/* BARĂ FIXĂ DE PREȚ (comună tuturor configuratoarelor, vizibilă doar pe mobil) */}
+      <MobilePriceBar
+        total={price.finalPrice}
+        disabled={price.finalPrice <= 0}
+        onAddToCart={handleAddToCart}
+        onShowSummary={scrollToSummary}
+      />
     </main>
   );
 }
@@ -554,7 +563,7 @@ function NumberInput({ label, value, onChange }: { label: string; value: number;
           type="number"
           value={value}
           onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))}
-          className="input text-lg font-semibold text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-y-0 rounded-none"
+          className="input text-lg font-semibold text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-y-0"
         />
         <button onClick={() => inc(1)} className="p-3 bg-white/10 rounded-r-md hover:bg-white/15" aria-label="Increment">
           <Plus size={16} />
