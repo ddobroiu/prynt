@@ -1,81 +1,148 @@
-import React, { useReducer, createContext, useContext } from 'react'
-import type { ReactNode } from 'react'
+"use client";
 
-type CartItem = {
-  id: string
-  title?: string
-  name?: string
-  price: number | string
-  quantity?: number
-  [key: string]: any
-}
+import React, { createContext, useContext, useEffect, useState } from "react";
 
-type State = {
-  items: CartItem[]
-}
+export type CartItem = {
+  id: string;
+  productId?: string;
+  slug?: string;
+  title?: string;
+  width?: number;
+  height?: number;
+  price: number; // unit price
+  quantity?: number;
+  currency?: string;
+  metadata?: Record<string, any>;
+};
 
-const initialState: State = { items: [] }
+type CartContextType = {
+  items: CartItem[];
+  addItem: (item: Partial<CartItem> & { price: number; id?: string }) => void;
+  removeItem: (id: string) => void;
+  clearCart: () => void;
+  total: number;
+  count: number;
+  isLoaded: boolean;
+};
 
-function normalizeItem(raw: Partial<CartItem>) {
-  // extrage numeric din string-uri de tip "75 RON" sau "75,00"
-  const rawPrice = raw.price ?? 0
-  let priceNumber = 0
-  if (typeof rawPrice === 'string') {
-    // elimină tot ce nu e cifră, punct sau virgulă, apoi transformă virgulă în punct
-    const cleaned = rawPrice.replace(/[^\d.,-]/g, '').replace(',', '.')
-    priceNumber = Number(cleaned)
-  } else {
-    priceNumber = Number(rawPrice)
-  }
-  if (!Number.isFinite(priceNumber)) priceNumber = 0
+const STORAGE_KEY = "cart";
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
-  const quantity = Number(raw.quantity) || 1
-  const title = raw.title || raw.name || raw.product?.title || raw.product?.name || ''
-
+function normalizeItem(raw: Partial<CartItem> & { price: number; id?: string }): CartItem {
+  const id = String(raw.id ?? raw.productId ?? `${raw.slug ?? "item"}-${Math.random().toString(36).slice(2, 9)}`);
+  const price = Number(raw.price ?? 0) || 0;
+  const quantity = Math.max(1, Number(raw.quantity ?? 1) || 1);
   return {
-    ...raw,
-    price: priceNumber,
+    id,
+    productId: raw.productId ? String(raw.productId) : undefined,
+    slug: raw.slug,
+    title: raw.title ?? raw.slug ?? "Produs",
+    width: raw.width ? Number(raw.width) : undefined,
+    height: raw.height ? Number(raw.height) : undefined,
+    price,
     quantity,
-    title,
-  } as CartItem
+    currency: raw.currency ?? "RON",
+    metadata: raw.metadata,
+  };
 }
 
-function reducer(state: State, action: any): State {
-  switch (action.type) {
-    case 'ADD_ITEM': {
-      const item = normalizeItem(action.payload)
-      // simplu exemplu de adăugat (pot adapta logica merge/replace)
-      return { items: [...state.items, item] }
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // load from localStorage once on mount
+  useEffect(() => {
+    try {
+      const raw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          // basic normalization in case shape differs
+          const normalized = parsed.map((p) =>
+            normalizeItem({
+              id: p.id,
+              productId: p.productId ?? p.productId,
+              slug: p.slug ?? p.productSlug,
+              title: p.title ?? p.name,
+              width: p.width ?? p.w,
+              height: p.height ?? p.h,
+              price: p.price ?? p.unitAmount ?? 0,
+              quantity: p.quantity ?? 1,
+              metadata: p.metadata ?? p.extras,
+              currency: p.currency,
+            })
+          );
+          setItems(normalized);
+        }
+      }
+    } catch (e) {
+      console.warn("[Cart] load failed", e);
+    } finally {
+      setIsLoaded(true);
     }
-    case 'REMOVE_ITEM': {
-      return { items: state.items.filter(i => i.id !== action.payload) }
+  }, []);
+
+  // persist to localStorage after loaded
+  useEffect(() => {
+    if (!isLoaded) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch (e) {
+      console.warn("[Cart] save failed", e);
     }
-    // alte acțiuni...
-    default:
-      return state
+  }, [items, isLoaded]);
+
+  function addItem(raw: Partial<CartItem> & { price: number; id?: string }) {
+    const item = normalizeItem(raw);
+    setItems((prev) => {
+      // merge by productId/slug/size/metadata to increase quantity if same product
+      const idx = prev.findIndex(
+        (p) =>
+          (p.productId && item.productId && p.productId === item.productId) ||
+          (p.slug && item.slug && p.slug === item.slug) ||
+          p.id === item.id
+      );
+
+      // If we find identical by id/product/slug + same metadata (best-effort)
+      if (idx >= 0) {
+        const copy = [...prev];
+        const sameMetadata =
+          JSON.stringify(copy[idx].metadata ?? {}) === JSON.stringify(item.metadata ?? {});
+        if (sameMetadata) {
+          copy[idx] = {
+            ...copy[idx],
+            quantity: (Number(copy[idx].quantity ?? 1) || 1) + (Number(item.quantity ?? 1) || 1),
+            price: Number(item.price) || copy[idx].price,
+            title: item.title || copy[idx].title,
+          };
+          return copy;
+        }
+      }
+
+      return [...prev, item];
+    });
   }
-}
 
-export const CartContext = createContext<any>(null)
-
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, initialState)
-
-  function getSubtotal() {
-    return state.items.reduce((sum, it) => {
-      const price = Number(it.price) || 0
-      const qty = Number(it.quantity) || 1
-      return sum + price * qty
-    }, 0)
+  function removeItem(id: string) {
+    setItems((prev) => prev.filter((i) => i.id !== id));
   }
+
+  function clearCart() {
+    setItems([]);
+  }
+
+  const total = items.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
+  const count = items.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
 
   return (
-    <CartContext.Provider value={{ state, dispatch, getSubtotal }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, clearCart, total, count, isLoaded }}>
       {children}
     </CartContext.Provider>
-  )
+  );
 }
 
-export function useCart() {
-  return useContext(CartContext)
+export function useCart(): CartContextType {
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error("useCart must be used within CartProvider");
+  return ctx;
 }

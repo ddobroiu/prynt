@@ -20,6 +20,7 @@ type CartContextType = {
   removeItem: (id: string) => void;
   clearCart: () => void;
   total: number;
+  isLoaded: boolean;
 };
 
 const STORAGE_KEY = "cart";
@@ -43,6 +44,7 @@ function normalizeLoadedItem(raw: any): CartItem {
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     try {
@@ -56,16 +58,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (e) {
       console.warn("[Cart] load failed", e);
+    } finally {
+      setIsLoaded(true);
     }
   }, []);
 
   useEffect(() => {
+    if (!isLoaded) return; // nu scriem înainte să fim încărcați
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch (e) {
       console.warn("[Cart] save failed", e);
     }
-  }, [items]);
+  }, [items, isLoaded]);
 
   function addItem(item: CartItem) {
     setItems((prev) => {
@@ -97,9 +102,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems([]);
   }
 
-  const total = items.reduce((s, i) => s + i.price * (i.quantity ?? 1), 0);
+  const total = items.reduce((s, i) => s + (Number(i.price) || 0) * (i.quantity ?? 1), 0);
 
-  return <CartContext.Provider value={{ items, addItem, removeItem, clearCart, total }}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={{ items, addItem, removeItem, clearCart, total, isLoaded }}>
+      {children}
+    </CartContext.Provider>
+  );
 }
 
 export function useCart() {
