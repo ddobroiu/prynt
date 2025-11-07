@@ -1,13 +1,14 @@
 import Image from "next/image";
 import { getProductBySlug } from "@/lib/products";
-import DimensionEditor from "@/components/DimensionEditor";
 import ProductJsonLd from "@/components/ProductJsonLd";
+import ProductClient from "@/components/ProductClient";
 import { notFound } from "next/navigation";
 
 type Props = { params: { slug: string } };
 
 export async function generateMetadata({ params }: Props) {
-  const product = await getProductBySlug(params.slug);
+  const resolvedParams = (await params) as { slug: string };
+  const product = await getProductBySlug(resolvedParams.slug);
   if (!product) return {};
   return {
     title: `${product.title} — ${product.minWidthCm}x${product.minHeightCm} | Magazin`,
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function Page({ params }: Props) {
-  const slug = params.slug;
+  const { slug } = (await params) as { slug: string };
   const product = await getProductBySlug(slug);
   if (!product) return notFound();
 
@@ -29,7 +30,6 @@ export default async function Page({ params }: Props) {
 
   return (
     <main style={{ padding: 16 }}>
-      {/* JSON-LD for SEO */}
       <ProductJsonLd product={product} url={url} />
 
       <h1>{product.title}</h1>
@@ -46,15 +46,9 @@ export default async function Page({ params }: Props) {
 
       <section style={{ marginTop: 18 }}>
         <h2>Personalizează dimensiunea</h2>
-        <DimensionEditor
-          minWidth={product.minWidthCm}
-          maxWidth={product.maxWidthCm}
-          minHeight={product.minHeightCm}
-          maxHeight={product.maxHeightCm}
-          onAddToCart={(payload) => {
-            console.log("add to cart", payload);
-          }}
-        />
+
+        {/*  În loc să trecem handler de la server -> client, apelăm un Client Component care conține handler-ul. */}
+        <ProductClient product={product} />
       </section>
     </main>
   );
