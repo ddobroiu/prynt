@@ -55,18 +55,32 @@ export default function CheckoutPage() {
 
   const firstInvalidRef = useRef<HTMLElement | null>(null);
 
-  // subtotal - robust: support both current CartProvider shape (price * quantity)
-  // and legacy shapes that stored unitAmount/totalAmount.
+  // Helper: normalize cart items to the shape expected by server (name, unitAmount, totalAmount, artworkUrl, textDesign, metadata)
+  function normalizeCart(cart: any[]) {
+    return (cart ?? []).map((it) => {
+      const quantity = Number(it.quantity ?? 1) || 1;
+      const unitAmount = Number(it.price ?? it.unitAmount ?? it.metadata?.price ?? 0) || 0;
+      const totalAmount = Number(it.totalAmount ?? (unitAmount > 0 ? unitAmount * quantity : 0)) || 0;
+      const artworkUrl = it.artworkUrl ?? it.metadata?.artworkUrl ?? it.metadata?.artworkLink ?? it.metadata?.artwork ?? null;
+      const textDesign = it.textDesign ?? it.metadata?.textDesign ?? it.metadata?.text ?? null;
+      const name = it.title ?? it.name ?? it.slug ?? it.metadata?.title ?? `Produs`;
+      return {
+        id: it.id,
+        name,
+        quantity,
+        unitAmount,
+        totalAmount,
+        artworkUrl,
+        textDesign,
+        metadata: it.metadata ?? {},
+      };
+    });
+  }
+
+  // subtotal fallback: compute robustly from items (use normalized)
   const subtotal = useMemo(() => {
-    return (items ?? []).reduce((acc: number, item: any) => {
-      const qty = Number(item.quantity ?? 1) || 1;
-      // prefer explicit price, fallback to unitAmount, then fallback to totalAmount/qty
-      const unit = Number(item.price ?? item.unitAmount ?? 0) || 0;
-      if (unit > 0) return acc + unit * qty;
-      const totalAmount = Number(item.totalAmount ?? 0) || 0;
-      if (totalAmount > 0) return acc + totalAmount;
-      return acc;
-    }, 0);
+    const norm = normalizeCart(items);
+    return norm.reduce((s, it) => s + Number(it.totalAmount || it.unitAmount * it.quantity || 0), 0);
   }, [items]);
 
   const costLivrare = (items ?? []).length > 0 ? 19.99 : 0;
@@ -130,8 +144,11 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Normalized cart (robust)
+    const normalizedCart = normalizeCart(items);
+
     const orderData = {
-      cart: items ?? [],
+      cart: normalizedCart,
       address,
       billing: {
         ...billing,
@@ -160,6 +177,7 @@ export default function CheckoutPage() {
         return;
       }
 
+      // Card: send normalizedCart to Stripe session endpoint
       const res = await fetch("/api/stripe/checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -353,7 +371,7 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
           // Support both shapes:
           // - current CartProvider: { id, title, price, quantity, metadata }
           // - legacy/other: { id, name, unitAmount, totalAmount, artworkUrl, textDesign }
-          const title = item.title ?? item.name ?? item.slug ?? "Produs";
+          const title = item.title ?? item.name ?? item.slug ?? 'Produs';
           const qty = Number(item.quantity ?? 1) || 1;
           const unit = Number(item.price ?? item.unitAmount ?? 0) || 0;
           const lineTotal = unit > 0 ? unit * qty : Number(item.totalAmount ?? 0) || 0;
@@ -366,12 +384,7 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
                 </div>
                 <div className="mt-1 text-sm text-white/70">
                   {item.artworkUrl && (
-                    <a
-                      className="underline text-indigo-300"
-                      href={item.artworkUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                    <a className="underline text-indigo-300" href={item.artworkUrl} target="_blank" rel="noopener noreferrer">
                       fișier încărcat
                     </a>
                   )}

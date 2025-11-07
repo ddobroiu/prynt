@@ -1,12 +1,22 @@
 import { Resend } from 'resend';
 
+type AnyRecord = Record<string, any>;
+
 interface CartItem {
-  name: string;
-  quantity: number;
-  unitAmount: number;
-  totalAmount: number;
-  artworkUrl?: string;
+  // support multiple incoming shapes (legacy/current)
+  id?: string;
+  name?: string;
+  title?: string;
+  slug?: string;
+  quantity?: number;
+  unitAmount?: number; // preferred by some handlers (RON)
+  price?: number; // alternative unit price field
+  totalAmount?: number; // optional precomputed line total
+  artworkUrl?: string; // direct artwork url
+  textDesign?: string; // text content for text-only graphic
+  metadata?: AnyRecord;
 }
+
 interface Address {
   nume_prenume: string;
   email: string;
@@ -62,7 +72,7 @@ function formatRON(n: number) {
 }
 
 function escapeHtml(str: string) {
-  return String(str)
+  return String(str || '')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
@@ -98,6 +108,12 @@ async function createOblioInvoice(payload: any, token: string) {
   }
 }
 
+/**
+ * sendEmails
+ * - Acceptă cart ca array de CartItem (flexibil)
+ * - Include link-ul graficii (artworkUrl) sau textul trimis (textDesign) în emailuri
+ * - Loghează răspunsul de la Resend pentru debugging
+ */
 async function sendEmails(
   address: Address,
   billing: Billing,
@@ -105,133 +121,172 @@ async function sendEmails(
   invoiceLink: string | null,
   paymentType: 'Ramburs' | 'Card'
 ) {
-  const subtotal = cart.reduce((acc, item) => acc + item.totalAmount, 0);
+  // Normalize cart for totals and for listing in emails
+  const normalized = cart.map((raw) => {
+    const qty = Number(raw.quantity ?? 1) || 1;
+    const unit =
+      Number(raw.unitAmount ?? raw.price ?? (raw.metadata?.price ?? 0)) || 0;
+    const total =
+      Number(raw.totalAmount ?? (unit > 0 ? unit * qty : raw.metadata?.totalAmount ?? 0)) || 0;
+    const artwork =
+      raw.artworkUrl ??
+      raw.metadata?.artworkUrl ??
+      raw.metadata?.artworkLink ??
+      raw.metadata?.artwork ??
+      null;
+    const textDesign = raw.textDesign ?? raw.metadata?.textDesign ?? raw.metadata?.text ?? null;
+    const name = raw.name ?? raw.title ?? raw.metadata?.title ?? raw.slug ?? 'Produs';
+    return { ...raw, name, qty, unit, total, artwork, textDesign, rawMetadata: raw.metadata ?? {} };
+  });
+
+  const subtotal = normalized.reduce((acc, it) => acc + (Number(it.total) || 0), 0);
   const totalComanda = subtotal + SHIPPING_FEE;
 
-  const produseListHTML = cart
+  const produseListHTML = normalized
     .map((item) => {
-      const line = `${escapeHtml(item.name)} - <strong>${item.quantity} buc.</strong> - ${formatRON(item.totalAmount)} RON`;
-      const artwork = item.artworkUrl
-        ? ` — <a href="${item.artworkUrl}" target="_blank" rel="noopener noreferrer">Fișier grafică</a>`
+      const escapedName = escapeHtml(String(item.name));
+      const line = `${escapedName} - <strong>${item.qty} buc.</strong> - ${formatRON(Number(item.total) || 0)} RON`;
+      const artworkHtml = item.artwork
+        ? ` — <a href="${escapeHtml(item.artwork)}" target="_blank" rel="noopener noreferrer">Fișier grafică</a>`
         : '';
-      return `<li>${line}${artwork}</li>`;
+      const textHtml = item.textDesign ? ` — <em>Text: ${escapeHtml(item.textDesign)}</em>` : '';
+      // include metadata summary small (if present) for admin
+      const metaSummary =
+        item.rawMetadata && Object.keys(item.rawMetadata).length > 0
+          ? `<div style="font-size:12px;color:#666;margin-top:6px">Metadata: ${escapeHtml(JSON.stringify(item.rawMetadata))}</div>`
+          : '';
+      return `<li style="margin-bottom:8px;">${line}${artworkHtml}${textHtml}${metaSummary}</li>`;
     })
     .join('');
 
-  // Email ADMIN – COMPLET, cu CUI la Companie
-  await resend.emails.send({
-    from: 'comenzi@prynt.ro',
-    to: 'contact@prynt.ro',
-    subject: `Comandă Nouă (${paymentType}) - ${escapeHtml(address.nume_prenume)}`,
-    html: `
-      <div style="font-family: sans-serif; padding: 20px; background-color: #f4f4f4;">
-        <div style="max-width: 640px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 8px;">
-          <h1 style="color: #333; margin: 0 0 12px;">Comandă Nouă (${paymentType})</h1>
+  // Build admin email HTML (includes artwork links / text)
+  const adminHtml = `
+    <div style="font-family: sans-serif; padding: 20px; background-color: #f4f4f4;">
+      <div style="max-width: 640px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 8px;">
+        <h1 style="color: #333; margin: 0 0 12px;">Comandă Nouă (${paymentType})</h1>
 
-          <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Date Client</h2>
-          <p><strong>Nume:</strong> ${escapeHtml(address.nume_prenume)}</p>
-          <p><strong>Email:</strong> ${escapeHtml(address.email)}</p>
-          <p><strong>Telefon:</strong> ${escapeHtml(address.telefon)}</p>
+        <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Date Client</h2>
+        <p><strong>Nume:</strong> ${escapeHtml(address.nume_prenume)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(address.email)}</p>
+        <p><strong>Telefon:</strong> ${escapeHtml(address.telefon)}</p>
 
-          <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Adresă Livrare</h2>
-          <p>${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}</p>
+        <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Adresă Livrare</h2>
+        <p>${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}</p>
 
-          <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Detalii Facturare</h2>
-          <p><strong>Tip:</strong> ${billing.tip_factura === 'companie' ? 'Companie' : 'Persoană Fizică'}</p>
-          ${
-            billing.tip_factura === 'companie'
-              ? `<p><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
-              : `<p><strong>Nume Factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`
-          }
+        <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Detalii Facturare</h2>
+        <p><strong>Tip:</strong> ${billing.tip_factura === 'companie' ? 'Companie' : 'Persoană Fizică'}</p>
+        ${
+          billing.tip_factura === 'companie'
+            ? `<p><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
+            : `<p><strong>Nume Factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`
+        }
 
-          <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Produse Comandate</h2>
-          <ul style="padding-left: 18px;">
-            ${produseListHTML}
-          </ul>
+        <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Produse Comandate</h2>
+        <ul style="padding-left: 18px;">
+          ${produseListHTML}
+        </ul>
 
-          <div style="border-top: 1px solid #eee; margin: 16px 0; padding-top: 12px;">
-            <p style="margin: 4px 0; color: #333;">Taxă livrare: ${formatRON(SHIPPING_FEE)} RON</p>
-            <h3 style="text-align: right; color: #111; margin: 8px 0 0;">Total Comandă: ${formatRON(totalComanda)} RON</h3>
-          </div>
+        <div style="border-top: 1px solid #eee; margin: 16px 0; padding-top: 12px;">
+          <p style="margin: 4px 0; color: #333;">Taxă livrare: ${formatRON(SHIPPING_FEE)} RON</p>
+          <h3 style="text-align: right; color: #111; margin: 8px 0 0;">Total Comandă: ${formatRON(totalComanda)} RON</h3>
+        </div>
 
-          ${
-            invoiceLink
-              ? `<p style="text-align: center; margin-top: 20px;">
-                   <a href="${invoiceLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Vezi Factura Oblio</a>
-                 </p>`
-              : `<p style="text-align:center;margin-top:20px;color:#b54708">
-                   Factura va fi emisă manual în Oblio (client: ${escapeHtml(
-                     billing.cui || billing.name || address.nume_prenume
-                   )}).
-                 </p>`
-          }
+        ${
+          invoiceLink
+            ? `<p style="text-align: center; margin-top: 20px;">
+                 <a href="${invoiceLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Vezi Factura Oblio</a>
+               </p>`
+            : `<p style="text-align:center;margin-top:20px;color:#b54708">
+                 Factura va fi emisă manual în Oblio (client: ${escapeHtml(
+                   billing.cui || billing.name || address.nume_prenume
+                 )}).
+               </p>`
+        }
+      </div>
+    </div>
+  `;
+
+  // Admin email
+  try {
+    const adminResp = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'comenzi@prynt.ro',
+      to: process.env.ADMIN_EMAIL || 'contact@prynt.ro',
+      subject: `Comandă Nouă (${paymentType}) - ${escapeHtml(address.nume_prenume)}`,
+      html: adminHtml,
+    });
+    console.log('[OrderService] Admin email sent, resend response:', adminResp);
+  } catch (e: any) {
+    console.error('[OrderService] Eroare trimitere email admin:', e?.message || e);
+  }
+
+  // Email CLIENT – include artwork link or text if provided
+  const clientHtml = `
+    <div style="font-family:sans-serif; background:#f7f7fb; padding:24px;">
+      <div style="max-width:640px; margin:auto; background:#ffffff; border-radius:10px; padding:24px;">
+        <h1 style="margin:0 0 12px; color:#111;">Mulțumim pentru comandă!</h1>
+        <p style="margin:0 0 16px; color:#444;">
+          Am primit comanda ta și am început procesarea. Mai jos ai un rezumat.
+        </p>
+
+        <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Datele tale</h2>
+        <p style="margin:4px 0;"><strong>Nume:</strong> ${escapeHtml(address.nume_prenume)}</p>
+        <p style="margin:4px 0;"><strong>Email:</strong> ${escapeHtml(address.email)}</p>
+        <p style="margin:4px 0;"><strong>Telefon:</strong> ${escapeHtml(address.telefon)}</p>
+
+        <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Adresă livrare</h2>
+        <p style="margin:4px 0;">${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}</p>
+
+        <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Facturare</h2>
+        <p style="margin:4px 0;"><strong>Tip:</strong> ${billing.tip_factura === 'companie' ? 'Companie' : 'Persoană Fizică'}</p>
+        ${
+          billing.tip_factura === 'companie'
+            ? `<p style="margin:4px 0;"><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
+            : `<p style="margin:4px 0;"><strong>Nume factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`
+        }
+
+        <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Produse</h2>
+        <ul style="padding-left:18px; margin:8px 0 0;">
+          ${produseListHTML}
+        </ul>
+
+        <div style="border-top:1px solid #eee; margin:16px 0; padding-top:12px;">
+          <p style="margin:4px 0; color:#333;">Taxă livrare: ${formatRON(SHIPPING_FEE)} RON</p>
+          <h3 style="text-align:right; color:#111; margin:8px 0 0;">Total: ${formatRON(totalComanda)} RON</h3>
+        </div>
+
+        ${
+          invoiceLink
+            ? `<p style="text-align:center; margin-top:16px;">
+                 <a href="${invoiceLink}" style="display:inline-block; background:#4f46e5; color:#fff; padding:10px 18px; text-decoration:none; border-radius:8px;">Descarcă Factura</a>
+               </p>`
+            : `<p style="text-align:center; margin-top:16px; color:#555;">
+                 Factura va fi emisă și trimisă pe email ulterior.
+               </p>`
+        }
+
+        <div style="margin-top:20px; color:#555; font-size:14px;">
+          <p style="margin:6px 0;">Întrebări? Scrie-ne la <a href="mailto:${escapeHtml(process.env.SUPPORT_EMAIL || 'contact@prynt.ro')}">${escapeHtml(process.env.SUPPORT_EMAIL || 'contact@prynt.ro')}</a>.</p>
         </div>
       </div>
-    `,
-  });
+    </div>
+  `;
 
-  // Email CLIENT – COMPLET, minimal cerut în UI, include CUI dacă e Companie
-  await resend.emails.send({
-    from: 'contact@prynt.ro',
-    to: address.email,
-    subject: 'Confirmare comandă Prynt.ro',
-    html: `
-      <div style="font-family:sans-serif; background:#f7f7fb; padding:24px;">
-        <div style="max-width:640px; margin:auto; background:#ffffff; border-radius:10px; padding:24px;">
-          <h1 style="margin:0 0 12px; color:#111;">Mulțumim pentru comandă!</h1>
-          <p style="margin:0 0 16px; color:#444;">
-            Am primit comanda ta și am început procesarea. Mai jos ai un rezumat.
-          </p>
-
-          <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Datele tale</h2>
-          <p style="margin:4px 0;"><strong>Nume:</strong> ${escapeHtml(address.nume_prenume)}</p>
-          <p style="margin:4px 0;"><strong>Email:</strong> ${escapeHtml(address.email)}</p>
-          <p style="margin:4px 0;"><strong>Telefon:</strong> ${escapeHtml(address.telefon)}</p>
-
-          <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Adresă livrare</h2>
-          <p style="margin:4px 0;">${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}</p>
-
-          <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Facturare</h2>
-          <p style="margin:4px 0;"><strong>Tip:</strong> ${billing.tip_factura === 'companie' ? 'Companie' : 'Persoană Fizică'}</p>
-          ${
-            billing.tip_factura === 'companie'
-              ? `<p style="margin:4px 0;"><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
-              : `<p style="margin:4px 0;"><strong>Nume factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`
-          }
-
-          <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Produse</h2>
-          <ul style="padding-left:18px; margin:8px 0 0;">
-            ${produseListHTML}
-          </ul>
-
-          <div style="border-top:1px solid #eee; margin:16px 0; padding-top:12px;">
-            <p style="margin:4px 0; color:#333;">Taxă livrare: ${formatRON(SHIPPING_FEE)} RON</p>
-            <h3 style="text-align:right; color:#111; margin:8px 0 0;">Total: ${formatRON(totalComanda)} RON</h3>
-          </div>
-
-          ${
-            invoiceLink
-              ? `<p style="text-align:center; margin-top:16px;">
-                   <a href="${invoiceLink}" style="display:inline-block; background:#4f46e5; color:#fff; padding:10px 18px; text-decoration:none; border-radius:8px;">Descarcă Factura</a>
-                 </p>`
-              : `<p style="text-align:center; margin-top:16px; color:#555;">
-                   Factura va fi emisă și trimisă pe email ulterior.
-                 </p>`
-          }
-
-          <div style="margin-top:20px; color:#555; font-size:14px;">
-            <p style="margin:6px 0;">Întrebări? Scrie-ne la <a href="mailto:contact@prynt.ro">contact@prynt.ro</a>.</p>
-          </div>
-        </div>
-      </div>
-    `,
-  });
+  try {
+    const clientResp = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'contact@prynt.ro',
+      to: address.email,
+      subject: 'Confirmare comandă Prynt.ro',
+      html: clientHtml,
+    });
+    console.log('[OrderService] Client email sent, resend response:', clientResp);
+  } catch (e: any) {
+    console.error('[OrderService] Eroare trimitere email client:', e?.message || e);
+  }
 }
 
 /**
  * Procesează comanda NON‑BLOCANT și cu MINIM de date cerute în UI:
- * - Companie: încearcă “doar CUI”; dacă cere client, reîncearcă cu nume+adresă+email generate din formular
- * - Persoană fizică: nume + adresă + email
+ * - Acceptă cart cu forme diferite (normalizăm local)
  * - Emailuri se trimit oricum; dacă factura nu iese, nu blocăm comanda
  */
 export async function fulfillOrder(
@@ -248,13 +303,19 @@ export async function fulfillOrder(
     { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr }
   );
 
-  const products = cart.map((item) => ({
-    name: item.name,
-    price: item.unitAmount,
-    measuringUnitName: 'buc',
-    vatName: 'S',
-    quantity: item.quantity,
-  }));
+  // Normalize products into Oblio expected shape (name, price, quantity)
+  const products = (cart ?? []).map((item) => {
+    const name = item.name ?? item.title ?? item.slug ?? 'Produs';
+    const quantity = Number(item.quantity ?? 1) || 1;
+    const unitAmount = Number(item.unitAmount ?? item.price ?? item.metadata?.price ?? 0) || 0;
+    return {
+      name,
+      price: unitAmount,
+      measuringUnitName: 'buc',
+      vatName: 'S',
+      quantity,
+    };
+  });
 
   // Încercăm Oblio, dar nu blocăm dacă pică
   try {
@@ -309,7 +370,7 @@ export async function fulfillOrder(
     console.warn('[OrderService] Oblio a eșuat (comanda continuă):', e?.message || e);
   }
 
-  // Emailuri – întotdeauna
+  // Emailuri – întotdeauna; sendEmails este tolerant la forma cart-ului
   try {
     await sendEmails(address, billing, cart, invoiceLink, paymentType);
   } catch (e: any) {
