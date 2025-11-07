@@ -1,88 +1,81 @@
-'use client';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useReducer, createContext, useContext } from 'react'
+import type { ReactNode } from 'react'
 
-interface CartItem {
-  id: string;
-  name: string;
-  quantity: number;
-  unitAmount: number;
-  totalAmount: number;
-  artworkUrl?: string;
-  textDesign?: string; // pentru “banner cu text”
+type CartItem = {
+  id: string
+  title?: string
+  name?: string
+  price: number | string
+  quantity?: number
+  [key: string]: any
 }
 
-type CartContextType = {
-  items: CartItem[];
-  addItem: (item: CartItem) => void;
-  removeItem: (id: string) => void;
-  clear: () => void;
-  total: number;
-  count: number;
-  isLoaded: boolean;
-};
-
-const CartContext = createContext<CartContextType | null>(null);
-
-export function useCart() {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error('useCart must be used within a CartProvider');
-  return ctx;
+type State = {
+  items: CartItem[]
 }
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+const initialState: State = { items: [] }
 
-  useEffect(() => {
-    try {
-      if (typeof window === 'undefined') return;
-      const raw = localStorage.getItem('cart');
-      if (raw) setItems(JSON.parse(raw));
-    } catch (e) {
-      console.error('Eroare la citirea coșului din localStorage:', e);
-    } finally {
-      setIsLoaded(true);
+function normalizeItem(raw: Partial<CartItem>) {
+  // extrage numeric din string-uri de tip "75 RON" sau "75,00"
+  const rawPrice = raw.price ?? 0
+  let priceNumber = 0
+  if (typeof rawPrice === 'string') {
+    // elimină tot ce nu e cifră, punct sau virgulă, apoi transformă virgulă în punct
+    const cleaned = rawPrice.replace(/[^\d.,-]/g, '').replace(',', '.')
+    priceNumber = Number(cleaned)
+  } else {
+    priceNumber = Number(rawPrice)
+  }
+  if (!Number.isFinite(priceNumber)) priceNumber = 0
+
+  const quantity = Number(raw.quantity) || 1
+  const title = raw.title || raw.name || raw.product?.title || raw.product?.name || ''
+
+  return {
+    ...raw,
+    price: priceNumber,
+    quantity,
+    title,
+  } as CartItem
+}
+
+function reducer(state: State, action: any): State {
+  switch (action.type) {
+    case 'ADD_ITEM': {
+      const item = normalizeItem(action.payload)
+      // simplu exemplu de adăugat (pot adapta logica merge/replace)
+      return { items: [...state.items, item] }
     }
-  }, []);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    try {
-      localStorage.setItem('cart', JSON.stringify(items));
-    } catch (e) {
-      console.error('Eroare la salvarea coșului în localStorage:', e);
+    case 'REMOVE_ITEM': {
+      return { items: state.items.filter(i => i.id !== action.payload) }
     }
-  }, [items, isLoaded]);
+    // alte acțiuni...
+    default:
+      return state
+  }
+}
 
-  const addItem = (item: CartItem) => {
-    setItems((prev) => {
-      const idx = prev.findIndex((p) => p.id === item.id);
-      if (idx >= 0) {
-        const copy = [...prev];
-        const mergedQty = copy[idx].quantity + item.quantity;
-        const unit = copy[idx].unitAmount;
-        copy[idx] = {
-          ...copy[idx],
-          quantity: mergedQty,
-          totalAmount: unit * mergedQty,
-          artworkUrl: item.artworkUrl ?? copy[idx].artworkUrl,
-          textDesign: item.textDesign ?? copy[idx].textDesign,
-        };
-        return copy;
-      }
-      return [...prev, item];
-    });
-  };
+export const CartContext = createContext<any>(null)
 
-  const removeItem = (id: string) => setItems((p) => p.filter((i) => i.id !== id));
-  const clear = () => setItems([]);
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(reducer, initialState)
 
-  const total = useMemo(() => items.reduce((s, i) => s + i.totalAmount, 0), [items]);
-  const count = useMemo(() => items.reduce((s, i) => s + i.quantity, 0), [items]);
+  function getSubtotal() {
+    return state.items.reduce((sum, it) => {
+      const price = Number(it.price) || 0
+      const qty = Number(it.quantity) || 1
+      return sum + price * qty
+    }, 0)
+  }
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, clear, total, count, isLoaded }}>
+    <CartContext.Provider value={{ state, dispatch, getSubtotal }}>
       {children}
     </CartContext.Provider>
-  );
+  )
+}
+
+export function useCart() {
+  return useContext(CartContext)
 }

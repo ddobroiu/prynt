@@ -30,7 +30,7 @@ type Billing = {
 };
 
 export default function CheckoutPage() {
-  const { items, removeItem, isLoaded } = useCart();
+  const { items, removeItem, isLoaded, total } = useCart();
 
   const [address, setAddress] = useState<Address>({
     nume_prenume: "",
@@ -52,16 +52,21 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showEmbed, setShowEmbed] = useState(false);
 
-  // pentru scroll la primul câmp invalid
   const firstInvalidRef = useRef<HTMLElement | null>(null);
 
+  // protecție: folosim fallback [] și convertim la număr
   const subtotal = useMemo(
-    () => items.reduce((acc, item) => acc + item.totalAmount, 0),
+    () =>
+      (items ?? []).reduce(
+        (acc, item) => acc + Number(item?.totalAmount ?? 0),
+        0
+      ),
     [items]
   );
-  const costLivrare = items.length > 0 ? 19.99 : 0;
-  const totalPlata = items.length > 0 ? subtotal + costLivrare : 0;
-  const isEmpty = isLoaded && items.length === 0;
+
+  const costLivrare = (items ?? []).length > 0 ? 19.99 : 0;
+  const totalPlata = (items ?? []).length > 0 ? subtotal + costLivrare : 0;
+  const isEmpty = isLoaded && (items ?? []).length === 0;
 
   const fmt = new Intl.NumberFormat("ro-RO", {
     style: "currency",
@@ -75,7 +80,6 @@ export default function CheckoutPage() {
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const telRe = /^[0-9+()\-\s]{7,}$/;
 
-    // Livrare - obligatorii
     if (!address.nume_prenume.trim()) e["address.nume_prenume"] = "Nume și prenume obligatoriu";
     if (!emailRe.test(address.email)) e["address.email"] = "Email invalid";
     if (!telRe.test(address.telefon)) e["address.telefon"] = "Telefon invalid";
@@ -83,15 +87,12 @@ export default function CheckoutPage() {
     if (!address.localitate.trim()) e["address.localitate"] = "Localitate obligatorie";
     if (!address.strada_nr.trim()) e["address.strada_nr"] = "Stradă și număr obligatorii";
 
-    // Facturare
     if (billing.tip_factura === "persoana_juridica") {
       if (!billing.denumire_companie?.trim())
         e["billing.denumire_companie"] = "Denumire companie obligatorie";
       if (!billing.cui?.trim()) e["billing.cui"] = "CUI/CIF obligatoriu";
-      // reg_com poate fi opțional
     }
 
-    // Adresa de facturare (dacă nu e aceeași)
     if (!sameAsDelivery) {
       if (!billing.judet) e["billing.judet"] = "Alege județul (facturare)";
       if (!billing.localitate?.trim())
@@ -100,8 +101,7 @@ export default function CheckoutPage() {
         e["billing.strada_nr"] = "Stradă și număr facturare obligatorii";
     }
 
-    // Coș
-    if (items.length === 0) e["cart.empty"] = "Coșul este gol";
+    if ((items ?? []).length === 0) e["cart.empty"] = "Coșul este gol";
 
     return { ok: Object.keys(e).length === 0, errs: e };
   }
@@ -115,7 +115,6 @@ export default function CheckoutPage() {
     const { ok, errs } = validate();
     if (!ok) {
       setErrors(errs);
-      // încearcă să derulezi la primul câmp invalid (după id-uri stabilite în CheckoutForm)
       const firstKey = Object.keys(errs)[0];
       const el = document.querySelector<HTMLElement>(
         `[data-field="${firstKey}"]`
@@ -129,11 +128,10 @@ export default function CheckoutPage() {
     }
 
     const orderData = {
-      cart: items,
+      cart: items ?? [],
       address,
       billing: {
         ...billing,
-        // dacă e aceeași, copiem adresa de livrare în facturare (să existe valori)
         ...(sameAsDelivery
           ? {
               judet: address.judet,
@@ -159,7 +157,6 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Card (Stripe Embedded Checkout)
       const res = await fetch("/api/stripe/checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -167,10 +164,9 @@ export default function CheckoutPage() {
       });
       const data = await res.json();
       if (!res.ok || !data?.clientSecret) {
-        throw new Error(data?.error || "Nu s-a putut iniția plata cu cardul.");
+        throw new Error(data?.error || "Nu s-a putut inițializa plata cu cardul.");
       }
 
-      // Arată containerul pentru Embedded Checkout și montează
       setShowEmbed(true);
       const stripe = await stripePromise;
       if (!stripe) throw new Error("Stripe nu a putut fi inițializat.");
@@ -179,7 +175,6 @@ export default function CheckoutPage() {
         clientSecret: data.clientSecret,
       });
       embeddedCheckout.mount("#stripe-embedded");
-      // UI rămâne blocat până la finalizarea plății (success redirect)
     } catch (err: any) {
       console.error("[placeOrder] error:", err?.message || err);
       alert(err?.message || "A apărut o eroare. Reîncearcă.");
@@ -192,7 +187,6 @@ export default function CheckoutPage() {
   return (
     <main className="bg-[#0b0f19] min-h-screen text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header + CTA continuă cumpărăturile */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Coșul tău</h1>
           <a
@@ -207,7 +201,6 @@ export default function CheckoutPage() {
           <EmptyCart />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* SUMAR primul pe mobil */}
             <aside className="order-1 lg:order-2 lg:col-span-1">
               <SummaryCard
                 subtotal={subtotal}
@@ -220,7 +213,6 @@ export default function CheckoutPage() {
               />
             </aside>
 
-            {/* FORM + PRODUSE */}
             <section className={`order-2 lg:order-1 lg:col-span-2 space-y-6 ${showEmbed ? "hidden" : ""}`}>
               <CartItems items={items} onRemove={removeItem} />
 
@@ -238,7 +230,6 @@ export default function CheckoutPage() {
         )}
       </div>
 
-      {/* CONTAINER Stripe Embedded Checkout */}
       {showEmbed && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur flex items-center justify-center p-4">
           <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-gray-950 p-4">
@@ -310,7 +301,6 @@ function SummaryCard({
         </div>
       </div>
 
-      {/* Plata */}
       <div className="mt-5">
         <div className="mb-3 flex gap-3">
           <button
@@ -349,14 +339,14 @@ function SummaryCard({
   );
 }
 
-function CartItems({ items, onRemove }: { items: Array<any>; onRemove: (id: string) => void }) {
+function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemove: (id: string) => void }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
       <h2 className="text-xl font-bold mb-4">Produsele tale</h2>
       <ul className="divide-y divide-white/10">
-        {items.map((item) => (
+        {(items ?? []).map((item) => (
           <li key={item.id} className="py-4 flex items-start gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
@@ -383,7 +373,7 @@ function CartItems({ items, onRemove }: { items: Array<any>; onRemove: (id: stri
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="font-semibold">{fmt(item.totalAmount)}</span>
+              <span className="font-semibold">{fmt(Number(item.totalAmount ?? 0))}</span>
               <button
                 onClick={() => onRemove(item.id)}
                 className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-white/80 hover:bg-white/10"
