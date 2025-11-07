@@ -15,7 +15,6 @@ const GALLERY = [
 
 /* Prețuri fixe pentru dimensiuni (RON) — pentru variante cu șasiu (fixed sizes) */
 const SIZE_PRICE_MAP: Record<string, number> = {
-  // rectangular (w x h)
   "30x40": 89,
   "30x50": 99,
   "40x60": 119,
@@ -24,7 +23,6 @@ const SIZE_PRICE_MAP: Record<string, number> = {
   "80x100": 249,
   "80x120": 299,
   "100x120": 369,
-  // squares
   "30x30": 79,
   "40x40": 99,
   "50x50": 129,
@@ -79,26 +77,40 @@ const MATERIAL_LABEL = "Canvas Fine Art — bumbac + poliester, 330 g/mp";
 
 type Props = {
   productSlug?: string;
+  initialWidth?: number;   // NEW: accept initial values (in cm)
+  initialHeight?: number;  // NEW: accept initial values (in cm)
 };
 
-export default function CanvasConfigurator({ productSlug }: Props) {
+export default function CanvasConfigurator({ productSlug, initialWidth, initialHeight }: Props) {
   const { addItem } = useCart();
 
   // defaults: framed true, shape rect, and preset auto-selected
   const [framed, setFramed] = useState<boolean>(true);
   const [shape, setShape] = useState<"rect" | "square">("rect");
-
-  // preset selected when framed; default to first rect preset
   const [selectedSizeKey, setSelectedSizeKey] = useState<string | null>(() => RECT_SIZES[0]?.key ?? null);
 
-  // custom sizes when no-frame
+  // custom sizes when no-frame (cm)
   const [customWidthCm, setCustomWidthCm] = useState<number | "">("");
   const [customHeightCm, setCustomHeightCm] = useState<number | "">("");
 
-  // qty and artwork
+  // if initialWidth/initialHeight are passed, apply them once on mount
+  useEffect(() => {
+    if (typeof initialWidth === "number" && initialWidth > 0) {
+      setCustomWidthCm(initialWidth);
+    }
+    if (typeof initialHeight === "number" && initialHeight > 0) {
+      setCustomHeightCm(initialHeight);
+    }
+  }, [initialWidth, initialHeight]);
+
+  // quantity and artwork
   const [quantity, setQuantity] = useState<number>(1);
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
   const [artworkLink, setArtworkLink] = useState<string>("");
+
+  // add-text option + text content
+  const [addTextOption, setAddTextOption] = useState<boolean>(false);
+  const [textDesign, setTextDesign] = useState<string>("");
 
   // UI states
   const [uploading, setUploading] = useState(false);
@@ -106,22 +118,23 @@ export default function CanvasConfigurator({ productSlug }: Props) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
 
+  // errors visible when trying to add to cart
+  const [errors, setErrors] = useState<string[]>([]);
+
   // gallery
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
 
-  // refs (graphics panel)
+  // refs
   const graphicsRef = useRef<HTMLDivElement | null>(null);
 
-  // keep preset selection in sync when shape changes or framed toggled on
+  // keep preset selection in sync
   useEffect(() => {
     if (framed) {
-      // ensure a preset is selected; prefer first of current shape list
       if (!selectedSizeKey) {
         const first = shape === "rect" ? RECT_SIZES[0] : SQUARE_SIZES[0];
         setSelectedSizeKey(first?.key ?? null);
       } else {
-        // if selected key doesn't match shape (e.g., square selected but shape switched to rect), reset to first of new shape
         const currentList = shape === "rect" ? RECT_SIZES : SQUARE_SIZES;
         if (!currentList.find((s) => s.key === selectedSizeKey)) {
           setSelectedSizeKey(currentList[0]?.key ?? null);
@@ -156,7 +169,7 @@ export default function CanvasConfigurator({ productSlug }: Props) {
   const unitPrice = useMemo(() => (framed ? basePricePerUnitPreset : unitPriceNoFrame), [framed, basePricePerUnitPreset, unitPriceNoFrame]);
   const totalPrice = useMemo(() => roundMoney(unitPrice * quantity), [unitPrice, quantity]);
 
-  // server/calc UX
+  // server / calc UX
   const [serverPrice, setServerPrice] = useState<number | null>(null);
   const [calcLoading, setCalcLoading] = useState(false);
 
@@ -176,6 +189,7 @@ export default function CanvasConfigurator({ productSlug }: Props) {
       const data = await res.json();
       setArtworkUrl(data.url);
       setArtworkLink("");
+      setUploadError(null);
     } catch (e: any) {
       try {
         const preview = file ? URL.createObjectURL(file) : null;
@@ -194,48 +208,48 @@ export default function CanvasConfigurator({ productSlug }: Props) {
       setServerPrice(totalPrice);
     } catch (err) {
       console.error("calc error", err);
-      alert("Eroare la calcul preț");
     } finally {
       setCalcLoading(false);
     }
   }
 
+  // validate and add to cart with visible reasons why it failed
   function handleAddToCart() {
-    if (!artworkUrl && !artworkLink) {
-      alert("Încarcă poza sau pune linkul paginii înainte de a adăuga în coș.");
-      return;
-    }
+    const nextErrors: string[] = [];
 
+    // artwork optional — warn if uploadError exists
+    if (uploadError) nextErrors.push("Eroare la upload: " + uploadError);
+
+    // framed vs no-frame validations
     if (framed) {
-      if (!selectedSizeKey) {
-        alert("Selectează o dimensiune preset (cu șasiu) înainte de a adăuga în coș.");
-        return;
-      }
+      if (!selectedSizeKey) nextErrors.push("Nu ai selectat o dimensiune preset (cu șasiu).");
     } else {
-      if (!customWidthCm || !customHeightCm || Number(customWidthCm) <= 0 || Number(customHeightCm) <= 0) {
-        alert("Completează lățimea și înălțimea (în cm) pentru varianta fără șasiu.");
-        return;
-      }
-      if (Number(customWidthCm) > MAX_WIDTH_CM_NO_FRAME) {
-        alert(`Lățimea maximă permisă fără șasiu este ${MAX_WIDTH_CM_NO_FRAME / 100} m (${MAX_WIDTH_CM_NO_FRAME} cm).`);
-        return;
-      }
-      if (Number(customHeightCm) > MAX_LENGTH_CM_NO_FRAME) {
-        alert(`Lungimea maximă permisă fără șasiu este ${MAX_LENGTH_CM_NO_FRAME / 100} m (${MAX_LENGTH_CM_NO_FRAME} cm).`);
-        return;
-      }
+      if (!customWidthCm || Number(customWidthCm) <= 0) nextErrors.push("Nu ai introdus lățimea (cm) pentru varianta fără șasiu.");
+      if (!customHeightCm || Number(customHeightCm) <= 0) nextErrors.push("Nu ai introdus lungimea (cm) pentru varianta fără șasiu.");
+      if (customWidthCm && Number(customWidthCm) > MAX_WIDTH_CM_NO_FRAME)
+        nextErrors.push(`Lățimea maximă permisă fără șasiu este ${MAX_WIDTH_CM_NO_FRAME / 100} m.`);
+      if (customHeightCm && Number(customHeightCm) > MAX_LENGTH_CM_NO_FRAME)
+        nextErrors.push(`Lungimea maximă permisă fără șasiu este ${MAX_LENGTH_CM_NO_FRAME / 100} m.`);
     }
 
-    const totalForOrder = serverPrice ?? totalPrice;
-    if (!totalForOrder || totalForOrder <= 0) {
-      alert("Calculează prețul înainte de a adăuga în coș");
+    // quantity
+    if (!quantity || quantity <= 0) nextErrors.push("Cantitate invalidă.");
+
+    // if errors, set visible errors and focus
+    if (nextErrors.length > 0) {
+      setErrors(nextErrors);
+      const el = document.querySelector("#config-errors");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
+    // passed validation — clear errors
+    setErrors([]);
+
+    // determine dims
     let width_cm = 0;
     let height_cm = 0;
     let sizeLabel = "";
-
     if (framed) {
       const [wStr, hStr] = (selectedSizeKey || "").split("x");
       width_cm = parseInt(wStr || "0", 10);
@@ -247,8 +261,11 @@ export default function CanvasConfigurator({ productSlug }: Props) {
       sizeLabel = `${width_cm}x${height_cm}`;
     }
 
+    // Build a clear title that includes whether it has frame or not
+    const frameText = framed ? "Cu șasiu" : "Fără șasiu";
+    const title = `Canvas Fine Art - ${width_cm}x${height_cm} cm (${frameText})`;
+
     const uniqueId = ["canvas", framed ? "framed" : "noframe", sizeLabel].join("-");
-    const title = `Canvas Fine Art - ${width_cm}x${height_cm} cm`;
 
     addItem({
       id: uniqueId,
@@ -263,9 +280,12 @@ export default function CanvasConfigurator({ productSlug }: Props) {
       metadata: {
         material: MATERIAL_LABEL,
         framed,
+        framed_label: frameText,
         shape,
         artworkUrl,
         artworkLink,
+        addText: addTextOption && textDesign.trim() !== "",
+        textDesign: addTextOption && textDesign.trim() !== "" ? textDesign.trim() : null,
         basePricePerUnit: framed ? basePricePerUnitPreset : pricePerSqmTier,
         pricePerUnit: unitPrice,
         totalPrice: serverPrice ?? totalPrice,
@@ -273,8 +293,12 @@ export default function CanvasConfigurator({ productSlug }: Props) {
       },
     });
 
+    // success feedback
     setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 1600);
+    setTimeout(() => setToastVisible(false), 1500);
+
+    // reset server price so user recalculates if they change something
+    setServerPrice(null);
   }
 
   // auto gallery advance
@@ -289,7 +313,24 @@ export default function CanvasConfigurator({ productSlug }: Props) {
     return () => clearInterval(id);
   }, []);
 
-  const canAdd = Boolean(artworkUrl || artworkLink) && quantity > 0 && (serverPrice ?? totalPrice) > 0;
+  // pretty visual markers
+  const FilePreview = () => {
+    if (!artworkUrl) return null;
+    return (
+      <div className="mt-2 flex items-center gap-3">
+        <img src={artworkUrl} alt="uploaded" className="h-12 w-12 object-cover rounded-md border" />
+        <div>
+          <div className="text-sm font-medium text-white">Fișier încărcat</div>
+          <div className="text-xs text-white/60">Poți schimba sau să adaugi link alternativ.</div>
+        </div>
+      </div>
+    );
+  };
+
+  // canAdd used by MobilePriceBar
+  const canAdd =
+    quantity > 0 &&
+    ((framed && Boolean(selectedSizeKey)) || (!framed && customWidthCm && customHeightCm && Number(customWidthCm) > 0 && Number(customHeightCm) > 0));
 
   return (
     <main className="min-h-screen">
@@ -301,7 +342,7 @@ export default function CanvasConfigurator({ productSlug }: Props) {
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Canvas</h1>
-            <p className="mt-2 text-white/70">Canvas Fine Art — bumbac + poliester, 330 g/mp. Trimite poza sau linkul paginii (nu trimite text).</p>
+            <p className="mt-2 text-white/70">Canvas Fine Art — bumbac + poliester, 330 g/mp.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -312,6 +353,18 @@ export default function CanvasConfigurator({ productSlug }: Props) {
           </div>
         </header>
 
+        {/* ERROR PANEL */}
+        {errors.length > 0 && (
+          <div id="config-errors" className="mb-4 card p-3 border-l-4 border-red-500 bg-black/40">
+            <div className="font-semibold text-red-400 mb-2">Nu s-a putut adăuga în coș</div>
+            <ul className="list-disc pl-5 text-sm text-white/80">
+              {errors.map((err, i) => (
+                <li key={i}>{err}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3 space-y-6">
             {/* chenar with shape + framed toggles */}
@@ -319,51 +372,23 @@ export default function CanvasConfigurator({ productSlug }: Props) {
               <div className="text-sm font-semibold text-white">Formă</div>
 
               <div className="inline-flex rounded-md bg-white/5 p-1">
-                <button
-                  type="button"
-                  onClick={() => setShape("rect")}
-                  className={`px-3 py-1 rounded-md text-sm ${shape === "rect" ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
-                >
-                  Dreptunghi
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShape("square")}
-                  className={`ml-2 px-3 py-1 rounded-md text-sm ${shape === "square" ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
-                >
-                  Pătrat
-                </button>
+                <button type="button" onClick={() => setShape("rect")} className={`px-3 py-1 rounded-md text-sm ${shape === "rect" ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}>Dreptunghi</button>
+                <button type="button" onClick={() => setShape("square")} className={`ml-2 px-3 py-1 rounded-md text-sm ${shape === "square" ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}>Pătrat</button>
               </div>
 
               <div className="ml-4 inline-flex rounded-lg border border-white/10 bg-white/5 p-1">
-                <button
-                  type="button"
-                  onClick={() => setFramed(false)}
-                  className={`px-3 py-1 rounded-md text-sm ${!framed ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
-                >
-                  Fără șasiu
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFramed(true)}
-                  className={`ml-2 px-3 py-1 rounded-md text-sm ${framed ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
-                >
-                  Cu șasiu (pre-set)
-                </button>
+                <button type="button" onClick={() => setFramed(false)} className={`px-3 py-1 rounded-md text-sm ${!framed ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}>Fără șasiu</button>
+                <button type="button" onClick={() => setFramed(true)} className={`ml-2 px-3 py-1 rounded-md text-sm ${framed ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}>Cu șasiu (pre-set)</button>
               </div>
             </div>
 
-            {/* If framed: show the relevant preset list (no collapse) */}
+            {/* presets / custom inputs */}
             {framed ? (
               <div className="card p-4">
                 <div className="text-sm text-white/70 mb-3">{shape === "rect" ? "Dimensiuni preset — Dreptunghi" : "Dimensiuni preset — Pătrat"}</div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {(shape === "rect" ? RECT_SIZES : SQUARE_SIZES).map((s) => (
-                    <button
-                      key={s.key}
-                      onClick={() => setSelectedSizeKey(s.key)}
-                      className={`p-3 rounded-md text-left border ${selectedSizeKey === s.key ? "border-indigo-500 bg-indigo-900/20" : "border-white/10 hover:bg-white/5"}`}
-                    >
+                    <button key={s.key} onClick={() => setSelectedSizeKey(s.key)} className={`p-3 rounded-md text-left border ${selectedSizeKey === s.key ? "border-indigo-500 bg-indigo-900/20" : "border-white/10 hover:bg-white/5"}`}>
                       <div className="font-semibold text-white">{s.label}</div>
                       <div className="text-sm text-white/60">{s.price} RON</div>
                     </button>
@@ -373,25 +398,15 @@ export default function CanvasConfigurator({ productSlug }: Props) {
             ) : (
               <div className="card p-4">
                 <div className="text-sm text-white/70 mb-3">Introdu dimensiunile (cm). Limite: lățime ≤ 3.10 m, lungime ≤ 50 m.</div>
+
                 {shape === "square" ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="field-label">Latura (cm)</label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={MAX_WIDTH_CM_NO_FRAME}
-                        value={customWidthCm as number | ""}
-                        onChange={(e) => {
-                          const v = e.target.value === "" ? "" : Math.max(0, Number(e.target.value));
-                          setCustomWidthCm(v);
-                          setCustomHeightCm(v);
-                        }}
-                        className="input"
-                        placeholder="Ex: 50"
-                      />
+                      <input type="number" min={1} max={MAX_WIDTH_CM_NO_FRAME} value={customWidthCm as number | ""} onChange={(e) => { const v = e.target.value === "" ? "" : Math.max(0, Number(e.target.value)); setCustomWidthCm(v); setCustomHeightCm(v); }} className="input" placeholder="Ex: 50" />
                       <div className="text-xs text-white/60 mt-1">Max lățime: {MAX_WIDTH_CM_NO_FRAME / 100} m, max lungime: {MAX_LENGTH_CM_NO_FRAME / 100} m</div>
                     </div>
+
                     <div>
                       <NumberInput label="Cantitate" value={quantity} onChange={(v) => setQty(v)} />
                     </div>
@@ -400,36 +415,16 @@ export default function CanvasConfigurator({ productSlug }: Props) {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="field-label">Lățime (cm)</label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={MAX_WIDTH_CM_NO_FRAME}
-                        value={customWidthCm as number | ""}
-                        onChange={(e) => {
-                          const v = e.target.value === "" ? "" : Math.max(0, Number(e.target.value));
-                          setCustomWidthCm(v);
-                        }}
-                        className="input"
-                        placeholder="Ex: 100"
-                      />
+                      <input type="number" min={1} max={MAX_WIDTH_CM_NO_FRAME} value={customWidthCm as number | ""} onChange={(e) => { const v = e.target.value === "" ? "" : Math.max(0, Number(e.target.value)); setCustomWidthCm(v); }} className="input" placeholder="Ex: 100" />
                       <div className="text-xs text-white/60 mt-1">Max: {MAX_WIDTH_CM_NO_FRAME / 100} m</div>
                     </div>
+
                     <div>
                       <label className="field-label">Lungime (cm)</label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={MAX_LENGTH_CM_NO_FRAME}
-                        value={customHeightCm as number | ""}
-                        onChange={(e) => {
-                          const v = e.target.value === "" ? "" : Math.max(0, Number(e.target.value));
-                          setCustomHeightCm(v);
-                        }}
-                        className="input"
-                        placeholder="Ex: 150"
-                      />
+                      <input type="number" min={1} max={MAX_LENGTH_CM_NO_FRAME} value={customHeightCm as number | ""} onChange={(e) => { const v = e.target.value === "" ? "" : Math.max(0, Number(e.target.value)); setCustomHeightCm(v); }} className="input" placeholder="Ex: 150" />
                       <div className="text-xs text-white/60 mt-1">Max: {MAX_LENGTH_CM_NO_FRAME / 100} m</div>
                     </div>
+
                     <div>
                       <NumberInput label="Cantitate" value={quantity} onChange={(v) => setQty(v)} />
                     </div>
@@ -438,36 +433,60 @@ export default function CanvasConfigurator({ productSlug }: Props) {
               </div>
             )}
 
-            {/* Grafică (upload/link) */}
+            {/* Grafică */}
             <div className="card p-4" ref={graphicsRef}>
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-white">Grafică</h2></div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="text-indigo-400"><CheckCircle /></div>
+                <h2 className="text-lg font-bold text-white">Grafică</h2>
+              </div>
+
               <div className="panel p-3 space-y-2">
                 <div>
-                  <label className="field-label">Încarcă poza</label>
-                  <input type="file" accept=".jpg,.jpeg,.png,.pdf" onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)} className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500" />
+                  <label className="field-label">Încarcă fișier</label>
+                  <input type="file" accept=".pdf,.ai,.psd,.jpg,.jpeg,.png" onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)} className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500" />
                 </div>
+
                 <div>
-                  <label className="field-label">Link (opțional)</label>
-                  <input type="url" value={artworkLink} onChange={(e) => setArtworkLink(e.target.value)} placeholder="https://..." className="input" />
-                  <div className="text-xs text-white/60 mt-1">Trimite poza sau linkul paginii; noi imprimăm imaginea primită.</div>
+                  <label className="field-label">Link descărcare (opțional)</label>
+                  <input type="url" value={artworkLink} onChange={(e) => setArtworkLink(e.target.value)} placeholder="Ex: https://.../fisier.pdf" className="input" />
+                  <div className="text-xs text-white/60 mt-1">Ex: https://.../fisier.pdf — Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
                 </div>
+
+                <FilePreview />
+
+                <div className="flex items-start gap-3 mt-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={addTextOption} onChange={(e) => setAddTextOption(e.target.checked)} />
+                    <span className="text-sm text-white/80">Adaugă text pe canvas</span>
+                  </label>
+                </div>
+
+                {addTextOption && (
+                  <div className="mt-2">
+                    <label className="field-label">Text pentru canvas</label>
+                    <input type="text" value={textDesign} onChange={(e) => setTextDesign(e.target.value)} placeholder="Ex: Nume / Mesaj scurt" className="input" />
+                    <div className="text-xs text-white/60 mt-1">Textul nu apare pe previzualizare, dar va fi trimis cu comanda dacă este bifat.</div>
+                  </div>
+                )}
+
                 <div className="text-xs text-white/60">
                   {uploading && "Se încarcă…"}
-                  {uploadError && "Eroare upload"}
-                  {artworkUrl && "Fișier încărcat"}
-                  {!artworkUrl && artworkLink && "Link salvat"}
+                  {uploadError && <span className="text-red-400">Eroare upload: {uploadError}</span>}
+                  {artworkUrl && <span className="text-green-400">Fișier disponibil</span>}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* RIGHT - summary */}
+          {/* RIGHT - summary + preview (NO uploaded override of gallery) */}
           <aside id="order-summary" className="lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
-              <div className="card p-4">
-                <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
+              <div className="card p-4 relative">
+                <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black relative">
+                  {/* keep gallery images only here; do NOT show uploaded artwork over gallery */}
                   <img src={activeImage} alt="Canvas preview" className="h-full w-full object-cover" loading="eager" />
                 </div>
+
                 <div className="mt-3 grid grid-cols-4 gap-3">
                   {GALLERY.map((src, i) => (
                     <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
@@ -482,9 +501,21 @@ export default function CanvasConfigurator({ productSlug }: Props) {
                 <div className="space-y-2 text-white/80 text-sm">
                   <p>Forma: <span className="text-white font-semibold">{shape === "rect" ? "Dreptunghi" : "Pătrat"}</span></p>
                   <p>Dimensiune: <span className="text-white font-semibold">{framed ? (selectedSizeKey ?? "—") : `${customWidthCm || "—"} x ${customHeightCm || "—"} cm`}</span></p>
+                  <p>Șasiu: <span className="text-white font-semibold">{framed ? "Da" : "Nu"}</span></p>
                   <p>Cantitate: <span className="text-white font-semibold">{quantity}</span></p>
                   <p>Preț per unitate: <span className="text-white font-semibold">{formatMoneyDisplay(unitPrice)} RON</span></p>
                   <p className="text-2xl font-extrabold text-white">Total: {formatMoneyDisplay(serverPrice ?? totalPrice)} RON</p>
+                  {addTextOption && textDesign.trim() !== "" && <div className="text-sm text-white/60">Text pe comandă: "{textDesign.trim()}"</div>}
+                  {/* show uploaded file info only in summary (thumb + label) */}
+                  {artworkUrl && (
+                    <div className="mt-2 flex items-center gap-3">
+                      <img src={artworkUrl} alt="uploaded-thumb" className="h-12 w-12 object-cover rounded-md border" />
+                      <div>
+                        <div className="text-sm font-medium text-white">Fișier încărcat</div>
+                        <div className="text-xs text-white/60">Fișierul va fi folosit la imprimare.</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="hidden lg:block mt-4">
@@ -517,7 +548,7 @@ export default function CanvasConfigurator({ productSlug }: Props) {
               <p>- Material: Canvas Fine Art (bumbac + poliester), 330 g/mp — nu se cutează, tăiere sigură.</p>
               <p>- Șasiu: lemn (montaj profesional) — pentru preseturi (cu șasiu) prețurile sunt fixe.</p>
               <p>- Varianta fără șasiu se calculează pe mp conform tarifelor: &lt;1 mp = 175 RON/m²; 1–5 = 150 RON/m²; 5–20 = 130 RON/m²; 20–50 = 100 RON/m²; &gt;50 = 80 RON/m².</p>
-              <p>- Trimite poza sau linkul paginii. Vom imprima imaginea primită (fără adăugare de text).</p>
+              <p>- Trimite poza sau linkul paginii. Vom imprima imaginea primită. Textul introdus (dacă ai bifat opțiunea) nu este afișat pe previzualizare, dar este trimis în comandă.</p>
             </div>
             <div className="mt-6 text-right">
               <button onClick={() => setDetailsOpen(false)} className="btn-primary py-2 px-4">Închide</button>
