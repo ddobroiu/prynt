@@ -34,6 +34,18 @@ export async function generateMetadata({ params }: Props) {
   return metadata;
 }
 
+// helper mic pentru a formata doar titlul (nu schimb restul paginii)
+function prettyTitleFrom(raw: string | undefined, fallback = "Banner personalizat") {
+  if (!raw) return fallback;
+  const cleaned = String(raw).replace(/[_\-]+/g, " ").replace(/\s+/g, " ").trim();
+  const m = cleaned.match(/(\d{2,4})[x×-](\d{2,4})/);
+  if (m) return `Banner ${m[1]}x${m[2]} cm`;
+  if (/banner/i.test(cleaned)) {
+    return cleaned.replace(/\s+/g, " ").trim();
+  }
+  return `Banner ${cleaned}`;
+}
+
 export default async function Page({ params }: Props) {
   // params poate fi Promise — îl rezolvăm cu await
   const resolved = await params;
@@ -56,11 +68,15 @@ export default async function Page({ params }: Props) {
       <ProductJsonLd product={(product as Product)} url={url} />
 
       <section style={{ marginTop: 18 }}>
+        {/* Page header / SEO visible content */}
         <header style={{ marginBottom: 18 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 700 }}>{product.title}</h1>
-          <p style={{ marginTop: 8, color: "#9ca3af" }}>{product.description}</p>
+          <h1 style={{ fontSize: 28, fontWeight: 700, textAlign: "center", margin: 0 }}>
+            {prettyTitleFrom(product.title || joinedSlug)}
+          </h1>
+          <p style={{ marginTop: 8, color: "#9ca3af", textAlign: "center", marginBottom: 0 }}>{product.description}</p>
         </header>
 
+        {/* Configurator prefilled with product dims */}
         <BannerConfigurator productSlug={product.slug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
       </section>
     </main>
