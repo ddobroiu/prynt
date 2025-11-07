@@ -25,41 +25,60 @@ type PriceInput = {
 };
 type LocalPriceOutput = {
   sqm_per_unit: number;
-  total_sqm_taxable: number;
-  pricePerSqmBase: number;
+  total_sqm: number;
+  pricePerSqmBand: number;
+  pricePerSqmAfterSurcharges: number;
   finalPrice: number;
 };
 
-const MINIMUM_AREA_PER_ORDER = 1.0;
-const PRICING_TIERS = [
-  { maxSqm: 5, price: 35.0 },
-  { maxSqm: 10, price: 32.0 },
-  { maxSqm: 20, price: 30.0 },
-  { maxSqm: 50, price: 28.0 },
-  { maxSqm: Infinity, price: 26.0 },
-];
-const SURCHARGES = { frontlit_510: 1.15, wind_holes: 1.05, hem_and_grommets: 1.10 };
 const roundMoney = (n: number) => Math.round(n * 100) / 100;
 
+/**
+ * Pricing rules implemented as requested:
+ * - total area < 1 mp: 100 RON / mp
+ * - 1 <= total area <= 5 mp: 75 RON / mp
+ * - 5 < total area <= 20 mp: 60 RON / mp
+ * - 20 < total area <= 50 mp: 45 RON / mp
+ * - total area > 50 mp: 35 RON / mp
+ *
+ * Surcharges (multiplicative, 10% each as requested):
+ * - material premium (frontlit_510) -> +10% (x1.10)
+ * - tiv și capse -> +10% (x1.10)
+ * - găuri pentru vânt -> +10% (x1.10)
+ *
+ * Design "pro" fee is handled as a separate cart item (+50 RON one time).
+ */
 const localCalculatePrice = (input: PriceInput): LocalPriceOutput => {
   if (input.width_cm <= 0 || input.height_cm <= 0 || input.quantity <= 0) {
-    return { sqm_per_unit: 0, total_sqm_taxable: 0, pricePerSqmBase: 0, finalPrice: 0 };
+    return { sqm_per_unit: 0, total_sqm: 0, pricePerSqmBand: 0, pricePerSqmAfterSurcharges: 0, finalPrice: 0 };
   }
+
   const sqm_per_unit = (input.width_cm / 100) * (input.height_cm / 100);
   const total_sqm = sqm_per_unit * input.quantity;
-  const total_sqm_taxable = Math.max(total_sqm, MINIMUM_AREA_PER_ORDER);
-  let base = PRICING_TIERS.find((t) => total_sqm_taxable <= t.maxSqm)?.price ?? PRICING_TIERS.at(-1)!.price;
-  let mult = 1;
-  if (input.material === "frontlit_510") mult *= SURCHARGES.frontlit_510;
-  if (input.want_wind_holes) mult *= SURCHARGES.wind_holes;
-  if (input.want_hem_and_grommets) mult *= SURCHARGES.hem_and_grommets;
-  const adj = base * mult;
-  const final = total_sqm_taxable * adj;
+
+  // Determine band price based on total area
+  let pricePerSqmBand = 35;
+  if (total_sqm < 1) pricePerSqmBand = 100;
+  else if (total_sqm <= 5) pricePerSqmBand = 75;
+  else if (total_sqm <= 20) pricePerSqmBand = 60;
+  else if (total_sqm <= 50) pricePerSqmBand = 45;
+  else pricePerSqmBand = 35;
+
+  // Apply multiplicative surcharges (10% each as requested)
+  let multiplier = 1;
+  if (input.material === "frontlit_510") multiplier *= 1.10; // +10% premium material
+  if (input.want_hem_and_grommets) multiplier *= 1.10; // +10% tiv & capse
+  if (input.want_wind_holes) multiplier *= 1.10; // +10% gauri vant
+
+  const pricePerSqmAfterSurcharges = roundMoney(pricePerSqmBand * multiplier);
+  const final = roundMoney(total_sqm * pricePerSqmAfterSurcharges);
+
   return {
     sqm_per_unit: roundMoney(sqm_per_unit),
-    total_sqm_taxable: roundMoney(total_sqm_taxable),
-    pricePerSqmBase: roundMoney(adj),
-    finalPrice: roundMoney(final),
+    total_sqm: roundMoney(total_sqm),
+    pricePerSqmBand: roundMoney(pricePerSqmBand),
+    pricePerSqmAfterSurcharges,
+    finalPrice: final,
   };
 };
 
@@ -106,7 +125,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       ? roundMoney(priceDetailsLocal.finalPrice / input.quantity)
       : 0;
 
-  // Server-calculated price
+  // "serverPrice" now just represents the authoritative calculated total (local calc used)
   const [serverPrice, setServerPrice] = useState<number | null>(null);
   const [calcLoading, setCalcLoading] = useState(false);
 
@@ -148,40 +167,29 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     }
   };
 
+  // calculateServer runs the local calculation (no external API call)
   async function calculateServer() {
     setCalcLoading(true);
     setServerPrice(null);
     try {
-      const res = await fetch("/api/calc-price", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          widthCm: input.width_cm,
-          heightCm: input.height_cm,
-          slug: productSlug ?? undefined,
-          materialId: input.material === "frontlit_510" ? "frontlit_510" : "frontlit_440",
-          side: "single",
-        }),
-      });
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        setServerPrice(data.price);
-      } else {
-        alert(data.message || "Eroare calcul server");
-      }
-    } catch (e) {
-      alert("Eroare de rețea");
+      const result = localCalculatePrice(input);
+      setServerPrice(result.finalPrice);
+    } catch (err) {
+      console.error("calc error", err);
+      alert("Eroare la calcul preț");
     } finally {
       setCalcLoading(false);
     }
   }
 
   function handleAddToCart() {
-    const finalUnit = serverPrice ?? pricePerUnitLocal;
-    if (!finalUnit || finalUnit <= 0) {
+    const totalForOrder = serverPrice ?? priceDetailsLocal.finalPrice;
+    if (!totalForOrder || totalForOrder <= 0) {
       alert("Calculează prețul înainte de a adăuga în coș");
       return;
     }
+
+    const unitPrice = roundMoney(totalForOrder / input.quantity);
 
     const uniqueId = [
       "banner",
@@ -193,7 +201,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       designOption,
     ].join("-");
 
-    const title = `Banner ${input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"} - ${input.width_cm}x${input.height_cm}cm`;
+    const title = `Banner personalizat - ${input.width_cm}x${input.height_cm} cm`;
 
     addItem({
       id: uniqueId,
@@ -202,16 +210,19 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       title,
       width: input.width_cm,
       height: input.height_cm,
-      price: finalUnit,
+      price: unitPrice,
       quantity: input.quantity,
       currency: "RON",
       metadata: {
         artworkUrl,
         designOption,
         textDesign,
+        totalSqm: priceDetailsLocal.total_sqm,
+        pricePerSqm: priceDetailsLocal.pricePerSqmAfterSurcharges,
       },
     });
 
+    // If designOption === "pro" add design fee as separate item if not present (one-time)
     if (designOption === "pro" && !hasProDesign) {
       addItem({
         id: "design-pro",
@@ -272,7 +283,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               <div className="flex items-center gap-3 mb-5"><div className="text-indigo-400"><Layers /></div><h2 className="text-xl font-bold text-white">2. Material Banner</h2></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <MaterialOption title="Frontlit 440g/mp" description="Standard, echilibru bun calitate-preț" selected={input.material === "frontlit_440"} onClick={() => updateInput("material", "frontlit_440")} />
-                <MaterialOption title="Frontlit 510g/mp" description="Premium, mai rigid și mai durabil" selected={input.material === "frontlit_510"} onClick={() => updateInput("material", "frontlit_510")} />
+                <MaterialOption title="Frontlit 510g/mp (premium)" description="Premium, mai rigid și mai durabil (+10%)" selected={input.material === "frontlit_510"} onClick={() => updateInput("material", "frontlit_510")} />
               </div>
             </div>
 
@@ -282,11 +293,11 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               <div className="space-y-3">
                 <label className="relative flex items-center gap-3 rounded-lg bg-white/5 border border-white/10 px-4 py-3 cursor-pointer">
                   <input type="checkbox" className="checkbox" checked={input.want_hem_and_grommets} onChange={(e) => updateInput("want_hem_and_grommets", e.target.checked)} />
-                  <span className="text-sm">Tiv și capse (standard)</span>
+                  <span className="text-sm">Tiv și capse (standard) (+10%)</span>
                 </label>
                 <label className="relative flex items-center gap-3 rounded-lg bg-white/5 border border-white/10 px-4 py-3 cursor-pointer">
                   <input type="checkbox" className="checkbox" checked={input.want_wind_holes} onChange={(e) => updateInput("want_wind_holes", e.target.checked)} />
-                  <span className="text-sm">Găuri pentru vânt (mesh-look)</span>
+                  <span className="text-sm">Găuri pentru vânt (mesh-look) (+10%)</span>
                 </label>
               </div>
             </div>
@@ -351,12 +362,14 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               <div className="card p-6">
                 <h2 className="text-xl font-bold border-b border-white/10 pb-4 mb-4">Sumar Comandă</h2>
                 <div className="space-y-2 text-white/80 text-sm">
+                  <p>Produs: <span className="text-white font-semibold">Banner personalizat</span></p>
                   <p>Dimensiuni: <span className="text-white font-semibold">{lengthText || "—"} x {heightText || "—"} cm</span></p>
                   <p>Cantitate: <span className="text-white font-semibold">{input.quantity} buc</span></p>
-                  <p>Material: <span className="text-white font-semibold">{input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"}</span></p>
-                  {artworkUrl && (
-                    <p className="text-xs">Fișier: <a className="underline text-indigo-300" href={artworkUrl} target="_blank" rel="noreferrer">deschide</a></p>
-                  )}
+                  <p>Material: <span className="text-white font-semibold">{input.material === "frontlit_510" ? "Frontlit 510g/mp (premium)" : "Frontlit 440g/mp"}</span></p>
+                  {designOption === "upload" && artworkUrl && <p>Grafică: <span className="text-white font-semibold">Fișier încărcat</span></p>}
+                  {designOption === "text_only" && <p>Grafică: <span className="text-white font-semibold">Banner cu text</span></p>}
+                  {designOption === "pro" && <p>Grafică: <span className="text-white font-semibold">Grafică profesională (+{PRO_DESIGN_FEE} RON)</span></p>}
+                  {textDesign && <p className="text-xs">Text: <span className="text-white/70">{textDesign}</span></p>}
                 </div>
 
                 <div className="hidden lg:block">
@@ -367,7 +380,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                   </div>
 
                   <div className="mt-4">
-                    <button onClick={calculateServer} disabled={calcLoading} className="btn-secondary mr-2">Calculează server</button>
+                    <button onClick={calculateServer} disabled={calcLoading} className="btn-secondary mr-2">Calculează</button>
                     <button onClick={handleAddToCart} disabled={(serverPrice ?? priceDetailsLocal.finalPrice) <= 0} className="btn-primary w-full mt-6 py-3 text-lg">
                       <ShoppingCart size={20} /><span className="ml-2">Adaugă în coș</span>
                     </button>
