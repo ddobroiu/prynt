@@ -4,6 +4,14 @@
  * folosită de app/banner/[slug]/page.tsx și de sitemap.
  */
 
+/* exportăm tipul MaterialOption pentru a-l folosi în componente */
+export type MaterialOption = {
+  id: string;
+  name: string;
+  priceModifierPerCm2?: number;
+  fixedExtra?: number;
+};
+
 export type Product = {
   id: string;
   sku?: string;
@@ -18,7 +26,7 @@ export type Product = {
   width_cm?: number;
   height_cm?: number;
   currency?: string;
-  materials?: { id: string; name: string; surchargePercent?: number }[];
+  materials?: MaterialOption[];
   tags?: string[];
   seo?: { title?: string; description?: string };
   metadata?: Record<string, any>;
@@ -39,8 +47,8 @@ export const PRODUCTS: Product[] = [
     height_cm: 20,
     currency: "RON",
     materials: [
-      { id: "frontlit_440", name: "Frontlit 440g/mp", surchargePercent: 0 },
-      { id: "frontlit_510", name: "Frontlit 510g/mp", surchargePercent: 10 },
+      { id: "frontlit_440", name: "Frontlit 440g/mp", priceModifierPerCm2: 0 },
+      { id: "frontlit_510", name: "Frontlit 510g/mp", priceModifierPerCm2: 0.0001, fixedExtra: 0 },
     ],
     tags: ["banner", "120x20", "promo", "tiv capse"],
     seo: {
