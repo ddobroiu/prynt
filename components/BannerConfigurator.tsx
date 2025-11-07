@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { useCart } from "./CartContext"; // asigură calea corectă
+import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info } from "lucide-react";
 import BannerModeSwitch from "./BannerModeSwitch";
 import MobilePriceBar from "./MobilePriceBar";
@@ -13,7 +13,7 @@ const GALLERY = [
   "/products/banner/4.jpg",
 ] as const;
 
-/* LOGICA PREȚ LOCAL (păstreaz-o pentru preview instant) */
+/* LOGICA PREȚ LOCAL (preview instant) */
 type BannerMaterial = "frontlit_440" | "frontlit_510";
 type PriceInput = {
   width_cm: number;
@@ -23,6 +23,13 @@ type PriceInput = {
   want_wind_holes: boolean;
   want_hem_and_grommets: boolean;
 };
+type LocalPriceOutput = {
+  sqm_per_unit: number;
+  total_sqm_taxable: number;
+  pricePerSqmBase: number;
+  finalPrice: number;
+};
+
 const MINIMUM_AREA_PER_ORDER = 1.0;
 const PRICING_TIERS = [
   { maxSqm: 5, price: 35.0 },
@@ -33,7 +40,8 @@ const PRICING_TIERS = [
 ];
 const SURCHARGES = { frontlit_510: 1.15, wind_holes: 1.05, hem_and_grommets: 1.10 };
 const roundMoney = (n: number) => Math.round(n * 100) / 100;
-const localCalculatePrice = (input: PriceInput) => {
+
+const localCalculatePrice = (input: PriceInput): LocalPriceOutput => {
   if (input.width_cm <= 0 || input.height_cm <= 0 || input.quantity <= 0) {
     return { sqm_per_unit: 0, total_sqm_taxable: 0, pricePerSqmBase: 0, finalPrice: 0 };
   }
@@ -60,7 +68,7 @@ type DesignOption = "upload" | "pro" | "text_only";
 const PRO_DESIGN_FEE = 50;
 
 type Props = {
-  productSlug?: string; // pass from page.tsx if you want server calc with slug
+  productSlug?: string;
   initialWidth?: number;
   initialHeight?: number;
 };
@@ -92,14 +100,13 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
   const hasProDesign = items.some((i) => i.id === "design-pro");
 
-  // Local preview price
   const priceDetailsLocal = useMemo(() => localCalculatePrice(input), [input]);
   const pricePerUnitLocal =
     input.quantity > 0 && priceDetailsLocal.finalPrice > 0
       ? roundMoney(priceDetailsLocal.finalPrice / input.quantity)
       : 0;
 
-  // Server-calculated price (preferred) - set after fetch
+  // Server-calculated price
   const [serverPrice, setServerPrice] = useState<number | null>(null);
   const [calcLoading, setCalcLoading] = useState(false);
 
@@ -118,7 +125,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     updateInput("height_cm", d === "" ? 0 : parseInt(d, 10));
   };
 
-  // Upload handler: if you have /api/upload implemented, keep it; otherwise set artworkUrl to preview blob
   const handleArtworkFileInput = async (file: File | null) => {
     setArtworkUrl(null);
     setUploadError(null);
@@ -132,7 +138,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       const data = await res.json();
       setArtworkUrl(data.url);
     } catch (e: any) {
-      // fallback: create local preview URL so user sees it even if no server upload
       try {
         const preview = file ? URL.createObjectURL(file) : null;
         setArtworkUrl(preview);
@@ -143,7 +148,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     }
   };
 
-  // Server calculation - recommended
   async function calculateServer() {
     setCalcLoading(true);
     setServerPrice(null);
@@ -172,9 +176,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     }
   }
 
-  // Adapter: map configurator fields to CartContext item shape
   function handleAddToCart() {
-    // prefer serverPrice if available; fallback to local preview
     const finalUnit = serverPrice ?? pricePerUnitLocal;
     if (!finalUnit || finalUnit <= 0) {
       alert("Calculează prețul înainte de a adăuga în coș");
@@ -193,7 +195,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
     const title = `Banner ${input.material === "frontlit_510" ? "Frontlit 510g/mp" : "Frontlit 440g/mp"} - ${input.width_cm}x${input.height_cm}cm`;
 
-    // Map to CartItem shape used by CartContext (id, productId, slug, title, width, height, price, quantity)
     addItem({
       id: uniqueId,
       productId: productSlug ?? "banner-generic",
@@ -201,14 +202,16 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       title,
       width: input.width_cm,
       height: input.height_cm,
-      price: finalUnit, // price per unit; CartContext computes total = price*quantity
+      price: finalUnit,
       quantity: input.quantity,
       currency: "RON",
-      // If CartContext supports metadata, add it; otherwise ignore
-      // metadata: { artworkUrl, designOption, textDesign }
-    } as any); // as any if CartItem type not yet extended
+      metadata: {
+        artworkUrl,
+        designOption,
+        textDesign,
+      },
+    });
 
-    // add optional design service item (keep backward compatibility)
     if (designOption === "pro" && !hasProDesign) {
       addItem({
         id: "design-pro",
@@ -220,7 +223,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         price: PRO_DESIGN_FEE,
         quantity: 1,
         currency: "RON",
-      } as any);
+      });
     }
 
     setToastVisible(true);
@@ -229,7 +232,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
   return (
     <main className="min-h-screen">
-      {/* toast */}
       <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
         Produs adăugat în coș
       </div>
@@ -248,16 +250,90 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* left configurator (same as your file) */}
           <div className="lg:col-span-3 space-y-8">
-            {/* ... put the rest of your configurator markup (inputs, material, finishes, graphic upload) here,
-                 but keep event handlers bound to the updateInput, onChangeLength, onChangeHeight, handleArtworkFileInput, etc. */}
-            {/* For brevity I'm omitting repeated markup here — paste the corresponding blocks from your original file */}
+            {/* 1. Dimensiuni */}
+            <div className="card p-6">
+              <div className="flex items-center gap-3 mb-5"><div className="text-indigo-400"><Ruler /></div><h2 className="text-xl font-bold text-white">1. Dimensiuni și Cantitate</h2></div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="field-label">Lungime (cm)</label>
+                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="ex: 100" className="input text-lg font-semibold" />
+                </div>
+                <div>
+                  <label className="field-label">Înălțime (cm)</label>
+                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="ex: 100" className="input text-lg font-semibold" />
+                </div>
+                <NumberInput label="Cantitate (buc)" value={input.quantity} onChange={(v) => setQty(v)} />
+              </div>
+            </div>
+
+            {/* 2. Material */}
+            <div className="card p-6">
+              <div className="flex items-center gap-3 mb-5"><div className="text-indigo-400"><Layers /></div><h2 className="text-xl font-bold text-white">2. Material Banner</h2></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <MaterialOption title="Frontlit 440g/mp" description="Standard, echilibru bun calitate-preț" selected={input.material === "frontlit_440"} onClick={() => updateInput("material", "frontlit_440")} />
+                <MaterialOption title="Frontlit 510g/mp" description="Premium, mai rigid și mai durabil" selected={input.material === "frontlit_510"} onClick={() => updateInput("material", "frontlit_510")} />
+              </div>
+            </div>
+
+            {/* 3. Finisaje */}
+            <div className="card p-6">
+              <div className="flex items-center gap-3 mb-5"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-xl font-bold text-white">3. Finisaje</h2></div>
+              <div className="space-y-3">
+                <label className="relative flex items-center gap-3 rounded-lg bg-white/5 border border-white/10 px-4 py-3 cursor-pointer">
+                  <input type="checkbox" className="checkbox" checked={input.want_hem_and_grommets} onChange={(e) => updateInput("want_hem_and_grommets", e.target.checked)} />
+                  <span className="text-sm">Tiv și capse (standard)</span>
+                </label>
+                <label className="relative flex items-center gap-3 rounded-lg bg-white/5 border border-white/10 px-4 py-3 cursor-pointer">
+                  <input type="checkbox" className="checkbox" checked={input.want_wind_holes} onChange={(e) => updateInput("want_wind_holes", e.target.checked)} />
+                  <span className="text-sm">Găuri pentru vânt (mesh-look)</span>
+                </label>
+              </div>
+            </div>
+
+            {/* 4. Grafică */}
+            <div className="card p-6">
+              <div className="flex items-center gap-3 mb-5"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-xl font-bold text-white">4. Grafică</h2></div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <SelectCard active={designOption === "upload"} onClick={() => setDesignOption("upload")} title="Am grafică" subtitle="Încarcă fișierul (PDF, AI, PSD, JPG, PNG)" />
+                <SelectCard active={designOption === "text_only"} onClick={() => setDesignOption("text_only")} title="Banner cu text" subtitle="Scrii textul, noi îl aranjăm (gratis)" />
+                <SelectCard active={designOption === "pro"} onClick={() => setDesignOption("pro")} title="Grafică profesională" subtitle={`+${PRO_DESIGN_FEE} RON (o singură dată)`} />
+              </div>
+
+              {designOption === "upload" && (
+                <div className="panel p-4 mt-4">
+                  <label className="field-label">Încarcă fișier</label>
+                  <input type="file" accept=".pdf,.ai,.psd,.jpg,.jpeg,.png" onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)} className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-white hover:file:bg-indigo-500" />
+                  <div className="mt-3 text-sm">
+                    {uploading && <span className="text-white/80">Se încarcă...</span>}
+                    {uploadError && <span className="text-red-400">Eroare: {uploadError}</span>}
+                    {artworkUrl && (
+                      <span className="text-emerald-400">Încărcat: <a className="underline" href={artworkUrl} target="_blank" rel="noopener noreferrer">deschide fișier</a></span>
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-white/60">Linkul fișierului ajunge automat în emailul de comandă.</p>
+                </div>
+              )}
+
+              {designOption === "text_only" && (
+                <div className="panel p-4 mt-4">
+                  <label className="field-label">Text pentru banner</label>
+                  <textarea value={textDesign} onChange={(e) => setTextDesign(e.target.value)} rows={4} placeholder="Ex.: REDUCERI -50% • Deschis L-V 9:00-18:00 • www.exemplu.ro" className="input resize-y min-h-[120px]" />
+                  <p className="mt-2 text-xs text-white/60">Gratuit: scrie textul, iar designerii noștri îl așază clar și lizibil.</p>
+                </div>
+              )}
+
+              {designOption === "pro" && (
+                <div className="panel p-4 mt-4">
+                  <p className="text-sm text-white/80">Un designer te va contacta după plasarea comenzii. Taxa se aplică o singură dată (+{PRO_DESIGN_FEE} RON) per comandă.</p>
+                  {hasProDesign && <p className="text-xs text-white/60 mt-2">Taxa este deja în coș.</p>}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* right summary (same as original) */}
+          {/* RIGHT - summary */}
           <aside id="order-summary" className="lg:col-span-2">
-            {/* summary card, gallery and price display */}
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
                 <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
@@ -265,7 +341,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
                   {GALLERY.map((src) => (
-                    <button key={src} onClick={() => setActiveImage(src)} className={`relative overflow-hidden rounded-md border transition ${ activeImage === src ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30" }`} aria-label="Previzualizare">
+                    <button key={src} onClick={() => setActiveImage(src)} className={`relative overflow-hidden rounded-md border transition ${activeImage === src ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
                       <img src={src} alt="Thumb" className="h-20 w-full object-cover" loading="lazy" />
                     </button>
                   ))}
@@ -274,7 +350,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
               <div className="card p-6">
                 <h2 className="text-xl font-bold border-b border-white/10 pb-4 mb-4">Sumar Comandă</h2>
-
                 <div className="space-y-2 text-white/80 text-sm">
                   <p>Dimensiuni: <span className="text-white font-semibold">{lengthText || "—"} x {heightText || "—"} cm</span></p>
                   <p>Cantitate: <span className="text-white font-semibold">{input.quantity} buc</span></p>
@@ -288,7 +363,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                   <div className="border-t border-white/10 mt-4 pt-4">
                     <p className="text-white/60 text-sm">Preț total</p>
                     <p className="text-4xl font-extrabold text-white my-2">{(serverPrice ?? priceDetailsLocal.finalPrice).toFixed(2)} RON</p>
-                    { (serverPrice ?? pricePerUnitLocal) > 0 && <p className="text-xs text-white/60">{((serverPrice ?? pricePerUnitLocal)).toFixed(2)} RON / buc</p> }
+                    {(serverPrice ?? pricePerUnitLocal) > 0 && <p className="text-xs text-white/60">{((serverPrice ?? pricePerUnitLocal)).toFixed(2)} RON / buc</p>}
                   </div>
 
                   <div className="mt-4">
@@ -308,5 +383,55 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
       <MobilePriceBar total={(serverPrice ?? priceDetailsLocal.finalPrice)} disabled={(serverPrice ?? priceDetailsLocal.finalPrice) <= 0} onAddToCart={handleAddToCart} onShowSummary={() => document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth" })} />
     </main>
+  );
+}
+
+/* small UI helpers */
+function ConfigSection({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+  return (
+    <div className="card p-6">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="text-indigo-400">{icon}</div>
+        <h2 className="text-xl font-bold text-white">{title}</h2>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  const inc = (d: number) => onChange(Math.max(1, value + d));
+  return (
+    <div>
+      <label className="field-label">{label}</label>
+      <div className="flex items-center">
+        <button onClick={() => inc(-1)} className="p-3 bg-white/10 rounded-l-md hover:bg-white/15" aria-label="Decrement">
+          <Minus size={16} />
+        </button>
+        <input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-lg font-semibold text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-y-0 rounded-none" />
+        <button onClick={() => inc(1)} className="p-3 bg-white/10 rounded-r-md hover:bg-white/15" aria-label="Increment">
+          <Plus size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MaterialOption({ title, description, selected, onClick }: { title: string; description: string; selected: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className={`relative text-left p-4 rounded-lg transition-all ${selected ? "border-2 border-indigo-500 bg-indigo-900/30 ring-4 ring-indigo-500/20" : "border border-white/10 bg-white/5 hover:bg-white/10"}`}>
+      {selected && <span className="absolute right-3 top-3 badge badge-success"><CheckCircle size={12} className="mr-1" /> Selectat</span>}
+      <p className="font-bold text-white">{title}</p>
+      <p className="text-sm text-gray-400">{description}</p>
+    </button>
+  );
+}
+
+function SelectCard({ active, onClick, title, subtitle }: { active: boolean; onClick: () => void; title: string; subtitle: string; }) {
+  return (
+    <button type="button" onClick={onClick} className={`rounded-lg border p-4 text-left transition ${active ? "border-indigo-500 ring-2 ring-indigo-500/40 bg-white/10" : "border-white/10 hover:border-white/30"}`}>
+      <div className="font-semibold">{title}</div>
+      <div className="text-xs text-white/70">{subtitle}</div>
+    </button>
   );
 }
