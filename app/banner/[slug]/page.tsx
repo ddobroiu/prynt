@@ -1,12 +1,17 @@
 import { notFound } from "next/navigation";
+import React from "react";
 import ProductJsonLd from "@/components/ProductJsonLd";
-import { resolveProductForRequestedSlug } from "@/lib/products";
+import { resolveProductForRequestedSlug, getAllProductSlugs } from "@/lib/products";
 import type { Product } from "@/lib/products";
-
-// static import al componentului client (BannerConfigurator trebuie să conțină 'use client')
 import BannerConfigurator from "@/components/BannerConfigurator";
 
 type Props = { params: { slug: string } };
+
+export async function generateStaticParams() {
+  // statically generate pages for all products in PRODUCTS (top pages)
+  const slugs = getAllProductSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = params as { slug: string };
@@ -14,11 +19,12 @@ export async function generateMetadata({ params }: Props) {
   if (!product) return {};
 
   const metadata: any = {
-    title: `${product.title} — ${product.minWidthCm}x${product.minHeightCm} | Prynt`,
-    description: product.description,
-    openGraph: { title: product.title, description: product.description, images: product.images },
+    title: product.seo?.title || `${product.title} | Prynt`,
+    description: product.seo?.description || product.description,
+    openGraph: { title: product.seo?.title || product.title, description: product.description, images: product.images },
   };
 
+  // If page is fallback (generated from slug parse) tell bots not to index (optional)
   if (isFallback) {
     metadata.robots = { index: false, follow: true };
   }
@@ -36,12 +42,18 @@ export default async function Page({ params }: Props) {
 
   return (
     <main style={{ padding: 16 }}>
-      {/* JSON-LD pentru SEO */}
-      <ProductJsonLd product={product as Product} url={url} />
+      {/* JSON-LD for Product (improves indexability) */}
+      <ProductJsonLd product={(product as Product)} url={url} />
 
-      {/* Am eliminat avertizarea fallback — pagina afișează doar configuratorul */}
       <section style={{ marginTop: 18 }}>
-        <BannerConfigurator productSlug={product.slug} initialWidth={initialWidth} initialHeight={initialHeight} />
+        {/* Page header / SEO visible content */}
+        <header style={{ marginBottom: 18 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 700 }}>{product.title}</h1>
+          <p style={{ marginTop: 8, color: "#9ca3af" }}>{product.description}</p>
+        </header>
+
+        {/* Configurator prefilled with product dims */}
+        <BannerConfigurator productSlug={product.slug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
       </section>
     </main>
   );

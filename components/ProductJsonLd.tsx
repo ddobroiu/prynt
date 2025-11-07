@@ -1,22 +1,27 @@
+"use client";
 import React from "react";
 import type { Product } from "@/lib/products";
 
 export default function ProductJsonLd({ product, url }: { product: Product; url: string }) {
-  const sku = product.sku ?? product.id;
-  const json = {
+  const offers = {
+    "@type": "Offer",
+    url,
+    priceCurrency: product.currency || "RON",
+    price: product.priceBase ? String(product.priceBase) : "0",
+    availability: "https://schema.org/InStock",
+    itemCondition: "https://schema.org/NewCondition",
+  };
+
+  const jsonLd = {
     "@context": "https://schema.org/",
     "@type": "Product",
     name: product.title,
+    image: product.images || [],
     description: product.description,
-    image: product.images,
-    sku,
-    url,
-    offers: {
-      "@type": "Offer",
-      priceCurrency: product.currency,
-      price: product.priceBase,
-      availability: "https://schema.org/InStock",
-    },
+    sku: product.sku ?? product.slug,
+    brand: { "@type": "Brand", name: "Prynt" },
+    offers,
   };
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(json) }} />;
+
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />;
 }
