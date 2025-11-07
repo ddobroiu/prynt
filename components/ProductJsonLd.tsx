@@ -1,31 +1,22 @@
 import React from "react";
-import { Product } from "../lib/products";
+import type { Product } from "@/lib/products";
 
-type Props = { product: Product; url: string };
-
-export default function ProductJsonLd({ product, url }: Props) {
-  const jsonLd = {
-    "@context": "https://schema.org",
+export default function ProductJsonLd({ product, url }: { product: Product; url: string }) {
+  const sku = product.sku ?? product.id;
+  const json = {
+    "@context": "https://schema.org/",
     "@type": "Product",
     name: product.title,
-    image: product.images,
     description: product.description,
-    sku: product.sku,
-    brand: { "@type": "Brand", name: "Magazin" },
+    image: product.images,
+    sku,
+    url,
     offers: {
       "@type": "Offer",
-      url,
       priceCurrency: product.currency,
-      price: product.priceBase.toString(),
-      availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      price: product.priceBase,
+      availability: "https://schema.org/InStock",
     },
   };
-
-  return (
-    <script
-      type="application/ld+json"
-      // server component: safe to inject
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
-  );
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(json) }} />;
 }
