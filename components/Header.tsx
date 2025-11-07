@@ -25,7 +25,7 @@ const LINKS: NavItem[] = [
       { href: "/banner-verso", label: "Față-verso" },
     ],
   },
-  { href: "/flayer", label: "Flayer" },
+  { href: "/flayere", label: "Flayere" },
   { href: "/canvas", label: "Canvas" },
   { href: "/autocolante", label: "Autocolante" },
   { href: "/materiale-rigide", label: "Materiale rigide" },
