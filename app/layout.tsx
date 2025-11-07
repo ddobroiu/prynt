@@ -4,7 +4,7 @@ import Footer from "../components/Footer";
 import Providers from "../components/Providers";
 import ContactButton from "../components/ContactButton";
 
-// Cart provider + widget (client components)
+// cart provider + widget
 import { CartProvider } from "../components/CartContext";
 import CartWidget from "../components/CartWidget";
 
@@ -14,28 +14,22 @@ export const metadata = {
     "Bannere, flayere, canvas, autocolante, materiale rigide. Configurează online și vezi prețul în timp real.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ro">
       <body className="bg-[#0b0f19] text-white antialiased">
-        <Providers>
-          <Header />
-
-          {/* CartProvider trebuie să învăluie părțile care folosesc useCart */}
-          <CartProvider>
+        {/* CartProvider trebuie să învăluie toată aplicația astfel încât orice componentă client să poată folosi useCart */}
+        <CartProvider>
+          <Providers>
+            <Header />
             <main>{children}</main>
+            <Footer />
+            <ContactButton />
+          </Providers>
 
-            {/* CartWidget folosește useCart, deci trebuie în interiorul CartProvider */}
-            <CartWidget />
-          </CartProvider>
-
-          <Footer />
-          <ContactButton />
-        </Providers>
+          {/* CartWidget în interiorul CartProvider */}
+          <CartWidget />
+        </CartProvider>
       </body>
     </html>
   );

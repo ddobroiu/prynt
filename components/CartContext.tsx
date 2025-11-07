@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type CartItem = {
-  id: string; // unique per konfigurare (ex: productId-widthxheight)
+  id: string;
   productId: string;
   slug?: string;
   title: string;
@@ -26,28 +26,30 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  // încarcă din localStorage la mount
+  // load
   useEffect(() => {
     try {
       const raw = localStorage.getItem("cart");
+      console.log("[Cart] load from localStorage:", raw);
       if (raw) setItems(JSON.parse(raw));
     } catch (e) {
-      console.warn("Cart load failed", e);
+      console.warn("[Cart] load failed", e);
     }
   }, []);
 
-  // salvează la schimbare
+  // save
   useEffect(() => {
     try {
+      console.log("[Cart] saving to localStorage:", items);
       localStorage.setItem("cart", JSON.stringify(items));
     } catch (e) {
-      console.warn("Cart save failed", e);
+      console.warn("[Cart] save failed", e);
     }
   }, [items]);
 
   function addItem(item: CartItem) {
+    console.log("[Cart] addItem called", item);
     setItems((prev) => {
-      // combină iteme identice (same productId + same size)
       const existingIndex = prev.findIndex(
         (p) => p.productId === item.productId && p.width === item.width && p.height === item.height
       );
@@ -57,17 +59,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           ...copy[existingIndex],
           quantity: (copy[existingIndex].quantity || 1) + (item.quantity || 1),
         };
+        console.log("[Cart] updated items", copy);
         return copy;
       }
-      return [...prev, { ...item, quantity: item.quantity ?? 1 }];
+      const newItems = [...prev, { ...item, quantity: item.quantity ?? 1 }];
+      console.log("[Cart] new items", newItems);
+      return newItems;
     });
   }
 
   function removeItem(id: string) {
+    console.log("[Cart] removeItem", id);
     setItems((prev) => prev.filter((i) => i.id !== id));
   }
 
   function clearCart() {
+    console.log("[Cart] clearCart");
     setItems([]);
   }
 
@@ -82,6 +89,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
 export function useCart() {
   const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used within CartProvider");
+  if (!ctx) throw new Error("useCart must be used within a CartProvider");
   return ctx;
 }
