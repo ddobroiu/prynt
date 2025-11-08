@@ -16,7 +16,22 @@ type NavItem = {
   children?: { href: string; label: string }[];
 };
 
+/* Menu updated per request:
+   - "Promotionale" instead of "Print digital" and placed first
+   - Order now: Promotionale, Banner, Publicitar, Decor, Materiale rigide
+   - Promotionale contains: Pliante, Flayere, Afișe, Autocolante
+*/
 const LINKS: NavItem[] = [
+  {
+    href: "/promotionale",
+    label: "Promotionale",
+    children: [
+      { href: "/pliante", label: "Pliante" },
+      { href: "/flayere", label: "Flayere" },
+      { href: "/afise", label: "Afișe" },
+      { href: "/autocolante", label: "Autocolante" },
+    ],
+  },
   {
     href: "/banner",
     label: "Banner",
@@ -25,15 +40,24 @@ const LINKS: NavItem[] = [
       { href: "/banner-verso", label: "Față-verso" },
     ],
   },
-  { href: "/flayere", label: "Flayere" },
-  { href: "/canvas", label: "Canvas" },
-  { href: "/autocolante", label: "Autocolante" },
+  {
+    href: "/publicitar",
+    label: "Publicitar",
+  },
+  {
+    href: "/decor",
+    label: "Decor",
+    children: [
+      { href: "/canvas", label: "Canvas" },
+      { href: "/tapet", label: "Tapet" },
+    ],
+  },
   { href: "/materiale-rigide", label: "Materiale rigide" },
 ];
 
 export default function Header() {
   const [openMobile, setOpenMobile] = useState(false);
-  const [openBannerMobile, setOpenBannerMobile] = useState(false);
+  const [openMobileSub, setOpenMobileSub] = useState<string | null>(null);
   const { count, isLoaded } = useCart();
 
   // Desktop dropdown control
@@ -61,7 +85,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-gray-950/80 backdrop-blur">
       <div className="page">
-        {/* BARĂ MOBIL: burger · logo · coș */}
+        {/* MOBILE BAR: burger · logo · cart */}
         <div className="flex items-center justify-between py-3 lg:hidden">
           <button
             type="button"
@@ -102,7 +126,7 @@ export default function Header() {
           </a>
         </div>
 
-        {/* MENIU MOBIL */}
+        {/* MOBILE NAV */}
         <div
           className={`lg:hidden overflow-hidden transition-[max-height,opacity] duration-300 ${
             openMobile ? "opacity-100 max-h-[600px]" : "opacity-0 max-h-0"
@@ -117,26 +141,22 @@ export default function Header() {
                       <li key={l.label}>
                         <button
                           type="button"
-                          onClick={() =>
-                            setOpenBannerMobile((v) => !v)
-                          }
+                          onClick={() => setOpenMobileSub((cur) => (cur === l.label ? null : l.label))}
                           className="w-full inline-flex items-center justify-between rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10"
-                          aria-expanded={openBannerMobile}
-                          aria-controls="mobile-banner-sub"
+                          aria-expanded={openMobileSub === l.label}
+                          aria-controls={`mobile-sub-${l.label.replace(/\s+/g, "-").toLowerCase()}`}
                         >
                           <span>{l.label}</span>
-                          {openBannerMobile ? (
+                          {openMobileSub === l.label ? (
                             <ChevronDown size={16} />
                           ) : (
                             <ChevronRight size={16} />
                           )}
                         </button>
                         <div
-                          id="mobile-banner-sub"
+                          id={`mobile-sub-${l.label.replace(/\s+/g, "-").toLowerCase()}`}
                           className={`grid transition-[grid-template-rows,opacity] duration-300 ${
-                            openBannerMobile
-                              ? "grid-rows-[1fr] opacity-100 mt-2"
-                              : "grid-rows-[0fr] opacity-0"
+                            openMobileSub === l.label ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0"
                           }`}
                         >
                           <div className="overflow-hidden">
@@ -172,25 +192,14 @@ export default function Header() {
           </nav>
         </div>
 
-        {/* MENIU DESKTOP */}
+        {/* DESKTOP NAV */}
         <div className="hidden lg:flex items-center justify-between py-3">
-          <a
-            href="/"
-            className="inline-flex items-center gap-2"
-            aria-label="Prynt.ro"
-          >
-            <img
-              src="/logo.png"
-              alt="Prynt.ro"
-              width={36}
-              height={36}
-              className="rounded-full border border-white/10"
-              loading="lazy"
-            />
+          <a href="/" className="inline-flex items-center gap-2" aria-label="Prynt.ro">
+            <img src="/logo.png" alt="Prynt.ro" width={36} height={36} className="rounded-full border border-white/10" loading="lazy" />
             <span className="sr-only">Prynt.ro</span>
           </a>
 
-            {/* Desktop nav */}
+          {/* Desktop nav */}
           <nav className="flex items-center gap-4">
             {LINKS.map((l) =>
               l.children ? (
@@ -207,64 +216,33 @@ export default function Header() {
                     aria-haspopup="menu"
                     aria-expanded={openDropdown === l.label}
                     className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                    onClick={() =>
-                      setOpenDropdown((cur) =>
-                        cur === l.label ? null : l.label
-                      )
-                    }
+                    onClick={() => setOpenDropdown((cur) => (cur === l.label ? null : l.label))}
                   >
                     {l.label}
-                    <ChevronDown
-                      size={16}
-                      className={`opacity-70 transition-transform ${
-                        openDropdown === l.label ? "rotate-180 opacity-100" : ""
-                      }`}
-                    />
+                    <ChevronDown size={16} className={`opacity-70 transition-transform ${openDropdown === l.label ? "rotate-180 opacity-100" : ""}`} />
                   </button>
                   <div
                     role="menu"
-                    className={`absolute left-0 mt-2 w-48 rounded-md border border-white/10 bg-[#0b0f19] p-2 shadow-xl z-50 transition-all origin-top ${
-                      openDropdown === l.label
-                        ? "opacity-100 scale-100"
-                        : "opacity-0 pointer-events-none scale-95"
-                    }`}
+                    className={`absolute left-0 mt-2 w-48 rounded-md border border-white/10 bg-[#0b0f19] p-2 shadow-xl z-50 transition-all origin-top ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}`}
                   >
                     {l.children.map((c) => (
-                      <a
-                        key={c.href}
-                        href={c.href}
-                        role="menuitem"
-                        className="block rounded-md px-3 py-2 text-sm text-white hover:bg-white/10 focus:bg-white/10 focus:outline-none"
-                        onClick={() => setOpenDropdown(null)}
-                      >
+                      <a key={c.href} href={c.href} role="menuitem" className="block rounded-md px-3 py-2 text-sm text-white hover:bg-white/10 focus:bg-white/10 focus:outline-none" onClick={() => setOpenDropdown(null)}>
                         {c.label}
                       </a>
                     ))}
                   </div>
                 </div>
               ) : (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                >
+                <a key={l.href} href={l.href} className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                   {l.label}
                 </a>
               )
             )}
           </nav>
 
-          <a
-            href="/checkout"
-            className="relative inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-            aria-label="Coșul meu"
-          >
+          <a href="/checkout" className="relative inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/50" aria-label="Coșul meu">
             <ShoppingCart size={20} />
-            {isLoaded && count > 0 && (
-              <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
-                {count}
-              </span>
-            )}
+            {isLoaded && count > 0 && <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">{count}</span>}
           </a>
         </div>
       </div>
