@@ -1,23 +1,24 @@
 // lib/products.ts
 // Central product registry + helpers for route/slug resolution.
-// Updated: exports MaterialOption + MATERIAL_OPTIONS and Product.materials (optional)
-// so components that read product.materials compile correctly.
+// Updated: MaterialOption now includes `id` (alias pentru key) so components
+// that read product.materials?.[0].id compile correctly.
 
 export type MaterialOption = {
-  key: string;
+  id: string;            // added: components expect `.id`
+  key?: string;          // keep key for backward compatibility
   label: string;
   description?: string;
   // priceModifier can be interpreted by UI: either percent (0.1 = +10%) or absolute RON addition
   priceModifier?: number;
-  recommendedFor?: string[]; // e.g. ["bannere", "afise", "pliante"]
+  recommendedFor?: string[]; // categories e.g. ["bannere", "afise", "pliante"]
 };
 
 export const MATERIAL_OPTIONS: MaterialOption[] = [
-  { key: "frontlit-440", label: "Frontlit 440 g/mp (standard)", description: "Material rezistent pentru exterior", priceModifier: 0, recommendedFor: ["bannere"] },
-  { key: "frontlit-510", label: "Frontlit 510 g/mp (durabil)", description: "Mai gros, pentru expuneri îndelungate", priceModifier: 0.1, recommendedFor: ["bannere"] },
-  { key: "couche-150", label: "Hârtie couché 150 g/mp", description: "Hârtie pentru afișe/interior și pliante", priceModifier: 0, recommendedFor: ["afise", "pliante"] },
-  { key: "couche-170", label: "Hârtie couché 170 g/mp", description: "Hârtie premium pentru pliante/catalog", priceModifier: 0.12, recommendedFor: ["pliante"] },
-  { key: "pp-5mm", label: "PVC 5mm", description: "Material rigid pentru indoor/outdoor", priceModifier: 0.15, recommendedFor: ["decor", "materiale-rigide"] },
+  { id: "frontlit-440", key: "frontlit-440", label: "Frontlit 440 g/mp (standard)", description: "Material rezistent pentru exterior", priceModifier: 0, recommendedFor: ["bannere"] },
+  { id: "frontlit-510", key: "frontlit-510", label: "Frontlit 510 g/mp (durabil)", description: "Mai gros, pentru expuneri îndelungate", priceModifier: 0.1, recommendedFor: ["bannere"] },
+  { id: "couche-150", key: "couche-150", label: "Hârtie couché 150 g/mp", description: "Hârtie pentru afișe/interior și pliante", priceModifier: 0, recommendedFor: ["afise", "pliante"] },
+  { id: "couche-170", key: "couche-170", label: "Hârtie couché 170 g/mp", description: "Hârtie premium pentru pliante/catalog", priceModifier: 0.12, recommendedFor: ["pliante"] },
+  { id: "pp-5mm", key: "pp-5mm", label: "PVC 5mm", description: "Material rigid pentru indoor/outdoor", priceModifier: 0.15, recommendedFor: ["decor", "materiale-rigide"] },
 ];
 
 // Product type: add optional materials property so components can read available materials per product
@@ -99,7 +100,6 @@ export const PRODUCTS: Product[] = [
     priceBase: 45.0,
     currency: "RON",
     tags: ["pliante", "a5"],
-    // provide recommended paper options for pliante
     materials: MATERIAL_OPTIONS.filter((m) => (m.recommendedFor ?? []).includes("pliante")),
     metadata: { category: "pliante" },
   },
