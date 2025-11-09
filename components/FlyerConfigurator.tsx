@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { CheckCircle, Plus, Minus, ShoppingCart, Info } from "lucide-react";
@@ -18,11 +17,11 @@ const SIZES: SizeDef[] = [
     label: "A6",
     dims: "105 × 148 mm",
     brackets: [
-      { max: 100, oneSided: 0.50, twoSided: 0.96 },
+      { max: 100, oneSided: 0.5, twoSided: 0.96 },
       { max: 500, oneSided: 0.46, twoSided: 0.88 },
-      { max: 1000, oneSided: 0.30, twoSided: 0.60 },
+      { max: 1000, oneSided: 0.3, twoSided: 0.6 },
       { max: 2000, oneSided: 0.28, twoSided: 0.46 },
-      { max: 3000, oneSided: 0.26, twoSided: 0.40 },
+      { max: 3000, oneSided: 0.26, twoSided: 0.4 },
       { max: 4000, oneSided: 0.24, twoSided: 0.36 },
       { max: 5000, oneSided: 0.22, twoSided: 0.28 },
       { max: Infinity, oneSided: 0.22, twoSided: 0.28 },
@@ -33,9 +32,9 @@ const SIZES: SizeDef[] = [
     label: "A5",
     dims: "148 × 210 mm",
     brackets: [
-      { max: 100, oneSided: 1.00, twoSided: 1.92 },
+      { max: 100, oneSided: 1.0, twoSided: 1.92 },
       { max: 500, oneSided: 0.92, twoSided: 1.76 },
-      { max: 1000, oneSided: 0.60, twoSided: 1.20 },
+      { max: 1000, oneSided: 0.6, twoSided: 1.2 },
       { max: 2000, oneSided: 0.52, twoSided: 0.64 },
       { max: 3000, oneSided: 0.38, twoSided: 0.44 },
       { max: 4000, oneSided: 0.32, twoSided: 0.38 },
@@ -48,10 +47,10 @@ const SIZES: SizeDef[] = [
     label: "21 × 10 cm",
     dims: "210 × 100 mm",
     brackets: [
-      { max: 100, oneSided: 0.76, twoSided: 1.40 },
-      { max: 500, oneSided: 0.68, twoSided: 1.20 },
-      { max: 1000, oneSided: 0.54, twoSided: 1.00 },
-      { max: 2000, oneSided: 0.40, twoSided: 0.64 },
+      { max: 100, oneSided: 0.76, twoSided: 1.4 },
+      { max: 500, oneSided: 0.68, twoSided: 1.2 },
+      { max: 1000, oneSided: 0.54, twoSided: 1.0 },
+      { max: 2000, oneSided: 0.4, twoSided: 0.64 },
       { max: 3000, oneSided: 0.36, twoSided: 0.52 },
       { max: 4000, oneSided: 0.28, twoSided: 0.38 },
       { max: 5000, oneSided: 0.22, twoSided: 0.28 },
@@ -76,12 +75,18 @@ function round2(n: number) {
   return Math.round(n * 100) / 100;
 }
 
-export default function FlyerConfigurator() {
+type FlyerConfiguratorProps = {
+  productSlug?: string | null;
+  initialWidth?: number | null | undefined;
+  initialHeight?: number | null | undefined;
+};
+
+export default function FlyerConfigurator({ productSlug, initialWidth, initialHeight }: FlyerConfiguratorProps) {
   const { addItem } = useCart();
 
   // UI states
   const [sizeKey, setSizeKey] = useState<string>(SIZES[0].key);
-  const [qty, setQty] = useState<number>(100);
+  const [qty, setQty] = useState<number>(initialWidth && initialWidth > 0 ? Math.max(1, Math.round(initialWidth)) : 100);
   const [twoSided, setTwoSided] = useState<boolean>(false);
   const [sameDesignForBoth, setSameDesignForBoth] = useState<boolean>(true);
   const [paperWeightKey, setPaperWeightKey] = useState<string>(PAPER_WEIGHTS[0].key);
@@ -120,17 +125,14 @@ export default function FlyerConfigurator() {
   const subtotal = useMemo(() => round2(pricePerUnit * qty), [pricePerUnit, qty]);
 
   const proFee = useMemo(() => (sameDesignForBoth ? PRO_FEE_PER_FACE : PRO_FEE_PER_FACE * 2), [sameDesignForBoth]);
-  const graphicsFee = useMemo(() => (graphicsMode === "pro" ? proFee : (!sameDesignForBoth ? 100 : 0)), [graphicsMode, sameDesignForBoth, proFee]);
-  // Note: if graphicsMode === "client" and sameDesignForBoth===false we still must require two uploads or apply DIFFERENT graphics fee 100 per earlier rules;
-  // implement as: if client and different designs -> DIFFERENT fee 100 (user asked that earlier).
   const differentGraphicsFee = 100;
+  const graphicsFee = useMemo(() => (graphicsMode === "pro" ? proFee : graphicsMode === "client" && !sameDesignForBoth ? differentGraphicsFee : 0), [
+    graphicsMode,
+    sameDesignForBoth,
+    proFee,
+  ]);
 
-  const total =
-    graphicsMode === "pro"
-      ? round2(subtotal + proFee)
-      : !sameDesignForBoth
-      ? round2(subtotal + differentGraphicsFee)
-      : subtotal;
+  const total = round2(subtotal + graphicsFee);
 
   // helpers
   function uploadFile(file: File | null, side: "face" | "verso") {
@@ -206,25 +208,25 @@ export default function FlyerConfigurator() {
       return;
     }
     const unitPrice = round2(total / Math.max(1, qty));
-    const title = `Flyer ${sizeKey} ${SIZES.find(s => s.key === sizeKey)?.dims} - ${twoSided ? "Față‑Verso" : "Față"}`;
+    const title = `Flyer ${sizeKey} ${SIZES.find((s) => s.key === sizeKey)?.dims} - ${twoSided ? "Față‑Verso" : "Față"}`;
     const id = ["flyer", sizeKey, twoSided ? "2s" : "1s", sameDesignForBoth ? "same" : "diff", graphicsMode, qty].join("-");
     addItem({
       id,
       productId: "flyer",
-      slug: "flyer",
+      slug: productSlug ?? "flyer",
       title,
-      width: 0,
-      height: 0,
+      width: initialWidth ?? 0,
+      height: initialHeight ?? 0,
       price: unitPrice,
       quantity: qty,
       currency: "RON",
       metadata: {
         sizeKey,
-        dims: SIZES.find(s => s.key === sizeKey)?.dims,
+        dims: SIZES.find((s) => s.key === sizeKey)?.dims,
         qty,
         twoSided,
         sameDesignForBoth,
-        paperWeight: PAPER_WEIGHTS.find(p => p.key === paperWeightKey)?.label,
+        paperWeight: PAPER_WEIGHTS.find((p) => p.key === paperWeightKey)?.label,
         graphicsMode,
         proFee: graphicsMode === "pro" ? proFee : 0,
         differentGraphicsFee: graphicsMode === "client" && !sameDesignForBoth ? differentGraphicsFee : 0,
@@ -259,8 +261,12 @@ export default function FlyerConfigurator() {
             <div className="card p-4">
               <div className="text-sm text-white/70 mb-2">Dimensiune</div>
               <div className="grid grid-cols-3 gap-2">
-                {SIZES.map(s => (
-                  <button key={s.key} onClick={() => setSizeKey(s.key)} className={`p-3 rounded-md text-left border ${sizeKey === s.key ? "border-indigo-500 bg-indigo-900/20" : "border-white/10 hover:bg-white/5"}`}>
+                {SIZES.map((s) => (
+                  <button
+                    key={s.key}
+                    onClick={() => setSizeKey(s.key)}
+                    className={`p-3 rounded-md text-left border ${sizeKey === s.key ? "border-indigo-500 bg-indigo-900/20" : "border-white/10 hover:bg-white/5"}`}
+                  >
                     <div className="font-semibold text-white">{s.label}</div>
                     <div className="text-xs text-white/60">{s.dims}</div>
                   </button>
@@ -271,25 +277,41 @@ export default function FlyerConfigurator() {
                 <div>
                   <label className="field-label">Cantitate</label>
                   <div className="flex items-center">
-                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-2 bg-white/10 rounded-l-md"><Minus size={14} /></button>
+                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-2 bg-white/10 rounded-l-md">
+                      <Minus size={14} />
+                    </button>
                     <input className="input text-center" type="number" value={qty} onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))} />
-                    <button onClick={() => setQty(qty + 1)} className="p-2 bg-white/10 rounded-r-md"><Plus size={14} /></button>
+                    <button onClick={() => setQty(qty + 1)} className="p-2 bg-white/10 rounded-r-md">
+                      <Plus size={14} />
+                    </button>
                   </div>
                 </div>
 
                 <div>
                   <label className="field-label">Față / Față‑Verso</label>
                   <div className="inline-flex rounded-md bg-white/5 p-1">
-                    <button onClick={() => { setTwoSided(false); setSameDesignForBoth(true); }} className={`px-3 py-1 rounded-md ${!twoSided ? "bg-indigo-600 text-white" : "text-white/80"}`}>Față</button>
-                    <button onClick={() => setTwoSided(true)} className={`ml-1 px-3 py-1 rounded-md ${twoSided ? "bg-indigo-600 text-white" : "text-white/80"}`}>Față‑Verso</button>
+                    <button
+                      onClick={() => {
+                        setTwoSided(false);
+                        setSameDesignForBoth(true);
+                      }}
+                      className={`px-3 py-1 rounded-md ${!twoSided ? "bg-indigo-600 text-white" : "text-white/80"}`}
+                    >
+                      Față
+                    </button>
+                    <button onClick={() => setTwoSided(true)} className={`ml-1 px-3 py-1 rounded-md ${twoSided ? "bg-indigo-600 text-white" : "text-white/80"}`}>
+                      Față‑Verso
+                    </button>
                   </div>
                 </div>
 
                 <div>
                   <label className="field-label">Hârtie</label>
                   <div className="flex gap-2 mt-2">
-                    {PAPER_WEIGHTS.map(p => (
-                      <button key={p.key} onClick={() => setPaperWeightKey(p.key)} className={`px-3 py-2 rounded-md ${paperWeightKey === p.key ? "bg-indigo-600 text-white" : "bg-white/5"}`}>{p.label}</button>
+                    {PAPER_WEIGHTS.map((p) => (
+                      <button key={p.key} onClick={() => setPaperWeightKey(p.key)} className={`px-3 py-2 rounded-md ${paperWeightKey === p.key ? "bg-indigo-600 text-white" : "bg-white/5"}`}>
+                        {p.label}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -311,19 +333,9 @@ export default function FlyerConfigurator() {
               <div className="text-lg font-bold text-white mb-3">Grafică</div>
 
               <div className="space-y-3">
-                <SelectCardSmall
-                  active={graphicsMode === "client"}
-                  onClick={() => setGraphicsMode("client")}
-                  title="Am grafică — încarc / adaug link"
-                  subtitle={sameDesignForBoth ? "Un singur fișier pentru față = spate" : "Încarcă separat pentru față și spate"}
-                />
+                <SelectCardSmall active={graphicsMode === "client"} onClick={() => setGraphicsMode("client")} title="Am grafică — încarc / adaug link" subtitle={sameDesignForBoth ? "Un singur fișier pentru față = spate" : "Încarcă separat pentru față și spate"} />
 
-                <SelectCardSmall
-                  active={graphicsMode === "pro"}
-                  onClick={() => setGraphicsMode("pro")}
-                  title="Vreau grafică profesională"
-                  subtitle={sameDesignForBoth ? `Cost fix: ${PRO_FEE_PER_FACE} RON` : `Cost: ${PRO_FEE_PER_FACE} RON/față (până la 2 fețe)`}
-                />
+                <SelectCardSmall active={graphicsMode === "pro"} onClick={() => setGraphicsMode("pro")} title="Vreau grafică profesională" subtitle={sameDesignForBoth ? `Cost fix: ${PRO_FEE_PER_FACE} RON` : `Cost: ${PRO_FEE_PER_FACE} RON/față (până la 2 fețe)`} />
               </div>
 
               {/* controls open only for chosen mode */}
@@ -374,7 +386,14 @@ export default function FlyerConfigurator() {
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
                   {GALLERY.map((src, i) => (
-                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`rounded-md overflow-hidden border ${activeIndex === i ? "border-indigo-500" : "border-white/10"}`}>
+                    <button
+                      key={src}
+                      onClick={() => {
+                        setActiveImage(src);
+                        setActiveIndex(i);
+                      }}
+                      className={`rounded-md overflow-hidden border ${activeIndex === i ? "border-indigo-500" : "border-white/10"}`}
+                    >
                       <img src={src} alt="thumb" className="h-20 w-full object-cover" />
                     </button>
                   ))}
@@ -384,16 +403,33 @@ export default function FlyerConfigurator() {
               <div className="card p-4">
                 <h3 className="font-bold mb-3">Sumar</h3>
                 <div className="text-sm text-white/80 space-y-2">
-                  <div>Dimensiune: <strong>{SIZES.find(s => s.key === sizeKey)?.label}</strong></div>
-                  <div>Cantitate: <strong>{qty}</strong></div>
-                  <div>Față‑verso: <strong>{twoSided ? "Da" : "Nu"}</strong></div>
-                  <div>Hârtie: <strong>{PAPER_WEIGHTS.find(p => p.key === paperWeightKey)?.label}</strong></div>
+                  <div>
+                    Dimensiune: <strong>{SIZES.find((s) => s.key === sizeKey)?.label}</strong>
+                  </div>
+                  <div>
+                    Cantitate: <strong>{qty}</strong>
+                  </div>
+                  <div>
+                    Față‑verso: <strong>{twoSided ? "Da" : "Nu"}</strong>
+                  </div>
+                  <div>
+                    Hârtie: <strong>{PAPER_WEIGHTS.find((p) => p.key === paperWeightKey)?.label}</strong>
+                  </div>
                   <div className="text-2xl font-extrabold">Total: {total.toFixed(2)} RON</div>
                 </div>
 
                 <div className="mt-4">
-                  <button onClick={() => { /* calc server if needed */ }} className="btn-secondary mr-2">Calculează</button>
-                  <button onClick={handleAddToCart} className="btn-primary w-full mt-3 py-2"> <ShoppingCart size={18} /> <span className="ml-2">Adaugă</span></button>
+                  <button
+                    onClick={() => {
+                      /* calc server if needed */
+                    }}
+                    className="btn-secondary mr-2"
+                  >
+                    Calculează
+                  </button>
+                  <button onClick={handleAddToCart} className="btn-primary w-full mt-3 py-2">
+                    <ShoppingCart size={18} /> <span className="ml-2">Adaugă</span>
+                  </button>
                 </div>
               </div>
 
@@ -403,7 +439,12 @@ export default function FlyerConfigurator() {
         </div>
       </div>
 
-      <MobilePriceBar total={total} disabled={false} onAddToCart={handleAddToCart} onShowSummary={() => document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth" })} />
+      <MobilePriceBar
+        total={total}
+        disabled={false}
+        onAddToCart={handleAddToCart}
+        onShowSummary={() => document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth" })}
+      />
     </main>
   );
 }
