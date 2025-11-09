@@ -101,12 +101,11 @@ export default function Header() {
             className="inline-flex items-center gap-2"
             aria-label="Prynt.ro"
           >
+            {/* Logo: made larger and responsive (mobile and desktop scale) */}
             <img
               src="/logo.png"
               alt="Prynt.ro"
-              width={60}
-              height={60}
-              className="rounded-full border border-white/10"
+              className="rounded-full border border-white/10 w-16 h-16 lg:w-20 lg:h-20"
               loading="lazy"
             />
             <span className="sr-only">Prynt.ro</span>
@@ -195,7 +194,8 @@ export default function Header() {
         {/* DESKTOP NAV */}
         <div className="hidden lg:flex items-center justify-between py-3">
           <a href="/" className="inline-flex items-center gap-2" aria-label="Prynt.ro">
-            <img src="/logo.png" alt="Prynt.ro" width={36} height={36} className="rounded-full border border-white/10" loading="lazy" />
+            {/* Desktop logo larger too */}
+            <img src="/logo.png" alt="Prynt.ro" className="rounded-full border border-white/10 w-16 h-16 lg:w-20 lg:h-20" loading="lazy" />
             <span className="sr-only">Prynt.ro</span>
           </a>
 
