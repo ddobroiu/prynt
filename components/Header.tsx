@@ -17,14 +17,14 @@ type NavItem = {
 };
 
 /* Menu updated per request:
-   - "Promotionale" instead of "Print digital" and placed first
-   - Order now: Promotionale, Banner, Publicitar, Decor, Materiale rigide
-   - Promotionale contains: Pliante, Flayere, Afișe, Autocolante
+   - Moved the items that were previously under "Promotionale" into "Publicitar"
+   - Order now: Publicitar, Banner, Promotionale, Decor, Materiale rigide
+   - "Publicitar" contains: Pliante, Flayere, Afișe, Autocolante
 */
 const LINKS: NavItem[] = [
   {
-    href: "/promotionale",
-    label: "Promotionale",
+    href: "/publicitar",
+    label: "Publicitar",
     children: [
       { href: "/pliante", label: "Pliante" },
       { href: "/flayere", label: "Flayere" },
@@ -41,8 +41,8 @@ const LINKS: NavItem[] = [
     ],
   },
   {
-    href: "/publicitar",
-    label: "Publicitar",
+    href: "/promotionale",
+    label: "Promotionale",
   },
   {
     href: "/decor",
