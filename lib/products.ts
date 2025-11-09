@@ -1,12 +1,13 @@
 // lib/products.ts
 // Central product registry + helpers for route/slug resolution.
-// Updated to include landing pages for 'frizerie' and 'vulcanizare' and strict matching.
+// Updated to include landing pages for many niches and strict matching.
+// Also exports MaterialOption and MATERIAL_OPTIONS for MaterialSelector components.
 
 export type Product = {
   id: string;
   sku?: string;
   slug?: string; // legacy/internal id
-  routeSlug?: string; // optional: slug folosit în URL (ex: "pliante-vulcanizare")
+  routeSlug?: string; // optional: slug used in URL (ex: "pliante-vulcanizare")
   title: string;
   description?: string;
   images?: string[];
@@ -21,6 +22,25 @@ export type Product = {
   metadata?: Record<string, any>;
 };
 
+// Export material option type for material selector components
+export type MaterialOption = {
+  key: string;
+  label: string;
+  description?: string;
+  priceModifier?: number; // optional: multiplier or RON addition depending on implementation
+  recommendedFor?: string[]; // categories e.g. ["bannere"]
+};
+
+export const MATERIAL_OPTIONS: MaterialOption[] = [
+  { key: "frontlit-440", label: "Frontlit 440 g/mp (standard)", description: "Material rezistent pentru exterior", priceModifier: 0, recommendedFor: ["bannere"] },
+  { key: "frontlit-510", label: "Frontlit 510 g/mp (durabil)", description: "Mai gros, pentru expuneri îndelungate", priceModifier: 0.1, recommendedFor: ["bannere"] },
+  { key: "couche-150", label: "Hârtie couché 150 g/mp", description: "Pentru afișe interioare", priceModifier: 0, recommendedFor: ["afise"] },
+  { key: "pp-5mm", label: "PVC 5mm", description: "Material rigid pentru indoor/outdoor", priceModifier: 0.15, recommendedFor: ["decor", "materiale-rigide"] },
+];
+
+//=== PRODUCTS ===============================================================
+// Add or edit products here. Keep landing-specific tags (frizerie, vulcanizare, etc.)
+// only on landing entries to avoid greedy matches.
 export const PRODUCTS: Product[] = [
   // BANNERS (generic)
   {
@@ -141,26 +161,24 @@ export const PRODUCTS: Product[] = [
     metadata: { category: "afise" },
   },
 
-  // --- LANDING PAGES (SEO) for "frizerie" and "vulcanizare" ---------------------
-  // Keep landing-specific tags (frizerie, vulcanizare, salon) only on these entries.
+  // --- LANDING PAGES (SEO) for many niches ---------------------
+  // Keep niche tags only on these landing entries.
 
-  // FRIZERIE landing pages (existing)
+  // FRIZERIE landing pages
   {
     id: "pliant-frizerie-landing",
     sku: "PLT-FRZ",
     slug: "pliant-frizerie",
     routeSlug: "pliante-frizerie",
     title: "Pliante pentru frizerii — modele, prețuri și configurator",
-    description:
-      "Pliante special create pentru frizerii: design personalizat, hârtie, pliere și tiraj. Configurează online și vezi prețul instant.",
+    description: "Pliante special create pentru frizerii: design personalizat, hârtie, pliere și tiraj. Configurează online și vezi prețul instant.",
     images: ["/images/landing/pliante-frizerie-1.jpg"],
     priceBase: 0,
     currency: "RON",
     tags: ["pliante", "frizerie", "salon", "pliante-frizerie"],
     seo: {
       title: "Pliante pentru frizerii — comandă online | Prynt",
-      description:
-        "Pliante personalizate pentru saloane și frizerii. Alege dimensiuni, hârtie și finisaje. Configurator live.",
+      description: "Pliante personalizate pentru saloane și frizerii. Alege dimensiuni, hârtie și finisaje. Configurator live.",
     },
     metadata: { category: "pliante", landing: true },
   },
@@ -218,23 +236,21 @@ export const PRODUCTS: Product[] = [
     metadata: { category: "bannere", landing: true },
   },
 
-  // VULCANIZARE landing pages (NEW)
+  // VULCANIZARE landing pages
   {
     id: "pliant-vulcanizare-landing",
     sku: "PLT-VUL",
     slug: "pliant-vulcanizare",
     routeSlug: "pliante-vulcanizare",
     title: "Pliante pentru vulcanizări — modele, prețuri și configurator",
-    description:
-      "Pliante concepute pentru service-uri auto și vulcanizări: oferte, pachete de service și promoții. Configurează tirajul și finisajele online.",
+    description: "Pliante concepute pentru service-uri auto și vulcanizări: oferte, pachete de service și promoții. Configurează tirajul și finisajele online.",
     images: ["/images/landing/pliante-vulcanizare-1.jpg"],
     priceBase: 0,
     currency: "RON",
     tags: ["pliante", "vulcanizare", "service-auto", "pliante-vulcanizare"],
     seo: {
       title: "Pliante pentru vulcanizări — tipărire rapidă | Prynt",
-      description:
-        "Pliante și flyere pentru vulcanizări: promovare oferte, reparații și schimb anvelope. Alege formatul și tirajul în configurator.",
+      description: "Pliante și flyere pentru vulcanizări: promovare oferte, reparații și schimb anvelope. Alege formatul și tirajul în configurator.",
     },
     metadata: { category: "pliante", landing: true },
   },
@@ -293,12 +309,20 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
-// UTILITARE
+//=== UTILITARE =============================================================
 
+/**
+ * Returnează toate slug-urile folosite pentru sitemap / generateStaticParams.
+ * Folosește routeSlug dacă e prezent.
+ */
 export function getAllProductSlugs(): string[] {
   return PRODUCTS.map((p) => String(p.routeSlug ?? p.slug ?? p.id));
 }
 
+/**
+ * Returnează slug-urile pentru o categorie (folosite la generateStaticParams pentru paginile catch-all).
+ * Poți filtra aici dacă vrei să incluzi/excluzi landing pages din sitemap.
+ */
 export function getAllProductSlugsByCategory(category: string): string[] {
   const cat = String(category || "").toLowerCase();
   return PRODUCTS.filter((p) => String(p.metadata?.category ?? "").toLowerCase() === cat).map((p) =>
@@ -307,7 +331,7 @@ export function getAllProductSlugsByCategory(category: string): string[] {
 }
 
 /**
- * Matching ordered and tolerant:
+ * Matching ordered and tolerant to avoid collisions:
  * 1) exact match on id / slug / routeSlug
  * 2) suffix match (requests like "banner-300x100" match routeSlug "300x100")
  * 3) tag exact match
