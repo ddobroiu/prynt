@@ -4,18 +4,59 @@ import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
 
-/* GALLERY (adjust image paths if needed) */
-const GALLERY = [
+/* Default GALLERIES */
+const GALLERY_PVC = [
   "/products/pvc-forex/1.jpg",
   "/products/pvc-forex/2.jpg",
   "/products/pvc-forex/3.jpg",
   "/products/pvc-forex/4.jpg",
+] as const;
+const GALLERY_ALU = [
+  "/products/alucobond/1.jpg",
+  "/products/alucobond/2.jpg",
+  "/products/alucobond/3.jpg",
+] as const;
+const GALLERY_PP = [
+  "/products/polipropilena/1.jpg",
+  "/products/polipropilena/2.jpg",
 ] as const;
 
 /* HELPERS */
 const roundMoney = (n: number) => Math.round(n * 100) / 100;
 const formatMoneyDisplay = (n: number) => (n && n > 0 ? n.toFixed(2) : "0");
 const formatAreaDisplay = (n: number) => (n && n > 0 ? String(n) : "0");
+
+/* PRESETS / LIMITS */
+const PRESETS = [
+  { w: 100, h: 100 },
+  { w: 120, h: 80 },
+  { w: 200, h: 100 },
+];
+
+const DEFAULT_MAX_WIDTH_CM = 200;
+const DEFAULT_MAX_HEIGHT_CM = 300;
+
+/* PRICE MAPS (RON / m²) */
+const PVC_FOREX_PRICE: Record<number, number> = {
+  1: 120,
+  2: 150,
+  3: 180,
+  4: 210,
+  5: 240,
+  6: 270,
+  8: 300,
+  10: 400,
+};
+
+const ALU_PRICE: Record<number, number> = {
+  3: 350,
+  4: 450,
+};
+
+const PP_PRICE: Record<number, number> = {
+  3: 110,
+  5: 120,
+};
 
 /* TYPES */
 type DesignOption = "upload" | "pro";
@@ -35,68 +76,74 @@ type LocalPriceOutput = {
   finalPrice: number;
 };
 
-/* PRESETS / LIMITS */
-const PRESETS = [
-  { w: 100, h: 100 },
-  { w: 120, h: 80 },
-  { w: 200, h: 100 },
-];
-
-const MAX_WIDTH_CM = 200;
-const MAX_HEIGHT_CM = 300;
-
-/* PRICE MAP (RON / m²) for PVC Forex */
-const PVC_FOREX_PRICE: Record<number, number> = {
-  1: 120,
-  2: 150,
-  3: 180,
-  4: 210,
-  5: 240,
-  6: 270,
-  8: 300,
-  10: 400,
-};
-
-const AVAILABLE_THICKNESS = [1, 2, 3, 4, 5, 6, 8, 10];
-
-/* LOCAL CALC */
-const localCalculatePrice = (input: PriceInput): LocalPriceOutput => {
-  if (input.width_cm <= 0 || input.height_cm <= 0 || input.quantity <= 0) {
-    return { sqm_per_unit: 0, total_sqm: 0, pricePerSqm: 0, finalPrice: 0 };
-  }
-
-  const sqm_per_unit = (input.width_cm / 100) * (input.height_cm / 100);
-  const total_sqm = roundMoney(sqm_per_unit * input.quantity);
-  const pricePerSqm = PVC_FOREX_PRICE[input.thickness_mm] ?? 0;
-  const finalPrice = roundMoney(total_sqm * pricePerSqm);
-
-  return {
-    sqm_per_unit: roundMoney(sqm_per_unit),
-    total_sqm,
-    pricePerSqm: roundMoney(pricePerSqm),
-    finalPrice,
-  };
-};
-
 /* Props */
 type Props = {
   productSlug?: string;
   initialWidth?: number;
   initialHeight?: number;
+  productType?: "pvc-forex" | "alucobond" | "polipropilena" | string;
 };
 
-export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW, initialHeight: initH }: Props) {
+/* Utility: returns config based on productType */
+function getProductConfig(productType?: string) {
+  const type = String(productType || "pvc-forex").toLowerCase();
+  if (type === "alucobond") {
+    return {
+      title: "Configurator Alucobond",
+      gallery: GALLERY_ALU,
+      priceMap: ALU_PRICE,
+      availableThickness: Object.keys(ALU_PRICE).map((k) => Number(k)).sort((a, b) => a - b),
+      maxWidth: 3000,
+      maxHeight: 1500,
+      defaultSlug: "alucobond",
+    };
+  }
+  if (type === "polipropilena" || type === "pp" || type === "polipropilenă") {
+    return {
+      title: "Configurator Polipropilenă",
+      gallery: GALLERY_PP,
+      priceMap: PP_PRICE,
+      availableThickness: Object.keys(PP_PRICE).map((k) => Number(k)).sort((a, b) => a - b),
+      maxWidth: 2000,
+      maxHeight: 1000,
+      defaultSlug: "polipropilena",
+    };
+  }
+  // default PVC-Forex
+  return {
+    title: "Configurator PVC Forex",
+    gallery: GALLERY_PVC,
+    priceMap: PVC_FOREX_PRICE,
+    availableThickness: Object.keys(PVC_FOREX_PRICE).map((k) => Number(k)).sort((a, b) => a - b),
+    maxWidth: DEFAULT_MAX_WIDTH_CM,
+    maxHeight: DEFAULT_MAX_HEIGHT_CM,
+    defaultSlug: "pvc-forex",
+  };
+}
+
+/* Component */
+export default function ConfiguratorPVCForex({
+  productSlug,
+  initialWidth: initW,
+  initialHeight: initH,
+  productType,
+}: Props) {
   const { addItem } = useCart();
 
-  const [input, setInput] = useState<PriceInput>({
+  // derive product-specific config
+  const config = useMemo(() => getProductConfig(productType), [productType]);
+
+  const GALLERY = config.gallery;
+
+  const [input, setInput] = useState<PriceInput>(() => ({
     width_cm: initW ?? 0,
     height_cm: initH ?? 0,
     quantity: 1,
-    thickness_mm: AVAILABLE_THICKNESS[0],
+    thickness_mm: config.availableThickness[0] ?? 1,
     designOption: "upload",
     artworkUrl: null,
     artworkLink: "",
-  });
+  }));
 
   const [lengthText, setLengthText] = useState(initW ? String(initW) : "");
   const [heightText, setHeightText] = useState(initH ? String(initH) : "");
@@ -104,7 +151,7 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
   const [presetIndex, setPresetIndex] = useState(0);
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
+  const [activeImage, setActiveImage] = useState<string>(GALLERY[0] ?? "");
 
   const [serverPrice, setServerPrice] = useState<number | null>(null);
   const [calcLoading, setCalcLoading] = useState(false);
@@ -118,11 +165,12 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
 
   useEffect(() => {
     if (usePreset) {
-      const p = PRESETS[presetIndex];
+      const p = PRESETS[presetIndex] ?? PRESETS[0];
       setLengthText(String(p.w));
       setHeightText(String(p.h));
       setInput((s) => ({ ...s, width_cm: p.w, height_cm: p.h }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usePreset, presetIndex]);
 
   useEffect(() => {
@@ -134,10 +182,32 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
       });
     }, 3000);
     return () => clearInterval(id);
-  }, []);
+  }, [GALLERY]);
 
-  const priceDetailsLocal = useMemo(() => localCalculatePrice(input), [input]);
-  const displayedTotal = useMemo(() => serverPrice ?? priceDetailsLocal.finalPrice, [serverPrice, priceDetailsLocal]);
+  // ensure thickness stays valid if productType changes
+  useEffect(() => {
+    if (!config.availableThickness.includes(input.thickness_mm)) {
+      setInput((s) => ({ ...s, thickness_mm: config.availableThickness[0] ?? s.thickness_mm }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productType]);
+
+  // local price calculation using product-specific price map
+  const localCalculatePrice = (inp: PriceInput): LocalPriceOutput => {
+    if (inp.width_cm <= 0 || inp.height_cm <= 0 || inp.quantity <= 0) {
+      return { sqm_per_unit: 0, total_sqm: 0, pricePerSqm: 0, finalPrice: 0 };
+    }
+    const sqm_per_unit = (inp.width_cm / 100) * (inp.height_cm / 100);
+    const total_sqm = roundMoney(sqm_per_unit * inp.quantity);
+    const pricePerSqm = config.priceMap[inp.thickness_mm] ?? 0;
+    const finalPrice = roundMoney(total_sqm * pricePerSqm);
+    return {
+      sqm_per_unit: roundMoney(sqm_per_unit),
+      total_sqm,
+      pricePerSqm: roundMoney(pricePerSqm),
+      finalPrice,
+    };
+  };
 
   const updateInput = <K extends keyof PriceInput>(k: K, v: PriceInput[K]) => setInput((p) => ({ ...p, [k]: v }));
 
@@ -180,6 +250,7 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
     setCalcLoading(true);
     setServerPrice(null);
     try {
+      // In this example we do a local calc; replace with server API call if needed
       const result = localCalculatePrice(input);
       setServerPrice(result.finalPrice);
     } catch (err) {
@@ -191,6 +262,9 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
   }
 
   function handleAddToCart() {
+    const MAX_WIDTH_CM = config.maxWidth;
+    const MAX_HEIGHT_CM = config.maxHeight;
+
     if (!input.width_cm || !input.height_cm) {
       alert("Completează lățimea și înălțimea (în cm) înainte de a adăuga în coș.");
       return;
@@ -200,6 +274,7 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
       return;
     }
 
+    const priceDetailsLocal = localCalculatePrice(input);
     const totalForOrder = serverPrice ?? priceDetailsLocal.finalPrice;
     if (!totalForOrder || totalForOrder <= 0) {
       alert("Calculează prețul înainte de a adăuga în coș");
@@ -209,19 +284,20 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
     const unitPrice = roundMoney(totalForOrder / input.quantity);
 
     const uniqueId = [
-      "pvc-forex",
+      productType ?? "material",
+      productSlug ?? config.defaultSlug,
       input.thickness_mm,
       input.width_cm,
       input.height_cm,
       input.designOption ?? "upload",
     ].join("-");
 
-    const title = `PVC Forex ${input.thickness_mm}mm ${input.width_cm}x${input.height_cm} cm`;
+    const title = `${(productType ?? config.defaultSlug).replace("-", " ")} ${input.thickness_mm}mm ${input.width_cm}x${input.height_cm} cm`;
 
     addItem({
       id: uniqueId,
-      productId: productSlug ?? "pvc-forex-generic",
-      slug: productSlug ?? "pvc-forex",
+      productId: productSlug ?? config.defaultSlug,
+      slug: productSlug ?? config.defaultSlug,
       title,
       width: input.width_cm,
       height: input.height_cm,
@@ -235,6 +311,7 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
         designOption: input.designOption ?? "upload",
         artworkUrl: input.artworkUrl ?? null,
         artworkLink: input.artworkLink ?? "",
+        productType: productType ?? config.defaultSlug,
       },
     });
 
@@ -242,8 +319,16 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
     setTimeout(() => setToastVisible(false), 1400);
   }
 
+  const priceDetailsLocal = useMemo(() => localCalculatePrice(input), [input, productType]);
+  const displayedTotal = useMemo(() => serverPrice ?? priceDetailsLocal.finalPrice, [serverPrice, priceDetailsLocal]);
+
   const totalShown = displayedTotal;
-  const canAdd = totalShown > 0 && input.width_cm > 0 && input.height_cm > 0 && input.width_cm <= MAX_WIDTH_CM && input.height_cm <= MAX_HEIGHT_CM;
+  const canAdd =
+    totalShown > 0 &&
+    input.width_cm > 0 &&
+    input.height_cm > 0 &&
+    input.width_cm <= config.maxWidth &&
+    input.height_cm <= config.maxHeight;
 
   return (
     <main className="min-h-screen">
@@ -254,8 +339,14 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
       <div className="page py-10 pb-24 lg:pb-10">
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold">Configurator PVC Forex</h1>
-            <p className="mt-2 text-white/70">Plăci rigide din spumă PVC — alege grosimea, dimensiunile și încarcă grafică. Opțiunea "Pro" se stabilește după comandă.</p>
+            <h1 className="text-3xl md:text-4xl font-extrabold">{config.title}</h1>
+            <p className="mt-2 text-white/70">
+              {productType === "alucobond"
+                ? "Panou compozit Alucobond — alege grosimea și dimensiunile."
+                : productType === "polipropilena"
+                ? "Placă din polipropilenă — alege dimensiunea și finisajele."
+                : "Plăci rigide din spumă PVC — alege grosimea, dimensiunile și încarcă grafică. Opțiunea \"Pro\" se stabilește după comandă."}
+            </p>
           </div>
           <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline text-sm self-start">
             <Info size={18} />
@@ -267,35 +358,74 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
           <div className="lg:col-span-3 space-y-6">
             {/* 1. Dimensiuni */}
             <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-white">1. Dimensiuni & cantitate</h2></div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="text-indigo-400">
+                  <Ruler />
+                </div>
+                <h2 className="text-lg font-bold text-white">1. Dimensiuni & cantitate</h2>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="field-label">Lățime (cm)</label>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="ex: 100" className="input text-lg font-semibold" />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={lengthText}
+                    onChange={(e) => onChangeLength(e.target.value)}
+                    placeholder="ex: 100"
+                    className="input text-lg font-semibold"
+                  />
                 </div>
                 <div>
                   <label className="field-label">Înălțime (cm)</label>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="ex: 100" className="input text-lg font-semibold" />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={heightText}
+                    onChange={(e) => onChangeHeight(e.target.value)}
+                    placeholder="ex: 100"
+                    className="input text-lg font-semibold"
+                  />
                 </div>
                 <div>
                   <label className="field-label">Cantitate</label>
                   <div className="flex items-center">
-                    <button onClick={() => updateInput("quantity", Math.max(1, input.quantity - 1))} className="p-2 bg-white/10 rounded-l-md hover:bg-white/15"><Minus size={14} /></button>
-                    <input type="number" value={input.quantity} onChange={(e) => updateInput("quantity", Math.max(1, parseInt(e.target.value || "1")))} className="input text-lg font-semibold text-center" />
-                    <button onClick={() => updateInput("quantity", input.quantity + 1)} className="p-2 bg-white/10 rounded-r-md hover:bg-white/15"><Plus size={14} /></button>
+                    <button onClick={() => updateInput("quantity", Math.max(1, input.quantity - 1))} className="p-2 bg-white/10 rounded-l-md hover:bg-white/15">
+                      <Minus size={14} />
+                    </button>
+                    <input
+                      type="number"
+                      value={input.quantity}
+                      onChange={(e) => updateInput("quantity", Math.max(1, parseInt(e.target.value || "1")))}
+                      className="input text-lg font-semibold text-center"
+                    />
+                    <button onClick={() => updateInput("quantity", input.quantity + 1)} className="p-2 bg-white/10 rounded-r-md hover:bg-white/15">
+                      <Plus size={14} />
+                    </button>
                   </div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-white/60">Dimensiune maximă a plăcii: 200 x 300 cm. Preseturi rapide disponibile.</div>
+              <div className="mt-2 text-xs text-white/60">Dimensiune maximă a plăcii: {config.maxWidth} x {config.maxHeight} cm. Preseturi rapide disponibile.</div>
             </div>
 
             {/* 2. Grosime */}
             <div className="card p-4" ref={materialRef}>
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-white">2. Grosime material (mm)</h2></div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="text-indigo-400">
+                  <Layers />
+                </div>
+                <h2 className="text-lg font-bold text-white">2. Grosime material (mm)</h2>
+              </div>
 
               <div className="grid grid-cols-2 gap-2">
-                {AVAILABLE_THICKNESS.map((t) => (
-                  <button key={t} onClick={() => updateInput("thickness_mm", t)} className={`p-2 text-left rounded-md ${input.thickness_mm === t ? "border border-indigo-500 bg-indigo-900/10" : "border border-white/10 hover:bg-white/5"}`}>
+                {config.availableThickness.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => updateInput("thickness_mm", t)}
+                    className={`p-2 text-left rounded-md ${input.thickness_mm === t ? "border border-indigo-500 bg-indigo-900/10" : "border border-white/10 hover:bg-white/5"}`}
+                  >
                     {t} mm
                   </button>
                 ))}
@@ -305,11 +435,20 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
 
             {/* 3. Grafică */}
             <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Info /></div><h2 className="text-lg font-bold text-white">3. Grafică</h2></div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="text-indigo-400">
+                  <Info />
+                </div>
+                <h2 className="text-lg font-bold text-white">3. Grafică</h2>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <button onClick={() => updateInput("designOption", "upload")} className={`p-3 rounded-lg border ${input.designOption === "upload" ? "border-indigo-500 bg-indigo-900/10" : "border-white/10 hover:bg-white/5"}`}>Încarcă grafică</button>
-                <button onClick={() => updateInput("designOption", "pro")} className={`p-3 rounded-lg border ${input.designOption === "pro" ? "border-indigo-500 bg-indigo-900/10" : "border-white/10 hover:bg-white/5"}`}>Pro (preț stabilit după comandă)</button>
+                <button onClick={() => updateInput("designOption", "upload")} className={`p-3 rounded-lg border ${input.designOption === "upload" ? "border-indigo-500 bg-indigo-900/10" : "border-white/10 hover:bg-white/5"}`}>
+                  Încarcă grafică
+                </button>
+                <button onClick={() => updateInput("designOption", "pro")} className={`p-3 rounded-lg border ${input.designOption === "pro" ? "border-indigo-500 bg-indigo-900/10" : "border-white/10 hover:bg-white/5"}`}>
+                  Pro (preț stabilit după comandă)
+                </button>
               </div>
 
               {input.designOption === "upload" && (
@@ -327,13 +466,7 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
 
                   <div>
                     <label className="field-label">Link descărcare (opțional)</label>
-                    <input
-                      type="url"
-                      value={input.artworkLink ?? ""}
-                      onChange={(e) => updateInput("artworkLink", e.target.value)}
-                      placeholder="Ex: https://.../fisier.pdf"
-                      className="input"
-                    />
+                    <input type="url" value={input.artworkLink ?? ""} onChange={(e) => updateInput("artworkLink", e.target.value)} placeholder="Ex: https://.../fisier.pdf" className="input" />
                     <div className="text-xs text-white/60 mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
                   </div>
 
@@ -359,11 +492,19 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
                 <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
-                  <img src={activeImage} alt="PVC Forex preview" className="h-full w-full object-cover" loading="eager" />
+                  <img src={activeImage} alt="preview" className="h-full w-full object-cover" loading="eager" />
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
                   {GALLERY.map((src, i) => (
-                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
+                    <button
+                      key={src}
+                      onClick={() => {
+                        setActiveImage(src);
+                        setActiveIndex(i);
+                      }}
+                      className={`relative overflow-hidden rounded-md border transition ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`}
+                      aria-label="Previzualizare"
+                    >
                       <img src={src} alt="Thumb" className="h-20 w-full object-cover" loading="lazy" />
                     </button>
                   ))}
@@ -373,29 +514,43 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
               <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
                 <div className="space-y-2 text-white/80 text-sm">
-                  <p>Suprafață: <span className="text-white font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
-                  <p>Preț: <span className="text-2xl font-extrabold text-white">{formatMoneyDisplay(totalShown)} RON</span></p>
-                  <p className="text-xs text-white/60">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—"}</strong></p>
-                  <p className="text-xs text-white/60">Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong></p>
+                  <p>
+                    Suprafață: <span className="text-white font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span>
+                  </p>
+                  <p>
+                    Preț: <span className="text-2xl font-extrabold text-white">{formatMoneyDisplay(totalShown)} RON</span>
+                  </p>
+                  <p className="text-xs text-white/60">
+                    Preț / m²: <strong>{priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—"}</strong>
+                  </p>
+                  <p className="text-xs text-white/60">
+                    Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong>
+                  </p>
                 </div>
 
                 <div className="hidden lg:block mt-4">
-                  <button onClick={calculateServer} disabled={calcLoading} className="btn-secondary mr-2">Calculează</button>
+                  <button onClick={calculateServer} disabled={calcLoading} className="btn-secondary mr-2">
+                    Calculează
+                  </button>
                   <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-full mt-3 py-2">
-                    <ShoppingCart size={18} /><span className="ml-2">Adaugă</span>
+                    <ShoppingCart size={18} />
+                    <span className="ml-2">Adaugă</span>
                   </button>
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-white/60">
-                Dimensiune maximă a plăcii: 200 x 300 cm. Prețurile afișate sunt orientative.
-              </div>
+              <div className="card-muted p-3 text-xs text-white/60">Dimensiune maximă a plăcii: {config.maxWidth} x {config.maxHeight} cm. Prețurile afișate sunt orientative.</div>
             </div>
           </aside>
         </div>
       </div>
 
-      <MobilePriceBar total={totalShown} disabled={!canAdd} onAddToCart={handleAddToCart} onShowSummary={() => document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth" })} />
+      <MobilePriceBar
+        total={totalShown}
+        disabled={!canAdd}
+        onAddToCart={handleAddToCart}
+        onShowSummary={() => document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth" })}
+      />
 
       {/* Details modal */}
       {detailsOpen && (
@@ -405,20 +560,16 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
             <button className="absolute right-3 top-3 p-1" onClick={() => setDetailsOpen(false)} aria-label="Închide">
               <X size={18} className="text-white/80" />
             </button>
-            <h3 className="text-xl font-bold text-white mb-3">Detalii PVC Forex</h3>
+            <h3 className="text-xl font-bold text-white mb-3">{config.title} - Detalii</h3>
             <div className="text-sm text-white/70 space-y-3">
-              <p>
-                Plăci rigide și durabile din spumă de PVC, cu structură expandată uniform și celulă închisă. Finisarea specială a suprafeței (grad ridicat de luciu) și greutatea redusă fac din aceste produse alegerea ideală când se cere un material ușor și rezistent la zgârieturi.
-              </p>
-              <p>
-                Aplicații uzuale: decorări interioare/exterioare, litere volumetrice, panouri publicitare, afișaje și display-uri. Dimensiunea maximă a plăcii este de 200 x 300 cm.
-              </p>
-              <p>
-                Pentru grafică: încărcați fișierul sau alegeți serviciul grafic profesional (Pro). Serviciul Pro nu are tarif afișat în configurator — prețul se stabilește după evaluarea comenzii.
-              </p>
+              <p>{productType === "alucobond" ? "Panou compozit din aluminiu (Alucobond)." : productType === "polipropilena" ? "Placă din polipropilenă celulară." : "Plăci rigide din spumă PVC."}</p>
+              <p>Aplicații uzuale: decorări, litere volumetrice, panouri publicitare, afișaje și display-uri.</p>
+              <p>Serviciu grafic profesional (Pro) — prețul se stabilește după evaluarea comenzii.</p>
             </div>
             <div className="mt-6 text-right">
-              <button onClick={() => setDetailsOpen(false)} className="btn-primary py-2 px-4">Închide</button>
+              <button onClick={() => setDetailsOpen(false)} className="btn-primary py-2 px-4">
+                Închide
+              </button>
             </div>
           </div>
         </div>
