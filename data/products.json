@@ -1,0 +1,14 @@
+[
+  {
+    "id": "banner-90x200-01",
+    "slug": "banner-90x200-01",
+    "title": "Banner 90x200 PVC",
+    "description": "Banner standard 90x200 cm, PVC 440g, print full color.",
+    "price": 120.0,
+    "stock": 12,
+    "category": "bannere",
+    "images": ["/products/banners/banner-90x200-01.jpg"],
+    "attributes": { "dimensiuni": "90x200", "material": "PVC 440g" },
+    "created_at": "2025-11-10T00:00:00Z"
+  }
+]

@@ -18,3 +18,23 @@ export type Billing = {
   localitate?: string;
   strada_nr?: string;
 };
+
+/*
+  Tipuri noi pentru magazin
+*/
+export type ProductCategory = "bannere" | "postere" | "stickere" | string;
+
+export type Product = {
+  id: string;
+  slug: string; // ex: "banner-90x200"
+  title: string;
+  description?: string;
+  price: number; // în lei (număr)
+  currency?: string; // ex: "RON"
+  stock: number; // cantitate în stoc
+  category: ProductCategory;
+  images?: string[]; // căi relative în /public (ex: /products/banner1.jpg)
+  attributes?: Record<string, string>; // ex: { dimensiuni: "90x200", material: "PVC" }
+  created_at?: string;
+  updated_at?: string;
+};
