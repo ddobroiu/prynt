@@ -1,7 +1,7 @@
 import React from "react";
 import ConfiguratorCarton from "../../../components/ConfiguratorCarton";
 
-type Props = { params: { slug?: string[] } };
+type Props = { params: { slug?: string[] | string } };
 
 function parseDimsFromSlug(slug?: string[] | string): { width?: number; height?: number; productSlug?: string } {
   if (!slug) return {};
@@ -19,7 +19,7 @@ function parseDimsFromSlug(slug?: string[] | string): { width?: number; height?:
     if (mExact && width === undefined && height === undefined) {
       width = Number(mExact[1]);
       height = Number(mExact[2]);
-      continue; // skip this exact-dimension segment
+      continue; // skip exact-dimension segment
     }
 
     const mAny = seg.match(dimAnywhere);

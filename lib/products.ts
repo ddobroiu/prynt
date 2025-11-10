@@ -137,6 +137,45 @@ export const PRODUCTS: Product[] = [
     metadata: { category: "autocolante" },
   },
 
+  // MATERIALE RIGIDE - Polipropilena si Alucobond
+  {
+    id: "polipropilena-5mm",
+    sku: "PP-5MM",
+    slug: "polipropilena-5mm",
+    routeSlug: "polipropilena",
+    title: "Polipropilenă (PP) 5mm",
+    description: "Placă din polipropilenă celulară 5mm — ideală pentru panouri expoziționale și semnalistică ușoară.",
+    images: ["/products/materiale/polipropilena-5mm-1.jpg"],
+    priceBase: 120.0,
+    currency: "RON",
+    tags: ["polipropilena", "pp", "materiale-rigide"],
+    seo: {
+      title: "Placă Polipropilenă (PP) 5mm | Prynt",
+      description: "Placă din polipropilenă 5mm pentru indoor/outdoor — tăiere, perforare și montaj la cerere."
+    },
+    materials: MATERIAL_OPTIONS.filter((m) => (m.recommendedFor ?? []).includes("materiale-rigide")),
+    metadata: { category: "materiale-rigide" },
+  },
+
+  {
+    id: "alucobond-3mm",
+    sku: "ALU-3MM",
+    slug: "alucobond-3mm",
+    routeSlug: "alucobond",
+    title: "Alucobond / Aluminiu compozit 3mm",
+    description: "Panou compozit Alucobond 3mm — finisaj mat/lucios, potrivit pentru fațade, panouri și semnalistică premium.",
+    images: ["/products/materiale/alucobond-3mm-1.jpg"],
+    priceBase: 250.0,
+    currency: "RON",
+    tags: ["alucobond", "aluminium-composite", "materiale-rigide"],
+    seo: {
+      title: "Alucobond 3mm — panou compozit | Prynt",
+      description: "Alucobond 3mm — panouri compozite din aluminiu pentru aplicații exterioare și interior."
+    },
+    materials: MATERIAL_OPTIONS.filter((m) => (m.recommendedFor ?? []).includes("materiale-rigide")),
+    metadata: { category: "materiale-rigide" },
+  },
+
   // FLYER (generic)
   {
     id: "flyer-a6",
@@ -187,7 +226,7 @@ export const PRODUCTS: Product[] = [
     tags: ["pliante", "frizerie", "salon", "pliante-frizerie"],
     seo: {
       title: "Pliante pentru frizerii — comandă online | Prynt",
-      description: "Pliante personalizate pentru saloane și frizerii. Alege dimensiuni, hârtia și finisaje. Configurator live.",
+      description: "Pliante personalizate pentru saloane și frizerii. Alege dimensiuni, hârtie și finisaje. Configurator live.",
     },
     materials: MATERIAL_OPTIONS.filter((m) => (m.recommendedFor ?? []).includes("pliante")),
     metadata: { category: "pliante", landing: true },

@@ -1,35 +1,62 @@
 import React from "react";
-import BannerVersoConfigurator from "@/components/BannerVersoConfigurator";
+import ConfiguratorPVCForex from "../../../components/ConfiguratorPVCForex"; // reutilizăm configuratorul pentru materiale rigide
 
-type Props = {
-  params: {
-    slug?: string[];
-  };
-};
+type Props = { params: { slug?: string[] | string } };
 
-function parseDimsFromSlug(slug?: string[]): { width?: number; height?: number; productSlug?: string } {
-  if (!slug || slug.length === 0) return {};
-  // Try to find a segment like "100x200" or "100X200"
-  for (const seg of slug) {
-    const m = seg.match(/^(\d{1,5})[xX](\d{1,5})$/);
-    if (m) {
-      return { width: parseInt(m[1], 10), height: parseInt(m[2], 10), productSlug: slug.join("/") };
+/**
+ * Parsează dimensiuni din slug analog cu celelalte pagini.
+ * Returnează width, height şi productSlug curăţat (fără segmentul WxH).
+ */
+function parseDimsFromSlug(slug?: string[] | string): { width?: number; height?: number; productSlug?: string } {
+  if (!slug) return {};
+  const parts = Array.isArray(slug) ? slug : String(slug).split("/").map((s) => s.trim()).filter(Boolean);
+
+  const dimExact = /^(\d{1,5})[xX×-](\d{1,5})$/;
+  const dimAnywhere = /(\d{1,5})[xX×-](\d{1,5})/;
+
+  let width: number | undefined;
+  let height: number | undefined;
+  const remaining: string[] = [];
+
+  for (const seg of parts) {
+    const mExact = seg.match(dimExact);
+    if (mExact && width === undefined && height === undefined) {
+      width = Number(mExact[1]);
+      height = Number(mExact[2]);
+      continue; // sărim segmentul exact dimensiune
     }
+
+    const mAny = seg.match(dimAnywhere);
+    if (mAny && width === undefined && height === undefined) {
+      width = Number(mAny[1]);
+      height = Number(mAny[2]);
+      const cleaned = seg.replace(mAny[0], "").replace(/(^[-_]+|[-_]+$)/g, "").trim();
+      if (cleaned) remaining.push(cleaned);
+      continue;
+    }
+
+    remaining.push(seg);
   }
-  // If no WxH found, return productSlug as joined slug (useful to map to DB)
-  return { productSlug: slug.join("/") };
+
+  const productSlug = remaining.length ? remaining.join("/") : parts.join("/");
+  const out: { width?: number; height?: number; productSlug?: string } = {};
+  if (width !== undefined && !Number.isNaN(width)) out.width = width;
+  if (height !== undefined && !Number.isNaN(height)) out.height = height;
+  out.productSlug = productSlug || undefined;
+  return out;
 }
 
-export default function BannerVersoCatchAllPage({ params }: Props) {
-  const { width, height, productSlug } = parseDimsFromSlug(params.slug);
+export default function Page({ params }: Props) {
+  const parsed = parseDimsFromSlug(params.slug);
+  const productSlug = parsed.productSlug ?? (Array.isArray(params.slug) ? params.slug.join("/") : params.slug ?? "polipropilena");
 
   return (
-    <div>
-      <BannerVersoConfigurator
-        productSlug={productSlug ?? "banner-verso"}
-        initialWidth={width}
-        initialHeight={height}
+    <main style={{ padding: 24 }}>
+      <ConfiguratorPVCForex
+        productSlug={productSlug}
+        initialWidth={parsed.width ?? undefined}
+        initialHeight={parsed.height ?? undefined}
       />
-    </div>
+    </main>
   );
 }
