@@ -52,7 +52,7 @@ export default function Page({ params }: Props) {
         productSlug={productSlug}
         initialWidth={parsed.width ?? undefined}
         initialHeight={parsed.height ?? undefined}
-        productType="alucobond" // <--- trimitem productType corect tipului
+        productType="alucobond" // trimitem productType exact ca string literal
       />
     </main>
   );
