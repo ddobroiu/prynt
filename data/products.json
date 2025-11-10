@@ -1,14 +1,28 @@
 [
   {
-    "id": "banner-90x200-01",
-    "slug": "banner-90x200-01",
-    "title": "Banner 90x200 PVC",
-    "description": "Banner standard 90x200 cm, PVC 440g, print full color.",
-    "price": 120.0,
-    "stock": 12,
+    "id": "banner-custom-01",
+    "slug": "banner-custom-01",
+    "title": "Banner personalizabil PVC",
+    "description": "Banner din PVC 440g, se confecționează pe dimensiuni personalizate.",
+    "price": 0,
+    "currency": "RON",
+    "stock": 9999,
     "category": "bannere",
-    "images": ["/products/banners/banner-90x200-01.jpg"],
-    "attributes": { "dimensiuni": "90x200", "material": "PVC 440g" },
+    "images": ["/products/banners/banner-sample.jpg"],
+    "attributes": { "material": "PVC 440g" },
+    "config": {
+      "configurable": true,
+      "dimensions": {
+        "unit": "cm",
+        "minWidthCm": 50,
+        "maxWidthCm": 300,
+        "minHeightCm": 50,
+        "maxHeightCm": 300,
+        "stepCm": 1
+      },
+      "pricePerSqm": 100,
+      "basePrice": 30
+    },
     "created_at": "2025-11-10T00:00:00Z"
   }
 ]
