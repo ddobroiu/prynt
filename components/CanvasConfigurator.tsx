@@ -81,6 +81,72 @@ type Props = {
   initialHeight?: number;  // NEW: accept initial values (in cm)
 };
 
+/* Responsive selector component embedded to avoid extra file */
+function ResponsiveShapeFrameSelector({
+  shape,
+  setShape,
+  framed,
+  setFramed,
+}: {
+  shape: "rect" | "square";
+  setShape: (s: "rect" | "square") => void;
+  framed: boolean;
+  setFramed: (b: boolean) => void;
+}) {
+  return (
+    <div className="card p-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+        {/* Shape selector */}
+        <div>
+          <div className="text-sm font-semibold text-white mb-2">Formă</div>
+          <div className="inline-flex w-full rounded-md bg-white/5 p-1 gap-2">
+            <button
+              type="button"
+              onClick={() => setShape("rect")}
+              className={`flex-1 px-3 py-1 rounded-md text-sm text-center ${shape === "rect" ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
+            >
+              Dreptunghi
+            </button>
+            <button
+              type="button"
+              onClick={() => setShape("square")}
+              className={`flex-1 px-3 py-1 rounded-md text-sm text-center ${shape === "square" ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
+            >
+              Pătrat
+            </button>
+          </div>
+        </div>
+
+        {/* Framed selector - occupies remaining columns on md+ and full width below */}
+        <div className="md:col-span-2">
+          <div className="text-sm font-semibold text-white mb-2">Șasiu</div>
+
+          {/* Desktop: inline segmented; Mobile: stacked full-width */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setFramed(false)}
+              className={`w-full px-3 py-2 rounded-md text-sm text-left ${!framed ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
+            >
+              <div className="font-medium">Fără șasiu</div>
+              <div className="text-xs text-white/60">Personalizat, calcul pe m²</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFramed(true)}
+              className={`w-full px-3 py-2 rounded-md text-sm text-left ${framed ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
+            >
+              <div className="font-medium">Cu șasiu (pre-set)</div>
+              <div className="text-xs text-white/60">Dimensiuni preset cu preț fix</div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CanvasConfigurator({ productSlug, initialWidth, initialHeight }: Props) {
   const { addItem } = useCart();
 
@@ -367,20 +433,8 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3 space-y-6">
-            {/* chenar with shape + framed toggles */}
-            <div className="card p-3 flex items-center gap-4">
-              <div className="text-sm font-semibold text-white">Formă</div>
-
-              <div className="inline-flex rounded-md bg-white/5 p-1">
-                <button type="button" onClick={() => setShape("rect")} className={`px-3 py-1 rounded-md text-sm ${shape === "rect" ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}>Dreptunghi</button>
-                <button type="button" onClick={() => setShape("square")} className={`ml-2 px-3 py-1 rounded-md text-sm ${shape === "square" ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}>Pătrat</button>
-              </div>
-
-              <div className="ml-4 inline-flex rounded-lg border border-white/10 bg-white/5 p-1">
-                <button type="button" onClick={() => setFramed(false)} className={`px-3 py-1 rounded-md text-sm ${!framed ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}>Fără șasiu</button>
-                <button type="button" onClick={() => setFramed(true)} className={`ml-2 px-3 py-1 rounded-md text-sm ${framed ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}>Cu șasiu (pre-set)</button>
-              </div>
-            </div>
+            {/* REPLACED: responsive shape + framed selector */}
+            <ResponsiveShapeFrameSelector shape={shape} setShape={setShape} framed={framed} setFramed={setFramed} />
 
             {/* presets / custom inputs */}
             {framed ? (
@@ -554,6 +608,13 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
               <button onClick={() => setDetailsOpen(false)} className="btn-primary py-2 px-4">Închide</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toastVisible && (
+        <div className="fixed left-1/2 bottom-6 z-50 -translate-x-1/2 rounded-md bg-green-600 px-4 py-2 text-sm text-white">
+          Produs adăugat în coș
         </div>
       )}
     </main>

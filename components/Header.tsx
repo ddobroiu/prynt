@@ -16,10 +16,9 @@ type NavItem = {
   children?: { href: string; label: string }[];
 };
 
-/* Menu updated per request:
-   - Moved the items that were previously under "Promotionale" into "Publicitar"
-   - Order now: Publicitar, Banner, Promotionale, Decor, Materiale rigide
-   - "Publicitar" contains: Pliante, Flayere, Afișe, Autocolante
+/* Menu updated: keep structure as before, but "Materiale rigide" is a top-level item
+   and the rigid materials are subitems under it.
+   Order: Publicitar, Banner, Promotionale, Decor, Materiale rigide
 */
 const LINKS: NavItem[] = [
   {
@@ -52,7 +51,21 @@ const LINKS: NavItem[] = [
       { href: "/tapet", label: "Tapet" },
     ],
   },
-  { href: "/materiale-rigide", label: "Materiale rigide" },
+
+  // Materiale rigide as a single top-level menu item with children
+  {
+    href: "/materiale-rigide",
+    label: "Materiale rigide",
+    children: [
+      { href: "/Plexiglass", label: "Plexiglass" },
+      { href: "/Alucobond", label: "Alucobond" },
+      { href: "/Carton", label: "Carton" },
+      { href: "/FoamBord", label: "FoamBord" },
+      { href: "/HIPS", label: "HIPS" },
+      { href: "/Polipropilena", label: "Polipropilena" },
+      { href: "/PVC-Forex", label: "PVC Forex" }, // keep hyphen slug for PVC Forex
+    ],
+  },
 ];
 
 export default function Header() {
@@ -101,7 +114,6 @@ export default function Header() {
             className="inline-flex items-center gap-2"
             aria-label="Prynt.ro"
           >
-            {/* Logo: made larger and responsive (mobile and desktop scale) */}
             <img
               src="/logo.png"
               alt="Prynt.ro"
@@ -194,7 +206,6 @@ export default function Header() {
         {/* DESKTOP NAV */}
         <div className="hidden lg:flex items-center justify-between py-3">
           <a href="/" className="inline-flex items-center gap-2" aria-label="Prynt.ro">
-            {/* Desktop logo larger too */}
             <img src="/logo.png" alt="Prynt.ro" className="rounded-full border border-white/10 w-16 h-16 lg:w-20 lg:h-20" loading="lazy" />
             <span className="sr-only">Prynt.ro</span>
           </a>
