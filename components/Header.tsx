@@ -60,7 +60,6 @@ const LINKS: NavItem[] = [
       { href: "/Plexiglass", label: "Plexiglass" },
       { href: "/Alucobond", label: "Alucobond" },
       { href: "/Carton", label: "Carton" },
-      { href: "/FoamBord", label: "FoamBord" },
       { href: "/HIPS", label: "HIPS" },
       { href: "/Polipropilena", label: "Polipropilena" },
       { href: "/PVC-Forex", label: "PVC Forex" }, // keep hyphen slug for PVC Forex

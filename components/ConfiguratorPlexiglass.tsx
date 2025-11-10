@@ -3,14 +3,13 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
-import { usePathname, useRouter } from "next/navigation";
 
-/* GALLERY */
+/* GALLERY (adjust image paths if needed) */
 const GALLERY = [
-  "/products/alucobond/1.jpg",
-  "/products/alucobond/2.jpg",
-  "/products/alucobond/3.jpg",
-  "/products/alucobond/4.jpg",
+  "/products/plexiglass/1.jpg",
+  "/products/plexiglass/2.jpg",
+  "/products/plexiglass/3.jpg",
+  "/products/plexiglass/4.jpg",
 ] as const;
 
 /* HELPERS */
@@ -19,14 +18,19 @@ const formatMoneyDisplay = (n: number) => (n && n > 0 ? n.toFixed(2) : "0");
 const formatAreaDisplay = (n: number) => (n && n > 0 ? String(n) : "0");
 
 /* TYPES */
-type MaterialType = "PE" | "PVDF";
+type MaterialType = "alb" | "transparent";
 type PriceInput = {
   width_cm: number;
   height_cm: number;
   quantity: number;
   material: MaterialType;
-  color: string;
+  thickness_mm: number;
+  printDouble?: boolean;
+  designOption?: "upload" | "pro";
+  artworkUrl?: string | null;
+  artworkLink?: string;
 };
+
 type LocalPriceOutput = {
   sqm_per_unit: number;
   total_sqm: number;
@@ -44,19 +48,37 @@ const PRESETS = [
 const MAX_WIDTH_CM = 400;
 const MAX_HEIGHT_CM = 200;
 
-/* PRICE MAP & THICKNESS */
-const MATERIAL_INFO: Record<MaterialType, { thickness_mm: number; label: string }> = {
-  PE: { thickness_mm: 3, label: "Visual Bond PE - Interior" },
-  PVDF: { thickness_mm: 4, label: "Visual Bond PVDF - Exterior" },
+/* PRICE MAPS (RON / m²) */
+const PLEXI_ALB_PRICE: Record<number, number> = {
+  2: 200,
+  3: 250,
+  4: 300,
+  5: 350,
 };
 
-const PRICE_MAP: Record<MaterialType, Record<string, number>> = {
-  PE: { Alb: 250, Argintiu: 250, Negru: 250 },
-  PVDF: { Alb: 350 },
+const PLEXI_TRANSPARENT_SINGLE: Record<number, number> = {
+  2: 280,
+  3: 350,
+  4: 410,
+  5: 470,
+  6: 700,
+  8: 1100,
+  10: 1450,
 };
 
-/* DESIGN FEE */
-const PRO_DESIGN_FEE = 100; // RON
+const PLEXI_TRANSPARENT_DOUBLE: Record<number, number> = {
+  2: 380,
+  3: 450,
+  4: 510,
+  5: 570,
+  6: 800,
+  8: 1200,
+  10: 1650,
+};
+
+/* AVAILABLE THICKNESSES (explicit per cerere) */
+const AVAILABLE_THICKNESS_ALB = [2, 3, 4, 5];
+const AVAILABLE_THICKNESS_TRANSPARENT = [2, 3, 4, 5, 6, 8, 10];
 
 /* LOCAL CALC */
 const localCalculatePrice = (input: PriceInput): LocalPriceOutput => {
@@ -65,15 +87,24 @@ const localCalculatePrice = (input: PriceInput): LocalPriceOutput => {
   }
 
   const sqm_per_unit = (input.width_cm / 100) * (input.height_cm / 100);
-  const total_sqm = sqm_per_unit * input.quantity;
+  const total_sqm = roundMoney(sqm_per_unit * input.quantity);
 
-  const pricePerSqm = PRICE_MAP[input.material]?.[input.color] ?? 0;
+  let pricePerSqm = 0;
+
+  if (input.material === "alb") {
+    pricePerSqm = PLEXI_ALB_PRICE[input.thickness_mm] ?? 0;
+  } else if (input.material === "transparent") {
+    pricePerSqm = input.printDouble
+      ? PLEXI_TRANSPARENT_DOUBLE[input.thickness_mm] ?? 0
+      : PLEXI_TRANSPARENT_SINGLE[input.thickness_mm] ?? 0;
+  }
+
   const finalPrice = roundMoney(total_sqm * pricePerSqm);
 
   return {
     sqm_per_unit: roundMoney(sqm_per_unit),
-    total_sqm: roundMoney(total_sqm),
-    pricePerSqm: pricePerSqm,
+    total_sqm,
+    pricePerSqm: roundMoney(pricePerSqm),
     finalPrice,
   };
 };
@@ -85,17 +116,19 @@ type Props = {
   initialHeight?: number;
 };
 
-export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW, initialHeight: initH }: Props) {
+export default function ConfiguratorPlexiglass({ productSlug, initialWidth: initW, initialHeight: initH }: Props) {
   const { addItem } = useCart();
-  const pathname = usePathname();
-  const router = useRouter();
 
   const [input, setInput] = useState<PriceInput>({
     width_cm: initW ?? 0,
     height_cm: initH ?? 0,
     quantity: 1,
-    material: "PE",
-    color: "Alb",
+    material: "alb",
+    thickness_mm: 2,
+    printDouble: false,
+    designOption: "upload",
+    artworkUrl: null,
+    artworkLink: "",
   });
 
   const [lengthText, setLengthText] = useState(initW ? String(initW) : "");
@@ -112,28 +145,12 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   const [materialOpen, setMaterialOpen] = useState(false);
-  const [colorsOpen, setColorsOpen] = useState(false);
+  const [thicknessOpen, setThicknessOpen] = useState(false);
   const materialRef = useRef<HTMLDivElement | null>(null);
-  const colorsRef = useRef<HTMLDivElement | null>(null);
+  const thicknessRef = useRef<HTMLDivElement | null>(null);
 
-  /* GRAFICA (no text-only option) */
-  type DesignOption = "upload" | "pro";
-  const [designOption, setDesignOption] = useState<DesignOption>("upload");
-  const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
-  const [artworkLink, setArtworkLink] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-
-  const availableColors = useMemo(() => {
-    return input.material === "PE" ? ["Alb", "Argintiu", "Negru"] : ["Alb"];
-  }, [input.material]);
-
-  useEffect(() => {
-    if (!availableColors.includes(input.color)) {
-      setInput((s) => ({ ...s, color: availableColors[0] }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input.material]);
 
   useEffect(() => {
     if (usePreset) {
@@ -147,7 +164,7 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       if (materialRef.current && !materialRef.current.contains(e.target as Node)) setMaterialOpen(false);
-      if (colorsRef.current && !colorsRef.current.contains(e.target as Node)) setColorsOpen(false);
+      if (thicknessRef.current && !thicknessRef.current.contains(e.target as Node)) setThicknessOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
@@ -164,14 +181,20 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
     return () => clearInterval(id);
   }, []);
 
+  const availableThickness = useMemo(() => {
+    return input.material === "alb" ? AVAILABLE_THICKNESS_ALB : AVAILABLE_THICKNESS_TRANSPARENT;
+  }, [input.material]);
+
+  useEffect(() => {
+    if (!availableThickness.includes(input.thickness_mm)) {
+      setInput((s) => ({ ...s, thickness_mm: availableThickness[0] }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input.material]);
+
   const priceDetailsLocal = useMemo(() => localCalculatePrice(input), [input]);
 
-  const displayedTotal = useMemo(() => {
-    const base = serverPrice ?? priceDetailsLocal.finalPrice;
-    return designOption === "pro" ? roundMoney(base + PRO_DESIGN_FEE) : base;
-  }, [serverPrice, priceDetailsLocal, designOption]);
-
-  const pricePerUnitLocal = input.quantity > 0 && displayedTotal > 0 ? roundMoney(displayedTotal / input.quantity) : 0;
+  const displayedTotal = useMemo(() => serverPrice ?? priceDetailsLocal.finalPrice, [serverPrice, priceDetailsLocal]);
 
   const updateInput = <K extends keyof PriceInput>(k: K, v: PriceInput[K]) => setInput((p) => ({ ...p, [k]: v }));
 
@@ -187,26 +210,25 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
   };
 
   const handleArtworkFileInput = async (file: File | null) => {
-    setArtworkUrl(null);
+    updateInput("artworkUrl", null);
+    updateInput("artworkLink", "");
     setUploadError(null);
     if (!file) return;
     try {
       setUploading(true);
       const form = new FormData();
       form.append("file", file);
-      // endpoint placeholder - adapt to actual upload route
       const res = await fetch("/api/upload", { method: "POST", body: form });
       if (!res.ok) throw new Error("Upload eșuat");
       const data = await res.json();
-      setArtworkUrl(data.url);
-      setArtworkLink("");
+      updateInput("artworkUrl", data.url);
+      setUploading(false);
     } catch (e: any) {
       try {
         const preview = file ? URL.createObjectURL(file) : null;
-        setArtworkUrl(preview);
+        updateInput("artworkUrl", preview);
       } catch {}
       setUploadError(e?.message ?? "Eroare la upload");
-    } finally {
       setUploading(false);
     }
   };
@@ -215,10 +237,8 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
     setCalcLoading(true);
     setServerPrice(null);
     try {
-      // For now server price is same as local; placeholder for future API
       const result = localCalculatePrice(input);
-      const base = result.finalPrice;
-      setServerPrice(base);
+      setServerPrice(result.finalPrice);
     } catch (err) {
       console.error("calc error", err);
       alert("Eroare la calcul preț");
@@ -228,7 +248,6 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
   }
 
   function handleAddToCart() {
-    // basic validation
     if (!input.width_cm || !input.height_cm) {
       alert("Completează lățimea și înălțimea (în cm) înainte de a adăuga în coș.");
       return;
@@ -239,30 +258,29 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
     }
 
     const totalForOrder = serverPrice ?? priceDetailsLocal.finalPrice;
-    const totalWithDesign = designOption === "pro" ? roundMoney(totalForOrder + PRO_DESIGN_FEE) : totalForOrder;
-    if (!totalWithDesign || totalWithDesign <= 0) {
+    if (!totalForOrder || totalForOrder <= 0) {
       alert("Calculează prețul înainte de a adăuga în coș");
       return;
     }
 
-    const unitPrice = roundMoney(totalWithDesign / input.quantity);
+    const unitPrice = roundMoney(totalForOrder / input.quantity);
 
     const uniqueId = [
-      "alucobond",
+      "plexiglass",
       input.material,
-      input.color,
+      input.thickness_mm,
+      input.printDouble ? "duplex" : "simple",
       input.width_cm,
       input.height_cm,
-      designOption,
-      artworkUrl ? "art" : artworkLink ? "link" : "nod",
+      input.designOption ?? "upload",
     ].join("-");
 
-    const title = `Alucobond ${input.material} - ${input.color} ${input.width_cm}x${input.height_cm} cm`;
+    const title = `Plexiglass ${input.material === "alb" ? "alb" : "transparent"} ${input.thickness_mm}mm ${input.width_cm}x${input.height_cm} cm`;
 
     addItem({
       id: uniqueId,
-      productId: productSlug ?? "alucobond-generic",
-      slug: productSlug ?? "alucobond",
+      productId: productSlug ?? "plexiglass-generic",
+      slug: productSlug ?? "plexiglass",
       title,
       width: input.width_cm,
       height: input.height_cm,
@@ -272,25 +290,21 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
       metadata: {
         totalSqm: priceDetailsLocal.total_sqm,
         pricePerSqm: priceDetailsLocal.pricePerSqm,
-        thickness_mm: MATERIAL_INFO[input.material].thickness_mm,
-        designOption,
-        proDesignFee: designOption === "pro" ? PRO_DESIGN_FEE : 0,
-        artworkUrl,
-        artworkLink,
+        material: input.material,
+        thickness_mm: input.thickness_mm,
+        printDouble: input.printDouble,
+        designOption: input.designOption ?? "upload",
+        artworkUrl: input.artworkUrl ?? null,
+        artworkLink: input.artworkLink ?? "",
       },
     });
 
     setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 1600);
+    setTimeout(() => setToastVisible(false), 1400);
   }
 
   const totalShown = displayedTotal;
-  const canAdd =
-    totalShown > 0 &&
-    input.width_cm > 0 &&
-    input.height_cm > 0 &&
-    input.width_cm <= MAX_WIDTH_CM &&
-    input.height_cm <= MAX_HEIGHT_CM;
+  const canAdd = totalShown > 0 && input.width_cm > 0 && input.height_cm > 0 && input.width_cm <= MAX_WIDTH_CM && input.height_cm <= MAX_HEIGHT_CM;
 
   return (
     <main className="min-h-screen">
@@ -301,8 +315,8 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
       <div className="page py-10 pb-24 lg:pb-10">
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Alucobond</h1>
-            <p className="mt-2 text-white/70">Alege tip, culoare, dimensiuni și încarcă grafică. Calcul instant și adaugă în coș.</p>
+            <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Plexiglass</h1>
+            <p className="mt-2 text-white/70">Alege tipul, grosimea, dimensiunile și încarcă grafică. Opțiunea "Pro" se stabilește după comandă.</p>
           </div>
           <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline text-sm self-start">
             <Info size={18} />
@@ -318,74 +332,68 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="field-label">Lățime (cm)</label>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="ex: 300" className="input text-lg font-semibold" />
+                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="ex: 100" className="input text-lg font-semibold" />
                 </div>
                 <div>
                   <label className="field-label">Înălțime (cm)</label>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="ex: 150" className="input text-lg font-semibold" />
+                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="ex: 100" className="input text-lg font-semibold" />
                 </div>
-                <NumberInput label="Cantitate" value={input.quantity} onChange={(v) => updateInput("quantity", Math.max(1, Math.floor(v)))} />
+                <div>
+                  <label className="field-label">Cantitate</label>
+                  <div className="flex items-center">
+                    <button onClick={() => updateInput("quantity", Math.max(1, input.quantity - 1))} className="p-2 bg-white/10 rounded-l-md hover:bg-white/15"><Minus size={14} /></button>
+                    <input type="number" value={input.quantity} onChange={(e) => updateInput("quantity", Math.max(1, parseInt(e.target.value || "1")))} className="input text-lg font-semibold text-center" />
+                    <button onClick={() => updateInput("quantity", input.quantity + 1)} className="p-2 bg-white/10 rounded-r-md hover:bg-white/15"><Plus size={14} /></button>
+                  </div>
+                </div>
               </div>
-              <div className="mt-2 text-xs text-white/60">Dimensiuni maxime suportate: 400 x 200 cm. Preseturi rapide disponibile.</div>
+              <div className="mt-2 text-xs text-white/60">Preseturi: {PRESETS.map(p => `${p.w}x${p.h} cm`).join(" • ")}</div>
             </div>
 
-            {/* 2. Material & Culori */}
+            {/* 2. Material & thickness */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="card p-4" ref={materialRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-white">2. Tip material</h2></div>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-white">2. Material</h2></div>
 
                 <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setMaterialOpen((s) => !s)}
-                    className="w-full flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5"
-                    aria-expanded={materialOpen}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="text-sm text-white/80">
-                        {MATERIAL_INFO[input.material].label} — {MATERIAL_INFO[input.material].thickness_mm}mm
-                      </div>
-                    </div>
+                  <button type="button" onClick={() => setMaterialOpen((s) => !s)} className="w-full flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5" aria-expanded={materialOpen}>
+                    <div className="text-sm text-white/80">{input.material === "alb" ? "Plexiglass alb" : "Plexiglass transparent"}</div>
                     <div className="text-xs text-white/60">{materialOpen ? "Închide" : "Schimbă"}</div>
                   </button>
 
                   {materialOpen && (
                     <div className="mt-2 p-2 bg-black/60 rounded-md border border-white/10 space-y-2">
-                      <MaterialOptionDropdown checked={input.material === "PE"} onSelect={() => { updateInput("material", "PE"); setMaterialOpen(false); }} title="Visual Bond PE" subtitle="3mm — Interior" />
-                      <MaterialOptionDropdown checked={input.material === "PVDF"} onSelect={() => { updateInput("material", "PVDF"); setMaterialOpen(false); }} title="Visual Bond PVDF" subtitle="4mm — Exterior" />
+                      <button onClick={() => { updateInput("material", "alb"); updateInput("printDouble", false); setMaterialOpen(false); }} className="w-full text-left p-2 rounded-md hover:bg-white/5">Plexiglass alb</button>
+                      <button onClick={() => { updateInput("material", "transparent"); setMaterialOpen(false); }} className="w-full text-left p-2 rounded-md hover:bg-white/5">Plexiglass transparent</button>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="card p-4" ref={colorsRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-white">3. Culoare</h2></div>
+              <div className="card p-4" ref={thicknessRef}>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-white">3. Grosime & print</h2></div>
 
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setColorsOpen((s) => !s)}
-                    className="w-full flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5"
-                    aria-expanded={colorsOpen}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="text-sm text-white/80">{input.color}</div>
-                    </div>
-                    <div className="text-xs text-white/60">{colorsOpen ? "Închide" : "Schimbă"}</div>
-                  </button>
+                <div className="space-y-2">
+                  <div className="text-xs text-white/60">Grosime (mm)</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {availableThickness.map((t) => (
+                      <button key={t} onClick={() => updateInput("thickness_mm", t)} className={`p-2 text-left rounded-md ${input.thickness_mm === t ? "border border-indigo-500 bg-indigo-900/10" : "border border-white/10 hover:bg-white/5"}`}>
+                        {t} mm
+                      </button>
+                    ))}
+                  </div>
 
-                  {colorsOpen && (
-                    <div className="mt-2 p-2 bg-black/60 rounded-md border border-white/10 space-y-2">
-                      {availableColors.map((c) => (
-                        <button key={c} onClick={() => { updateInput("color", c); setColorsOpen(false); }} className={`w-full text-left p-2 rounded-md ${c === input.color ? "bg-indigo-900/30 border border-indigo-500" : "hover:bg-white/5"}`}>
-                          <div className="text-sm text-white">{c}</div>
-                        </button>
-                      ))}
+                  {input.material === "transparent" && (
+                    <div className="mt-3">
+                      <label className="flex items-center gap-3">
+                        <input type="checkbox" checked={!!input.printDouble} onChange={(e) => updateInput("printDouble", e.target.checked)} className="checkbox" />
+                        <span className="text-sm">Print față-verso (dacă doriți)</span>
+                      </label>
                     </div>
                   )}
-                </div>
 
-                <div className="mt-2 text-xs text-white/60">Culori disponibile pentru tipul ales.</div>
+                  <div className="mt-2 text-xs text-white/60">Notă: prețurile sunt calculate automat în funcție de grosime și opțiunea față/verso.</div>
+                </div>
               </div>
             </div>
 
@@ -395,12 +403,12 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
 
               <div className="relative">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <button onClick={() => setDesignOption("upload")} className={`p-3 rounded-lg border ${designOption === "upload" ? "border-indigo-500 bg-indigo-900/10" : "border-white/10 hover:bg-white/5"}`}>Încarcă grafică</button>
-                  <button onClick={() => setDesignOption("pro")} className={`p-3 rounded-lg border ${designOption === "pro" ? "border-indigo-500 bg-indigo-900/10" : "border-white/10 hover:bg-white/5"}`}>Pro (+{PRO_DESIGN_FEE} RON)</button>
+                  <button onClick={() => updateInput("designOption", "upload")} className={`p-3 rounded-lg border ${input.designOption === "upload" ? "border-indigo-500 bg-indigo-900/10" : "border-white/10 hover:bg-white/5"}`}>Încarcă grafică</button>
+                  <button onClick={() => updateInput("designOption", "pro")} className={`p-3 rounded-lg border ${input.designOption === "pro" ? "border-indigo-500 bg-indigo-900/10" : "border-white/10 hover:bg-white/5"}`}>Pro (preț stabilit după comandă)</button>
                 </div>
               </div>
 
-              {designOption === "upload" && (
+              {input.designOption === "upload" && (
                 <div className="panel p-3 mt-3 space-y-2 border-t border-white/5">
                   <div>
                     <label className="field-label">Încarcă fișier</label>
@@ -417,8 +425,8 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                     <label className="field-label">Link descărcare (opțional)</label>
                     <input
                       type="url"
-                      value={artworkLink}
-                      onChange={(e) => setArtworkLink(e.target.value)}
+                      value={input.artworkLink ?? ""}
+                      onChange={(e) => updateInput("artworkLink", e.target.value)}
                       placeholder="Ex: https://.../fisier.pdf"
                       className="input"
                     />
@@ -428,15 +436,15 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                   <div className="text-xs text-white/60">
                     {uploading && "Se încarcă…"}
                     {uploadError && "Eroare upload"}
-                    {artworkUrl && "Fișier încărcat"}
-                    {!artworkUrl && artworkLink && "Link salvat"}
+                    {input.artworkUrl && "Fișier încărcat"}
+                    {!input.artworkUrl && input.artworkLink && "Link salvat"}
                   </div>
                 </div>
               )}
 
-              {designOption === "pro" && (
+              {input.designOption === "pro" && (
                 <div className="panel p-3 mt-3 border-t border-white/5">
-                  <div className="text-sm text-white/80">Serviciu grafic profesional — includem fișier sursă și corecții minore.</div>
+                  <div className="text-sm text-white/80">Serviciu grafic profesional — prețul se stabilește după comandă și comunicare cu clientul.</div>
                 </div>
               )}
             </div>
@@ -447,7 +455,7 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
                 <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
-                  <img src={activeImage} alt="Alucobond preview" className="h-full w-full object-cover" loading="eager" />
+                  <img src={activeImage} alt="Plexiglass preview" className="h-full w-full object-cover" loading="eager" />
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
                   {GALLERY.map((src, i) => (
@@ -463,8 +471,8 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                 <div className="space-y-2 text-white/80 text-sm">
                   <p>Suprafață: <span className="text-white font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
                   <p>Preț: <span className="text-2xl font-extrabold text-white">{formatMoneyDisplay(totalShown)} RON</span></p>
-                  <p className="text-xs text-white/60">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm} RON</strong></p>
-                  {designOption === "pro" && <p className="text-xs text-white/60">Taxă design pro: <strong>{PRO_DESIGN_FEE} RON</strong></p>}
+                  <p className="text-xs text-white/60">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—"}</strong></p>
+                  <p className="text-xs text-white/60">Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong></p>
                 </div>
 
                 <div className="hidden lg:block mt-4">
@@ -475,7 +483,9 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-white/60">Dimensiuni maxime: 300x150 cm; 400x150 cm; 300x200 cm. Prețurile afișate sunt orientative.</div>
+              <div className="card-muted p-3 text-xs text-white/60">
+                Dimensiuni maxime suportate: 300x150 cm; 400x150 cm; 300x200 cm. Prețurile afișate sunt orientative.
+              </div>
             </div>
           </aside>
         </div>
@@ -491,23 +501,16 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
             <button className="absolute right-3 top-3 p-1" onClick={() => setDetailsOpen(false)} aria-label="Închide">
               <X size={18} className="text-white/80" />
             </button>
-            <h3 className="text-xl font-bold text-white mb-3">Detalii Alucobond</h3>
-            <div className="text-sm text-white/70 space-y-2">
+            <h3 className="text-xl font-bold text-white mb-3">Detalii Plexiglass</h3>
+            <div className="text-sm text-white/70 space-y-3">
               <p>
-                Plăcile de alucobond sunt realizate dintr-un strat interior de polietilenă, îmbrăcat în 2 feţe de aluminiu cu o acoperire specială care conferă acestui tip de plăci un aspect deosebit. Materialul are suprafaţa albă, perfect plană şi netedă, este uşor şi rezistent în timp.
+                Plexiglassul alb și plexiglassul transparent sunt materiale durabile, ușor de prelucrat și folosite frecvent pentru panouri, display-uri și aplicații de protecție. Grosimea și tipul (alb/transparent) influențează rezistența și aspectul.
               </p>
               <p>
-                O caracteristică deosebită a acestui tip de material, cu suprafaţa netedă şi albă, este aceea că oferă un print de înaltă calitate şi culori vii.
+                Opțiunea de print față-verso este disponibilă pentru plexiglass transparent; pentru plexiglass alb se recomandă print față (verifică cu echipa tehnică pentru lucrări față-verso).
               </p>
               <p>
-                Dimensiunile maxime ale plăcilor pot fi: 300 x 150 cm; 400 x 150 cm; 300 x 200 cm.
-              </p>
-              <p>
-                Tipuri disponibile:
-                <ul className="list-disc ml-5 mt-1">
-                  <li>Visual Bond PE — Interior, grosime 3mm — culori: Alb, Argintiu, Negru — 250 RON / m²</li>
-                  <li>Visual Bond PVDF — Exterior, grosime 4mm — culoare: Alb — 350 RON / m²</li>
-                </ul>
+                Pentru grafică: încărcați fișierul sau alegeți serviciul grafic profesional (Pro). Pentru Pro nu afișăm un tarif în configurator — prețul se stabilește după evaluarea cerințelor și comunicare.
               </p>
             </div>
             <div className="mt-6 text-right">
@@ -522,22 +525,6 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
 
 /* small UI helpers */
 
-function MaterialOptionDropdown({ checked, onSelect, title, subtitle }: { checked: boolean; onSelect: () => void; title: string; subtitle?: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={`w-full flex items-center gap-3 p-2 rounded-md ${checked ? "bg-indigo-900/30 border border-indigo-500" : "hover:bg-white/5"}`}
-    >
-      <span className={`h-3 w-3 rounded-full border ${checked ? "bg-indigo-500 border-indigo-500" : "bg-transparent border-white/20"}`} />
-      <div className="text-left">
-        <div className="text-sm text-white">{title}</div>
-        {subtitle && <div className="text-xs text-white/60">{subtitle}</div>}
-      </div>
-    </button>
-  );
-}
-
 function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   const inc = (d: number) => onChange(Math.max(1, value + d));
   return (
@@ -547,7 +534,7 @@ function NumberInput({ label, value, onChange }: { label: string; value: number;
         <button onClick={() => inc(-1)} className="p-2 bg-white/10 rounded-l-md hover:bg-white/15" aria-label="Decrement">
           <Minus size={14} />
         </button>
-        <input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-lg font-semibold text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-y-0 rounded-none" />
+        <input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value || "1")))} className="input text-lg font-semibold text-center" />
         <button onClick={() => inc(1)} className="p-2 bg-white/10 rounded-r-md hover:bg-white/15" aria-label="Increment">
           <Plus size={14} />
         </button>
