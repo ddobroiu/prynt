@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function ShopPage() {
   const categories = [
     { key: "bannere", label: "Bannere din stoc" },
-    // alte categorii...
+    { key: "inchiriere", label: "Banner - închiriere" }
   ];
 
   return (

@@ -14,8 +14,6 @@ type Product = {
 
 export default function ProductCard({ product }: { product: Product }) {
   const img = product.images?.[0] ?? "/placeholder.png";
-
-  // Conversie defensivă a prețului pentru a evita erori runtime
   const priceNum = typeof product.price === "number" ? product.price : Number(product.price || 0);
   const priceDisplay = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "—";
 

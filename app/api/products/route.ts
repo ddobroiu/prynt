@@ -1,39 +1,51 @@
 import { NextResponse } from "next/server";
+import fs from "fs/promises";
+import path from "path";
 
-const MOCK_PRODUCTS = [
-  {
-    id: "banner-90x200-01",
-    slug: "banner-90x200-01",
-    title: "Banner 90x200 PVC",
-    description: "Banner standard 90x200 cm, PVC 440g, print full color.",
-    price: 120.0,
-    stock: 12,
-    category: "bannere",
-    images: ["/products/banners/banner-90x200-01.jpg"],
-    attributes: { dimensiuni: "90x200", material: "PVC 440g" },
-  },
-  {
-    id: "banner-60x160-01",
-    slug: "banner-60x160-01",
-    title: "Banner 60x160",
-    description: "Banner compact 60x160 cm.",
-    price: 90.0,
-    stock: 5,
-    category: "bannere",
-    images: ["/products/banners/banner-60x160-01.jpg"],
-    attributes: { dimensiuni: "60x160", material: "PVC 440g" },
-  },
-];
+const DATA_PATH = path.join(process.cwd(), "data", "products.json");
+
+async function readProducts() {
+  try {
+    const raw = await fs.readFile(DATA_PATH, "utf-8");
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed;
+    return [];
+  } catch (e) {
+    // dacă nu există sau e corupt, returnăm array gol
+    return [];
+  }
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const category = url.searchParams.get("category");
+  const slug = url.searchParams.get("slug");
 
-  let results = MOCK_PRODUCTS;
-  if (category) {
-    results = MOCK_PRODUCTS.filter((p) => p.category === category);
+  const products = await readProducts();
+
+  if (slug) {
+    const found = products.find((p: any) => p.slug === slug) ?? null;
+    return NextResponse.json(found);
   }
 
-  // Returnăm direct array ca răspuns JSON
+  const results = category ? products.filter((p: any) => p.category === category) : products;
   return NextResponse.json(results);
+}
+
+// Optional: POST pentru a adăuga produse (folosește doar în dev)
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    if (!body?.id || !body?.slug) {
+      return NextResponse.json({ error: "invalid payload" }, { status: 400 });
+    }
+    const products = await readProducts();
+    products.push(body);
+    await fs.mkdir(path.dirname(DATA_PATH), { recursive: true });
+    await fs.writeFile(DATA_PATH, JSON.stringify(products, null, 2), "utf-8");
+    return NextResponse.json(body, { status: 201 });
+  } catch (err) {
+    console.error("POST /api/products error:", err);
+    return NextResponse.json({ error: "server error" }, { status: 500 });
+  }
 }
