@@ -187,7 +187,7 @@ export const PRODUCTS: Product[] = [
     tags: ["pliante", "frizerie", "salon", "pliante-frizerie"],
     seo: {
       title: "Pliante pentru frizerii — comandă online | Prynt",
-      description: "Pliante personalizate pentru saloane și frizerii. Alege dimensiuni, hârtie și finisaje. Configurator live.",
+      description: "Pliante personalizate pentru saloane și frizerii. Alege dimensiuni, hârtia și finisaje. Configurator live.",
     },
     materials: MATERIAL_OPTIONS.filter((m) => (m.recommendedFor ?? []).includes("pliante")),
     metadata: { category: "pliante", landing: true },
@@ -340,7 +340,7 @@ export function getAllProductSlugsByCategory(category: string): string[] {
 /**
  * Matching ordered and tolerant to avoid collisions:
  * 1) exact match on id / slug / routeSlug
- * 2) suffix match (requests like "banner-300x100" match routeSlug "300x100")
+ * 2) last-segment match (requests like "/something/300x100" match last segment "300x100")
  * 3) tag exact match
  * 4) title contains (low priority)
  */
@@ -348,48 +348,100 @@ export function getProductBySlug(slug: string | undefined): Product | undefined 
   if (!slug) return undefined;
   const s = String(slug).toLowerCase().trim();
 
+  // compute last segment to avoid greedy endsWith collisions
+  const segments = s.split("/").map((x) => x.trim()).filter(Boolean);
+  const lastSegment = segments.length ? segments[segments.length - 1] : s;
+
   // 1) exact match
   for (const p of PRODUCTS) {
     const id = String(p.id ?? "").toLowerCase();
     const sl = String(p.slug ?? "").toLowerCase();
     const rs = String(p.routeSlug ?? "").toLowerCase();
     if (s === id || s === sl || s === rs) return p;
+    // also allow direct match on last segment (helps when raw path has multiple segments)
+    if (lastSegment === id || lastSegment === sl || lastSegment === rs) return p;
   }
 
-  // 2) suffix match
+  // 2) last-segment match (safer than endsWith on the full path)
   for (const p of PRODUCTS) {
     const sl = String(p.slug ?? "").toLowerCase();
     const rs = String(p.routeSlug ?? "").toLowerCase();
-    if (rs && s.endsWith(rs)) return p;
-    if (sl && s.endsWith(sl)) return p;
+    if (rs && lastSegment === rs) return p;
+    if (sl && lastSegment === sl) return p;
   }
 
   // 3) tag exact match (global)
   for (const p of PRODUCTS) {
     const tags = (p.tags ?? []).map((t) => String(t).toLowerCase());
-    if (tags.includes(s)) return p;
+    if (tags.includes(lastSegment) || tags.includes(s)) return p;
   }
 
   // 4) title contains (low priority)
   for (const p of PRODUCTS) {
     const title = String(p.title ?? "").toLowerCase();
-    if (title.includes(s)) return p;
+    if (title.includes(s) || title.includes(lastSegment)) return p;
   }
 
   return undefined;
 }
 
+/**
+ * resolveProductForRequestedSlug
+ *
+ * Behavior improvements:
+ * - Accepts complex slugs that may include dimension segments (ex: "300x200/banner-name" or "banner-300x200")
+ * - Extracts first dimension occurrence and removes it from the slug used for lookup
+ * - Tries lookups with the cleaned slug first (category-scoped then global), falls back to original slug
+ * - If dimensions are detected but no product is found, returns a dimension fallback product
+ */
 export async function resolveProductForRequestedSlug(requestedSlug: string, category?: string) {
-  const slug = String(requestedSlug || "").toLowerCase().trim();
+  const raw = String(requestedSlug || "").toLowerCase().trim();
 
-  // 1) category scoped lookup (prefer products in the specified category)
-  if (category) {
+  // Normalize into segments
+  const segments = raw.split("/").map((s) => s.trim()).filter(Boolean);
+
+  // Regexes: allow 1-5 digits and separators x X × -
+  const dimExactRegex = /^(\d{1,5})[xX×-](\d{1,5})$/;
+  const dimAnywhereRegex = /(\d{1,5})[xX×-](\d{1,5})/;
+
+  let width: number | undefined;
+  let height: number | undefined;
+  const remaining: string[] = [];
+
+  for (const seg of segments) {
+    const mExact = seg.match(dimExactRegex);
+    if (mExact && width === undefined && height === undefined) {
+      width = Number(mExact[1]);
+      height = Number(mExact[2]);
+      // skip adding this exact-dimension segment
+      continue;
+    }
+
+    const mAny = seg.match(dimAnywhereRegex);
+    if (mAny && width === undefined && height === undefined) {
+      width = Number(mAny[1]);
+      height = Number(mAny[2]);
+      // remove the matched portion from the segment and keep the rest if present
+      const cleaned = seg.replace(mAny[0], "").replace(/(^[-_]+|[-_]+$)/g, "").trim();
+      if (cleaned) remaining.push(cleaned);
+      continue;
+    }
+
+    remaining.push(seg);
+  }
+
+  const cleanedSlug = remaining.join("/") || raw;
+
+  // Helper to attempt category-scoped lookup using a candidate slug
+  function categoryLookup(candidate: string | undefined): { product?: Product; initialWidth?: number | null; initialHeight?: number | null; isFallback?: boolean } | null {
+    if (!category || !candidate) return null;
+    const slugCandidate = String(candidate).toLowerCase().trim();
     const candidates = PRODUCTS.filter((p) => String(p.metadata?.category ?? "").toLowerCase() === String(category).toLowerCase());
 
-    // 1a) exact id/slug/routeSlug or suffix among candidates
+    // 1a) exact id/slug/routeSlug or last-segment match among candidates
     for (const p of candidates) {
       const ids = [String(p.id ?? ""), String(p.slug ?? ""), String(p.routeSlug ?? "")].map((x) => x.toLowerCase());
-      if (ids.includes(slug) || ids.some((id) => id && slug.endsWith(id))) {
+      if (ids.includes(slugCandidate) || ids.some((id) => id && slugCandidate.split("/").pop() === id)) {
         return {
           product: p,
           initialWidth: p.width_cm ?? p.minWidthCm ?? null,
@@ -402,7 +454,7 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
     // 1b) tag exact match among candidates
     for (const p of candidates) {
       const tags = (p.tags ?? []).map((t) => String(t).toLowerCase());
-      if (tags.includes(slug)) {
+      if (tags.includes(slugCandidate) || tags.includes(slugCandidate.split("/").pop() ?? "")) {
         return {
           product: p,
           initialWidth: p.width_cm ?? p.minWidthCm ?? null,
@@ -415,7 +467,7 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
     // 1c) title contains (category restricted)
     for (const p of candidates) {
       const title = String(p.title ?? "").toLowerCase();
-      if (title.includes(slug)) {
+      if (title.includes(slugCandidate) || title.includes(slugCandidate.split("/").pop() ?? "")) {
         return {
           product: p,
           initialWidth: p.width_cm ?? p.minWidthCm ?? null,
@@ -424,37 +476,57 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
         };
       }
     }
+
+    return null;
   }
 
-  // 2) global lookup
-  const product = getProductBySlug(slug);
-  if (product) {
+  // 1) Try category scoped lookup with cleaned slug first, then raw
+  if (category) {
+    const catResClean = categoryLookup(cleanedSlug);
+    if (catResClean) return catResClean;
+
+    const catResRaw = categoryLookup(raw);
+    if (catResRaw) return catResRaw;
+  }
+
+  // 2) global lookup: try cleanedSlug first, then raw
+  const productClean = getProductBySlug(cleanedSlug);
+  if (productClean) {
     return {
-      product,
-      initialWidth: product.width_cm ?? product.minWidthCm ?? null,
-      initialHeight: product.height_cm ?? product.minHeightCm ?? null,
+      product: productClean,
+      initialWidth: productClean.width_cm ?? productClean.minWidthCm ?? null,
+      initialHeight: productClean.height_cm ?? productClean.minHeightCm ?? null,
       isFallback: false,
     };
   }
 
-  // 3) parse dimensions ex: 120x80
-  const m = slug.match(/(\d{2,4})[x×-](\d{2,4})/);
-  if (m) {
-    const width = Number(m[1]);
-    const height = Number(m[2]);
+  const productRaw = getProductBySlug(raw);
+  if (productRaw) {
+    return {
+      product: productRaw,
+      initialWidth: productRaw.width_cm ?? productRaw.minWidthCm ?? null,
+      initialHeight: productRaw.height_cm ?? productRaw.minHeightCm ?? null,
+      isFallback: false,
+    };
+  }
+
+  // 3) If dimensions were detected, return a dimension fallback product
+  if (typeof width === "number" && typeof height === "number") {
+    const w = width;
+    const h = height;
     const fallback: Product = {
-      id: `fallback-${width}x${height}`,
-      slug: `fallback-${width}x${height}`,
-      routeSlug: `${width}x${height}`,
-      title: `Produs ${width}x${height} cm`,
-      description: `Produs personalizat ${width}x${height} cm — configurează dimensiuni și finisaje.`,
+      id: `fallback-${w}x${h}`,
+      slug: `fallback-${w}x${h}`,
+      routeSlug: `${w}x${h}`,
+      title: `Produs ${w}x${h} cm`,
+      description: `Produs personalizat ${w}x${h} cm — configurează dimensiuni și finisaje.`,
       images: ["/images/generic-banner.jpg"],
       priceBase: 0,
       currency: "RON",
       tags: ["fallback", "personalizat"],
       metadata: { category: category ?? "bannere" },
     };
-    return { product: fallback, initialWidth: width, initialHeight: height, isFallback: true };
+    return { product: fallback, initialWidth: w, initialHeight: h, isFallback: true };
   }
 
   // 4) fallback generic per category (if category provided)
@@ -474,7 +546,7 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
     const fallback: Product = {
       id: `fallback-${catKey}`,
       slug: `fallback-${catKey}`,
-      routeSlug: slug || info.defaultSlug,
+      routeSlug: cleanedSlug || info.defaultSlug,
       title: info.title,
       description: `Configurați ${info.title.toLowerCase()} — completați dimensiunile și opțiunile.`,
       images: [info.image],
