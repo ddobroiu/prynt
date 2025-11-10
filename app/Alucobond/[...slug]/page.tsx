@@ -1,12 +1,8 @@
 import React from "react";
-import ConfiguratorPVCForex from "../../../components/ConfiguratorPVCForex"; // reutilizăm configuratorul pentru materiale rigide
+import ConfiguratorPVCForex from "../../../components/ConfiguratorPVCForex";
 
 type Props = { params: { slug?: string[] | string } };
 
-/**
- * Parsează dimensiuni din slug analog cu celelalte pagini.
- * Returnează width, height şi productSlug curăţat (fără segmentul WxH).
- */
 function parseDimsFromSlug(slug?: string[] | string): { width?: number; height?: number; productSlug?: string } {
   if (!slug) return {};
   const parts = Array.isArray(slug) ? slug : String(slug).split("/").map((s) => s.trim()).filter(Boolean);
@@ -23,7 +19,7 @@ function parseDimsFromSlug(slug?: string[] | string): { width?: number; height?:
     if (mExact && width === undefined && height === undefined) {
       width = Number(mExact[1]);
       height = Number(mExact[2]);
-      continue; // sărim segmentul exact dimensiune
+      continue;
     }
 
     const mAny = seg.match(dimAnywhere);
@@ -56,7 +52,7 @@ export default function Page({ params }: Props) {
         productSlug={productSlug}
         initialWidth={parsed.width ?? undefined}
         initialHeight={parsed.height ?? undefined}
-        productType="alucobond"
+        productType="alucobond" // <--- trimitem productType corect tipului
       />
     </main>
   );
