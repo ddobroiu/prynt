@@ -47,14 +47,19 @@ export type Product = {
 // Add or edit products here. Keep landing-specific tags (frizerie, vulcanizare, etc.)
 // only on landing entries to avoid greedy matches.
 export const PRODUCTS: Product[] = [
-  // Bannere generate automat
+  // Bannere — intrări generate pentru fiecare pagină din /app/banner
   {
     id: "banner-apartament-de-inchiriat",
     slug: "apartament-de-inchiriat",
     routeSlug: "apartament-de-inchiriat",
-    title: "Banner Apartament de închiriat",
-    description: "Banner personalizat pentru promovarea apartamentelor de închiriat. Configurabil la dimensiuni și materiale.",
-    images: ["/products/banner/apartament-de-inchiriat.jpg"],
+    title: "Banner - Apartament de închiriat",
+    description: "Banner personalizat pentru promovarea apartamentelor de închiriat. Configurează dimensiuni, material și finisaje.",
+    images: [
+      "/products/banner/apartament-de-inchiriat.jpg",
+      "/products/banner/1.jpg",
+      "/products/banner/2.jpg",
+      "/products/banner/3.jpg",
+    ],
     priceBase: 250.0,
     currency: "RON",
     tags: ["banner", "apartament", "inchiriat"],
@@ -66,9 +71,14 @@ export const PRODUCTS: Product[] = [
     id: "banner-apartament-de-vanzare",
     slug: "apartament-de-vanzare",
     routeSlug: "apartament-de-vanzare",
-    title: "Banner Apartament de vânzare",
-    description: "Banner personalizat pentru promovarea apartamentelor de vânzare. Configurabil la dimensiuni și materiale.",
-    images: ["/products/banner/apartament-de-vanzare.jpg"],
+  title: "Banner - Apartament de vânzare",
+  description: 'Banner pentru anunţuri "vânzare" — personalizabil pe dimensiuni și material.',
+  images: [
+    "/products/banner/apartament-de-vanzare.jpg",
+    "/products/banner/1.jpg",
+    "/products/banner/2.jpg",
+    "/products/banner/3.jpg",
+  ],
     priceBase: 250.0,
     currency: "RON",
     tags: ["banner", "apartament", "vanzare"],
@@ -76,7 +86,45 @@ export const PRODUCTS: Product[] = [
     materials: MATERIAL_OPTIONS.filter((m) => (m.recommendedFor ?? []).includes("bannere")),
     metadata: { category: "bannere" },
   },
-  // ...continui cu restul bannerele din listă...
+  { id: "banner-barbershop", slug: "barbershop", routeSlug: "barbershop", title: "Banner Barber Shop", description: "Banner pentru frizerii și barber-shop-uri.", images: [
+    "/products/banner/barbershop.jpg",
+    "/products/banner/1.jpg",
+    "/products/banner/2.jpg",
+    "/products/banner/3.jpg",
+  ], priceBase: 250, currency: "RON", tags: ["barbershop", "banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-cabinet-stomatologic", slug: "cabinet-stomatologic", routeSlug: "cabinet-stomatologic", title: "Banner Cabinet Stomatologic", description: "Banner pentru cabinete stomatologice și anunțuri medicale.", images: [
+    "/products/banner/cabinet-stomatologic.jpg",
+    "/products/banner/1.jpg",
+    "/products/banner/2.jpg",
+    "/products/banner/3.jpg",
+  ], priceBase: 250, currency: "RON", tags: ["stomatologie","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-casa-de-inchiriat", slug: "casa-de-inchiriat", routeSlug: "casa-de-inchiriat", title: "Banner - Casă de închiriat", description: "Banner pentru proprietăţi de închiriat.", images: [
+    "/products/banner/casa-de-inchiriat.jpg",
+    "/products/banner/1.jpg",
+    "/products/banner/2.jpg",
+    "/products/banner/3.jpg"
+  ], priceBase: 250, currency: "RON", tags: ["casa","inchiriat","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-casa-de-vanzare", slug: "casa-de-vanzare", routeSlug: "casa-de-vanzare", title: "Banner - Casă de vânzare", description: "Banner pentru proprietăţi de vânzare.", images: ["/products/banner/casa-de-vanzare.jpg"], priceBase: 250, currency: "RON", tags: ["casa","vanzare","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-de-inchiriat", slug: "de-inchiriat", routeSlug: "de-inchiriat", title: "Banner - De închiriat", description: "Banner generic pentru anunţuri 'de închiriat'.", images: ["/products/banner/de-inchiriat.jpg"], priceBase: 250, currency: "RON", tags: ["inchiriere","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-fastfood", slug: "fastfood", routeSlug: "fastfood", title: "Banner Fast-Food", description: "Banner pentru restaurante de tip fast-food și livrări.", images: ["/products/banner/fastfood.jpg"], priceBase: 250, currency: "RON", tags: ["food","fastfood","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-fructe-si-legume", slug: "fructe-si-legume", routeSlug: "fructe-si-legume", title: "Banner Fructe și Legume", description: "Banner pentru pieţe, tarabe și magazine de fructe și legume.", images: ["/products/banner/fructe-si-legume.jpg"], priceBase: 250, currency: "RON", tags: ["fructe","legume","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-garsoniera-de-inchiriat", slug: "garsoniera-de-inchiriat", routeSlug: "garsoniera-de-inchiriat", title: "Banner Garsonieră de închiriat", description: "Banner pentru garsoniere de închiriat.", images: ["/products/banner/garsoniera-de-inchiriat.jpg"], priceBase: 250, currency: "RON", tags: ["garsoniera","inchiriat","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-garsoniera-de-vanzare", slug: "garsoniera-de-vanzare", routeSlug: "garsoniera-de-vanzare", title: "Banner Garsonieră de vânzare", description: "Banner pentru garsoniere de vânzare.", images: ["/products/banner/garsoniera-de-vanzare.jpg"], priceBase: 250, currency: "RON", tags: ["garsoniera","vanzare","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-la-multi-ani", slug: "la-multi-ani", routeSlug: "la-multi-ani", title: "Banner La mulți ani!", description: "Banner de felicitare pentru aniversări și evenimente.", images: ["/products/banner/la-multi-ani.jpg"], priceBase: 250, currency: "RON", tags: ["la-multi-ani","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-magazin-alimentar", slug: "magazin-alimentar", routeSlug: "magazin-alimentar", title: "Banner Magazin Alimentar", description: "Banner pentru magazine alimentare și promoții.", images: ["/products/banner/magazin-alimentar.jpg"], priceBase: 250, currency: "RON", tags: ["magazin","alimentar","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-nu-blocati", slug: "nu-blocati", routeSlug: "nu-blocati", title: "Banner Nu blocați", description: "Banner pentru avertismente — 'Nu blocați'.", images: ["/products/banner/nu-blocati.jpg"], priceBase: 250, currency: "RON", tags: ["semnalistica","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-produs-in-romania", slug: "produs-in-romania", routeSlug: "produs-in-romania", title: "Banner – Produs în România", description: "Banner care marchează originile produsului 'Produs în România'.", images: ["/products/banner/produs-in-romania.jpg"], priceBase: 250, currency: "RON", tags: ["produs","romania","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-rent-a-car", slug: "rent-a-car", routeSlug: "rent-a-car", title: "Banner Rent-a-Car", description: "Banner pentru servicii de închiriere auto.", images: ["/products/banner/rent-a-car.jpg"], priceBase: 250, currency: "RON", tags: ["auto","rent","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-service-auto", slug: "service-auto", routeSlug: "service-auto", title: "Banner Service Auto", description: "Banner pentru service-uri auto și anunţuri tehnice.", images: ["/products/banner/service-auto.jpg"], priceBase: 250, currency: "RON", tags: ["service","auto","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-servicii-medicale", slug: "servicii-medicale", routeSlug: "servicii-medicale", title: "Banner Servicii medicale", description: "Banner pentru clinici și servicii medicale.", images: ["/products/banner/servicii-medicale.jpg"], priceBase: 250, currency: "RON", tags: ["medical","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-spalatorie-haine", slug: "spalatorie-haine", routeSlug: "spalatorie-haine", title: "Banner Spălătorie haine", description: "Banner pentru spălătorii auto sau de haine.", images: ["/products/banner/spalatorie-haine.jpg"], priceBase: 250, currency: "RON", tags: ["spalatorie","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-spatiu-de-inchiriat", slug: "spatiu-de-inchiriat", routeSlug: "spatiu-de-inchiriat", title: "Banner Spaţiu de închiriat", description: "Banner pentru spaţii comerciale sau industriale de închiriat.", images: ["/products/banner/spatiu-de-inchiriat.jpg"], priceBase: 250, currency: "RON", tags: ["spatiu","inchiriat","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-spatiu-de-vanzare", slug: "spatiu-de-vanzare", routeSlug: "spatiu-de-vanzare", title: "Banner Spaţiu de vânzare", description: "Banner pentru spaţii de vânzare.", images: ["/products/banner/spatiu-de-vanzare.jpg"], priceBase: 250, currency: "RON", tags: ["spatiu","vanzare","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-teren-de-inchiriat", slug: "teren-de-inchiriat", routeSlug: "teren-de-inchiriat", title: "Banner Teren de închiriat", description: "Banner pentru terenuri de închiriat (teren, loturi).", images: ["/products/banner/teren-de-inchiriat.jpg"], priceBase: 250, currency: "RON", tags: ["teren","inchiriat","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-teren-de-vanzare", slug: "teren-de-vanzare", routeSlug: "teren-de-vanzare", title: "Banner Teren de vânzare", description: "Banner pentru terenuri de vânzare.", images: ["/products/banner/teren-de-vanzare.jpg"], priceBase: 250, currency: "RON", tags: ["teren","vanzare","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-vila-de-inchiriat", slug: "vila-de-inchiriat", routeSlug: "vila-de-inchiriat", title: "Banner Vilă de închiriat", description: "Banner pentru vile de închiriat.", images: ["/products/banner/vila-de-inchiriat.jpg"], priceBase: 250, currency: "RON", tags: ["vila","inchiriat","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-vila-de-vanzare", slug: "vila-de-vanzare", routeSlug: "vila-de-vanzare", title: "Banner Vilă de vânzare", description: "Banner pentru vile de vânzare.", images: ["/products/banner/vila-de-vanzare.jpg"], priceBase: 250, currency: "RON", tags: ["vila","vanzare","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } },
+  { id: "banner-vulcanizare", slug: "vulcanizare", routeSlug: "vulcanizare", title: "Banner Vulcanizare", description: "Banner pentru service-uri de vulcanizare și anunţuri auto.", images: ["/products/banner/vulcanizare.jpg"], priceBase: 250, currency: "RON", tags: ["vulcanizare","auto","banner"], materials: MATERIAL_OPTIONS.filter((m)=> (m.recommendedFor ?? []).includes("bannere")), metadata: { category: "bannere" } }
 ];
 
 //=== UTILITARE =============================================================

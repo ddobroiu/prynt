@@ -13,7 +13,12 @@ export default function ShopPage() {
   const [maxPrice, setMaxPrice] = useState(0);
 
   // Găsește prețul minim și maxim din produse
-  const prices = PRODUCTS.map(p => p.priceBase ?? 0);
+  // Pentru bannere afișăm prețul de pornire 50 RON ("de la 50") în listă și în filtre
+  const prices = PRODUCTS.map(p => {
+    const cat = String(p.metadata?.category ?? "").toLowerCase();
+    if (cat === "bannere") return 50;
+    return p.priceBase ?? 0;
+  });
   const realMin = Math.min(...prices);
   const realMax = Math.max(...prices);
 
@@ -21,16 +26,20 @@ export default function ShopPage() {
   const effectiveMaxPrice = maxPrice > 0 ? maxPrice : realMax;
 
   // Adapt products la ProductCard props
-  const products = PRODUCTS.map((p) => ({
-    id: p.id,
-    slug: p.routeSlug || p.slug || p.id,
-    title: p.title,
-    description: p.description,
-    price: p.priceBase ?? 0,
-    stock: 10, // TODO: Replace with real stock if available
-    images: p.images,
-    category: p.metadata?.category ?? "",
-  }));
+  const products = PRODUCTS.map((p) => {
+    const category = String(p.metadata?.category ?? "").toLowerCase();
+    const startingPrice = category === "bannere" ? 50 : p.priceBase ?? 0;
+    return {
+      id: p.id,
+      slug: p.routeSlug || p.slug || p.id,
+      title: p.title,
+      description: p.description,
+      price: startingPrice,
+      stock: 10, // TODO: Replace with real stock if available
+      images: p.images,
+      category: p.metadata?.category ?? "",
+    };
+  });
 
   // Filtrare după categorie și preț
   const filtered = products.filter(p => {
