@@ -458,7 +458,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
 
               {designOption === "text_only" && (
                 <div className="panel p-3 mt-3 border-t border-white/5">
-                  <textarea value={textDesign} onChange={(e) => setTextDesign(e.target.value)} rows={3} placeholder="Ex: LOGO • www.exemplu.ro" className="input resize-y min-h-[80px]" />
+                  <textarea value={textDesign} onChange={(e) => setTextDesign(e.target.value)} rows={3} placeholder="Ex: LOGO • www.exemplu.ro" className="input resize-y min-h-20" />
                 </div>
               )}
 

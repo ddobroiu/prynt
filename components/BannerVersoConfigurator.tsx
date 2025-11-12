@@ -437,7 +437,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
 
                   {designOption === "text_only" && (
                     <div className="panel p-3 mt-3 border-t border-white/5">
-                      <textarea value={textDesignFront} onChange={(e) => setTextDesignFront(e.target.value)} rows={3} placeholder="Text pentru față (= spate)" className="input resize-y min-h-[80px]" />
+                      <textarea value={textDesignFront} onChange={(e) => setTextDesignFront(e.target.value)} rows={3} placeholder="Text pentru față (= spate)" className="input resize-y min-h-20" />
                     </div>
                   )}
 

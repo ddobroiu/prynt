@@ -54,7 +54,7 @@ export default function ThemeToggle() {
       <button
         aria-label="Toggle theme"
         title="Comută temă"
-        className="inline-flex items-center justify-center rounded-full p-2 border-1"
+  className="inline-flex items-center justify-center rounded-full p-2 border"
         onClick={() => applyTheme(theme === "dark" ? "light" : "dark")}
       >
         {theme === "dark" ? (
