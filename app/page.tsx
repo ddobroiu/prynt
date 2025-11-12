@@ -247,10 +247,7 @@ export default function HomePage() {
         </section>
       </div>
 
-      {/* --- FOOTER --- */}
-      <footer className="w-full py-8 border-t border-zinc-200 dark:border-white/10 mt-16 text-center text-zinc-500">
-        <p>&copy; {new Date().getFullYear()} Prynt.ro. Toate drepturile rezervate.</p>
-      </footer>
+      {/* Footer global este randat din layout; evităm duplicarea aici */}
     </main>
   );
 }

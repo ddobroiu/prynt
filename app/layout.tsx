@@ -10,9 +10,39 @@ import { CartProvider } from "../components/CartContext";
 import CartWidget from "../components/CartWidget";
 
 export const metadata = {
-  title: "Prynt.ro | Tipar digital & producție publicitară",
+  metadataBase: new URL(
+    (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "")
+  ),
+  title: {
+    default: "Prynt.ro | Tipar digital & producție publicitară",
+    template: "%s | Prynt.ro",
+  },
   description:
     "Bannere, flayere, canvas, autocolante, materiale rigide. Configurează online și vezi prețul în timp real.",
+  openGraph: {
+    title: "Prynt.ro | Tipar digital & producție publicitară",
+    description:
+      "Bannere, flayere, canvas, autocolante, materiale rigide. Configurează online și vezi prețul în timp real.",
+    url: "/",
+    siteName: "Prynt.ro",
+    locale: "ro_RO",
+    type: "website",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Prynt.ro",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Prynt.ro | Tipar digital & producție publicitară",
+    description:
+      "Bannere, flayere, canvas, autocolante, materiale rigide. Configurează online și vezi prețul în timp real.",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({
@@ -23,6 +53,48 @@ export default function RootLayout({
   return (
     <html lang="ro">
       <head>
+        {/* Organization & WebSite JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Prynt.ro",
+              url: (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, ""),
+              logo: new URL("/logo.png", (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro")).toString(),
+              sameAs: [
+                // Adaugă dacă există: Facebook, Instagram, LinkedIn etc.
+              ],
+              contactPoint: [{
+                "@type": "ContactPoint",
+                telephone: "+40 734 123 456",
+                contactType: "customer service",
+                areaServed: "RO",
+                availableLanguage: ["ro", "en"],
+              }],
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Prynt.ro",
+              url: (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, ""),
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "") + "/shop?q={search_term_string}",
+                },
+                queryInput: "required name=search_term_string",
+              },
+            }),
+          }}
+        />
         {/* TikTok Pixel: load after the page is interactive */}
         <Script
           id="tiktok-pixel"

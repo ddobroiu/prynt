@@ -5,7 +5,7 @@
 export default function Footer() {
   return (
   <footer className="mt-16 bg-ui text-ui border-t border-indigo-700/40">
-      <div className="mx-auto max-w-7xl px-4 py-14 grid gap-12 md:grid-cols-4">
+    <div className="mx-auto max-w-7xl px-4 py-14 grid gap-12 md:grid-cols-3">
         {/* Col 1 – Brand & Descriere */}
         <div className="md:col-span-1 flex flex-col items-start">
           <a href="/" className="inline-flex items-center group">
@@ -43,25 +43,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Col 3 – Produse */}
-        <div>
-          <h3 className="font-bold mb-5 text-xl text-indigo-300 flex items-center gap-2">
-            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><rect x="3" y="7" width="16" height="8" rx="2"/><path d="M3 7V5a2 2 0 012-2h10a2 2 0 012 2v2"/></svg>
-            Produse
-          </h3>
-          <ul className="text-base text-ui space-y-3">
-            <li className="pt-0.5 text-indigo-300/90 font-semibold">Fonduri UE</li>
-            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/fonduri-pnrr"><span>Fonduri PNRR</span></a></li>
-            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/fonduri-regio"><span>Fonduri REGIO</span></a></li>
-            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/fonduri-nationale"><span>Fonduri Naționale</span></a></li>
-            <li className="pt-2 text-indigo-300/90 font-semibold">Publicitar</li>
-            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/banner"><span>Banner</span></a></li>
-            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/flayere"><span>Flayere</span></a></li>
-            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/canvas"><span>Canvas</span></a></li>
-            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/autocolante"><span>Autocolante</span></a></li>
-            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/materiale-rigide"><span>Materiale rigide</span></a></li>
-          </ul>
-        </div>
+        {/* Col 3 – eliminat lista produse, la cerere */}
 
         {/* Col 4 – Informații Legale */}
         <div>
