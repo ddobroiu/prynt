@@ -83,6 +83,8 @@ type FlyerConfiguratorProps = {
 
 export default function FlyerConfigurator({ productSlug, initialWidth, initialHeight }: FlyerConfiguratorProps) {
   const { addItem } = useCart();
+  const [toastVisible, setToastVisible] = useState(false);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
 
   // UI states
   const [sizeKey, setSizeKey] = useState<string>(SIZES[0].key);
@@ -188,23 +190,15 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
   // validations before add
   function validateBeforeAdd() {
     if (!bracket) return "Cantitate/variantă invalidă (verifică pragurile).";
-    if (graphicsMode === "client") {
-      if (sameDesignForBoth) {
-        const has = artworkFaceUrl || artworkFaceLink || textFace;
-        if (!has) return "Încarcă grafică (față = spate) sau pune link/text.";
-      } else {
-        const f = artworkFaceUrl || artworkFaceLink || textFace;
-        const v = artworkVersoUrl || artworkVersoLink || textVerso;
-        if (!f || !v) return "Când grafica este diferită, încarcă grafică pentru față și pentru spate (sau link/text).";
-      }
-    }
+    // Grafica nu este obligatorie: nu mai blocăm adăugarea în coș
     return null;
   }
 
   function handleAddToCart() {
     const err = validateBeforeAdd();
     if (err) {
-      alert(err);
+      setErrorToast(err);
+      setTimeout(() => setErrorToast(null), 1600);
       return;
     }
     const unitPrice = round2(total / Math.max(1, qty));
@@ -240,12 +234,16 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
         total,
       },
     });
-    // success UI
-    alert("Produs adăugat în coș");
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 1600);
   }
 
   return (
     <main className="min-h-screen">
+      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">Produs adăugat în coș</div>
+      {errorToast && (
+        <div className={`toast-success opacity-100 translate-y-0`} aria-live="assertive">{errorToast}</div>
+      )}
       <div className="page py-10">
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
@@ -256,7 +254,7 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3 space-y-6">
+          <div className="order-2 lg:order-1 lg:col-span-3 space-y-6">
             {/* size + qty */}
             <div className="card p-4">
               <div className="text-sm text-muted mb-2">Dimensiune</div>
@@ -378,7 +376,7 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
           </div>
 
           {/* summary */}
-          <aside className="lg:col-span-2">
+          <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
                 <div className="aspect-video overflow-hidden rounded border bg-black">

@@ -432,7 +432,7 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3 space-y-6">
+          <div className="order-2 lg:order-1 lg:col-span-3 space-y-6">
             {/* REPLACED: responsive shape + framed selector */}
             <ResponsiveShapeFrameSelector shape={shape} setShape={setShape} framed={framed} setFramed={setFramed} />
 
@@ -533,7 +533,7 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
           </div>
 
           {/* RIGHT - summary + preview (NO uploaded override of gallery) */}
-          <aside id="order-summary" className="lg:col-span-2">
+          <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4 relative">
                 <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black relative">

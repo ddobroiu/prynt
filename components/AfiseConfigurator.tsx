@@ -365,6 +365,7 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
   const [size, setSize] = useState<SizeKey>("A2");
   const [material, setMaterial] = useState<MaterialKey>("whiteback_150_material");
   const [quantity, setQuantity] = useState<number>(50);
+  const [toastVisible, setToastVisible] = useState(false);
 
   // design: upload / pro
   const [designOption, setDesignOption] = useState<"upload" | "pro">("upload");
@@ -438,11 +439,15 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
       quantity: qty,
       metadata: { size, material, quantity: qty, designOption, proFee, uploadedFileName },
     });
-    alert("Produs adăugat în coș");
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 1600);
   }
 
   return (
     <main className="page py-10">
+      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
+        Produs adăugat în coș
+      </div>
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold">Afișe — Print digital</h1>
@@ -458,7 +463,7 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        <div className="lg:col-span-3 space-y-6">
+        <div className="order-2 lg:order-1 lg:col-span-3 space-y-6">
           {/* Top: dimensiune + cantitate on same line */}
           <div className="card p-4">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -535,7 +540,7 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
         </div>
 
         {/* right column: preview + summary */}
-        <aside className="lg:col-span-2">
+  <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
           <div className="space-y-6 lg:sticky lg:top-6">
             <div className="card p-4">
               <div className="aspect-video rounded overflow-hidden bg-black">

@@ -37,7 +37,7 @@ const ConfiguratorCard: React.FC<ConfiguratorItem> = ({ title, href, image }) =>
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+  <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-4">
         <h3 className="text-lg font-bold text-white">{title}</h3>
         <p className="mt-1 text-sm text-indigo-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
@@ -120,7 +120,7 @@ export default function HomePage() {
               height={120}
               className="mb-6 rounded-full border-2 border-zinc-200 dark:border-white/10 shadow-lg dark:shadow-2xl dark:shadow-black/50 transition-transform duration-300 hover:scale-105"
             />
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-black to-zinc-700 dark:from-white dark:to-zinc-400">
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-linear-to-b from-black to-zinc-700 dark:from-white dark:to-zinc-400">
               Tipar digital de impact
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
@@ -198,7 +198,7 @@ export default function HomePage() {
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                 <div className="p-4 flex flex-col justify-end h-full">
                     <div>
                         <h3 className="text-lg font-bold text-white">{p.title}</h3>

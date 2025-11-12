@@ -101,6 +101,8 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
   const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
 
   // design options: upload / pro (text-only removed)
   const [designOption, setDesignOption] = useState<"upload" | "pro">("upload");
@@ -123,7 +125,11 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
   const canAdd = quantity > 0;
 
   function handleAddToCart() {
-    if (!canAdd) return;
+    if (!canAdd) {
+      setErrorToast("Setează un tiraj valid înainte de a adăuga în coș.");
+      setTimeout(() => setErrorToast(null), 1600);
+      return;
+    }
     const unitPrice = pricePerUnitDisplayed;
     const id = `pliante-${productSlug ?? "generic"}-${weight}-${fold}-${Math.floor(quantity)}`;
     addItem({
@@ -140,13 +146,19 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
         proDesignFee: proFee,
       },
     });
-    // feedback similar to other configurators
-    alert("Produs adăugat în coș");
+    // feedback similar to celelalte configuratoare
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 1400);
   }
 
   return (
     <main className="min-h-screen">
-      <div id="added-toast" className={`toast-success`} aria-live="polite" style={{ display: "none" }} />
+      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
+        Produs adăugat în coș
+      </div>
+      {errorToast && (
+        <div className={`toast-success opacity-100 translate-y-0`} aria-live="assertive">{errorToast}</div>
+      )}
       <div className="page py-10">
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
@@ -163,7 +175,7 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
         </header>
 
         <div className="lg:container mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3 space-y-6">
+          <div className="order-2 lg:order-1 lg:col-span-3 space-y-6">
             {/* 1. Specificații */}
             <div className="card p-4">
               <div className="text-sm text-muted mb-2">Specificații</div>
@@ -238,7 +250,7 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
           </div>
 
           {/* RIGHT - gallery + summary */}
-          <aside className="lg:col-span-2">
+          <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
                 <div className="aspect-video overflow-hidden rounded border bg-black">

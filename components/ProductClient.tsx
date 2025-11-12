@@ -27,6 +27,7 @@ export default function ProductClient({
   initialHeight?: number | null;
 }) {
   const { addItem } = useCart();
+  const [toastVisible, setToastVisible] = useState(false);
 
   // fallback-uri logice: folosim initialWidth/initialHeight dacă există,
   // altfel product.width_cm / product.minWidthCm / 120 (sau alt fallback)
@@ -76,12 +77,16 @@ export default function ProductClient({
         side,
       },
     });
-    // poți afișa toast/feedback aici
-    alert("Produs adăugat în coș");
+    // feedback uniform: toast de succes
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 1400);
   }
 
   return (
     <div className="product-client">
+      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
+        Produs adăugat în coș
+      </div>
       <div style={{ marginBottom: 12 }}>
         <label>Lățime (cm)</label>
         <input

@@ -24,6 +24,15 @@ const LINKS: NavItem[] = [
     ],
   },
   {
+    href: "#",
+    label: "Fonduri UE",
+    children: [
+      { href: "/fonduri-pnrr", label: "Fonduri PNRR" },
+      { href: "/fonduri-regio", label: "Fonduri REGIO" },
+      { href: "/fonduri-nationale", label: "Fonduri Naționale" },
+    ],
+  },
+  {
     href: "/banner",
     label: "Banner",
     children: [
@@ -95,7 +104,7 @@ export default function Header() {
         sticky top-0 z-50 w-full border-b
         bg-white/70 dark:bg-slate-950/60
         border-gray-200/70 dark:border-slate-800/70
-        backdrop-blur-md supports-[backdrop-filter]:backdrop-blur
+  backdrop-blur-md supports-backdrop-filter:backdrop-blur
       "
     >
       <div className="page">
@@ -119,7 +128,7 @@ export default function Header() {
               aria-label="Shop"
               className="
                 inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold
-                bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white
+                bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white
                 shadow-lg shadow-indigo-600/20 ring-1 ring-white/10
                 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600
                 active:scale-[0.98] transition
@@ -274,7 +283,7 @@ export default function Header() {
                       <span
                         className={`
                           pointer-events-none absolute left-0 -bottom-1 h-0.5 w-full origin-left scale-x-0
-                          bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600
+                          bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600
                           transition-transform duration-300 group-hover:scale-x-100
                           ${openDropdown === l.label ? "scale-x-100" : ""}
                         `}
@@ -330,7 +339,7 @@ export default function Header() {
                     <span
                       className="
                         pointer-events-none absolute left-0 -bottom-1 h-0.5 w-full origin-left scale-x-0
-                        bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600
+                        bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600
                         transition-transform duration-300 group-hover:scale-x-100
                       "
                     />
@@ -346,7 +355,7 @@ export default function Header() {
               href="/shop"
               className="
                 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold
-                bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white
+                bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white
                 shadow-lg shadow-indigo-600/20 ring-1 ring-white/10
                 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600
                 active:scale-[0.98] transition

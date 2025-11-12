@@ -169,6 +169,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
 
   // compact dropdown toggles
   const [materialOpen, setMaterialOpen] = useState<boolean>(false);
@@ -238,7 +239,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       setServerPrice(total);
     } catch (err) {
       console.error("calc error", err);
-      alert("Eroare la calcul preț");
+      setErrorToast("Eroare la calcul preț");
+      setTimeout(() => setErrorToast(null), 1600);
     } finally {
       setCalcLoading(false);
     }
@@ -247,13 +249,15 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   function handleAddToCart() {
     // Validation: require dimensions
     if (!input.width_cm || !input.height_cm) {
-      alert("Completează lungimea și înălțimea (în cm) înainte de a adăuga în coș.");
+      setErrorToast("Te rugăm să completezi lungimea și înălțimea (cm) înainte de a adăuga în coș.");
+      setTimeout(() => setErrorToast(null), 1600);
       return;
     }
 
     const totalForOrder = serverPrice ?? displayedTotal;
     if (!totalForOrder || totalForOrder <= 0) {
-      alert("Calculează prețul înainte de a adăuga în coș");
+      setErrorToast("Calculează prețul înainte de a adăuga în coș.");
+      setTimeout(() => setErrorToast(null), 1600);
       return;
     }
 
@@ -343,7 +347,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        <div className="lg:col-span-3 space-y-6">
+        <div className="order-2 lg:order-1 lg:col-span-3 space-y-6">
           {/* 1. Dimensiuni */}
           <div className="card p-4">
             <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-ui">1. Dimensiuni & cantitate</h2></div>
@@ -483,7 +487,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         </div>
 
         {/* RIGHT - very compact summary: only area + price */}
-        <aside id="order-summary" className="lg:col-span-2">
+  <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
           <div className="space-y-6 lg:sticky lg:top-6">
             <div className="card p-4">
               <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
@@ -525,6 +529,9 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
         Produs adăugat în coș
       </div>
+      {errorToast && (
+        <div className={`toast-success opacity-100 translate-y-0`} aria-live="assertive">{errorToast}</div>
+      )}
 
       {/* render grid either as full page or the compact configurator only */}
       {gridContent}

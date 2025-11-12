@@ -109,6 +109,7 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
   const [serverPrice, setServerPrice] = useState<number | null>(null);
   const [calcLoading, setCalcLoading] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   const [uploading, setUploading] = useState(false);
@@ -184,7 +185,8 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
       setServerPrice(result.finalPrice);
     } catch (err) {
       console.error(err);
-      alert("Eroare la calcul preț");
+      setErrorToast("Eroare la calcul preț");
+      setTimeout(() => setErrorToast(null), 1600);
     } finally {
       setCalcLoading(false);
     }
@@ -192,17 +194,20 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
 
   function handleAddToCart() {
     if (!input.width_cm || !input.height_cm) {
-      alert("Completează lățimea și înălțimea (în cm) înainte de a adăuga în coș.");
+      setErrorToast("Te rugăm să completezi lățimea și înălțimea (cm) înainte de a adăuga în coș.");
+      setTimeout(() => setErrorToast(null), 1600);
       return;
     }
     if (input.width_cm > MAX_WIDTH_CM || input.height_cm > MAX_HEIGHT_CM) {
-      alert(`Dimensiunile maxime suportate sunt ${MAX_WIDTH_CM} x ${MAX_HEIGHT_CM} cm.`);
+      setErrorToast(`Dimensiunile maxime sunt ${MAX_WIDTH_CM} x ${MAX_HEIGHT_CM} cm.`);
+      setTimeout(() => setErrorToast(null), 2000);
       return;
     }
 
     const totalForOrder = serverPrice ?? priceDetailsLocal.finalPrice;
     if (!totalForOrder || totalForOrder <= 0) {
-      alert("Calculează prețul înainte de a adăuga în coș");
+      setErrorToast("Calculează prețul înainte de a adăuga în coș.");
+      setTimeout(() => setErrorToast(null), 1600);
       return;
     }
 
@@ -251,6 +256,9 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
       <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
         Produs adăugat în coș
       </div>
+      {errorToast && (
+        <div className={`toast-success opacity-100 translate-y-0`} aria-live="assertive">{errorToast}</div>
+      )}
 
       <div className="page py-10 pb-24 lg:pb-10">
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
