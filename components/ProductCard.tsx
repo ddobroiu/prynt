@@ -31,6 +31,9 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
     "/products/autocolante/1.jpg",
     "/products/autocolante/2.jpg",
     "/products/autocolante/3.jpg",
+    "/products/tapet/1.jpg",
+    "/products/tapet/2.jpg",
+    "/products/tapet/3.jpg",
     "/placeholder.png",
   ]);
   // Prefer an image that contains the product slug/id in its path (product-specific).
@@ -46,6 +49,7 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
   const isAfise = categoryLower === "afise";
   const isFlayere = categoryLower === "flayere";
   const isAutocolante = categoryLower === "autocolante";
+  const isTapet = categoryLower === "tapet";
   // Special starting prices by category
   const priceDisplay = isBanner
     ? `De la ${Number(50).toFixed(0)} RON`
@@ -57,6 +61,8 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
           ? `De la ${Number(50).toFixed(0)} RON`
           : isAutocolante
             ? `De la ${Number(5).toFixed(0)} RON`
+            : isTapet
+              ? `De la ${Number(45).toFixed(0)} RON`
         : (Number.isFinite(priceNum) ? `De la ${priceNum.toFixed(0)} RON` : "—");
 
   // Route mapping by category
@@ -82,6 +88,8 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
                       ? "/products/flayere/1.jpg"
                       : isAutocolante
                         ? "/products/autocolante/1.jpg"
+                        : isTapet
+                          ? "/products/tapet/1.jpg"
                         : "/products/banner/1.jpg";
               }
             }}

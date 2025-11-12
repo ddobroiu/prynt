@@ -304,6 +304,7 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
       flayere: { title: "Flyere personalizate", image: "/images/generic-flyer.jpg", defaultSlug: "flayere" },
       bannere: { title: "Banner personalizat", image: "/images/generic-banner.jpg", defaultSlug: "banner" },
       afise: { title: "Afișe personalizate", image: "/images/generic-afise.jpg", defaultSlug: "afise" },
+      tapet: { title: "Tapet personalizat", image: "/images/generic-banner.jpg", defaultSlug: "tapet" },
     };
 
     const catKey = String(category || "").toLowerCase();
