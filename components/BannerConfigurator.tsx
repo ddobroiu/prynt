@@ -90,6 +90,7 @@ type Props = {
   productSlug?: string;
   initialWidth?: number;
   initialHeight?: number;
+  productImage?: string;
 };
 
 /* Inline ModeSwitch - integrat în componentă pentru a evita import extern */
@@ -132,7 +133,7 @@ function BannerModeSwitchInline() {
   );
 }
 
-export default function BannerConfigurator({ productSlug, initialWidth: initW, initialHeight: initH }: Props) {
+export default function BannerConfigurator({ productSlug, initialWidth: initW, initialHeight: initH, productImage }: Props) {
   const { addItem } = useCart();
 
   // Important change: defaults must be empty (0) so price is 0 until user fills values.
@@ -150,8 +151,10 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   // Show empty fields if no initial values provided (so user sees blank inputs)
   const [lengthText, setLengthText] = useState(initW ? String(initW) : "");
   const [heightText, setHeightText] = useState(initH ? String(initH) : "");
+  // Gallery: if productImage is provided, use it as first image
+  const galleryImages = productImage ? [productImage, ...GALLERY] : [...GALLERY];
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
+  const [activeImage, setActiveImage] = useState<string>(galleryImages[0]);
   const [designOption, setDesignOption] = useState<DesignOption>("upload");
 
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
@@ -306,13 +309,13 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   useEffect(() => {
     const id = setInterval(() => {
       setActiveIndex((i) => {
-        const next = (i + 1) % GALLERY.length;
-        setActiveImage(GALLERY[next]);
+        const next = (i + 1) % galleryImages.length;
+        setActiveImage(galleryImages[next]);
         return next;
       });
     }, 3000);
     return () => clearInterval(id);
-  }, []);
+  }, [galleryImages]);
 
   // canAdd computed for disabling add button
   const totalShown = serverPrice ?? displayedTotal;
@@ -465,7 +468,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
               {designOption === "text_only" && (
                 <div className="panel p-3 mt-3 border-t border-white/5">
-                  <textarea value={textDesign} onChange={(e) => setTextDesign(e.target.value)} rows={3} placeholder="Ex: REDUCERI -50% • www.exemplu.ro" className="input resize-y min-h-[80px]" />
+                  <textarea value={textDesign} onChange={(e) => setTextDesign(e.target.value)} rows={3} placeholder="Ex: REDUCERI -50% • www.exemplu.ro" className="input resize-y min-h-20" />
                 </div>
               )}
 
@@ -485,7 +488,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                   <img src={activeImage} alt="Banner preview" className="h-full w-full object-cover" loading="eager" />
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
-                  {GALLERY.map((src, i) => (
+                  {galleryImages.map((src, i) => (
                     <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
                       <img src={src} alt="Thumb" className="h-20 w-full object-cover" loading="lazy" />
                     </button>

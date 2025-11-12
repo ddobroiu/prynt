@@ -10,6 +10,7 @@ type Product = {
   stock: number;
   images?: string[];
   attributes?: Record<string, string>;
+  category?: string;
 };
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -17,20 +18,20 @@ export default function ProductCard({ product }: { product: Product }) {
   const priceNum = typeof product.price === "number" ? product.price : Number(product.price || 0);
   const priceDisplay = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "—";
 
+  const isBanner = product.category === "bannere";
+  const productUrl = isBanner ? `/banner/${product.slug}` : `/product/${product.slug}`;
   return (
-    <article className="card bg-white/95 overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-2xl">
-      <Link href={`/product/${product.slug}`} className="block" aria-label={`Vezi produs ${product.title}`}>
-        <div className="w-full h-48 relative bg-gray-100 group">
-          <Image src={img} alt={product.title ?? "Imagine produs"} fill style={{ objectFit: "cover" }} className="transition-opacity duration-300 group-hover:opacity-90 border-b border-white/10" />
+    <article className="card bg-gradient-to-br from-white via-indigo-50 to-indigo-100 shadow-xl rounded-2xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-2xl">
+      <Link href={productUrl} className="block group" aria-label={`Configurează ${product.title}`}>
+        <div className="w-full h-56 relative bg-gray-100">
+          <Image src={img} alt={product.title ?? "Imagine produs"} fill style={{ objectFit: "cover" }} className="transition-opacity duration-300 group-hover:opacity-90 border-b border-indigo-100" />
         </div>
-        <div className="p-5 flex-1 flex flex-col">
-          <h3 className="text-lg font-semibold text-ui">{product.title}</h3>
-          <p className="text-sm text-muted flex-1 mt-2">{product.description}</p>
-          <div className="mt-4 flex items-center justify-between">
-            <div className="text-lg font-bold text-indigo-300">{priceDisplay} RON</div>
-            <div className={`text-sm font-medium ${product.stock > 0 ? "badge-success px-2 py-1 rounded" : "text-red-400"}`}>
-              {product.stock > 0 ? `În stoc: ${product.stock}` : "Stoc epuizat"}
-            </div>
+        <div className="p-6 flex-1 flex flex-col">
+          <h3 className="text-2xl font-bold text-indigo-900 mb-2">{product.title}</h3>
+          <p className="text-base text-muted flex-1 mb-4">{product.description}</p>
+          <div className="flex items-center justify-between mt-auto">
+            <span className="text-xl font-bold text-indigo-600">{priceDisplay} RON</span>
+            <button type="button" className="px-5 py-2 rounded-lg bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-500 transition">Configurează</button>
           </div>
         </div>
       </Link>
