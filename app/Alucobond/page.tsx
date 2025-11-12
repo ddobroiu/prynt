@@ -1,5 +1,6 @@
 import React from "react";
-import ConfiguratorAlucobond from "../../components/ConfiguratorAlucobond";
+import ConfiguratorAlucobond from "@/components/ConfiguratorAlucobond";
+import FaqJsonLd from "@/components/FaqJsonLd";
 
 export const metadata = {
   title: "Alucobond - Configurator",
@@ -8,8 +9,14 @@ export const metadata = {
 
 export default function Page() {
   return (
-    <main style={{ padding: 24 }}>
+    <div>
       <ConfiguratorAlucobond />
-    </main>
+      <FaqJsonLd
+        qa={[
+          { question: "Este alucobondul potrivit pentru exterior?", answer: "Da, alucobondul are stabilitate și rezistență la exterior, ideal pentru panouri durabile." },
+          { question: "Faceți găurire/decupare?", answer: "Da, oferim prelucrare la cerere. Specifică în detalii comandă." },
+        ]}
+      />
+    </div>
   );
 }
