@@ -15,14 +15,14 @@ export default function MobilePriceBar({
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0b0f19] p-3 lg:hidden">
       <div className="page flex items-center gap-3">
         <button
-          className="btn-outline flex-1"
+          className="btn-outline flex-1 text-white border-white/20 hover:bg-white/10"
           onClick={onShowSummary}
           aria-label="Vezi sumar"
         >
           Sumar
         </button>
         <div className="flex-1 text-right">
-          <div className="text-base font-bold">{total > 0 ? `${total.toFixed(2)} RON` : "—"}</div>
+          <div className="text-base font-bold text-white">{total > 0 ? `${total.toFixed(2)} RON` : "—"}</div>
           <button
             onClick={onAddToCart}
             disabled={disabled}
