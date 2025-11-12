@@ -1,6 +1,7 @@
 import React from "react";
 import FonduriEUConfigurator from "@/components/FonduriEUConfigurator";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import FaqJsonLd from "@/components/FaqJsonLd";
 
 export const metadata = {
   title: "Fonduri Naționale — Configurator",
@@ -14,6 +15,13 @@ export default function Page() {
     <>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Fonduri Naționale", url: `${base}/fonduri-nationale` }]} />
       <FonduriEUConfigurator />
+      <FaqJsonLd
+        qa={[
+          { question: "Ce documente/grafici trebuie să ofer?", answer: "Textele obligatorii, siglele și orice cerințe specifice proiectului. Le poți încărca sau trimite prin link." },
+          { question: "Pot primi o machetă pentru aprobare?", answer: "Da, la cerere trimitem BAT digital înainte de tipar. Corecțiile simple sunt gratuite." },
+          { question: "Termene și livrare", answer: "Producție 1–3 zile, apoi 24–48h curier. Urgențe la cerere." },
+        ]}
+      />
     </>
   );
 }
