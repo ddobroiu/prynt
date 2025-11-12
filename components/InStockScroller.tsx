@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import type { Product } from "@/lib/products";
 import ProductCard from "./ProductCard";
+import ProductCardCompact from "./ProductCardCompact";
 
 type Props = {
   products: Product[];
@@ -22,6 +23,7 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
   const [page, setPage] = useState(0);
   const mounted = useRef(false);
   const timer = useRef<number | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     mounted.current = true;
@@ -110,13 +112,28 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
         }
       }}
       // touch handlers for mobile to pause/resume auto-advance
-      onTouchStart={() => {
+      onTouchStart={(e) => {
+        const t = (e.changedTouches?.[0]?.clientX ?? e.touches?.[0]?.clientX) as number | undefined;
+        if (typeof t === "number") touchStartX.current = t;
         if (timer.current) {
           window.clearInterval(timer.current);
           timer.current = null;
         }
       }}
-      onTouchEnd={() => {
+      onTouchEnd={(e) => {
+        const start = touchStartX.current;
+        const end = (e.changedTouches?.[0]?.clientX ?? e.touches?.[0]?.clientX) as number | undefined;
+        touchStartX.current = null;
+        if (typeof start === "number" && typeof end === "number") {
+          const dx = end - start;
+          const threshold = 40;
+          if (Math.abs(dx) > threshold) {
+            setPage((p) => {
+              if (dx > 0) return (p - 1 + pages) % pages; // swipe right -> previous
+              return (p + 1) % pages; // swipe left -> next
+            });
+          }
+        }
         if (!timer.current && pages > 1) {
           timer.current = window.setInterval(() => setPage((p) => (p + 1) % pages), intervalMs) as unknown as number;
         }
@@ -127,10 +144,8 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
         {isMobileView ? (
           <div style={{ display: "flex", gap: 12, minWidth: "100%", boxSizing: "border-box", justifyContent: "center", padding: "12px 0" }}>
             {slice.map((p) => (
-              <div key={p.id} style={{ width: "85%", maxWidth: 360, boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
-                <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                  <ProductCard product={{ ...(p as any), category: (p.metadata?.category ?? (p as any).category) }} imageHeightPx={320} />
-                </div>
+              <div key={p.id} style={{ width: "92%", maxWidth: 400, boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+                <ProductCardCompact product={{ ...(p as any), category: (p.metadata?.category ?? (p as any).category) }} />
               </div>
             ))}
           </div>
