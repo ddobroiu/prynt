@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useRef } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { useCart } from "../../components/CartProvider";
+import { useCart } from "../../components/CartContext";
 import { ShieldCheck, Truck, X } from "lucide-react";
 import CheckoutForm from "./CheckoutForm";
 
