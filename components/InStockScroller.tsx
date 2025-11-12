@@ -17,6 +17,7 @@ type Props = {
 export default function InStockScroller({ products, perPage = 4, maxPerPage = 5, minCardWidth = 220, intervalMs = 3500 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState<number>(perPage);
+  const [isMobileView, setIsMobileView] = useState<boolean>(false);
   const pages = Math.max(1, Math.ceil((products?.length ?? 0) / itemsPerPage));
   const [page, setPage] = useState(0);
   const mounted = useRef(false);
@@ -36,15 +37,32 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
     if (!el) return;
     const ro = new (window as any).ResizeObserver((entries: any[]) => {
       const w = entries[0]?.contentRect?.width ?? el.clientWidth;
-      const fit = Math.max(1, Math.floor(w / minCardWidth));
-      const resolved = Math.min(maxPerPage, Math.max(1, Math.min(perPage, fit)));
+      // Use explicit breakpoints for consistent counts across devices:
+      // <640px => mobile: 1
+      // 640px-1023px => tablet: 3
+      // 1024px-1279px => laptop: 4
+      // >=1280px => desktop: 5
+      let resolved = perPage;
+      if (w < 640) resolved = 1;
+      else if (w < 1024) resolved = 3;
+      else if (w < 1280) resolved = 4;
+      else resolved = 5;
+      // respect maxPerPage and ensure at least 1 and not more than products length
+      resolved = Math.max(1, Math.min(maxPerPage, resolved, products.length || resolved));
+      setIsMobileView(w < 640);
       setItemsPerPage(resolved);
     });
     ro.observe(el);
     // init
-    const initW = el.clientWidth || 0;
-    const initFit = Math.max(1, Math.floor(initW / minCardWidth));
-    setItemsPerPage(Math.min(maxPerPage, Math.max(1, Math.min(perPage, initFit))));
+      const initW = el.clientWidth || 0;
+      let initResolved = perPage;
+      if (initW < 640) initResolved = 1;
+      else if (initW < 1024) initResolved = 3;
+      else if (initW < 1280) initResolved = 4;
+      else initResolved = 5;
+      initResolved = Math.max(1, Math.min(maxPerPage, initResolved, products.length || initResolved));
+      setIsMobileView(initW < 640);
+      setItemsPerPage(initResolved);
     return () => ro.disconnect();
   }, [containerRef, perPage, maxPerPage, minCardWidth]);
 
@@ -78,12 +96,12 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
           {Array.from({ length: pages }).map((_, pi) => {
             const s = products.slice(pi * itemsPerPage, pi * itemsPerPage + itemsPerPage);
             return (
-              <div key={pi} style={{ display: "grid", gridTemplateColumns: `repeat(${itemsPerPage}, minmax(0, 1fr))`, gap: 12, minWidth: "100%", boxSizing: "border-box", alignItems: "stretch" }}>
+              <div key={pi} style={{ display: "grid", gridTemplateColumns: `repeat(${itemsPerPage}, minmax(0, 1fr))`, gap: 12, minWidth: "100%", boxSizing: "border-box", alignItems: "stretch", justifyItems: isMobileView ? "center" : undefined }}>
                     {s.map((p) => (
-                      <div key={p.id} style={{ width: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+                      <div key={p.id} style={{ width: isMobileView ? "90%" : "100%", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
                         {/* Ensure ProductCard sees a `category` prop like shop data (fallback to metadata.category) */}
                         <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                          <ProductCard product={{ ...(p as any), category: (p.metadata?.category ?? (p as any).category) }} />
+                          <ProductCard product={{ ...(p as any), category: (p.metadata?.category ?? (p as any).category) }} imageHeightPx={isMobileView ? 220 : undefined} />
                         </div>
                       </div>
                     ))}

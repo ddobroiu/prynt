@@ -12,8 +12,7 @@ type Product = {
   attributes?: Record<string, string>;
   category?: string;
 };
-
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product, imageHeightPx }: { product: Product; imageHeightPx?: number }) {
   const img = product.images?.[0] ?? "/placeholder.png";
   const priceNum = typeof product.price === "number" ? product.price : Number(product.price || 0);
   const isBanner = String(product.category || "").toLowerCase() === "bannere";
@@ -24,7 +23,7 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <article className="card bg-gradient-to-br from-white via-indigo-50 to-indigo-100 shadow-xl rounded-2xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-2xl h-full">
       <Link href={productUrl} className="block group" aria-label={`Configurează ${product.title}`}>
-        <div className="w-full h-56 relative bg-gray-100">
+        <div className="w-full relative bg-gray-100 h-56" style={imageHeightPx ? { height: imageHeightPx } : undefined}>
           <Image src={img} alt={product.title ?? "Imagine produs"} fill style={{ objectFit: "cover" }} className="transition-opacity duration-300 group-hover:opacity-90 border-b border-indigo-100" />
         </div>
         <div className="p-6 flex-1 flex flex-col">
