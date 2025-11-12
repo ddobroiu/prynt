@@ -5,7 +5,7 @@ import { CheckCircle, Plus, Minus, ShoppingCart, Info } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
 
 /* Gallery images (placeholder) */
-const GALLERY = ["/products/flyer/1.jpg", "/products/flyer/2.jpg", "/products/flyer/3.jpg", "/products/flyer/4.jpg"] as const;
+const GALLERY = ["/products/flyere/1.jpg", "/products/flyere/2.jpg", "/products/flyere/3.jpg", "/products/flyere/4.jpg"] as const;
 
 /* Sizes & pricing (values doubled from screenshot per request) */
 type PriceBracket = { max: number; oneSided: number; twoSided: number };

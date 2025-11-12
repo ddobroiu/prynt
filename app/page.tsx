@@ -70,7 +70,7 @@ export default function HomePage() {
       title: 'Publicitar',
       items: [
         { title: 'Afișe', href: '/afise', image: '/products/afise/1.jpg' },
-        { title: 'Flyere', href: '/flayere', image: '/products/flyer/1.jpg' },
+        { title: 'Flyere', href: '/flayere', image: '/products/flyere/1.jpg' },
         { title: 'Pliante', href: '/pliante', image: '/products/pliante/1.jpg' },
         { title: 'Autocolante', href: '/autocolante', image: '/products/autocolante/1.jpg' },
       ],

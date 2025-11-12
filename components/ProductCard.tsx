@@ -78,7 +78,8 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
             loading="lazy"
             onError={(e) => {
               const el = e.currentTarget as HTMLImageElement;
-              if (!el.dataset.fallback) {
+              const step = el.dataset.fallback ?? "0";
+              if (step === "0") {
                 el.dataset.fallback = "1";
                 el.src = isCanvas
                   ? "/products/canvas/1.jpg"
@@ -90,7 +91,10 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
                         ? "/products/autocolante/1.jpg"
                         : isTapet
                           ? "/products/tapet/1.jpg"
-                        : "/products/banner/1.jpg";
+                          : "/products/banner/1.jpg";
+              } else if (step === "1") {
+                el.dataset.fallback = "2";
+                el.src = "/placeholder.png";
               }
             }}
             style={{ objectFit: "cover", width: "100%", height: "100%" }}
