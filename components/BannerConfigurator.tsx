@@ -151,8 +151,10 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   // Show empty fields if no initial values provided (so user sees blank inputs)
   const [lengthText, setLengthText] = useState(initW ? String(initW) : "");
   const [heightText, setHeightText] = useState(initH ? String(initH) : "");
-  // Gallery: if productImage is provided, use it as first image
-  const galleryImages = productImage ? [productImage, ...GALLERY] : [...GALLERY];
+  // Gallery: if productImage is provided, use it as first image, then only 1,2,3 (not 4)
+  const galleryImages = productImage
+    ? [productImage, "/products/banner/1.jpg", "/products/banner/2.jpg", "/products/banner/3.jpg"]
+    : ["/products/banner/1.jpg", "/products/banner/2.jpg", "/products/banner/3.jpg"];
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeImage, setActiveImage] = useState<string>(galleryImages[0]);
   const [designOption, setDesignOption] = useState<DesignOption>("upload");
