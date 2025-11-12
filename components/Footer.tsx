@@ -55,6 +55,7 @@ export default function Footer() {
             <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/termeni"><span>Termeni & condiții</span></a></li>
             <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/confidentialitate"><span>Politica de confidențialitate</span></a></li>
             <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/politica-cookies"><span>Politica Cookies</span></a></li>
+            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/blog"><span>Blog</span></a></li>
             <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/contact"><span>Contact</span></a></li>
           </ul>
         </div>
