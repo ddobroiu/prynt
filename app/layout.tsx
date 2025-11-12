@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Providers from "../components/Providers";
 import ContactButton from "../components/ContactButton";
+import AssistantWidget from "../components/AssistantWidget";
 
 // Cart provider + widget (client components)
 import { CartProvider } from "../components/CartContext";
@@ -126,6 +127,7 @@ var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n
           </CartProvider>
 
           <Footer />
+          <AssistantWidget />
           <ContactButton />
         </Providers>
       </body>
