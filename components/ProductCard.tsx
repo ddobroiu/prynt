@@ -12,7 +12,8 @@ type Product = {
   category?: string;
 };
 export default function ProductCard({ product, imageHeightPx }: { product: Product; imageHeightPx?: number }) {
-  const img = product.images?.[0] ?? "/placeholder.png";
+  const imgCandidates = product.images ?? [];
+  const initialImg = imgCandidates.find((x) => !!x) ?? "/products/banner/1.jpg";
   const priceNum = typeof product.price === "number" ? product.price : Number(product.price || 0);
   const isBanner = String(product.category || "").toLowerCase() === "bannere";
   // For banners show a 'De la 50 RON' starting price instead of a fixed 250
@@ -23,7 +24,7 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
     <article className="card bg-gradient-to-br from-white via-indigo-50 to-indigo-100 shadow-xl rounded-2xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-2xl h-full">
       <Link href={productUrl} className="block group" aria-label={`Configurează ${product.title}`}>
         <div className="w-full relative bg-gray-100 h-56 overflow-hidden" style={imageHeightPx ? { height: imageHeightPx } : undefined}>
-          <img src={img} alt={product.title ?? "Imagine produs"} loading="lazy" style={{ objectFit: "cover", width: "100%", height: "100%" }} className="transition-opacity duration-300 group-hover:opacity-90 border-b border-indigo-100 block" />
+          <img src={initialImg} alt={product.title ?? "Imagine produs"} loading="lazy" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/products/banner/1.jpg"; }} style={{ objectFit: "cover", width: "100%", height: "100%" }} className="transition-opacity duration-300 group-hover:opacity-90 border-b border-indigo-100 block" />
         </div>
         <div className="p-6 flex-1 flex flex-col">
           <h3 className="text-2xl font-bold text-indigo-900 mb-2">{product.title}</h3>
