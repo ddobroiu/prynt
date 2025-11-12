@@ -1,5 +1,7 @@
 import React from "react";
 import BannerConfigurator from "@/components/BannerConfigurator";
+import InStockScroller from "@/components/InStockScroller";
+import { PRODUCTS } from "@/lib/products";
 
 export const metadata = {
   title: "Banner — Configurează online | Prynt",
@@ -14,6 +16,25 @@ export default function Page() {
     <main style={{ padding: 16 }}>
       <section>
         <BannerConfigurator />
+      </section>
+      {/* Scroller with 4 products per view: show other products in the 'bannere' category */}
+      <section style={{ marginTop: 24 }}>
+        {(() => {
+          const cat = "bannere";
+          const all = (PRODUCTS || []).filter((p: any) => String(p.metadata?.category ?? p.category ?? "").toLowerCase() === cat);
+          if (!all || all.length === 0) return null;
+          // exclude generic templates if needed - show all for now
+          return (
+            <div>
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
+            <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: 0.6, textTransform: "uppercase", background: "linear-gradient(90deg,#7c3aed,#6366f1)", WebkitBackgroundClip: "text", color: "transparent" }}>Produse similare</h2>
+            <div style={{ height: 6 }} />
+            <p style={{ margin: 0, color: "#9ca3af", fontSize: 13 }}>Vezi alte modele și dimensiuni disponibile</p>
+          </div>
+              <InStockScroller products={all as any} perPage={4} intervalMs={3500} />
+            </div>
+          );
+        })()}
       </section>
 
       {/* Optional SEO/extra content can go here, but not the visual H1 to avoid duplication */}

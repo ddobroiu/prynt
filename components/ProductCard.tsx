@@ -22,7 +22,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   const productUrl = isBanner ? `/banner/${product.slug}` : `/product/${product.slug}`;
   return (
-    <article className="card bg-gradient-to-br from-white via-indigo-50 to-indigo-100 shadow-xl rounded-2xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-2xl">
+    <article className="card bg-gradient-to-br from-white via-indigo-50 to-indigo-100 shadow-xl rounded-2xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-2xl h-full">
       <Link href={productUrl} className="block group" aria-label={`Configurează ${product.title}`}>
         <div className="w-full h-56 relative bg-gray-100">
           <Image src={img} alt={product.title ?? "Imagine produs"} fill style={{ objectFit: "cover" }} className="transition-opacity duration-300 group-hover:opacity-90 border-b border-indigo-100" />
