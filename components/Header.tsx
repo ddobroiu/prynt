@@ -59,6 +59,7 @@ const LINKS: NavItem[] = [
       { href: "/pvc-forex", label: "PVC Forex" },
     ],
   },
+  { href: "/blog", label: "Blog" },
 ];
 
 export default function Header() {

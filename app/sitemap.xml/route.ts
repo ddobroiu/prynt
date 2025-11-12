@@ -1,5 +1,6 @@
 import { getAllProductSlugs, getProductBySlug } from "@/lib/products";
 import { NextResponse } from "next/server";
+import { getAllBlogSlugs } from "@/lib/blogPosts";
 
 export const runtime = "edge";
 
@@ -10,6 +11,7 @@ function formatDateISO(d: Date) {
 export async function GET() {
   const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
   const slugs = getAllProductSlugs();
+  const blogSlugs = getAllBlogSlugs();
 
   const pages = [
     { url: `${base}/`, priority: 1.0, lastmod: formatDateISO(new Date()) },
@@ -32,7 +34,8 @@ export async function GET() {
     { url: `${base}/polipropilena`, priority: 0.6, lastmod: formatDateISO(new Date()) },
     { url: `${base}/pvc-forex`, priority: 0.6, lastmod: formatDateISO(new Date()) },
     // Info
-    { url: `${base}/shop`, priority: 0.6, lastmod: formatDateISO(new Date()) },
+  { url: `${base}/shop`, priority: 0.6, lastmod: formatDateISO(new Date()) },
+  { url: `${base}/blog`, priority: 0.6, lastmod: formatDateISO(new Date()) },
     { url: `${base}/contact`, priority: 0.5, lastmod: formatDateISO(new Date()) },
     { url: `${base}/confidentialitate`, priority: 0.3, lastmod: formatDateISO(new Date()) },
     { url: `${base}/politica-cookies`, priority: 0.3, lastmod: formatDateISO(new Date()) },
@@ -51,7 +54,8 @@ export async function GET() {
     return { url: `${base}/banner/${s}`, priority: 0.8, lastmod };
   });
 
-  const urls = [...pages, ...productPages];
+  const blogPages = blogSlugs.map((s) => ({ url: `${base}/blog/${s}`, priority: 0.5, lastmod: formatDateISO(new Date()) }));
+  const urls = [...pages, ...productPages, ...blogPages];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
