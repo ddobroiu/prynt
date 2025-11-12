@@ -123,39 +123,37 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
       }}
     >
       <div style={{ display: "flex", gap: 12, overflow: "hidden", alignItems: "stretch" }}>
-        <div style={{ display: "flex", gap: 12, transform: `translateX(-${page * 100}%)`, transition: "transform 500ms ease", alignItems: "stretch" }}>
-          {/* Render each page as a group of cards so the width is consistent */}
-          {Array.from({ length: pages }).map((_, pi) => {
-            const s = products.slice(pi * itemsPerPage, pi * itemsPerPage + itemsPerPage);
-            // For mobile we render a centered single-card layout with a constrained width so the product is visible and nicely styled
-            if (isMobileView) {
+        {/* Mobile: render only the current slice (no translate) to avoid layout/overflow issues on narrow viewports */}
+        {isMobileView ? (
+          <div style={{ display: "flex", gap: 12, minWidth: "100%", boxSizing: "border-box", justifyContent: "center", padding: "12px 0" }}>
+            {slice.map((p) => (
+              <div key={p.id} style={{ width: "85%", maxWidth: 360, boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+                <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                  <ProductCard product={{ ...(p as any), category: (p.metadata?.category ?? (p as any).category) }} imageHeightPx={320} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: "flex", gap: 12, transform: `translateX(-${page * 100}%)`, transition: "transform 500ms ease", alignItems: "stretch" }}>
+            {/* Render each page as a group of cards so the width is consistent */}
+            {Array.from({ length: pages }).map((_, pi) => {
+              const s = products.slice(pi * itemsPerPage, pi * itemsPerPage + itemsPerPage);
               return (
-                <div key={pi} style={{ display: "flex", gap: 12, minWidth: "100%", boxSizing: "border-box", justifyContent: "center", padding: "12px 0" }}>
+                <div key={pi} style={{ display: "grid", gridTemplateColumns: `repeat(${itemsPerPage}, minmax(0, 1fr))`, gap: 12, minWidth: "100%", boxSizing: "border-box", alignItems: "stretch" }}>
                   {s.map((p) => (
-                    <div key={p.id} style={{ width: "85%", maxWidth: 360, boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+                    <div key={p.id} style={{ width: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+                      {/* Ensure ProductCard sees a `category` prop like shop data (fallback to metadata.category) */}
                       <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                        <ProductCard product={{ ...(p as any), category: (p.metadata?.category ?? (p as any).category) }} imageHeightPx={320} />
+                        <ProductCard product={{ ...(p as any), category: (p.metadata?.category ?? (p as any).category) }} />
                       </div>
                     </div>
                   ))}
                 </div>
               );
-            }
-
-            return (
-              <div key={pi} style={{ display: "grid", gridTemplateColumns: `repeat(${itemsPerPage}, minmax(0, 1fr))`, gap: 12, minWidth: "100%", boxSizing: "border-box", alignItems: "stretch" }}>
-                {s.map((p) => (
-                  <div key={p.id} style={{ width: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
-                    {/* Ensure ProductCard sees a `category` prop like shop data (fallback to metadata.category) */}
-                    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                      <ProductCard product={{ ...(p as any), category: (p.metadata?.category ?? (p as any).category) }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            );
-          })}
-        </div>
+            })}
+          </div>
+        )}
       </div>
 
       {/* Pager dots */}
