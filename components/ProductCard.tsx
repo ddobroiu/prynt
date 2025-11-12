@@ -28,6 +28,9 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
     "/products/flayere/1.jpg",
     "/products/flayere/2.jpg",
     "/products/flayere/3.jpg",
+    "/products/autocolante/1.jpg",
+    "/products/autocolante/2.jpg",
+    "/products/autocolante/3.jpg",
     "/placeholder.png",
   ]);
   // Prefer an image that contains the product slug/id in its path (product-specific).
@@ -42,6 +45,7 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
   const isCanvas = categoryLower === "canvas";
   const isAfise = categoryLower === "afise";
   const isFlayere = categoryLower === "flayere";
+  const isAutocolante = categoryLower === "autocolante";
   // Special starting prices by category
   const priceDisplay = isBanner
     ? `De la ${Number(50).toFixed(0)} RON`
@@ -51,6 +55,8 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
         ? `De la ${Number(3).toFixed(0)} RON`
         : isFlayere
           ? `De la ${Number(50).toFixed(0)} RON`
+          : isAutocolante
+            ? `De la ${Number(5).toFixed(0)} RON`
         : (Number.isFinite(priceNum) ? `De la ${priceNum.toFixed(0)} RON` : "—");
 
   // Route mapping by category
@@ -74,7 +80,9 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
                     ? "/products/afise/1.jpg"
                     : isFlayere
                       ? "/products/flayere/1.jpg"
-                      : "/products/banner/1.jpg";
+                      : isAutocolante
+                        ? "/products/autocolante/1.jpg"
+                        : "/products/banner/1.jpg";
               }
             }}
             style={{ objectFit: "cover", width: "100%", height: "100%" }}

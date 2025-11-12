@@ -27,6 +27,12 @@ export function generateSeoForProduct(p: any) {
     return { title: seoTitle, description: `${short} ${details}` };
   }
 
+  if (category === "autocolante") {
+    const short = `Autocolante și stickere ${title} – decupaj sau print la dimensiuni personalizate pentru pereți, vitrine, auto și device-uri.`;
+    const details = `Comandă online autocolante pentru ${tags || "decor, semnalistică și branding"}. Oferim materiale diverse (monomeric, polimeric, perete, vitrină), tăiere pe contur și opțiuni de laminare. Prețuri începând de la 5 RON și livrare rapidă.`;
+    return { title: seoTitle, description: `${short} ${details}` };
+  }
+
   // default: bannere (și alte categorii fără șablon dedicat)
   const short = `Banner ${title} – bannere personalizate, print full-color pe materiale rezistente pentru exterior și interior.`;
   const details = `Comandă online bannere personalizate pentru ${tags || "promovare, evenimente și semnalistică"}. Oferim material Frontlit de calitate, finisaje la cerere și tăiere la dimensiune. Prețuri începând de la 50 RON și livrare rapidă.`;

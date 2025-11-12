@@ -20,6 +20,7 @@ export default function ShopPage() {
     if (cat === "canvas") return 79;
     if (cat === "flayere") return 50;
     if (cat === "afise") return 3;
+    if (cat === "autocolante") return 5;
     return p.priceBase ?? 0;
   });
   const realMin = Math.min(...prices);
@@ -31,7 +32,7 @@ export default function ShopPage() {
   // Adapt products la ProductCard props
   const products = PRODUCTS.map((p) => {
     const category = String(p.metadata?.category ?? "").toLowerCase();
-    const startingPrice = category === "bannere" ? 50 : category === "canvas" ? 79 : category === "flayere" ? 50 : category === "afise" ? 3 : p.priceBase ?? 0;
+  const startingPrice = category === "bannere" ? 50 : category === "canvas" ? 79 : category === "flayere" ? 50 : category === "afise" ? 3 : category === "autocolante" ? 5 : p.priceBase ?? 0;
     return {
       id: p.id,
       slug: p.routeSlug || p.slug || p.id,
