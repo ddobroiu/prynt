@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useCart } from "./CartContext";
 import { ChevronDown, ChevronRight, Menu, ShoppingCart, X } from "lucide-react";
@@ -68,13 +69,12 @@ export default function Header() {
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
-    if (openMobile) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = prev;
-      };
-    }
+    if (!openMobile) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
   }, [openMobile]);
 
   const openNow = (key: string) => {
@@ -86,32 +86,55 @@ export default function Header() {
     clearTimeout(dropdownTimers.current[key]);
     dropdownTimers.current[key] = setTimeout(() => {
       setOpenDropdown((cur) => (cur === key ? null : cur));
-    }, 120);
+    }, 140);
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white dark:bg-slate-950 border-gray-200 dark:border-slate-800 shadow-md">
+    <header
+      className="
+        sticky top-0 z-50 w-full border-b
+        bg-white/70 dark:bg-slate-950/60
+        border-gray-200/70 dark:border-slate-800/70
+        backdrop-blur-md supports-[backdrop-filter]:backdrop-blur
+      "
+    >
       <div className="page">
-        {/* MOBILE BAR: burger · logo · cart */}
+        {/* MOBILE BAR: burger · actions (Shop, Theme, Cart) */}
         <div className="flex items-center justify-between py-3 lg:hidden">
           <button
             type="button"
             onClick={() => setOpenMobile((v) => !v)}
             aria-label={openMobile ? "Închide meniul" : "Deschide meniul"}
-            className="inline-flex items-center justify-center rounded-lg p-2 border border-gray-300 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+            className="inline-flex items-center justify-center rounded-xl p-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
           >
             {openMobile ? <X size={22} /> : <Menu size={22} />}
           </button>
-          <a href="/" className="inline-flex items-center gap-2 group" aria-label="Prynt.ro">
-            <img src="/logo.png" alt="Prynt.ro" className="rounded-full w-14 h-14 lg:w-16 lg:h-16 shadow-lg transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-            <span className="sr-only">Prynt.ro</span>
-          </a>
 
-          <div className="flex items-center gap-3">
+          {/* Fără logo (la cerere) */}
+
+          <div className="flex items-center gap-2">
+            {/* SHOP evidențiat, în dreapta */}
+            <Link
+              href="/shop"
+              aria-label="Shop"
+              className="
+                inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold
+                bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white
+                shadow-lg shadow-indigo-600/20 ring-1 ring-white/10
+                hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600
+                active:scale-[0.98] transition
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500
+                dark:focus-visible:ring-offset-slate-950
+              "
+            >
+              Shop
+            </Link>
+
             <ThemeToggle />
-            <a
+
+            <Link
               href="/checkout"
-              className="relative inline-flex items-center justify-center rounded-lg p-2 border border-gray-300 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+              className="relative inline-flex items-center justify-center rounded-xl p-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
               aria-label="Coșul meu"
             >
               <ShoppingCart size={22} />
@@ -120,52 +143,74 @@ export default function Header() {
                   {count}
                 </span>
               )}
-            </a>
+            </Link>
           </div>
         </div>
 
-        {/* MOBILE NAV */}
-        {openMobile && <div className="fixed inset-0 z-40 bg-white dark:bg-slate-950 lg:hidden" />}
+        {/* MOBILE OVERLAY */}
+        {openMobile && (
+          <div className="fixed inset-0 z-40 bg-black/30 dark:bg-black/50 lg:hidden" aria-hidden="true" />
+        )}
+
+        {/* MOBILE NAV (card frosted) */}
         <div
           className={`lg:hidden overflow-hidden transition-[max-height,opacity] duration-300 relative z-50 ${
-            openMobile ? "opacity-100 max-h-[70vh]" : "opacity-0 max-h-0"
+            openMobile ? "opacity-100 max-h-[78vh]" : "opacity-0 max-h-0"
           }`}
         >
           <nav className="pb-3">
             <div className="mx-auto max-w-sm">
-              <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3 shadow-xl">
+              <div
+                className="
+                  rounded-2xl border border-gray-200/80 dark:border-slate-800/80
+                  bg-white/80 dark:bg-slate-950/70 backdrop-blur-xl p-3 shadow-2xl
+                "
+              >
                 <ul className="space-y-2">
-                  
-
                   {LINKS.map((l) =>
                     l.children ? (
                       <li key={l.label}>
                         <button
                           type="button"
-                          onClick={() => setOpenMobileSub((cur) => (cur === l.label ? null : l.label))}
-                          className="w-full inline-flex items-center justify-between rounded-md border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 py-2 text-slate-800 dark:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-800"
+                          onClick={() =>
+                            setOpenMobileSub((cur) => (cur === l.label ? null : l.label))
+                          }
+                          className="
+                            w-full inline-flex items-center justify-between rounded-xl
+                            border border-gray-200/80 dark:border-slate-800/80
+                            bg-white/70 dark:bg-slate-950/60
+                            px-3 py-2.5 text-slate-800 dark:text-slate-100
+                            hover:bg-gray-100/80 dark:hover:bg-slate-800/80 transition
+                          "
                           aria-expanded={openMobileSub === l.label}
                           aria-controls={`mobile-sub-${l.label.replace(/\s+/g, "-").toLowerCase()}`}
                         >
-                          <span>{l.label}</span>
+                          <span className="font-medium">{l.label}</span>
                           {openMobileSub === l.label ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                         </button>
                         <div
                           id={`mobile-sub-${l.label.replace(/\s+/g, "-").toLowerCase()}`}
-                          className={`grid transition-[grid-template-rows,opacity] duration-300 ${
-                            openMobileSub === l.label ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0"
-                          }`}
+                          className={`
+                            grid transition-[grid-template-rows,opacity] duration-300
+                            ${openMobileSub === l.label ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0"}
+                          `}
                         >
                           <div className="overflow-hidden">
-                            <ul className="pl-3 space-y-2">
+                            <ul className="pl-2.5 space-y-2">
                               {l.children.map((c) => (
                                 <li key={c.href}>
-                                  <a
+                                  <Link
                                     href={c.href}
-                                    className="block rounded-md border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-800"
+                                    className="
+                                      block rounded-lg border border-gray-200/80 dark:border-slate-800/80
+                                      bg-white/70 dark:bg-slate-950/60
+                                      px-3 py-2 text-sm text-slate-800 dark:text-slate-100
+                                      hover:bg-gray-100/80 dark:hover:bg-slate-800/80 transition
+                                    "
+                                    onClick={() => setOpenMobile(false)}
                                   >
                                     {c.label}
-                                  </a>
+                                  </Link>
                                 </li>
                               ))}
                             </ul>
@@ -174,12 +219,18 @@ export default function Header() {
                       </li>
                     ) : (
                       <li key={l.href} className="text-center">
-                        <a
+                        <Link
                           href={l.href}
-                          className="block rounded-md border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 py-2 text-slate-800 dark:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-800"
+                          className="
+                            block rounded-xl border border-gray-200/80 dark:border-slate-800/80
+                            bg-white/70 dark:bg-slate-950/60
+                            px-3 py-2.5 text-slate-800 dark:text-slate-100
+                            hover:bg-gray-100/80 dark:hover:bg-slate-800/80 transition
+                          "
+                          onClick={() => setOpenMobile(false)}
                         >
                           {l.label}
-                        </a>
+                        </Link>
                       </li>
                     )
                   )}
@@ -189,14 +240,13 @@ export default function Header() {
           </nav>
         </div>
 
-        {/* DESKTOP NAV */}
-        <div className="hidden lg:flex items-center justify-between py-3">
-          <a href="/" className="inline-flex items-center gap-2 group" aria-label="Prynt.ro">
-            <img src="/logo.png" alt="Prynt.ro" className="rounded-full w-16 h-16 lg:w-20 lg:h-20 shadow-lg transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-            <span className="sr-only">Prynt.ro</span>
-          </a>
+        {/* DESKTOP: 3-col grid — left (spacer), center (menu), right (actions) */}
+        <div className="hidden lg:grid grid-cols-3 items-center py-3">
+          {/* Left spacer (no logo) */}
+          <div />
 
-          <nav className="flex items-center gap-4">
+          {/* Centered menu with modern effects */}
+          <nav className="justify-self-center flex items-center gap-1">
             {LINKS.map((l) =>
               l.children ? (
                 <div
@@ -211,48 +261,111 @@ export default function Header() {
                     type="button"
                     aria-haspopup="menu"
                     aria-expanded={openDropdown === l.label}
-                    className="inline-flex items-center gap-1 rounded-md px-4 py-2 text-slate-800 dark:text-slate-100 font-semibold bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                    className="
+                      group inline-flex items-center gap-1 rounded-xl px-4 py-2 font-semibold
+                      text-slate-800 dark:text-slate-100
+                      hover:bg-gray-100/60 dark:hover:bg-slate-800/60 transition
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500/30
+                    "
                     onClick={() => setOpenDropdown((cur) => (cur === l.label ? null : l.label))}
                   >
-                    {l.label}
-                    <ChevronDown size={16} className={`opacity-70 transition-transform ${openDropdown === l.label ? "rotate-180 opacity-100" : ""}`} />
+                    <span className="relative">
+                      {l.label}
+                      <span
+                        className={`
+                          pointer-events-none absolute left-0 -bottom-1 h-0.5 w-full origin-left scale-x-0
+                          bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600
+                          transition-transform duration-300 group-hover:scale-x-100
+                          ${openDropdown === l.label ? "scale-x-100" : ""}
+                        `}
+                      />
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`opacity-70 transition-transform ${openDropdown === l.label ? "rotate-180 opacity-100" : ""}`}
+                    />
                   </button>
+
                   <div
                     role="menu"
-                    className={`absolute left-0 mt-2 w-56 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-xl z-50 transition-all origin-top ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}`}
+                    className={`
+                      absolute left-1/2 -translate-x-1/2 mt-2 w-64 rounded-2xl
+                      border border-gray-200/80 dark:border-slate-800/80
+                      bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-2
+                      shadow-2xl shadow-black/5 ring-1 ring-black/5
+                      z-50 transition-all origin-top
+                      ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}
+                    `}
                   >
                     {l.children.map((c) => (
-                      <a
+                      <Link
                         key={c.href}
                         href={c.href}
                         role="menuitem"
-                        className="block rounded-md px-4 py-2 text-base text-slate-800 dark:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-800 focus:outline-none font-medium transition"
+                        className="
+                          block rounded-xl px-4 py-2 text-[15px] font-medium
+                          text-slate-800 dark:text-slate-100
+                          hover:bg-gray-100/70 dark:hover:bg-slate-800/70 transition
+                        "
                         onClick={() => setOpenDropdown(null)}
                       >
                         {c.label}
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 </div>
               ) : (
-                <a
+                <Link
                   key={l.href}
                   href={l.href}
-                  className="rounded-md px-4 py-2 text-slate-800 dark:text-slate-100 font-semibold hover:bg-gray-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition"
+                  className="
+                    group rounded-xl px-4 py-2 font-semibold
+                    text-slate-800 dark:text-slate-100
+                    hover:bg-gray-100/60 dark:hover:bg-slate-800/60 transition
+                    focus:outline-none focus:ring-2 focus:ring-indigo-500/30
+                  "
                 >
-                  {l.label}
-                </a>
+                  <span className="relative">
+                    {l.label}
+                    <span
+                      className="
+                        pointer-events-none absolute left-0 -bottom-1 h-0.5 w-full origin-left scale-x-0
+                        bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600
+                        transition-transform duration-300 group-hover:scale-x-100
+                      "
+                    />
+                  </span>
+                </Link>
               )
             )}
-
-            
           </nav>
 
-          <div className="flex items-center gap-3">
+          {/* Right actions: Shop special + Theme + Cart */}
+          <div className="justify-self-end flex items-center gap-3">
+            <Link
+              href="/shop"
+              className="
+                inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold
+                bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white
+                shadow-lg shadow-indigo-600/20 ring-1 ring-white/10
+                hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600
+                active:scale-[0.98] transition
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500
+                dark:focus-visible:ring-offset-slate-950
+              "
+            >
+              Shop
+            </Link>
+
             <ThemeToggle />
-            <a
+
+            <Link
               href="/checkout"
-              className="relative inline-flex items-center justify-center rounded-lg px-4 py-2 border border-gray-300 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+              className="
+                relative inline-flex items-center justify-center rounded-xl px-4 py-2
+                border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition
+                dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800
+              "
               aria-label="Coșul meu"
             >
               <ShoppingCart size={20} />
@@ -261,7 +374,7 @@ export default function Header() {
                   {count}
                 </span>
               )}
-            </a>
+            </Link>
           </div>
         </div>
       </div>

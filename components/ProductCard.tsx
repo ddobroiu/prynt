@@ -14,7 +14,22 @@ type Product = {
 export default function ProductCard({ product, imageHeightPx }: { product: Product; imageHeightPx?: number }) {
   const imgCandidates = product.images ?? [];
   const slugKey = String(product.slug ?? (product as any).routeSlug ?? product.id ?? "").toLowerCase();
-  const genericSet = new Set<string>(["/products/banner/1.jpg", "/products/banner/2.jpg", "/products/banner/3.jpg", "/products/banner/4.jpg", "/placeholder.png"]);
+  const genericSet = new Set<string>([
+    "/products/banner/1.jpg",
+    "/products/banner/2.jpg",
+    "/products/banner/3.jpg",
+    "/products/banner/4.jpg",
+    "/products/canvas/1.jpg",
+    "/products/canvas/2.jpg",
+    "/products/canvas/3.jpg",
+    "/products/afise/1.jpg",
+    "/products/afise/2.jpg",
+    "/products/afise/3.jpg",
+    "/products/flayere/1.jpg",
+    "/products/flayere/2.jpg",
+    "/products/flayere/3.jpg",
+    "/placeholder.png",
+  ]);
   // Prefer an image that contains the product slug/id in its path (product-specific).
   let initialImg = imgCandidates.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
   if (!initialImg) {
@@ -22,13 +37,27 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
     initialImg = imgCandidates.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgCandidates[0] ?? "/products/banner/1.jpg";
   }
   const priceNum = typeof product.price === "number" ? product.price : Number(product.price || 0);
-  const isBanner = String(product.category || "").toLowerCase() === "bannere";
-  // For banners show a 'De la 50 RON' starting price instead of a fixed 250
-  const priceDisplay = isBanner ? `De la ${Number(50).toFixed(0)} RON` : (Number.isFinite(priceNum) ? `De la ${priceNum.toFixed(0)} RON` : "—");
+  const categoryLower = String(product.category || "").toLowerCase();
+  const isBanner = categoryLower === "bannere";
+  const isCanvas = categoryLower === "canvas";
+  const isAfise = categoryLower === "afise";
+  const isFlayere = categoryLower === "flayere";
+  // Special starting prices by category
+  const priceDisplay = isBanner
+    ? `De la ${Number(50).toFixed(0)} RON`
+    : isCanvas
+      ? `De la ${Number(79).toFixed(0)} RON`
+      : isAfise
+        ? `De la ${Number(3).toFixed(0)} RON`
+        : isFlayere
+          ? `De la ${Number(50).toFixed(0)} RON`
+        : (Number.isFinite(priceNum) ? `De la ${priceNum.toFixed(0)} RON` : "—");
 
-  const productUrl = isBanner ? `/banner/${product.slug}` : `/product/${product.slug}`;
+  // Route mapping by category
+  const routeBase = isBanner ? "banner" : isCanvas ? "canvas" : categoryLower || "product";
+  const productUrl = `/${routeBase}/${product.slug}`;
   return (
-    <article className="card bg-gradient-to-br from-white via-indigo-50 to-indigo-100 shadow-xl rounded-2xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-2xl h-full">
+  <article className="card bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-xl rounded-2xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-2xl h-full">
       <Link href={productUrl} className="block group" aria-label={`Configurează ${product.title}`}>
         <div className="w-full relative bg-gray-100 h-56 overflow-hidden" style={imageHeightPx ? { height: imageHeightPx } : undefined}>
           <img
@@ -39,7 +68,13 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
               const el = e.currentTarget as HTMLImageElement;
               if (!el.dataset.fallback) {
                 el.dataset.fallback = "1";
-                el.src = "/products/banner/1.jpg";
+                el.src = isCanvas
+                  ? "/products/canvas/1.jpg"
+                  : isAfise
+                    ? "/products/afise/1.jpg"
+                    : isFlayere
+                      ? "/products/flayere/1.jpg"
+                      : "/products/banner/1.jpg";
               }
             }}
             style={{ objectFit: "cover", width: "100%", height: "100%" }}

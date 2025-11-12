@@ -1,4 +1,4 @@
-// app/flyer/[...slug]/page.tsx
+// app/flayere/[...slug]/page.tsx
 import { notFound } from "next/navigation";
 import ProductJsonLd from "@/components/ProductJsonLd";
 import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
@@ -7,14 +7,14 @@ import type { Product } from "@/lib/products";
 type Props = { params?: any };
 
 export async function generateStaticParams() {
-  const slugs = getAllProductSlugsByCategory("flyer");
+  const slugs = getAllProductSlugsByCategory("flayere");
   return slugs.map((slug) => ({ slug: [slug] }));
 }
 
 export async function generateMetadata({ params }: Props) {
   const resolved = await params;
   const raw = (resolved?.slug ?? []).join("/");
-  const { product, isFallback } = await resolveProductForRequestedSlug(String(raw), "flyer");
+  const { product, isFallback } = await resolveProductForRequestedSlug(String(raw), "flayere");
   if (!product) return {};
   const metadata: any = {
     title: product.seo?.title || `${product.title} | Prynt`,
@@ -30,11 +30,11 @@ export default async function Page({ params }: Props) {
   const slugParts: string[] = resolved?.slug ?? [];
   const joinedSlug = slugParts.join("/");
 
-  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug), "flyer");
+  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug), "flayere");
 
   if (!product) return notFound();
 
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/flyer/${joinedSlug}`;
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/flayere/${joinedSlug}`;
 
   return (
     <main style={{ padding: 16 }}>

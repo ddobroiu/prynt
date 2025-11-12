@@ -4,7 +4,7 @@ import ProductJsonLd from "@/components/ProductJsonLd";
 import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
 import type { Product } from "@/lib/products";
 // Dacă ai un configurator specific pentru afișe, importă-l aici (dacă nu, poți reutiliza PlianteConfigurator sau un generic)
-import PlianteConfigurator from "@/components/PlianteConfigurator"; // înlocuiește cu AfișConfigurator dacă există
+import AfiseConfigurator from "@/components/AfiseConfigurator"; // configurator dedicat pentru afișe
 
 type Props = { params?: any };
 
@@ -46,8 +46,8 @@ export default async function Page({ params }: Props) {
           <h1 style={{ fontSize: 28, fontWeight: 700, textAlign: "center", margin: 0 }}>{product.title}</h1>
           <p style={{ marginTop: 8, color: "#9ca3af", textAlign: "center", marginBottom: 0 }}>{product.description}</p>
         </header>
-        {/* înlocuiește PlianteConfigurator cu componenta corectă pentru afișe dacă ai una */}
-        <PlianteConfigurator productSlug={product.slug ?? product.routeSlug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
+        {/* Configuratorul corect pentru Afișe */}
+        <AfiseConfigurator productSlug={product.slug ?? product.routeSlug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
       </section>
     </main>
   );
