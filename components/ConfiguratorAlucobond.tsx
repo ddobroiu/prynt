@@ -302,7 +302,7 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Alucobond</h1>
-            <p className="mt-2 text-white/70">Alege tip, culoare, dimensiuni și încarcă grafică. Calcul instant și adaugă în coș.</p>
+            <p className="mt-2 text-muted">Alege tip, culoare, dimensiuni și încarcă grafică. Calcul instant și adaugă în coș.</p>
           </div>
           <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline text-sm self-start">
             <Info size={18} />
@@ -314,7 +314,7 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
           <div className="lg:col-span-3 space-y-6">
             {/* 1. Dimensiuni */}
             <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-white">1. Dimensiuni & cantitate</h2></div>
+              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-ui">1. Dimensiuni & cantitate</h2></div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="field-label">Lățime (cm)</label>
@@ -326,13 +326,13 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                 </div>
                 <NumberInput label="Cantitate" value={input.quantity} onChange={(v) => updateInput("quantity", Math.max(1, Math.floor(v)))} />
               </div>
-              <div className="mt-2 text-xs text-white/60">Dimensiuni maxime suportate: 400 x 200 cm. Preseturi rapide disponibile.</div>
+              <div className="mt-2 text-xs text-muted">Dimensiuni maxime suportate: 400 x 200 cm. Preseturi rapide disponibile.</div>
             </div>
 
             {/* 2. Material & Culori */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="card p-4" ref={materialRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-white">2. Tip material</h2></div>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-ui">2. Tip material</h2></div>
 
                 <div className="relative">
                   <button
@@ -342,11 +342,11 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                     aria-expanded={materialOpen}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="text-sm text-white/80">
+                      <div className="text-sm text-muted">
                         {MATERIAL_INFO[input.material].label} — {MATERIAL_INFO[input.material].thickness_mm}mm
                       </div>
                     </div>
-                    <div className="text-xs text-white/60">{materialOpen ? "Închide" : "Schimbă"}</div>
+                    <div className="text-xs text-muted">{materialOpen ? "Închide" : "Schimbă"}</div>
                   </button>
 
                   {materialOpen && (
@@ -359,7 +359,7 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
               </div>
 
               <div className="card p-4" ref={colorsRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-white">3. Culoare</h2></div>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">3. Culoare</h2></div>
 
                 <div className="relative">
                   <button
@@ -369,9 +369,9 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                     aria-expanded={colorsOpen}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="text-sm text-white/80">{input.color}</div>
+                      <div className="text-sm text-muted">{input.color}</div>
                     </div>
-                    <div className="text-xs text-white/60">{colorsOpen ? "Închide" : "Schimbă"}</div>
+                    <div className="text-xs text-muted">{colorsOpen ? "Închide" : "Schimbă"}</div>
                   </button>
 
                   {colorsOpen && (
@@ -385,13 +385,13 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                   )}
                 </div>
 
-                <div className="mt-2 text-xs text-white/60">Culori disponibile pentru tipul ales.</div>
+                <div className="mt-2 text-xs text-muted">Culori disponibile pentru tipul ales.</div>
               </div>
             </div>
 
             {/* 4. Grafică */}
             <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Info /></div><h2 className="text-lg font-bold text-white">4. Grafică</h2></div>
+              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Info /></div><h2 className="text-lg font-bold text-ui">4. Grafică</h2></div>
 
               <div className="relative">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -410,7 +410,7 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                       onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)}
                       className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500"
                     />
-                    <div className="text-xs text-white/60 mt-1">sau</div>
+                    <div className="text-xs text-muted mt-1">sau</div>
                   </div>
 
                   <div>
@@ -422,10 +422,10 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                       placeholder="Ex: https://.../fisier.pdf"
                       className="input"
                     />
-                    <div className="text-xs text-white/60 mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
+                    <div className="text-xs text-muted mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
                   </div>
 
-                  <div className="text-xs text-white/60">
+                  <div className="text-xs text-muted">
                     {uploading && "Se încarcă…"}
                     {uploadError && "Eroare upload"}
                     {artworkUrl && "Fișier încărcat"}
@@ -436,7 +436,7 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
 
               {designOption === "pro" && (
                 <div className="panel p-3 mt-3 border-t border-white/5">
-                  <div className="text-sm text-white/80">Serviciu grafic profesional — includem fișier sursă și corecții minore.</div>
+                  <div className="text-sm text-muted">Serviciu grafic profesional — includem fișier sursă și corecții minore.</div>
                 </div>
               )}
             </div>
@@ -460,11 +460,11 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
 
               <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-                <div className="space-y-2 text-white/80 text-sm">
-                  <p>Suprafață: <span className="text-white font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
-                  <p>Preț: <span className="text-2xl font-extrabold text-white">{formatMoneyDisplay(totalShown)} RON</span></p>
-                  <p className="text-xs text-white/60">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm} RON</strong></p>
-                  {designOption === "pro" && <p className="text-xs text-white/60">Taxă design pro: <strong>{PRO_DESIGN_FEE} RON</strong></p>}
+                <div className="space-y-2 text-muted text-sm">
+                  <p>Suprafață: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
+                  <p>Preț: <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span></p>
+                  <p className="text-xs text-muted">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm} RON</strong></p>
+                  {designOption === "pro" && <p className="text-xs text-muted">Taxă design pro: <strong>{PRO_DESIGN_FEE} RON</strong></p>}
                 </div>
 
                 <div className="hidden lg:block mt-4">
@@ -475,7 +475,7 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-white/60">Dimensiuni maxime: 300x150 cm; 400x150 cm; 300x200 cm. Prețurile afișate sunt orientative.</div>
+              <div className="card-muted p-3 text-xs text-muted">Dimensiuni maxime: 300x150 cm; 400x150 cm; 300x200 cm. Prețurile afișate sunt orientative.</div>
             </div>
           </aside>
         </div>

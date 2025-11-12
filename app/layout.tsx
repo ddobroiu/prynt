@@ -41,7 +41,7 @@ var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n
         />
       </head>
 
-      <body className="bg-[#0b0f19] text-white antialiased">
+  <body className="bg-ui text-ui antialiased">
         <Providers>
           <Header />
 

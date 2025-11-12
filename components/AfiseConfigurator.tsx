@@ -352,8 +352,8 @@ function SelectCardSmall({ active, onClick, title, subtitle }: { active: boolean
     <button onClick={onClick} className={`w-full rounded-md p-3 text-left transition flex items-start gap-3 ${active ? "border-2 border-indigo-500 bg-indigo-900/20" : "border border-white/10 hover:bg-white/5"}`}>
       <div className={`h-4 w-4 mt-1 rounded-full border ${active ? "bg-indigo-500 border-indigo-500" : "bg-transparent border-white/20"}`} />
       <div>
-        <div className="text-sm text-white font-semibold">{title}</div>
-        {subtitle && <div className="text-xs text-white/60 mt-1">{subtitle}</div>}
+  <div className="text-sm text-ui font-semibold">{title}</div>
+  {subtitle && <div className="text-xs text-muted mt-1">{subtitle}</div>}
       </div>
     </button>
   );
@@ -446,7 +446,7 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold">Afișe — Print digital</h1>
-          <p className="mt-2 text-white/70">Alege dimensiunea, materialul, tirajul și grafica. Prețul se calculează instant.</p>
+          <p className="mt-2 text-muted">Alege dimensiunea, materialul, tirajul și grafica. Prețul se calculează instant.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -493,12 +493,12 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
 
           {/* Material selection */}
           <div className="card p-4">
-            <div className="text-sm text-white/70 mb-2">Material / Hârtie</div>
+            <div className="text-sm text-muted mb-2">Material / Hârtie</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {MATERIALS.filter((m) => isMaterialVisibleForSize(m.key, size)).map((m) => (
                 <button key={m.key} onClick={() => setMaterial(m.key)} className={`rounded-md p-3 text-left ${material === m.key ? "border-2 border-indigo-500 bg-indigo-900/20" : "border border-white/10 hover:bg-white/5"}`}>
-                  <div className="text-sm text-white font-semibold">{m.label}</div>
-                  {m.gramaj && <div className="text-xs text-white/60 mt-1">{m.gramaj} g/mp</div>}
+                  <div className="text-sm text-ui font-semibold">{m.label}</div>
+                  {m.gramaj && <div className="text-xs text-muted mt-1">{m.gramaj} g/mp</div>}
                 </button>
               ))}
             </div>
@@ -506,15 +506,15 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
 
           {/* Graphics options */}
           <div className="card p-4">
-            <div className="flex items-center gap-3 mb-3"><h2 className="text-lg font-bold text-white">Grafică</h2></div>
+            <div className="flex items-center gap-3 mb-3"><h2 className="text-lg font-bold text-ui">Grafică</h2></div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <button onClick={() => setDesignOption("upload")} className={`rounded-md p-3 text-left ${designOption === "upload" ? "border-2 border-indigo-500 bg-indigo-900/20" : "border border-white/10 hover:bg-white/5"}`}>
-                <div className="text-sm text-white font-semibold">Am fișier / Upload</div>
-                <div className="text-xs text-white/60 mt-1">Încarcă PDF / JPG (300 dpi recomandat)</div>
+                <div className="text-sm text-ui font-semibold">Am fișier / Upload</div>
+                <div className="text-xs text-muted mt-1">Încarcă PDF / JPG (300 dpi recomandat)</div>
               </button>
               <button onClick={() => setDesignOption("pro")} className={`rounded-md p-3 text-left ${designOption === "pro" ? "border-2 border-indigo-500 bg-indigo-900/20" : "border border-white/10 hover:bg-white/5"}`}>
-                <div className="text-sm text-white font-semibold">Grafică profesională</div>
-                <div className="text-xs text-white/60 mt-1">Tarif fix: <span className="font-semibold">100 RON</span></div>
+                <div className="text-sm text-ui font-semibold">Grafică profesională</div>
+                <div className="text-xs text-muted mt-1">Tarif fix: <span className="font-semibold">100 RON</span></div>
               </button>
             </div>
 
@@ -522,13 +522,13 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
               <div className="panel p-3 mt-3 border-t border-white/5">
                 <label className="field-label">Încarcă fișier</label>
                 <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileChange} className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500" />
-                {uploadedFileName && <div className="text-xs text-white/60 mt-2">Fișier: {uploadedFileName}</div>}
+                {uploadedFileName && <div className="text-xs text-muted mt-2">Fișier: {uploadedFileName}</div>}
               </div>
             )}
 
             {designOption === "pro" && (
               <div className="panel p-3 mt-3 border-t border-white/5">
-                <div className="text-sm text-white/80">Comandă grafică profesională. Tarif fix: <span className="font-semibold">{PRO_DESIGN_FEE} RON</span>.</div>
+                <div className="text-sm text-muted">Comandă grafică profesională. Tarif fix: <span className="font-semibold">{PRO_DESIGN_FEE} RON</span>.</div>
               </div>
             )}
           </div>
@@ -545,10 +545,10 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
 
             <div className="card p-4">
               <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-              <div className="space-y-2 text-white/80 text-sm">
-                <p>Dimensiune: <span className="text-white font-semibold">{size}</span></p>
-                <p>Material: <span className="text-white font-semibold">{MATERIALS.find((m) => m.key === material)?.label}</span></p>
-                <p>Tiraj: <span className="text-white font-semibold">{quantity} buc</span></p>
+              <div className="space-y-2 text-muted text-sm">
+                <p>Dimensiune: <span className="text-ui font-semibold">{size}</span></p>
+                <p>Material: <span className="text-ui font-semibold">{MATERIALS.find((m) => m.key === material)?.label}</span></p>
+                <p>Tiraj: <span className="text-ui font-semibold">{quantity} buc</span></p>
                 <p>Preț/unitate: <span className="text-white font-semibold">{unitPrice.toFixed(2)} RON</span></p>
                 {designOption === "pro" && <p>Taxă grafică Pro: <span className="text-white font-semibold">{PRO_DESIGN_FEE} RON</span></p>}
                 <p className="text-xl font-bold">Total: <span className="text-indigo-400">{total.toFixed(2)} RON</span></p>

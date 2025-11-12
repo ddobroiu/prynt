@@ -98,19 +98,19 @@ function ResponsiveShapeFrameSelector({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
         {/* Shape selector */}
         <div>
-          <div className="text-sm font-semibold text-white mb-2">Formă</div>
+          <div className="text-sm font-semibold text-ui mb-2">Formă</div>
           <div className="inline-flex w-full rounded-md bg-white/5 p-1 gap-2">
             <button
               type="button"
               onClick={() => setShape("rect")}
-              className={`flex-1 px-3 py-1 rounded-md text-sm text-center ${shape === "rect" ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
+              className={`flex-1 px-3 py-1 rounded-md text-sm text-center ${shape === "rect" ? "bg-indigo-600 text-white" : "text-muted hover:bg-white/5"}`}
             >
               Dreptunghi
             </button>
             <button
               type="button"
               onClick={() => setShape("square")}
-              className={`flex-1 px-3 py-1 rounded-md text-sm text-center ${shape === "square" ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
+              className={`flex-1 px-3 py-1 rounded-md text-sm text-center ${shape === "square" ? "bg-indigo-600 text-white" : "text-muted hover:bg-white/5"}`}
             >
               Pătrat
             </button>
@@ -119,26 +119,26 @@ function ResponsiveShapeFrameSelector({
 
         {/* Framed selector - occupies remaining columns on md+ and full width below */}
         <div className="md:col-span-2">
-          <div className="text-sm font-semibold text-white mb-2">Șasiu</div>
+          <div className="text-sm font-semibold text-ui mb-2">Șasiu</div>
 
           {/* Desktop: inline segmented; Mobile: stacked full-width */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => setFramed(false)}
-              className={`w-full px-3 py-2 rounded-md text-sm text-left ${!framed ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
+              className={`w-full px-3 py-2 rounded-md text-sm text-left ${!framed ? "bg-indigo-600 text-white" : "text-muted hover:bg-white/5"}`}
             >
               <div className="font-medium">Fără șasiu</div>
-              <div className="text-xs text-white/60">Personalizat, calcul pe m²</div>
+              <div className="text-xs text-muted">Personalizat, calcul pe m²</div>
             </button>
 
             <button
               type="button"
               onClick={() => setFramed(true)}
-              className={`w-full px-3 py-2 rounded-md text-sm text-left ${framed ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/5"}`}
+              className={`w-full px-3 py-2 rounded-md text-sm text-left ${framed ? "bg-indigo-600 text-white" : "text-muted hover:bg-white/5"}`}
             >
               <div className="font-medium">Cu șasiu (pre-set)</div>
-              <div className="text-xs text-white/60">Dimensiuni preset cu preț fix</div>
+              <div className="text-xs text-muted">Dimensiuni preset cu preț fix</div>
             </button>
           </div>
         </div>
@@ -408,7 +408,7 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Canvas</h1>
-            <p className="mt-2 text-white/70">Canvas Fine Art — bumbac + poliester, 330 g/mp.</p>
+            <p className="mt-2 text-muted">Canvas Fine Art — bumbac + poliester, 330 g/mp.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -439,26 +439,26 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
             {/* presets / custom inputs */}
             {framed ? (
               <div className="card p-4">
-                <div className="text-sm text-white/70 mb-3">{shape === "rect" ? "Dimensiuni preset — Dreptunghi" : "Dimensiuni preset — Pătrat"}</div>
+                <div className="text-sm text-muted mb-3">{shape === "rect" ? "Dimensiuni preset — Dreptunghi" : "Dimensiuni preset — Pătrat"}</div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {(shape === "rect" ? RECT_SIZES : SQUARE_SIZES).map((s) => (
                     <button key={s.key} onClick={() => setSelectedSizeKey(s.key)} className={`p-3 rounded-md text-left border ${selectedSizeKey === s.key ? "border-indigo-500 bg-indigo-900/20" : "border-white/10 hover:bg-white/5"}`}>
-                      <div className="font-semibold text-white">{s.label}</div>
-                      <div className="text-sm text-white/60">{s.price} RON</div>
+                      <div className="font-semibold text-ui">{s.label}</div>
+                      <div className="text-sm text-muted">{s.price} RON</div>
                     </button>
                   ))}
                 </div>
               </div>
             ) : (
               <div className="card p-4">
-                <div className="text-sm text-white/70 mb-3">Introdu dimensiunile (cm). Limite: lățime ≤ 3.10 m, lungime ≤ 50 m.</div>
+                <div className="text-sm text-muted mb-3">Introdu dimensiunile (cm). Limite: lățime ≤ 3.10 m, lungime ≤ 50 m.</div>
 
                 {shape === "square" ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="field-label">Latura (cm)</label>
                       <input type="number" min={1} max={MAX_WIDTH_CM_NO_FRAME} value={customWidthCm as number | ""} onChange={(e) => { const v = e.target.value === "" ? "" : Math.max(0, Number(e.target.value)); setCustomWidthCm(v); setCustomHeightCm(v); }} className="input" placeholder="Ex: 50" />
-                      <div className="text-xs text-white/60 mt-1">Max lățime: {MAX_WIDTH_CM_NO_FRAME / 100} m, max lungime: {MAX_LENGTH_CM_NO_FRAME / 100} m</div>
+                      <div className="text-xs text-muted mt-1">Max lățime: {MAX_WIDTH_CM_NO_FRAME / 100} m, max lungime: {MAX_LENGTH_CM_NO_FRAME / 100} m</div>
                     </div>
 
                     <div>
@@ -470,13 +470,13 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
                     <div>
                       <label className="field-label">Lățime (cm)</label>
                       <input type="number" min={1} max={MAX_WIDTH_CM_NO_FRAME} value={customWidthCm as number | ""} onChange={(e) => { const v = e.target.value === "" ? "" : Math.max(0, Number(e.target.value)); setCustomWidthCm(v); }} className="input" placeholder="Ex: 100" />
-                      <div className="text-xs text-white/60 mt-1">Max: {MAX_WIDTH_CM_NO_FRAME / 100} m</div>
+                      <div className="text-xs text-muted mt-1">Max: {MAX_WIDTH_CM_NO_FRAME / 100} m</div>
                     </div>
 
                     <div>
                       <label className="field-label">Lungime (cm)</label>
                       <input type="number" min={1} max={MAX_LENGTH_CM_NO_FRAME} value={customHeightCm as number | ""} onChange={(e) => { const v = e.target.value === "" ? "" : Math.max(0, Number(e.target.value)); setCustomHeightCm(v); }} className="input" placeholder="Ex: 150" />
-                      <div className="text-xs text-white/60 mt-1">Max: {MAX_LENGTH_CM_NO_FRAME / 100} m</div>
+                      <div className="text-xs text-muted mt-1">Max: {MAX_LENGTH_CM_NO_FRAME / 100} m</div>
                     </div>
 
                     <div>
@@ -491,7 +491,7 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
             <div className="card p-4" ref={graphicsRef}>
               <div className="flex items-center gap-3 mb-3">
                 <div className="text-indigo-400"><CheckCircle /></div>
-                <h2 className="text-lg font-bold text-white">Grafică</h2>
+                <h2 className="text-lg font-bold text-ui">Grafică</h2>
               </div>
 
               <div className="panel p-3 space-y-2">
@@ -511,7 +511,7 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
                 <div className="flex items-start gap-3 mt-2">
                   <label className="flex items-center gap-2">
                     <input type="checkbox" checked={addTextOption} onChange={(e) => setAddTextOption(e.target.checked)} />
-                    <span className="text-sm text-white/80">Adaugă text pe canvas</span>
+                    <span className="text-sm text-muted">Adaugă text pe canvas</span>
                   </label>
                 </div>
 
@@ -519,11 +519,11 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
                   <div className="mt-2">
                     <label className="field-label">Text pentru canvas</label>
                     <input type="text" value={textDesign} onChange={(e) => setTextDesign(e.target.value)} placeholder="Ex: Nume / Mesaj scurt" className="input" />
-                    <div className="text-xs text-white/60 mt-1">Textul nu apare pe previzualizare, dar va fi trimis cu comanda dacă este bifat.</div>
+                    <div className="text-xs text-muted mt-1">Textul nu apare pe previzualizare, dar va fi trimis cu comanda dacă este bifat.</div>
                   </div>
                 )}
 
-                <div className="text-xs text-white/60">
+                <div className="text-xs text-muted">
                   {uploading && "Se încarcă…"}
                   {uploadError && <span className="text-red-400">Eroare upload: {uploadError}</span>}
                   {artworkUrl && <span className="text-green-400">Fișier disponibil</span>}
@@ -552,21 +552,21 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
 
               <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-                <div className="space-y-2 text-white/80 text-sm">
-                  <p>Forma: <span className="text-white font-semibold">{shape === "rect" ? "Dreptunghi" : "Pătrat"}</span></p>
-                  <p>Dimensiune: <span className="text-white font-semibold">{framed ? (selectedSizeKey ?? "—") : `${customWidthCm || "—"} x ${customHeightCm || "—"} cm`}</span></p>
-                  <p>Șasiu: <span className="text-white font-semibold">{framed ? "Da" : "Nu"}</span></p>
-                  <p>Cantitate: <span className="text-white font-semibold">{quantity}</span></p>
-                  <p>Preț per unitate: <span className="text-white font-semibold">{formatMoneyDisplay(unitPrice)} RON</span></p>
-                  <p className="text-2xl font-extrabold text-white">Total: {formatMoneyDisplay(serverPrice ?? totalPrice)} RON</p>
-                  {addTextOption && textDesign.trim() !== "" && <div className="text-sm text-white/60">Text pe comandă: "{textDesign.trim()}"</div>}
+                <div className="space-y-2 text-muted text-sm">
+                  <p>Forma: <span className="text-ui font-semibold">{shape === "rect" ? "Dreptunghi" : "Pătrat"}</span></p>
+                  <p>Dimensiune: <span className="text-ui font-semibold">{framed ? (selectedSizeKey ?? "—") : `${customWidthCm || "—"} x ${customHeightCm || "—"} cm`}</span></p>
+                  <p>Șasiu: <span className="text-ui font-semibold">{framed ? "Da" : "Nu"}</span></p>
+                  <p>Cantitate: <span className="text-ui font-semibold">{quantity}</span></p>
+                  <p>Preț per unitate: <span className="text-ui font-semibold">{formatMoneyDisplay(unitPrice)} RON</span></p>
+                  <p className="text-2xl font-extrabold text-ui">Total: {formatMoneyDisplay(serverPrice ?? totalPrice)} RON</p>
+                  {addTextOption && textDesign.trim() !== "" && <div className="text-sm text-muted">Text pe comandă: "{textDesign.trim()}"</div>}
                   {/* show uploaded file info only in summary (thumb + label) */}
                   {artworkUrl && (
                     <div className="mt-2 flex items-center gap-3">
                       <img src={artworkUrl} alt="uploaded-thumb" className="h-12 w-12 object-cover rounded-md border" />
                       <div>
-                        <div className="text-sm font-medium text-white">Fișier încărcat</div>
-                        <div className="text-xs text-white/60">Fișierul va fi folosit la imprimare.</div>
+                        <div className="text-sm font-medium text-ui">Fișier încărcat</div>
+                        <div className="text-xs text-muted">Fișierul va fi folosit la imprimare.</div>
                       </div>
                     </div>
                   )}
@@ -580,7 +580,7 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-white/60">Canvas Fine Art 330 g/mp, șasiu lemn, finisaje profesionale.</div>
+              <div className="card-muted p-3 text-xs text-muted">Canvas Fine Art 330 g/mp, șasiu lemn, finisaje profesionale.</div>
             </div>
           </aside>
         </div>

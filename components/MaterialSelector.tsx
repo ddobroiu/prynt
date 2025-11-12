@@ -26,11 +26,11 @@ export default function MaterialSelector({ materials, value, onChange }: Materia
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold text-white">{m.label}</div>
-                  {m.description && <div className="text-xs text-white/60 mt-1">{m.description}</div>}
+                  <div className="font-semibold text-ui">{m.label}</div>
+                  {m.description && <div className="text-xs text-muted mt-1">{m.description}</div>}
                 </div>
                 {typeof m.priceModifier === "number" ? (
-                  <div className="text-sm text-white/80">{m.priceModifier > 0 ? `+${Math.round(m.priceModifier * 100)}%` : ""}</div>
+                  <div className="text-sm text-muted">{m.priceModifier > 0 ? `+${Math.round(m.priceModifier * 100)}%` : ""}</div>
                 ) : null}
               </div>
             </button>

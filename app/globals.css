@@ -1,15 +1,68 @@
 @import "tailwindcss";
 
-/* Temă dark globală, unificată cu stilul din coș */
+/* Theme tokens + light/dark support.
+   Toggle by setting `data-theme="light"` or `data-theme="dark"` on <html>.
+   Defaults respect system preference via media query.
+*/
+
 :root {
-  color-scheme: dark;
+  --bg: #0b0f19;
+  --surface: rgba(255,255,255,0.03);
+  --card-bg: rgba(255,255,255,0.04);
+  --text: #ffffff;
+  --muted: rgba(255,255,255,0.75);
+  --accent: #6366f1;
+  --accent-600: #4f46e5;
+  --border: rgba(255,255,255,0.08);
+  --success: #10b981;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f8fafc;
+    --surface: rgba(0,0,0,0.03);
+    --card-bg: #ffffff;
+    --text: #0b1220;
+    --muted: rgba(0,0,0,0.65);
+    --accent: #4f46e5;
+    --accent-600: #4338ca;
+    --border: rgba(15,23,42,0.06);
+    --success: #059669;
+  }
+}
+
+[data-theme="dark"] {
+  --bg: #0b0f19;
+  --surface: rgba(255,255,255,0.03);
+  --card-bg: rgba(255,255,255,0.04);
+  --text: #ffffff;
+  --muted: rgba(255,255,255,0.75);
+  --accent: #6366f1;
+  --accent-600: #4f46e5;
+  --border: rgba(255,255,255,0.08);
+  --success: #10b981;
+}
+
+[data-theme="light"] {
+  --bg: #f8fafc;
+  --surface: rgba(0,0,0,0.03);
+  --card-bg: #ffffff;
+  --text: #0b1220;
+  --muted: rgba(0,0,0,0.65);
+  --accent: #4f46e5;
+  --accent-600: #4338ca;
+  --border: rgba(15,23,42,0.06);
+  --success: #059669;
 }
 
 body {
-  @apply bg-[#0b0f19] text-white antialiased;
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Utilitare de stil reutilizabile (NUMAI utilitare Tailwind în @apply) */
 @layer components {
   /* Layout */
   .page {
@@ -18,13 +71,19 @@ body {
 
   /* Carduri */
   .card {
-    @apply rounded-2xl border border-white/10 bg-white/5;
+    @apply rounded-2xl;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
   }
   .card-muted {
-    @apply rounded-2xl border border-white/10 bg-white/4;
+    @apply rounded-2xl;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
   }
   .panel {
-    @apply rounded-xl border border-white/10 bg-white/5;
+    @apply rounded-xl;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
   }
 
   /* Butoane (fără @apply pe .btn în alte clase) */
@@ -32,34 +91,46 @@ body {
     @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition;
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition
-           bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/30;
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition shadow-lg;
+    background-color: var(--accent);
+    color: white;
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition
-           border border-white/15 bg-white/5 hover:bg-white/10 text-white;
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition;
+    background-color: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition
-           bg-transparent hover:bg-white/5 text-white;
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition;
+    background-color: transparent;
+    color: var(--text);
   }
   .btn-danger {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition
-           bg-red-600 text-white hover:bg-red-500;
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition;
+    background-color: #ef4444; /* red-500 */
+    color: white;
   }
 
   /* Form (inputs/select/checkbox) */
   .field-label {
-    @apply mb-1 block text-sm text-white/70;
+    @apply mb-1 block text-sm;
+    color: var(--muted);
   }
   .input {
-    @apply w-full rounded-md border border-white/10 bg-gray-900/40 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/40;
+    @apply w-full rounded-md px-3 py-2 focus:outline-none;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
   }
   .input-error {
     @apply border-red-500/70 ring-1 ring-red-500/40;
   }
   .select {
-    @apply w-full rounded-md border border-white/10 bg-gray-900/40 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 appearance-none;
+    @apply w-full rounded-md px-3 py-2 focus:outline-none appearance-none;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
   }
   .checkbox {
     @apply h-5 w-5 accent-indigo-500;
@@ -67,10 +138,21 @@ body {
 
   /* Badge/Tag */
   .badge {
-    @apply inline-flex items-center rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold;
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold;
+    background-color: var(--surface);
+    color: var(--text);
   }
   .badge-success {
-    @apply bg-emerald-500/90 text-white;
+    background-color: var(--success);
+    color: white;
+  }
+
+  /* Semantic text colors using theme tokens */
+  .text-ui {
+    color: var(--text);
+  }
+  .text-muted {
+    color: var(--muted);
   }
 
   /* Toast succes */

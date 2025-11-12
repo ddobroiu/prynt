@@ -111,7 +111,7 @@ function AutocolanteModeSwitchInline() {
       <button
         type="button"
         onClick={goSheet}
-        className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${!isDiecut ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/10"}`}
+  className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${!isDiecut ? "bg-indigo-600 text-white" : "text-muted hover:bg-white/10"}`}
         aria-pressed={!isDiecut}
       >
         Foile
@@ -119,7 +119,7 @@ function AutocolanteModeSwitchInline() {
       <button
         type="button"
         onClick={goDiecut}
-        className={`ml-1 px-3 py-1.5 rounded-md text-sm font-medium transition ${isDiecut ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/10"}`}
+  className={`ml-1 px-3 py-1.5 rounded-md text-sm font-medium transition ${isDiecut ? "bg-indigo-600 text-white" : "text-muted hover:bg-white/10"}`}
         aria-pressed={isDiecut}
       >
         Die-cut
@@ -313,7 +313,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
           <div>
             <div className="mb-2"><AutocolanteModeSwitchInline /></div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Autocolante</h1>
-            <p className="mt-2 text-white/70">Configurație identică ca la bannere — dimensiune, material, grafică.</p>
+            <p className="mt-2 text-muted">Configurație identică ca la bannere — dimensiune, material, grafică.</p>
           </div>
           <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline text-sm self-start">
             <Info size={18} />
@@ -325,7 +325,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
           <div className="lg:col-span-3 space-y-6">
             {/* 1. Dimensiuni & cantitate */}
             <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-white">1. Dimensiuni & cantitate</h2></div>
+              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-ui">1. Dimensiuni & cantitate</h2></div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="field-label">Lungime (cm)</label>
@@ -342,7 +342,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
             {/* 2. Material & 3. Finisaje */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="card p-4" ref={materialRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-white">2. Material</h2></div>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-ui">2. Material</h2></div>
 
                 <div className="relative">
                   <button
@@ -352,11 +352,11 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                     aria-expanded={materialOpen}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="text-sm text-white/80">
+                      <div className="text-sm text-muted">
                         {input.material === "vinyl" ? "Vinyl (premium)" : input.material === "paper_matte" ? "Hârtie Mată" : "Hârtie Lucioasă"}
                       </div>
                     </div>
-                    <div className="text-xs text-white/60">{materialOpen ? "Închide" : "Schimbă"}</div>
+                    <div className="text-xs text-muted">{materialOpen ? "Închide" : "Schimbă"}</div>
                   </button>
 
                   {materialOpen && (
@@ -368,11 +368,11 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                   )}
                 </div>
 
-                <div className="mt-2 text-xs text-white/60">Alege materialul potrivit; laminarea protejează autocolantul.</div>
+                <div className="mt-2 text-xs text-muted">Alege materialul potrivit; laminarea protejează autocolantul.</div>
               </div>
 
               <div className="card p-4">
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-white">3. Finisaje</h2></div>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">3. Finisaje</h2></div>
                 <div className="flex flex-col gap-2">
                   <label className="flex items-center gap-3">
                     <input type="checkbox" className="checkbox" checked={input.laminated} onChange={(e) => updateInput("laminated", e.target.checked)} />
@@ -389,7 +389,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
 
             {/* 4. Grafică */}
             <div className="card p-4" ref={graphicsRef}>
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-white">4. Grafică</h2></div>
+              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">4. Grafică</h2></div>
 
               <div className="relative">
                 <button
@@ -399,11 +399,11 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                   aria-expanded={graphicsOpen}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="text-sm text-white/80">
+                    <div className="text-sm text-muted">
                       {designOption === "upload" ? (artworkUrl || artworkLink ? "Am grafică" : "Am grafică (select)") : designOption === "text_only" ? "Text (gratis)" : `Pro (+${PRO_DESIGN_FEE} RON)`}
                     </div>
                   </div>
-                  <div className="text-xs text-white/60">{graphicsOpen ? "Închide" : "Alege"}</div>
+                  <div className="text-xs text-muted">{graphicsOpen ? "Închide" : "Alege"}</div>
                 </button>
 
                 {graphicsOpen && (
@@ -425,7 +425,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                       onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)}
                       className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500"
                     />
-                    <div className="text-xs text-white/60 mt-1">sau</div>
+                    <div className="text-xs text-muted mt-1">sau</div>
                   </div>
 
                   <div>
@@ -437,10 +437,10 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                       placeholder="Ex: https://.../fisier.pdf"
                       className="input"
                     />
-                    <div className="text-xs text-white/60 mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
+                    <div className="text-xs text-muted mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
                   </div>
 
-                  <div className="text-xs text-white/60">
+                  <div className="text-xs text-muted">
                     {uploading && "Se încarcă…"}
                     {uploadError && "Eroare upload"}
                     {artworkUrl && "Fișier încărcat"}
@@ -457,7 +457,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
 
               {designOption === "pro" && (
                 <div className="panel p-3 mt-3 border-t border-white/5">
-                  <div className="text-sm text-white/80">Grafică profesională (+{PRO_DESIGN_FEE} RON)</div>
+                  <div className="text-sm text-muted">Grafică profesională (+{PRO_DESIGN_FEE} RON)</div>
                 </div>
               )}
             </div>
@@ -481,11 +481,11 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
 
               <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-                <div className="space-y-2 text-white/80 text-sm">
-                  <p>Suprafață per bucată: <span className="text-white font-semibold">{formatAreaDisplay(priceDetailsLocal.sqm_per_unit)} m²</span></p>
-                  <p>Total suprafață: <span className="text-white font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
-                  <p>Preț total: <span className="text-2xl font-extrabold text-white">{formatMoneyDisplay(totalShown)} RON</span></p>
-                  <p className="text-sm text-white/60">Preț per bucată: {pricePerUnitLocal} RON</p>
+                <div className="space-y-2 text-muted text-sm">
+                  <p>Suprafață per bucată: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.sqm_per_unit)} m²</span></p>
+                  <p>Total suprafață: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
+                  <p>Preț total: <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span></p>
+                  <p className="text-sm text-muted">Preț per bucată: {pricePerUnitLocal} RON</p>
                 </div>
 
                 <div className="hidden lg:block mt-4">
@@ -496,7 +496,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-white/60">Autocolante personalizate. Finisaje profesionale.</div>
+              <div className="card-muted p-3 text-xs text-muted">Autocolante personalizate. Finisaje profesionale.</div>
             </div>
           </aside>
         </div>
@@ -511,10 +511,10 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
           <div className="absolute inset-0 bg-black/60" onClick={() => setDetailsOpen(false)} />
           <div className="relative z-10 w-full max-w-2xl bg-[#0b0b0b] rounded-md border border-white/10 p-6">
             <button className="absolute right-3 top-3 p-1" onClick={() => setDetailsOpen(false)} aria-label="Închide">
-              <X size={18} className="text-white/80" />
+              <X size={18} className="text-muted" />
             </button>
-            <h3 className="text-xl font-bold text-white mb-3">Detalii comandă - Autocolante</h3>
-            <div className="text-sm text-white/70 space-y-2">
+            <h3 className="text-xl font-bold text-ui mb-3">Detalii comandă - Autocolante</h3>
+            <div className="text-sm text-muted space-y-2">
               <p>- Alege materialul și finisajul; laminarea previne zgârieturile.</p>
               <p>- Die-cut este recomandat pentru logo-uri/forme speciale (+taxă).</p>
               <p>- Trimite link sau încarcă fișierul; dacă alegi Pro, vom realiza grafică pentru tine.</p>
@@ -540,8 +540,8 @@ function MaterialOptionDropdown({ checked, onSelect, title, subtitle }: { checke
     >
       <span className={`h-3 w-3 rounded-full border ${checked ? "bg-indigo-500 border-indigo-500" : "bg-transparent border-white/20"}`} />
       <div className="text-left">
-        <div className="text-sm text-white">{title}</div>
-        {subtitle && <div className="text-xs text-white/60">{subtitle}</div>}
+  <div className="text-sm text-ui">{title}</div>
+  {subtitle && <div className="text-xs text-muted">{subtitle}</div>}
       </div>
     </button>
   );
@@ -570,8 +570,8 @@ function SelectCardSmall({ active, onClick, title, subtitle }: { active: boolean
     <button type="button" onClick={onClick} className={`w-full rounded-md p-2 text-left transition flex items-center gap-3 ${active ? "border-2 border-indigo-500 bg-indigo-900/20" : "border border-white/10 bg-transparent hover:bg-white/5"}`}>
       <span className={`h-3 w-3 rounded-full border ${active ? "bg-indigo-500 border-indigo-500" : "bg-transparent border-white/20"}`} />
       <div>
-        <div className="text-sm text-white">{title}</div>
-        {subtitle && <div className="text-xs text-white/60">{subtitle}</div>}
+  <div className="text-sm text-ui">{title}</div>
+  {subtitle && <div className="text-xs text-muted">{subtitle}</div>}
       </div>
     </button>
   );

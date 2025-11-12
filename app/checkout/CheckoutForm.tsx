@@ -67,7 +67,7 @@ export default function CheckoutForm({
   return (
     <div className="space-y-6">
       {/* LIVRARE */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+  <div className="card p-4">
         <h2 className="text-xl font-bold mb-3">Date livrare</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Field id="address.nume_prenume" label="Nume și prenume" error={errors["address.nume_prenume"]}>
@@ -134,7 +134,7 @@ export default function CheckoutForm({
       </div>
 
       {/* FACTURARE */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+  <div className="card p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-xl font-bold">Facturare</h2>
 
@@ -145,14 +145,14 @@ export default function CheckoutForm({
                 checked={sameAsDelivery}
                 onChange={(e) => setSameAsDelivery(e.target.checked)}
               />
-              <span className="text-white/80">Adresa de facturare este aceeași</span>
+              <span className="text-muted">Adresa de facturare este aceeași</span>
             </label>
 
             {!sameAsDelivery && (
               <button
                 type="button"
                 onClick={copyBillingFromDeliveryOnce}
-                className="rounded-md border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10 transition"
+                className="rounded-md border border-[--border] bg-surface px-3 py-1.5 text-xs font-semibold text-ui hover:bg-white/10 transition"
                 title="Completează câmpurile de mai jos cu adresa de livrare"
               >
                 Completează automat din livrare
@@ -273,7 +273,7 @@ function Field({
 }) {
   return (
     <label htmlFor={id} className={`text-sm block ${disabled ? "opacity-60" : ""}`}>
-      <span className="mb-1 block text-white/70">{label}</span>
+  <span className="mb-1 block text-ui">{label}</span>
       {children}
       {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
     </label>
@@ -282,7 +282,7 @@ function Field({
 
 function inputCls(hasError?: string, disabled?: boolean) {
   const base =
-    "w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 bg-gray-900/40 border-white/10 focus:ring-indigo-500/40";
+    "w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 bg-surface border-[--border] text-ui focus:ring-indigo-500/40";
   return `${base} ${hasError ? "border-red-500/70 ring-1 ring-red-500/40" : ""} ${
     disabled ? "opacity-60" : ""
   }`;

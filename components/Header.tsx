@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { useCart } from "./CartProvider";
+import ThemeToggle from "@/components/ThemeToggle";
+import { useCart } from "./CartContext";
 import {
   ShoppingCart,
   Menu,
@@ -16,9 +17,9 @@ type NavItem = {
   children?: { href: string; label: string }[];
 };
 
-/* Menu updated: keep structure as before, but "Materiale rigide" is a top-level item
-   and the rigid materials are subitems under it.
-   Order: Publicitar, Banner, Promotionale, Decor, Materiale rigide
+/* Meniu: Promotionale scos, Shop adăugat (mobil + desktop).
+   Banner are sublink-urile /banner și /banner-verso.
+   Materiale rigide folosește rute complete sub /materiale-rigide (lowercase).
 */
 const LINKS: NavItem[] = [
   {
@@ -40,10 +41,6 @@ const LINKS: NavItem[] = [
     ],
   },
   {
-    href: "/promotionale",
-    label: "Promotionale",
-  },
-  {
     href: "/decor",
     label: "Decor",
     children: [
@@ -51,17 +48,15 @@ const LINKS: NavItem[] = [
       { href: "/tapet", label: "Tapet" },
     ],
   },
-
-  // Materiale rigide as a single top-level menu item with children
   {
     href: "/materiale-rigide",
     label: "Materiale rigide",
     children: [
-      { href: "/Plexiglass", label: "Plexiglass" },
-      { href: "/Alucobond", label: "Alucobond" },
-      { href: "/Carton", label: "Carton" },
-      { href: "/Polipropilena", label: "Polipropilena" },
-      { href: "/PVC-Forex", label: "PVC Forex" }, // keep hyphen slug for PVC Forex
+      { href: "/plexiglass", label: "Plexiglas" },
+      { href: "/alucobond", label: "Alucobond" },
+      { href: "/carton", label: "Carton" },
+      { href: "/polipropilena", label: "Polipropilenă" },
+      { href: "/pvc-forex", label: "PVC Forex" },
     ],
   },
 ];
@@ -94,7 +89,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-gray-950/80 backdrop-blur">
+  <header className="sticky top-0 z-40 w-full border-b border-indigo-700/30 bg-ui backdrop-blur">
       <div className="page">
         {/* MOBILE BAR: burger · logo · cart */}
         <div className="flex items-center justify-between py-3 lg:hidden">
@@ -102,37 +97,39 @@ export default function Header() {
             type="button"
             onClick={() => setOpenMobile((v) => !v)}
             aria-label={openMobile ? "Închide meniul" : "Deschide meniul"}
-            className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-white hover:bg-white/10 transition"
+            className="inline-flex items-center justify-center rounded-lg border-2 border-indigo-400 bg-indigo-900/80 p-2 text-ui hover:bg-indigo-700 transition shadow"
           >
             {openMobile ? <X size={22} /> : <Menu size={22} />}
           </button>
-
           <a
             href="/"
-            className="inline-flex items-center gap-2"
+            className="inline-flex items-center gap-2 group"
             aria-label="Prynt.ro"
           >
             <img
               src="/logo.png"
               alt="Prynt.ro"
-              className="rounded-full border border-white/10 w-16 h-16 lg:w-20 lg:h-20"
+              className="rounded-full border-2 border-indigo-400 w-16 h-16 lg:w-20 lg:h-20 shadow-lg group-hover:scale-105 group-hover:shadow-indigo-400/30 transition-transform duration-300"
               loading="lazy"
             />
             <span className="sr-only">Prynt.ro</span>
           </a>
 
-          <a
-            href="/checkout"
-            className="relative inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-white hover:bg-white/10 transition"
-            aria-label="Coșul meu"
-          >
-            <ShoppingCart size={22} />
-            {isLoaded && count > 0 && (
-              <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
-                {count}
-              </span>
-            )}
-          </a>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <a
+              href="/checkout"
+              className="relative inline-flex items-center justify-center rounded-lg border-2 border-indigo-400 bg-indigo-900/80 p-2 text-ui hover:bg-indigo-700 transition shadow"
+              aria-label="Coșul meu"
+            >
+              <ShoppingCart size={22} />
+              {isLoaded && count > 0 && (
+                <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-ui shadow-lg">
+                  {count}
+                </span>
+              )}
+            </a>
+          </div>
         </div>
 
         {/* MOBILE NAV */}
@@ -145,13 +142,23 @@ export default function Header() {
             <div className="mx-auto max-w-sm">
               <div className="card p-3 shadow-xl shadow-black/30">
                 <ul className="space-y-2">
+                  {/* Shop CTA în meniul mobil */}
+                  <li>
+                    <a
+                      href="/shop"
+                      className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-white font-semibold hover:bg-indigo-500 transition"
+                    >
+                      Shop
+                    </a>
+                  </li>
+
                   {LINKS.map((l) =>
                     l.children ? (
                       <li key={l.label}>
                         <button
                           type="button"
                           onClick={() => setOpenMobileSub((cur) => (cur === l.label ? null : l.label))}
-                          className="w-full inline-flex items-center justify-between rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10"
+                          className="w-full inline-flex items-center justify-between rounded-md border border-white/10 bg-white/5 px-3 py-2 text-ui hover:bg-white/10"
                           aria-expanded={openMobileSub === l.label}
                           aria-controls={`mobile-sub-${l.label.replace(/\s+/g, "-").toLowerCase()}`}
                         >
@@ -174,7 +181,7 @@ export default function Header() {
                                 <li key={c.href}>
                                   <a
                                     href={c.href}
-                                    className="block rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm hover:bg-white/10"
+                                    className="block rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-ui hover:bg-white/10"
                                   >
                                     {c.label}
                                   </a>
@@ -188,7 +195,7 @@ export default function Header() {
                       <li key={l.href} className="text-center">
                         <a
                           href={l.href}
-                          className="block rounded-md border border-white/10 bg-white/5 px-3 py-2 hover:bg-white/10"
+                          className="block rounded-md border border-white/10 bg-white/5 px-3 py-2 text-ui hover:bg-white/10"
                         >
                           {l.label}
                         </a>
@@ -203,8 +210,8 @@ export default function Header() {
 
         {/* DESKTOP NAV */}
         <div className="hidden lg:flex items-center justify-between py-3">
-          <a href="/" className="inline-flex items-center gap-2" aria-label="Prynt.ro">
-            <img src="/logo.png" alt="Prynt.ro" className="rounded-full border border-white/10 w-16 h-16 lg:w-20 lg:h-20" loading="lazy" />
+          <a href="/" className="inline-flex items-center gap-2 group" aria-label="Prynt.ro">
+            <img src="/logo.png" alt="Prynt.ro" className="rounded-full border-2 border-indigo-400 w-16 h-16 lg:w-20 lg:h-20 shadow-lg group-hover:scale-105 group-hover:shadow-indigo-400/30 transition-transform duration-300" loading="lazy" />
             <span className="sr-only">Prynt.ro</span>
           </a>
 
@@ -224,7 +231,7 @@ export default function Header() {
                     type="button"
                     aria-haspopup="menu"
                     aria-expanded={openDropdown === l.label}
-                    className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    className="inline-flex items-center gap-1 rounded-lg border-2 border-indigo-400 bg-indigo-900/80 px-4 py-2 text-ui font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow"
                     onClick={() => setOpenDropdown((cur) => (cur === l.label ? null : l.label))}
                   >
                     {l.label}
@@ -232,27 +239,39 @@ export default function Header() {
                   </button>
                   <div
                     role="menu"
-                    className={`absolute left-0 mt-2 w-48 rounded-md border border-white/10 bg-[#0b0f19] p-2 shadow-xl z-50 transition-all origin-top ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}`}
+                    className={`absolute left-0 mt-2 w-52 rounded-xl border card-bg p-2 shadow z-50 transition-all origin-top ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}`}
                   >
                     {l.children.map((c) => (
-                      <a key={c.href} href={c.href} role="menuitem" className="block rounded-md px-3 py-2 text-sm text-white hover:bg-white/10 focus:bg-white/10 focus:outline-none" onClick={() => setOpenDropdown(null)}>
+                      <a key={c.href} href={c.href} role="menuitem" className="block rounded-lg px-4 py-2 text-base text-ui hover:bg-surface focus:bg-surface focus:outline-none font-medium transition" onClick={() => setOpenDropdown(null)}>
                         {c.label}
                       </a>
                     ))}
                   </div>
                 </div>
               ) : (
-                <a key={l.href} href={l.href} className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                <a key={l.href} href={l.href} className="rounded-lg border-2 border-indigo-400 bg-indigo-900/80 px-4 py-2 text-ui font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow transition">
                   {l.label}
                 </a>
               )
             )}
+
+            {/* Shop CTA pe desktop */}
+            <a
+              href="/shop"
+              className="ml-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 text-base font-bold text-white hover:bg-indigo-500 transition shadow-lg"
+            >
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block mr-1"><circle cx="10" cy="10" r="9"/><path d="M6 10h8M10 6v8"/></svg>
+              Shop
+            </a>
           </nav>
 
-          <a href="/checkout" className="relative inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/50" aria-label="Coșul meu">
-            <ShoppingCart size={20} />
-            {isLoaded && count > 0 && <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">{count}</span>}
-          </a>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <a href="/checkout" className="relative inline-flex items-center justify-center rounded-xl border-2 border-indigo-400 bg-indigo-900/80 px-4 py-2 text-ui hover:bg-indigo-700 transition shadow focus:outline-none focus:ring-2 focus:ring-indigo-500/50" aria-label="Coșul meu">
+              <ShoppingCart size={20} />
+              {isLoaded && count > 0 && <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-ui shadow-lg">{count}</span>}
+            </a>
+          </div>
         </div>
       </div>
     </header>

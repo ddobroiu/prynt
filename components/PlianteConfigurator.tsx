@@ -85,8 +85,8 @@ function SelectCardSmall({ active, onClick, title, subtitle }: { active: boolean
     <button onClick={onClick} className={`w-full rounded-md p-3 text-left transition flex items-start gap-3 ${active ? "border-2 border-indigo-500 bg-indigo-900/20" : "border border-white/10 hover:bg-white/5"}`}>
       <div className={`h-4 w-4 mt-1 rounded-full border ${active ? "bg-indigo-500 border-indigo-500" : "bg-transparent border-white/20"}`} />
       <div>
-        <div className="text-sm text-white font-semibold">{title}</div>
-        {subtitle && <div className="text-xs text-white/60 mt-1">{subtitle}</div>}
+        <div className="text-sm text-ui font-semibold">{title}</div>
+        {subtitle && <div className="text-xs text-muted mt-1">{subtitle}</div>}
       </div>
     </button>
   );
@@ -152,7 +152,7 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Pliante</h1>
             {/* Detalii sus ca la celelalte */}
-            <p className="mt-2 text-white/70">Alege hârtia, tirajul și tipul de pliere. Prețul este calculat instant în componentă. Detaliile complete sunt disponibile mai jos.</p>
+            <p className="mt-2 text-muted">Alege hârtia, tirajul și tipul de pliere. Prețul este calculat instant în componentă. Detaliile complete sunt disponibile mai jos.</p>
           </div>
           <div>
             <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline text-sm self-start">
@@ -166,7 +166,7 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
           <div className="lg:col-span-3 space-y-6">
             {/* 1. Specificații */}
             <div className="card p-4">
-              <div className="text-sm text-white/70 mb-2">Specificații</div>
+              <div className="text-sm text-muted mb-2">Specificații</div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="field-label">Hartie (g/mp)</label>
@@ -192,7 +192,7 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
                     {(Object.keys(FOLDS) as FoldType[]).map((k) => (
                       <button key={k} onClick={() => setFold(k)} className={`rounded-md p-3 text-left ${fold === k ? "border-2 border-indigo-500 bg-indigo-900/20" : "border border-white/10 hover:bg-white/5"}`}>
                         <div className="text-sm font-semibold">{FOLDS[k].label}</div>
-                        <div className="text-xs text-white/60 mt-1">{FOLDS[k].open} → {FOLDS[k].closed}</div>
+                        <div className="text-xs text-muted mt-1">{FOLDS[k].open} → {FOLDS[k].closed}</div>
                       </button>
                     ))}
                   </div>
@@ -202,7 +202,7 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
 
             {/* 2. Grafică (upload / pro). text-only removed */}
             <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-white">Grafică</h2></div>
+              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">Grafică</h2></div>
 
               <div className="mt-2 p-2 bg-black/60 rounded-md border border-white/10 space-y-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -215,21 +215,21 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
                 <div className="panel p-3 mt-3 border-t border-white/5">
                   <label className="field-label">Încarcă fișier</label>
                   <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500" />
-                  <div className="text-xs text-white/60 mt-1">PDF sau JPG, 300dpi recomandat</div>
+                  <div className="text-xs text-muted mt-1">PDF sau JPG, 300dpi recomandat</div>
                 </div>
               )}
 
               {designOption === "pro" && (
                 <div className="panel p-3 mt-3 border-t border-white/5">
-                  <div className="text-sm text-white/80">Grafică profesională — tarif: <span className="font-semibold">{PRO_FEES[fold]} RON</span> (variază în funcție de numărul de biguri)</div>
+                  <div className="text-sm text-muted">Grafică profesională — tarif: <span className="font-semibold">{PRO_FEES[fold]} RON</span> (variază în funcție de numărul de biguri)</div>
                 </div>
               )}
             </div>
 
             {/* 3. Info / Detalii */}
             <div className="card p-4">
-              <h2 className="text-lg font-bold text-white">Informații</h2>
-              <div className="text-sm text-white/70 mt-2">
+              <h2 className="text-lg font-bold text-ui">Informații</h2>
+              <div className="text-sm text-muted mt-2">
                 <p>- Formatele afișate sunt estimative; pentru artă finală respectați bleed 3 mm.</p>
                 <p>- Timp producție standard: 2–5 zile lucrătoare (depinde de tiraj).</p>
                 <p>- Pentru tiraje mari sau finisări speciale cere o ofertă personalizată.</p>
@@ -255,14 +255,14 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
 
               <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-                <div className="space-y-2 text-white/80 text-sm">
-                  <p>Hârtie: <span className="text-white font-semibold">{weight} g/mp</span></p>
-                  <p>Tiraj: <span className="text-white font-semibold">{quantity} buc</span></p>
-                  <p>Tip pliere: <span className="text-white font-semibold">{FOLDS[fold].label}</span></p>
-                  <p>Preț bază/unitate: <span className="text-white font-semibold">{unitBasePrice.toFixed(2)} RON</span></p>
-                  {designOption === "pro" && <p>Taxă grafică Pro: <span className="text-white font-semibold">{proFee} RON</span></p>}
+                <div className="space-y-2 text-muted text-sm">
+                  <p>Hârtie: <span className="text-ui font-semibold">{weight} g/mp</span></p>
+                  <p>Tiraj: <span className="text-ui font-semibold">{quantity} buc</span></p>
+                  <p>Tip pliere: <span className="text-ui font-semibold">{FOLDS[fold].label}</span></p>
+                  <p>Preț bază/unitate: <span className="text-ui font-semibold">{unitBasePrice.toFixed(2)} RON</span></p>
+                  {designOption === "pro" && <p>Taxă grafică Pro: <span className="text-ui font-semibold">{proFee} RON</span></p>}
                   <p className="text-xl font-bold">Total: <span className="text-indigo-400">{displayedTotal.toFixed(2)} RON</span></p>
-                  <p className="text-sm text-white/60">Preț per bucată: {pricePerUnitDisplayed.toFixed(2)} RON</p>
+                  <p className="text-sm text-muted">Preț per bucată: {pricePerUnitDisplayed.toFixed(2)} RON</p>
                 </div>
 
                 <div className="mt-4">
@@ -284,10 +284,10 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
             <div className="absolute inset-0 bg-black/60" onClick={() => setDetailsOpen(false)} />
             <div className="relative z-10 w-full max-w-2xl bg-[#0b0b0b] rounded-md border border-white/10 p-6">
               <button className="absolute right-3 top-3 p-1" onClick={() => setDetailsOpen(false)} aria-label="Închide">
-                <X size={18} className="text-white/80" />
+                <X size={18} className="text-ui" />
               </button>
-              <h3 className="text-xl font-bold text-white mb-3">Detalii comandă - Pliante</h3>
-              <div className="text-sm text-white/70 space-y-2">
+              <h3 className="text-xl font-bold text-ui mb-3">Detalii comandă - Pliante</h3>
+              <div className="text-sm text-muted space-y-2">
                 <p>- Formatele afișate sunt estimative; pentru artă finală, includeți bleed 3 mm.</p>
                 <p>- Timp producție standard: 2–5 zile lucrătoare (depinde de tiraj).</p>
                 <p>- Pentru tiraje mari sau finisări speciale cere o ofertă personalizată.</p>

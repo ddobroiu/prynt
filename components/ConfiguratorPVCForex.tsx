@@ -340,7 +340,7 @@ export default function ConfiguratorPVCForex({
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold">{config.title}</h1>
-            <p className="mt-2 text-white/70">
+            <p className="mt-2 text-muted">
               {productType === "alucobond"
                 ? "Panou compozit Alucobond — alege grosimea și dimensiunile."
                 : productType === "polipropilena"
@@ -362,7 +362,7 @@ export default function ConfiguratorPVCForex({
                 <div className="text-indigo-400">
                   <Ruler />
                 </div>
-                <h2 className="text-lg font-bold text-white">1. Dimensiuni & cantitate</h2>
+                <h2 className="text-lg font-bold text-ui">1. Dimensiuni & cantitate</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -407,7 +407,7 @@ export default function ConfiguratorPVCForex({
                   </div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-white/60">Dimensiune maximă a plăcii: {config.maxWidth} x {config.maxHeight} cm. Preseturi rapide disponibile.</div>
+              <div className="mt-2 text-xs text-muted">Dimensiune maximă a plăcii: {config.maxWidth} x {config.maxHeight} cm. Preseturi rapide disponibile.</div>
             </div>
 
             {/* 2. Grosime */}
@@ -416,7 +416,7 @@ export default function ConfiguratorPVCForex({
                 <div className="text-indigo-400">
                   <Layers />
                 </div>
-                <h2 className="text-lg font-bold text-white">2. Grosime material (mm)</h2>
+                <h2 className="text-lg font-bold text-ui">2. Grosime material (mm)</h2>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
@@ -430,7 +430,7 @@ export default function ConfiguratorPVCForex({
                   </button>
                 ))}
               </div>
-              <div className="mt-2 text-xs text-white/60">Prețul se calculează automat pe baza grosimii și suprafeței.</div>
+              <div className="mt-2 text-xs text-muted">Prețul se calculează automat pe baza grosimii și suprafeței.</div>
             </div>
 
             {/* 3. Grafică */}
@@ -439,7 +439,7 @@ export default function ConfiguratorPVCForex({
                 <div className="text-indigo-400">
                   <Info />
                 </div>
-                <h2 className="text-lg font-bold text-white">3. Grafică</h2>
+                <h2 className="text-lg font-bold text-ui">3. Grafică</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -461,16 +461,16 @@ export default function ConfiguratorPVCForex({
                       onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)}
                       className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500"
                     />
-                    <div className="text-xs text-white/60 mt-1">sau</div>
+                    <div className="text-xs text-muted mt-1">sau</div>
                   </div>
 
                   <div>
                     <label className="field-label">Link descărcare (opțional)</label>
                     <input type="url" value={input.artworkLink ?? ""} onChange={(e) => updateInput("artworkLink", e.target.value)} placeholder="Ex: https://.../fisier.pdf" className="input" />
-                    <div className="text-xs text-white/60 mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
+                    <div className="text-xs text-muted mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
                   </div>
 
-                  <div className="text-xs text-white/60">
+                  <div className="text-xs text-muted">
                     {uploading && "Se încarcă…"}
                     {uploadError && "Eroare upload"}
                     {input.artworkUrl && "Fișier încărcat"}
@@ -481,7 +481,7 @@ export default function ConfiguratorPVCForex({
 
               {input.designOption === "pro" && (
                 <div className="panel p-3 mt-3 border-t border-white/5">
-                  <div className="text-sm text-white/80">Serviciu grafic profesional — prețul se stabilește după comandă.</div>
+                  <div className="text-sm text-muted">Serviciu grafic profesional — prețul se stabilește după comandă.</div>
                 </div>
               )}
             </div>
@@ -513,17 +513,17 @@ export default function ConfiguratorPVCForex({
 
               <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-                <div className="space-y-2 text-white/80 text-sm">
+                <div className="space-y-2 text-muted text-sm">
                   <p>
-                    Suprafață: <span className="text-white font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span>
+                    Suprafață: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span>
                   </p>
                   <p>
-                    Preț: <span className="text-2xl font-extrabold text-white">{formatMoneyDisplay(totalShown)} RON</span>
+                    Preț: <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span>
                   </p>
-                  <p className="text-xs text-white/60">
+                  <p className="text-xs text-muted">
                     Preț / m²: <strong>{priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—"}</strong>
                   </p>
-                  <p className="text-xs text-white/60">
+                  <p className="text-xs text-muted">
                     Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong>
                   </p>
                 </div>
@@ -539,7 +539,7 @@ export default function ConfiguratorPVCForex({
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-white/60">Dimensiune maximă a plăcii: {config.maxWidth} x {config.maxHeight} cm. Prețurile afișate sunt orientative.</div>
+              <div className="card-muted p-3 text-xs text-muted">Dimensiune maximă a plăcii: {config.maxWidth} x {config.maxHeight} cm. Prețurile afișate sunt orientative.</div>
             </div>
           </aside>
         </div>

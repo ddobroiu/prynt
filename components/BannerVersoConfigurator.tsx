@@ -94,7 +94,7 @@ function BannerModeSwitchInline() {
         type="button"
         onClick={goSingle}
         className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-          !isDouble ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/10"
+          !isDouble ? "bg-indigo-600 text-white" : "text-muted hover:bg-white/10"
         }`}
         aria-pressed={!isDouble}
       >
@@ -104,7 +104,7 @@ function BannerModeSwitchInline() {
         type="button"
         onClick={goDouble}
         className={`ml-1 px-3 py-1.5 rounded-md text-sm font-medium transition ${
-          isDouble ? "bg-indigo-600 text-white" : "text-white/80 hover:bg-white/10"
+          isDouble ? "bg-indigo-600 text-white" : "text-muted hover:bg-white/10"
         }`}
         aria-pressed={isDouble}
       >
@@ -349,7 +349,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
           <div>
             <div className="mb-2"><BannerModeSwitchInline /></div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Banner Verso</h1>
-            <p className="mt-2 text-white/70">Material: Blockout 610 (pretensionat)</p>
+            <p className="mt-2 text-muted">Material: Blockout 610 (pretensionat)</p>
           </div>
           <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline text-sm self-start">
             <Info size={18} />
@@ -361,7 +361,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
           <div className="lg:col-span-3 space-y-6">
             {/* 1. Dimensiuni */}
             <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-white">1. Dimensiuni & cantitate</h2></div>
+              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-ui">1. Dimensiuni & cantitate</h2></div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="field-label">Lungime (cm)</label>
@@ -378,17 +378,17 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
             {/* 2 + 3. Material și Finisaje pe același rând */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="card p-4" ref={materialRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-white">2. Material</h2></div>
-                <div className="text-sm text-white/80">
-                  <div className="font-semibold">Blockout 610 (pretensionat)</div>
-                </div>
-                <div className="mt-2 text-xs text-white/60">Tiv & capse incluse.</div>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-ui">2. Material</h2></div>
+                  <div className="text-sm text-muted">
+                    <div className="font-semibold">Blockout 610 (pretensionat)</div>
+                  </div>
+                  <div className="mt-2 text-xs text-muted">Tiv & capse incluse.</div>
               </div>
 
               <div className="card p-4">
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-white">3. Finisaje</h2></div>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">3. Finisaje</h2></div>
                 <div className="flex flex-col gap-2">
-                  <div className="text-sm text-white/80">Tiv & capse — inclus</div>
+                  <div className="text-sm text-muted">Tiv & capse — inclus</div>
                   <label className="flex items-center gap-3">
                     <input type="checkbox" className="checkbox" checked={input.want_wind_holes} onChange={(e) => updateInput("want_wind_holes", e.target.checked)} />
                     <span className="text-sm">Găuri pentru vânt (+10%)</span>
@@ -399,7 +399,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
 
             {/* 4. Grafică - compact dropdown like single-face configurator */}
             <div className="card p-4" ref={graphicsRef}>
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-white">4. Grafică</h2></div>
+              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">4. Grafică</h2></div>
 
               <label className="flex items-center gap-3 mb-3">
                 <input type="checkbox" className="checkbox" checked={input.sameGraphicFrontBack} onChange={(e) => updateInput("sameGraphicFrontBack", e.target.checked)} />
@@ -413,10 +413,10 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                   className="w-full flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5"
                   aria-expanded={graphicsOpen}
                 >
-                  <div className="text-sm text-white/80">
+                  <div className="text-sm text-muted">
                     {designOption === "upload" ? (input.sameGraphicFrontBack ? (artworkUrlFront || artworkLinkFront ? "Am grafică" : "Am grafică (select)") : (artworkUrlFront || artworkUrlBack || artworkLinkFront || artworkLinkBack ? "Am grafică" : "Am grafică (select)")) : designOption === "text_only" ? (input.sameGraphicFrontBack ? "Text (gratis)" : "Text (față + spate)") : `Pro (+${proFee} RON)`}
                   </div>
-                  <div className="text-xs text-white/60">{graphicsOpen ? "Închide" : "Alege"}</div>
+                  <div className="text-xs text-muted">{graphicsOpen ? "Închide" : "Alege"}</div>
                 </button>
 
                 {graphicsOpen && (
@@ -436,7 +436,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                       <div>
                         <label className="field-label">Încarcă fișier</label>
                         <input type="file" accept=".pdf,.ai,.psd,.jpg,.jpeg,.png" onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null, "front")} className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500" />
-                        <div className="text-xs text-white/60 mt-1">sau</div>
+                        <div className="text-xs text-muted mt-1">sau</div>
                       </div>
                       <div>
                         <label className="field-label">Link descărcare (opțional)</label>
@@ -453,7 +453,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
 
                   {designOption === "pro" && (
                     <div className="panel p-3 mt-3 border-t border-white/5">
-                      <div className="text-sm text-white/80">Grafică profesională (+{proFee} RON)</div>
+                      <div className="text-sm text-muted">Grafică profesională (+{proFee} RON)</div>
                     </div>
                   )}
                 </>
@@ -463,7 +463,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                   {designOption === "upload" && (
                     <>
                       <div className="panel p-3 mt-3 border-t border-white/5">
-                        <div className="text-sm font-semibold text-white mb-2">Față</div>
+                        <div className="text-sm font-semibold text-ui mb-2">Față</div>
                         <div className="space-y-2">
                           <div>
                             <label className="field-label">Încarcă fișier (față)</label>
@@ -474,11 +474,11 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                             <input type="url" value={artworkLinkFront} onChange={(e) => setArtworkLinkFront(e.target.value)} className="input" />
                           </div>
                         </div>
-                        <div className="text-xs text-white/60 mt-2">{uploadingFront && "Se încarcă…"} {uploadErrorFront && "Eroare upload"} {artworkUrlFront && "Fișier încărcat"}</div>
+                        <div className="text-xs text-muted mt-2">{uploadingFront && "Se încarcă…"} {uploadErrorFront && "Eroare upload"} {artworkUrlFront && "Fișier încărcat"}</div>
                       </div>
 
                       <div className="panel p-3 mt-3 border-t border-white/5">
-                        <div className="text-sm font-semibold text-white mb-2">Spate</div>
+                        <div className="text-sm font-semibold text-ui mb-2">Spate</div>
                         <div className="space-y-2">
                           <div>
                             <label className="field-label">Încarcă fișier (spate)</label>
@@ -489,7 +489,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                             <input type="url" value={artworkLinkBack} onChange={(e) => setArtworkLinkBack(e.target.value)} className="input" />
                           </div>
                         </div>
-                        <div className="text-xs text-white/60 mt-2">{uploadingBack && "Se încarcă…"} {uploadErrorBack && "Eroare upload"} {artworkUrlBack && "Fișier încărcat"}</div>
+                        <div className="text-xs text-muted mt-2">{uploadingBack && "Se încarcă…"} {uploadErrorBack && "Eroare upload"} {artworkUrlBack && "Fișier încărcat"}</div>
                       </div>
                     </>
                   )}
@@ -507,7 +507,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
 
                   {designOption === "pro" && (
                     <div className="panel p-3 mt-3 border-t border-white/5">
-                      <div className="text-sm text-white/80">Grafică profesională (+{proFee} RON)</div>
+                      <div className="text-sm text-muted">Grafică profesională (+{proFee} RON)</div>
                     </div>
                   )}
                 </>
@@ -531,11 +531,11 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                 </div>
               </div>
 
-              <div className="card p-4">
+                <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-                <div className="space-y-2 text-white/80 text-sm">
-                  <p>Suprafață: <span className="text-white font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
-                  <p>Preț: <span className="text-2xl font-extrabold text-white">{formatMoneyDisplay(totalShown)} RON</span></p>
+                <div className="space-y-2 text-muted text-sm">
+                  <p>Suprafață: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
+                  <p>Preț: <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span></p>
                 </div>
 
                 <div className="hidden lg:block mt-4">
@@ -546,7 +546,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-white/60">Print durabil. Livrare rapidă.</div>
+              <div className="card-muted p-3 text-xs text-muted">Print durabil. Livrare rapidă.</div>
             </div>
           </aside>
         </div>
@@ -559,10 +559,10 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
           <div className="absolute inset-0 bg-black/60" onClick={() => setDetailsOpen(false)} />
           <div className="relative z-10 w-full max-w-2xl bg-[#0b0b0b] rounded-md border border-white/10 p-6">
             <button className="absolute right-3 top-3 p-1" onClick={() => setDetailsOpen(false)} aria-label="Închide">
-              <X size={18} className="text-white/80" />
+              <X size={18} className="text-muted" />
             </button>
-            <h3 className="text-xl font-bold text-white mb-3">Detalii comandă - Banner Verso</h3>
-            <div className="text-sm text-white/70 space-y-2">
+            <h3 className="text-xl font-bold text-ui mb-3">Detalii comandă - Banner Verso</h3>
+            <div className="text-sm text-muted space-y-2">
               <p>- Material: Blockout 610 (pretensionat). Tiv și capse incluse.</p>
               <p>- Găuri pentru vânt (+10%) — opțional.</p>
               <p>- Pro: 50 RON când grafică identică, 100 RON când grafică diferită.</p>
@@ -601,8 +601,8 @@ function SelectCardSmall({ active, onClick, title, subtitle }: { active: boolean
     <button type="button" onClick={onClick} className={`w-full rounded-md p-2 text-left transition flex items-center gap-3 ${active ? "border-2 border-indigo-500 bg-indigo-900/20" : "border border-white/10 hover:bg-white/5"}`}>
       <span className={`h-3 w-3 rounded-full border ${active ? "bg-indigo-500 border-indigo-500" : "bg-transparent border-white/20"}`} />
       <div>
-        <div className="text-sm text-white">{title}</div>
-        {subtitle && <div className="text-xs text-white/60">{subtitle}</div>}
+        <div className="text-sm text-ui">{title}</div>
+        {subtitle && <div className="text-xs text-muted">{subtitle}</div>}
       </div>
     </button>
   );

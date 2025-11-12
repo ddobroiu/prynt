@@ -337,7 +337,7 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Carton</h1>
-            <p className="mt-2 text-white/70">Alege tipul de carton, dimensiuni, print și încarcă grafică. Opțiunea "Pro" pentru grafică se stabilește după comandă.</p>
+            <p className="mt-2 text-muted">Alege tipul de carton, dimensiuni, print și încarcă grafică. Opțiunea "Pro" pentru grafică se stabilește după comandă.</p>
           </div>
           <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline text-sm self-start">
             <Info size={18} />
@@ -349,7 +349,7 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
           <div className="lg:col-span-3 space-y-6">
             {/* 1. Dimensiuni */}
             <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-white">1. Dimensiuni & cantitate</h2></div>
+              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-ui">1. Dimensiuni & cantitate</h2></div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="field-label">Lățime (cm)</label>
@@ -374,7 +374,7 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
             {/* 2. Material */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="card p-4" ref={materialRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-white">2. Tip material</h2></div>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-ui">2. Tip material</h2></div>
 
                 <div className="relative">
                   <button type="button" onClick={() => setMaterialOpen((s) => !s)} className="w-full flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5" aria-expanded={materialOpen}>
@@ -393,7 +393,7 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
 
               {/* 3. Variant (thickness / board type / print) */}
               <div className="card p-4" ref={variantRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-white">3. Variantă & print</h2></div>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">3. Variantă & print</h2></div>
 
                 {input.material === "ondulat" ? (
                   <div className="space-y-2">
@@ -446,7 +446,7 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
 
             {/* 4. Grafică */}
             <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Info /></div><h2 className="text-lg font-bold text-white">4. Grafică</h2></div>
+              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Info /></div><h2 className="text-lg font-bold text-ui">4. Grafică</h2></div>
 
               <div className="relative">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -515,12 +515,12 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
 
               <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-                <div className="space-y-2 text-white/80 text-sm">
-                  <p>Suprafață: <span className="text-white font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
-                  <p>Preț total: <span className="text-2xl font-extrabold text-white">{formatMoneyDisplay(totalShown)} RON</span></p>
-                  <p className="text-xs text-white/60">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—"}</strong></p>
-                  {priceDetailsLocal.accessoryCost > 0 && <p className="text-xs text-white/60">Cost accesorii (cant): <strong>{priceDetailsLocal.accessoryCost} RON</strong></p>}
-                  <p className="text-xs text-white/60">Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong></p>
+                <div className="space-y-2 text-muted text-sm">
+                  <p>Suprafață: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
+                  <p>Preț total: <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span></p>
+                  <p className="text-xs text-muted">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—"}</strong></p>
+                  {priceDetailsLocal.accessoryCost > 0 && <p className="text-xs text-muted">Cost accesorii (cant): <strong>{priceDetailsLocal.accessoryCost} RON</strong></p>}
+                  <p className="text-xs text-muted">Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong></p>
                 </div>
 
                 <div className="hidden lg:block mt-4">

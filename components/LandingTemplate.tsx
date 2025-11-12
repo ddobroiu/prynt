@@ -39,7 +39,7 @@ export default function LandingTemplate({ category, landing, initialWidth, initi
       <ProductJsonLd product={jsonProduct} url={url} />
       <section className="mb-8">
         <h1 className="text-4xl font-extrabold mb-3">{landing.title}</h1>
-        <p className="text-white/70 mb-6">{landing.shortDescription}</p>
+  <p className="text-muted mb-6">{landing.shortDescription}</p>
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">

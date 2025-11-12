@@ -250,7 +250,7 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-3xl font-extrabold">Configurator Flyere</h1>
-            <p className="mt-2 text-white/70">Alege dimensiunea și opțiunile, apoi încarcă grafică sau selectează grafică profesională.</p>
+            <p className="mt-2 text-muted">Alege dimensiunea și opțiunile, apoi încarcă grafică sau selectează grafică profesională.</p>
           </div>
           <div />
         </header>
@@ -259,7 +259,7 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
           <div className="lg:col-span-3 space-y-6">
             {/* size + qty */}
             <div className="card p-4">
-              <div className="text-sm text-white/70 mb-2">Dimensiune</div>
+              <div className="text-sm text-muted mb-2">Dimensiune</div>
               <div className="grid grid-cols-3 gap-2">
                 {SIZES.map((s) => (
                   <button
@@ -267,8 +267,8 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
                     onClick={() => setSizeKey(s.key)}
                     className={`p-3 rounded-md text-left border ${sizeKey === s.key ? "border-indigo-500 bg-indigo-900/20" : "border-white/10 hover:bg-white/5"}`}
                   >
-                    <div className="font-semibold text-white">{s.label}</div>
-                    <div className="text-xs text-white/60">{s.dims}</div>
+                    <div className="font-semibold text-ui">{s.label}</div>
+                    <div className="text-xs text-muted">{s.dims}</div>
                   </button>
                 ))}
               </div>
@@ -323,14 +323,14 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
               <div className="card p-4">
                 <label className="flex items-center gap-3">
                   <input type="checkbox" checked={sameDesignForBoth} onChange={(e) => setSameDesignForBoth(e.target.checked)} />
-                  <span className="text-sm text-white/80">Aceeași grafică pe ambele fețe (folosește un singur fișier)</span>
+                  <span className="text-sm text-muted">Aceeași grafică pe ambele fețe (folosește un singur fișier)</span>
                 </label>
               </div>
             )}
 
             {/* Graphics: two stacked cards like Banner (client / pro) */}
             <div className="card p-4" ref={graphicsRef}>
-              <div className="text-lg font-bold text-white mb-3">Grafică</div>
+              <div className="text-lg font-bold text-ui mb-3">Grafică</div>
 
               <div className="space-y-3">
                 <SelectCardSmall active={graphicsMode === "client"} onClick={() => setGraphicsMode("client")} title="Am grafică — încarc / adaug link" subtitle={sameDesignForBoth ? "Un singur fișier pentru față = spate" : "Încarcă separat pentru față și spate"} />
@@ -346,31 +346,31 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
                     <input type="file" accept=".pdf,.jpg,.png" onChange={(e) => uploadFile(e.target.files?.[0] || null, "face")} className="block w-full file:rounded file:bg-indigo-600 file:text-white" />
                     <label className="field-label mt-2">Link descărcare (opțional)</label>
                     <input type="url" value={artworkFaceLink} onChange={(e) => setArtworkFaceLink(e.target.value)} className="input" />
-                    <div className="text-xs text-white/60">{uploadingFace ? "Se încarcă…" : uploadErrorFace ? `Eroare: ${uploadErrorFace}` : artworkFaceUrl ? "Fișier pregătit" : "Niciun fișier"}</div>
+                    <div className="text-xs text-muted">{uploadingFace ? "Se încarcă…" : uploadErrorFace ? `Eroare: ${uploadErrorFace}` : artworkFaceUrl ? "Fișier pregătit" : "Niciun fișier"}</div>
                   </div>
                 )}
 
                 {graphicsMode === "client" && !sameDesignForBoth && (
                   <>
                     <div className="panel p-3 space-y-2">
-                      <div className="font-semibold text-white">Față</div>
+                      <div className="font-semibold text-ui">Față</div>
                       <input type="file" accept=".pdf,.jpg,.png" onChange={(e) => uploadFile(e.target.files?.[0] || null, "face")} className="block w-full file:rounded file:bg-indigo-600 file:text-white" />
                       <input type="url" value={artworkFaceLink} onChange={(e) => setArtworkFaceLink(e.target.value)} className="input mt-2" />
-                      <div className="text-xs text-white/60">{uploadingFace ? "Se încarcă…" : uploadErrorFace ? `Eroare: ${uploadErrorFace}` : artworkFaceUrl ? "Fișier pregătit" : "Niciun fișier"}</div>
+                      <div className="text-xs text-muted">{uploadingFace ? "Se încarcă…" : uploadErrorFace ? `Eroare: ${uploadErrorFace}` : artworkFaceUrl ? "Fișier pregătit" : "Niciun fișier"}</div>
                     </div>
 
                     <div className="panel p-3 space-y-2 mt-3">
-                      <div className="font-semibold text-white">Spate</div>
+                      <div className="font-semibold text-ui">Spate</div>
                       <input type="file" accept=".pdf,.jpg,.png" onChange={(e) => uploadFile(e.target.files?.[0] || null, "verso")} className="block w-full file:rounded file:bg-indigo-600 file:text-white" />
                       <input type="url" value={artworkVersoLink} onChange={(e) => setArtworkVersoLink(e.target.value)} className="input mt-2" />
-                      <div className="text-xs text-white/60">{uploadingVerso ? "Se încarcă…" : uploadErrorVerso ? `Eroare: ${uploadErrorVerso}` : artworkVersoUrl ? "Fișier pregătit" : "Niciun fișier"}</div>
+                      <div className="text-xs text-muted">{uploadingVerso ? "Se încarcă…" : uploadErrorVerso ? `Eroare: ${uploadErrorVerso}` : artworkVersoUrl ? "Fișier pregătit" : "Niciun fișier"}</div>
                     </div>
                   </>
                 )}
 
                 {graphicsMode === "pro" && (
                   <div className="panel p-3">
-                    <div className="text-sm text-white/80">Am selectat grafică profesională — cost afișat în sumar.</div>
+                    <div className="text-sm text-muted">Am selectat grafică profesională — cost afișat în sumar.</div>
                   </div>
                 )}
               </div>
@@ -402,7 +402,7 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
 
               <div className="card p-4">
                 <h3 className="font-bold mb-3">Sumar</h3>
-                <div className="text-sm text-white/80 space-y-2">
+                <div className="text-sm text-muted space-y-2">
                   <div>
                     Dimensiune: <strong>{SIZES.find((s) => s.key === sizeKey)?.label}</strong>
                   </div>
@@ -433,7 +433,7 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-white/60">Prețurile afișate includ opțiuni selectate.</div>
+              <div className="card-muted p-3 text-xs text-muted">Prețurile afișate includ opțiuni selectate.</div>
             </div>
           </aside>
         </div>
@@ -454,9 +454,9 @@ function SelectCardSmall({ active, onClick, title, subtitle }: { active: boolean
   return (
     <button onClick={onClick} className={`w-full rounded-md p-3 text-left transition flex items-start gap-3 ${active ? "border-2 border-indigo-500 bg-indigo-900/20" : "border border-white/10 hover:bg-white/5"}`}>
       <div className={`h-4 w-4 mt-1 rounded-full border ${active ? "bg-indigo-500 border-indigo-500" : "bg-transparent border-white/20"}`} />
-      <div>
-        <div className="text-sm text-white font-semibold">{title}</div>
-        {subtitle && <div className="text-xs text-white/60 mt-1">{subtitle}</div>}
+        <div>
+        <div className="text-sm text-ui font-semibold">{title}</div>
+        {subtitle && <div className="text-xs text-muted mt-1">{subtitle}</div>}
       </div>
     </button>
   );

@@ -206,8 +206,8 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="bg-[#0b0f19] min-h-screen text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <main className="bg-ui min-h-screen">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Coșul tău</h1>
           <a
@@ -254,9 +254,9 @@ export default function CheckoutPage() {
       {showEmbed && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur flex items-center justify-center p-4">
           <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-gray-950 p-4">
-            <div className="mb-3 text-center text-white/80">Finalizează plata în siguranță</div>
+            <div className="mb-3 text-center text-muted">Finalizează plata în siguranță</div>
             <div id="stripe-embedded" />
-            <div className="mt-3 text-center text-xs text-white/50">
+            <div className="mt-3 text-center text-xs text-muted">
               După finalizare, vei fi redirecționat înapoi pentru confirmare.
             </div>
           </div>
@@ -268,12 +268,12 @@ export default function CheckoutPage() {
 
 function EmptyCart() {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
+  <div className="rounded-2xl border card-bg p-8 text-center text-ui">
       <h2 className="text-xl font-bold mb-2">Coșul tău este gol</h2>
-      <p className="text-white/70 mb-6">Adaugă produse pentru a continua.</p>
+  <p className="text-muted mb-6">Adaugă produse pentru a continua.</p>
       <a
         href="/"
-        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 transition"
+  className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 transition"
       >
         Continuă cumpărăturile
       </a>
@@ -301,23 +301,23 @@ function SummaryCard({
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
   return (
-    <div className="lg:sticky lg:top-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+  <div className="lg:sticky lg:top-6 rounded-2xl border card-bg p-5 text-ui">
       <h2 className="text-xl font-bold mb-4">Sumar comandă</h2>
 
       <div className="space-y-3 text-sm">
         <div className="flex items-center justify-between">
-          <span className="text-white/70">Produse</span>
+          <span className="text-muted">Produse</span>
           <span className="font-semibold">{fmt(subtotal)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-white/70">
-            <Truck size={16} className="text-white/50" />
+          <span className="flex items-center gap-2 text-muted">
+            <Truck size={16} className="text-muted" />
             Livrare
           </span>
           <span className="font-semibold">{fmt(shipping)}</span>
         </div>
         <div className="flex items-center justify-between border-t border-white/10 pt-3">
-          <span className="text-white/90 font-semibold">Total</span>
+          <span className="text-ui font-semibold">Total</span>
           <span className="text-2xl font-extrabold">{fmt(total)}</span>
         </div>
       </div>
@@ -352,7 +352,7 @@ function SummaryCard({
           {placing ? "Se procesează..." : "Plasează comanda"}
         </button>
 
-        <p className="mt-2 text-[11px] text-white/50 text-center">
+  <p className="mt-2 text-[11px] text-muted text-center">
           Plata cu cardul este securizată. Pentru ramburs, plătești la curier.
         </p>
       </div>
@@ -364,7 +364,7 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+  <div className="rounded-2xl border card-bg p-4 text-ui">
       <h2 className="text-xl font-bold mb-4">Produsele tale</h2>
       <ul className="divide-y divide-white/10">
         {(items ?? []).map((item) => {
@@ -380,9 +380,9 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold truncate pr-2">{title}</p>
-                  <span className="text-white/70 text-sm">x{qty}</span>
+                  <span className="text-muted text-sm">x{qty}</span>
                 </div>
-                <div className="mt-1 text-sm text-white/70">
+                <div className="mt-1 text-sm text-muted">
                   {item.artworkUrl && (
                     <a className="underline text-indigo-300" href={item.artworkUrl} target="_blank" rel="noopener noreferrer">
                       fișier încărcat
@@ -400,10 +400,10 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
                   )}
                   {/* unit price + line total */}
                   <div className="mt-2">
-                    <div className="text-xs text-white/60">
+                    <div className="text-xs text-muted">
                       {unit > 0 ? `Preț unitar: ${fmt(unit)}` : "Preț unitar: —"}
                     </div>
-                    <div className="text-sm text-white/80 mt-1">{fmt(Number(lineTotal))}</div>
+                    <div className="text-sm text-muted mt-1">{fmt(Number(lineTotal))}</div>
                   </div>
                 </div>
               </div>
@@ -411,7 +411,7 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
               <div>
                 <button
                   onClick={() => onRemove(item.id)}
-                  className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-white/80 hover:bg-white/10"
+                  className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-muted hover:bg-white/10"
                   aria-label="Elimină"
                   title="Elimină"
                 >

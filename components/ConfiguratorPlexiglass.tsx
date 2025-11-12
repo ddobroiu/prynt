@@ -316,7 +316,7 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Plexiglass</h1>
-            <p className="mt-2 text-white/70">Alege tipul, grosimea, dimensiunile și încarcă grafică. Opțiunea "Pro" se stabilește după comandă.</p>
+            <p className="mt-2 text-muted">Alege tipul, grosimea, dimensiunile și încarcă grafică. Opțiunea "Pro" se stabilește după comandă.</p>
           </div>
           <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline text-sm self-start">
             <Info size={18} />
@@ -328,7 +328,7 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
           <div className="lg:col-span-3 space-y-6">
             {/* 1. Dimensiuni */}
             <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-white">1. Dimensiuni & cantitate</h2></div>
+              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-ui">1. Dimensiuni & cantitate</h2></div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="field-label">Lățime (cm)</label>
@@ -347,18 +347,18 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
                   </div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-white/60">Preseturi: {PRESETS.map(p => `${p.w}x${p.h} cm`).join(" • ")}</div>
+              <div className="mt-2 text-xs text-muted">Preseturi: {PRESETS.map(p => `${p.w}x${p.h} cm`).join(" • ")}</div>
             </div>
 
             {/* 2. Material & thickness */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="card p-4" ref={materialRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-white">2. Material</h2></div>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-ui">2. Material</h2></div>
 
                 <div className="relative">
                   <button type="button" onClick={() => setMaterialOpen((s) => !s)} className="w-full flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5" aria-expanded={materialOpen}>
-                    <div className="text-sm text-white/80">{input.material === "alb" ? "Plexiglass alb" : "Plexiglass transparent"}</div>
-                    <div className="text-xs text-white/60">{materialOpen ? "Închide" : "Schimbă"}</div>
+                    <div className="text-sm text-muted">{input.material === "alb" ? "Plexiglass alb" : "Plexiglass transparent"}</div>
+                    <div className="text-xs text-muted">{materialOpen ? "Închide" : "Schimbă"}</div>
                   </button>
 
                   {materialOpen && (
@@ -371,10 +371,10 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
               </div>
 
               <div className="card p-4" ref={thicknessRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-white">3. Grosime & print</h2></div>
+                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">3. Grosime & print</h2></div>
 
                 <div className="space-y-2">
-                  <div className="text-xs text-white/60">Grosime (mm)</div>
+                  <div className="text-xs text-muted">Grosime (mm)</div>
                   <div className="grid grid-cols-2 gap-2">
                     {availableThickness.map((t) => (
                       <button key={t} onClick={() => updateInput("thickness_mm", t)} className={`p-2 text-left rounded-md ${input.thickness_mm === t ? "border border-indigo-500 bg-indigo-900/10" : "border border-white/10 hover:bg-white/5"}`}>
@@ -392,14 +392,14 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
                     </div>
                   )}
 
-                  <div className="mt-2 text-xs text-white/60">Notă: prețurile sunt calculate automat în funcție de grosime și opțiunea față/verso.</div>
+                  <div className="mt-2 text-xs text-muted">Notă: prețurile sunt calculate automat în funcție de grosime și opțiunea față/verso.</div>
                 </div>
               </div>
             </div>
 
             {/* 4. Grafică */}
             <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Info /></div><h2 className="text-lg font-bold text-white">4. Grafică</h2></div>
+              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Info /></div><h2 className="text-lg font-bold text-ui">4. Grafică</h2></div>
 
               <div className="relative">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -418,7 +418,7 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
                       onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)}
                       className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500"
                     />
-                    <div className="text-xs text-white/60 mt-1">sau</div>
+                    <div className="text-xs text-muted mt-1">sau</div>
                   </div>
 
                   <div>
@@ -430,10 +430,10 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
                       placeholder="Ex: https://.../fisier.pdf"
                       className="input"
                     />
-                    <div className="text-xs text-white/60 mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
+                    <div className="text-xs text-muted mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
                   </div>
 
-                  <div className="text-xs text-white/60">
+                  <div className="text-xs text-muted">
                     {uploading && "Se încarcă…"}
                     {uploadError && "Eroare upload"}
                     {input.artworkUrl && "Fișier încărcat"}
@@ -444,7 +444,7 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
 
               {input.designOption === "pro" && (
                 <div className="panel p-3 mt-3 border-t border-white/5">
-                  <div className="text-sm text-white/80">Serviciu grafic profesional — prețul se stabilește după comandă și comunicare cu clientul.</div>
+                  <div className="text-sm text-muted">Serviciu grafic profesional — prețul se stabilește după comandă și comunicare cu clientul.</div>
                 </div>
               )}
             </div>
@@ -468,11 +468,11 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
 
               <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-                <div className="space-y-2 text-white/80 text-sm">
-                  <p>Suprafață: <span className="text-white font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
-                  <p>Preț: <span className="text-2xl font-extrabold text-white">{formatMoneyDisplay(totalShown)} RON</span></p>
-                  <p className="text-xs text-white/60">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—"}</strong></p>
-                  <p className="text-xs text-white/60">Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong></p>
+                <div className="space-y-2 text-muted text-sm">
+                  <p>Suprafață: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
+                  <p>Preț: <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span></p>
+                  <p className="text-xs text-muted">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—"}</strong></p>
+                  <p className="text-xs text-muted">Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong></p>
                 </div>
 
                 <div className="hidden lg:block mt-4">
@@ -483,7 +483,7 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-white/60">
+              <div className="card-muted p-3 text-xs text-muted">
                 Dimensiuni maxime suportate: 300x150 cm; 400x150 cm; 300x200 cm. Prețurile afișate sunt orientative.
               </div>
             </div>

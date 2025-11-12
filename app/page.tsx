@@ -15,7 +15,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ href, title, desc, img, cta }) => (
   <a
     href={href}
-    className="group block overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-0 shadow-xl shadow-black/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/10"
+  className="group block overflow-hidden rounded-2xl border border-[--border] card-bg p-0 shadow-xl shadow-black/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface"
   >
     <div className="relative h-56 w-full">
       <img
@@ -28,8 +28,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ href, title, desc, img, cta }
     </div>
 
     <div className="p-6">
-      <h3 className="text-xl font-bold mb-1 text-white">{title}</h3>
-      <p className="mt-1 text-white/70 text-base">{desc}</p>
+  <h3 className="text-xl font-bold mb-1 text-ui">{title}</h3>
+  <p className="mt-1 text-muted text-base">{desc}</p>
 
       <span className="mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold btn-primary">
         {cta || 'Configurează'} →
@@ -40,23 +40,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ href, title, desc, img, cta }
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen text-white bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900 via-black to-black">
+  <main className="min-h-screen text-ui bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-zinc-900 via-black to-black">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         {/* HERO */}
-        <section className="pt-20 pb-16 text-center border-b border-white/10 mb-12">
+  <section className="pt-20 pb-16 text-center border-b border-[--border] mb-12">
           <div className="flex flex-col items-center">
             <img
               src="/logo.png"
               alt="Prynt.ro"
               width={140}
               height={140}
-              className="mb-6 rounded-full border border-white/10 shadow-xl shadow-black/30 transition-transform duration-300 hover:scale-[1.02]"
+              className="mb-6 rounded-full border border-[--border] shadow-xl shadow-black/30 transition-transform duration-300 hover:scale-[1.02]"
               style={{ objectFit: 'contain' }}
             />
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
               Prynt.ro — Tipar rapid & calitate premium
             </h1>
-            <p className="mt-4 text-xl text-white/80 max-w-3xl">
+            <p className="mt-4 text-xl text-muted max-w-3xl">
               Configurezi online, vezi prețul în timp real și primești livrarea ultra-rapid cu DPD.
             </p>
           </div>
@@ -64,7 +64,7 @@ export default function HomePage() {
 
         {/* PRODUSE */}
         <section className="py-12">
-          <h2 className="text-3xl font-bold mb-8 text-center">Produse populare</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center text-ui">Produse populare</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <ProductCard
               href="/banner"
@@ -113,9 +113,9 @@ export default function HomePage() {
 
         {/* DESPRE */}
         <section className="mx-auto max-w-4xl py-16 text-center">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl shadow-black/30">
-            <h2 className="text-3xl font-bold mb-4">Despre Prynt.ro</h2>
-            <p className="text-white/80 leading-relaxed text-lg">
+          <div className="rounded-2xl border border-[--border] card-bg p-6 shadow-xl shadow-black/30">
+            <h2 className="text-3xl font-bold mb-4 text-ui">Despre Prynt.ro</h2>
+            <p className="text-muted leading-relaxed text-lg">
               Suntem un centru de producție publicitară și tipar digital cu <strong>peste 10 ani de experiență</strong>.
               Oferim print de calitate pe o gamă largă de materiale — totul cu <strong>prețuri transparente</strong> și livrare rapidă.
               Misiunea noastră este să transformăm ideile tale în produse fizice impecabile.
@@ -134,10 +134,10 @@ export default function HomePage() {
             ].map((r) => (
               <div
                 key={r.name}
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl shadow-black/30 transition"
+                className="rounded-2xl border border-[--border] card-bg p-6 shadow-xl shadow-black/30 transition"
               >
-                <p className="text-white/90 italic text-lg mb-3">“{r.text}”</p>
-                <div className="text-white/70 font-semibold text-sm">— {r.name}</div>
+                <p className="text-ui italic text-lg mb-3">“{r.text}”</p>
+                <div className="text-muted font-semibold text-sm">— {r.name}</div>
               </div>
             ))}
           </div>
@@ -145,7 +145,7 @@ export default function HomePage() {
       </div>
 
       {/* FOOTER */}
-      <footer className="w-full py-8 border-t border-white/10 mt-8 text-center text-white/60">
+      <footer className="w-full py-8 border-t border-[--border] mt-8 text-center text-muted">
         <p>&copy; {new Date().getFullYear()} Prynt.ro. Toate drepturile rezervate.</p>
       </footer>
     </main>
