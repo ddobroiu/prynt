@@ -89,7 +89,7 @@ export default function Header() {
   };
 
   return (
-  <header className="sticky top-0 z-40 w-full border-b border-indigo-700/30 bg-ui backdrop-blur">
+  <header className="sticky top-0 z-40 w-full border-b border-indigo-700/30 bg-white dark:bg-gray-950">
       <div className="page">
         {/* MOBILE BAR: burger · logo · cart */}
         <div className="flex items-center justify-between py-3 lg:hidden">
