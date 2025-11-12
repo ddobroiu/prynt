@@ -147,6 +147,10 @@ body {
     color: white;
   }
 
+  /* Background helpers for theme tokens */
+  .card-bg { background-color: var(--card-bg); }
+  .bg-surface { background-color: var(--surface); }
+
   /* Semantic text colors using theme tokens */
   .text-ui {
     color: var(--text);

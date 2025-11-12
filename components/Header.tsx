@@ -76,6 +76,17 @@ export default function Header() {
     };
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (openMobile) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [openMobile]);
+
   const openNow = (key: string) => {
     clearTimeout(dropdownTimers.current[key]);
     setOpenDropdown(key);
@@ -89,7 +100,7 @@ export default function Header() {
   };
 
   return (
-  <header className="sticky top-0 z-40 w-full border-b border-indigo-700/30 bg-white dark:bg-gray-950">
+  <header className="sticky top-0 z-50 w-full border-b border-[--border] bg-[--bg] shadow-sm">
       <div className="page">
         {/* MOBILE BAR: burger · logo · cart */}
         <div className="flex items-center justify-between py-3 lg:hidden">
@@ -97,7 +108,7 @@ export default function Header() {
             type="button"
             onClick={() => setOpenMobile((v) => !v)}
             aria-label={openMobile ? "Închide meniul" : "Deschide meniul"}
-            className="inline-flex items-center justify-center rounded-lg border-2 border-indigo-400 bg-indigo-900/80 p-2 text-ui hover:bg-indigo-700 transition shadow"
+            className="btn-outline p-2"
           >
             {openMobile ? <X size={22} /> : <Menu size={22} />}
           </button>
@@ -109,7 +120,7 @@ export default function Header() {
             <img
               src="/logo.png"
               alt="Prynt.ro"
-              className="rounded-full border-2 border-indigo-400 w-16 h-16 lg:w-20 lg:h-20 shadow-lg group-hover:scale-105 group-hover:shadow-indigo-400/30 transition-transform duration-300"
+              className="rounded-full w-14 h-14 lg:w-16 lg:h-16 shadow-lg transition-transform duration-300 group-hover:scale-105"
               loading="lazy"
             />
             <span className="sr-only">Prynt.ro</span>
@@ -119,7 +130,7 @@ export default function Header() {
             <ThemeToggle />
             <a
               href="/checkout"
-              className="relative inline-flex items-center justify-center rounded-lg border-2 border-indigo-400 bg-indigo-900/80 p-2 text-ui hover:bg-indigo-700 transition shadow"
+              className="relative btn-outline p-2"
               aria-label="Coșul meu"
             >
               <ShoppingCart size={22} />
@@ -133,14 +144,16 @@ export default function Header() {
         </div>
 
         {/* MOBILE NAV */}
+        {/* Mobile overlay to avoid seeing page content behind menu */}
+        {openMobile && <div className="fixed inset-0 z-40 bg-[--bg] lg:hidden" />}
         <div
-          className={`lg:hidden overflow-hidden transition-[max-height,opacity] duration-300 ${
-            openMobile ? "opacity-100 max-h-[600px]" : "opacity-0 max-h-0"
+          className={`lg:hidden overflow-hidden transition-[max-height,opacity] duration-300 relative z-50 ${
+            openMobile ? "opacity-100 max-h-[70vh]" : "opacity-0 max-h-0"
           }`}
         >
           <nav className="pb-3">
             <div className="mx-auto max-w-sm">
-              <div className="card p-3 shadow-xl shadow-black/30">
+              <div className="rounded-2xl border border-[--border] bg-[--bg] p-3 shadow-xl">
                 <ul className="space-y-2">
                   {/* Shop CTA în meniul mobil */}
                   <li>
@@ -158,7 +171,7 @@ export default function Header() {
                         <button
                           type="button"
                           onClick={() => setOpenMobileSub((cur) => (cur === l.label ? null : l.label))}
-                          className="w-full inline-flex items-center justify-between rounded-md border border-white/10 bg-white/5 px-3 py-2 text-ui hover:bg-white/10"
+                          className="w-full inline-flex items-center justify-between rounded-md border border-[--border] bg-[--bg] px-3 py-2 text-ui hover:ring-1 hover:ring-[--border]"
                           aria-expanded={openMobileSub === l.label}
                           aria-controls={`mobile-sub-${l.label.replace(/\s+/g, "-").toLowerCase()}`}
                         >
@@ -181,7 +194,7 @@ export default function Header() {
                                 <li key={c.href}>
                                   <a
                                     href={c.href}
-                                    className="block rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-ui hover:bg-white/10"
+                                    className="block rounded-md border border-[--border] bg-[--bg] px-3 py-2 text-sm text-ui hover:ring-1 hover:ring-[--border]"
                                   >
                                     {c.label}
                                   </a>
@@ -195,7 +208,7 @@ export default function Header() {
                       <li key={l.href} className="text-center">
                         <a
                           href={l.href}
-                          className="block rounded-md border border-white/10 bg-white/5 px-3 py-2 text-ui hover:bg-white/10"
+                          className="block rounded-md border border-[--border] bg-[--bg] px-3 py-2 text-ui hover:ring-1 hover:ring-[--border]"
                         >
                           {l.label}
                         </a>
@@ -211,7 +224,7 @@ export default function Header() {
         {/* DESKTOP NAV */}
         <div className="hidden lg:flex items-center justify-between py-3">
           <a href="/" className="inline-flex items-center gap-2 group" aria-label="Prynt.ro">
-            <img src="/logo.png" alt="Prynt.ro" className="rounded-full border-2 border-indigo-400 w-16 h-16 lg:w-20 lg:h-20 shadow-lg group-hover:scale-105 group-hover:shadow-indigo-400/30 transition-transform duration-300" loading="lazy" />
+            <img src="/logo.png" alt="Prynt.ro" className="rounded-full w-16 h-16 lg:w-20 lg:h-20 shadow-lg transition-transform duration-300 group-hover:scale-105" loading="lazy" />
             <span className="sr-only">Prynt.ro</span>
           </a>
 
@@ -231,7 +244,7 @@ export default function Header() {
                     type="button"
                     aria-haspopup="menu"
                     aria-expanded={openDropdown === l.label}
-                    className="inline-flex items-center gap-1 rounded-lg border-2 border-indigo-400 bg-indigo-900/80 px-4 py-2 text-ui font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow"
+                    className="inline-flex items-center gap-1 rounded-lg px-4 py-2 text-ui font-semibold hover:ring-1 hover:ring-[--border] focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                     onClick={() => setOpenDropdown((cur) => (cur === l.label ? null : l.label))}
                   >
                     {l.label}
@@ -239,17 +252,17 @@ export default function Header() {
                   </button>
                   <div
                     role="menu"
-                    className={`absolute left-0 mt-2 w-52 rounded-xl border card-bg p-2 shadow z-50 transition-all origin-top ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}`}
+                    className={`absolute left-0 mt-2 w-56 rounded-xl border border-[--border] bg-[--bg] p-2 shadow-xl z-50 transition-all origin-top ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}`}
                   >
                     {l.children.map((c) => (
-                      <a key={c.href} href={c.href} role="menuitem" className="block rounded-lg px-4 py-2 text-base text-ui hover:bg-surface focus:bg-surface focus:outline-none font-medium transition" onClick={() => setOpenDropdown(null)}>
+                      <a key={c.href} href={c.href} role="menuitem" className="block rounded-lg px-4 py-2 text-base text-ui hover:ring-1 hover:ring-[--border] focus:outline-none font-medium transition" onClick={() => setOpenDropdown(null)}>
                         {c.label}
                       </a>
                     ))}
                   </div>
                 </div>
               ) : (
-                <a key={l.href} href={l.href} className="rounded-lg border-2 border-indigo-400 bg-indigo-900/80 px-4 py-2 text-ui font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow transition">
+                <a key={l.href} href={l.href} className="rounded-lg px-4 py-2 text-ui font-semibold hover:ring-1 hover:ring-[--border] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition">
                   {l.label}
                 </a>
               )
@@ -267,7 +280,7 @@ export default function Header() {
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <a href="/checkout" className="relative inline-flex items-center justify-center rounded-xl border-2 border-indigo-400 bg-indigo-900/80 px-4 py-2 text-ui hover:bg-indigo-700 transition shadow focus:outline-none focus:ring-2 focus:ring-indigo-500/50" aria-label="Coșul meu">
+            <a href="/checkout" className="relative btn-outline px-4 py-2" aria-label="Coșul meu">
               <ShoppingCart size={20} />
               {isLoaded && count > 0 && <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-ui shadow-lg">{count}</span>}
             </a>
