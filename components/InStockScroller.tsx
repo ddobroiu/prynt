@@ -67,6 +67,11 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
   }, [containerRef, perPage, maxPerPage, minCardWidth]);
 
   useEffect(() => {
+    // restart the timer whenever pages or interval change
+    if (timer.current) {
+      window.clearInterval(timer.current);
+      timer.current = null;
+    }
     if (pages <= 1) return;
     timer.current = window.setInterval(() => {
       setPage((p) => (p + 1) % pages);
@@ -89,7 +94,34 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
   const slice = products.slice(start, start + itemsPerPage);
 
   return (
-    <div ref={containerRef} className="in-stock-scroller" style={{ padding: 12, position: "relative" }} onMouseEnter={() => { if (timer.current) { window.clearInterval(timer.current); timer.current = null; } }} onMouseLeave={() => { if (!timer.current && pages > 1) { timer.current = window.setInterval(() => setPage((p) => (p + 1) % pages), intervalMs) as unknown as number; } }}>
+    <div
+      ref={containerRef}
+      className="in-stock-scroller"
+      style={{ padding: 12, position: "relative", minHeight: isMobileView ? 420 : undefined }}
+      onMouseEnter={() => {
+        if (timer.current) {
+          window.clearInterval(timer.current);
+          timer.current = null;
+        }
+      }}
+      onMouseLeave={() => {
+        if (!timer.current && pages > 1) {
+          timer.current = window.setInterval(() => setPage((p) => (p + 1) % pages), intervalMs) as unknown as number;
+        }
+      }}
+      // touch handlers for mobile to pause/resume auto-advance
+      onTouchStart={() => {
+        if (timer.current) {
+          window.clearInterval(timer.current);
+          timer.current = null;
+        }
+      }}
+      onTouchEnd={() => {
+        if (!timer.current && pages > 1) {
+          timer.current = window.setInterval(() => setPage((p) => (p + 1) % pages), intervalMs) as unknown as number;
+        }
+      }}
+    >
       <div style={{ display: "flex", gap: 12, overflow: "hidden", alignItems: "stretch" }}>
         <div style={{ display: "flex", gap: 12, transform: `translateX(-${page * 100}%)`, transition: "transform 500ms ease", alignItems: "stretch" }}>
           {/* Render each page as a group of cards so the width is consistent */}
