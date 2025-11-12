@@ -3,6 +3,11 @@ import Stripe from "stripe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Plată reușită",
+  robots: { index: false, follow: false },
+  alternates: { canonical: "/checkout/success" },
+};
 
 type PageProps = {
   searchParams: { session_id?: string };

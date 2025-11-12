@@ -5,6 +5,12 @@ type PageProps = {
   searchParams: { session_id?: string };
 };
 
+export const metadata = {
+  title: 'Plată eșuată',
+  robots: { index: false, follow: false },
+  alternates: { canonical: '/checkout/failed' },
+};
+
 export default async function FailedPage({ searchParams }: PageProps) {
   const sessionId = searchParams?.session_id;
   let paymentStatus: string | null = null;

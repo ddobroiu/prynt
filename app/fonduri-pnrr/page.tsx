@@ -12,12 +12,7 @@ export default function Page() {
   const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
   return (
     <>
-      <BreadcrumbsJsonLd
-        items={[
-          { name: "Acasă", url: `${base}/` },
-          { name: "Fonduri UE", url: `${base}/fonduri-pnrr` },
-        ]}
-      />
+      <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Fonduri PNRR", url: `${base}/fonduri-pnrr` }]} />
       <FonduriEUConfigurator />
     </>
   );
