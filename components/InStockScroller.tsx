@@ -95,17 +95,32 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
           {/* Render each page as a group of cards so the width is consistent */}
           {Array.from({ length: pages }).map((_, pi) => {
             const s = products.slice(pi * itemsPerPage, pi * itemsPerPage + itemsPerPage);
-            return (
-              <div key={pi} style={{ display: "grid", gridTemplateColumns: `repeat(${itemsPerPage}, minmax(0, 1fr))`, gap: 12, minWidth: "100%", boxSizing: "border-box", alignItems: "stretch", justifyItems: isMobileView ? "center" : undefined }}>
-                    {s.map((p) => (
-                      <div key={p.id} style={{ width: isMobileView ? "90%" : "100%", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
-                        {/* Ensure ProductCard sees a `category` prop like shop data (fallback to metadata.category) */}
-                        <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                          <ProductCard product={{ ...(p as any), category: (p.metadata?.category ?? (p as any).category) }} imageHeightPx={isMobileView ? 220 : undefined} />
-                        </div>
+            // For mobile we render a centered single-card layout with a constrained width so the product is visible and nicely styled
+            if (isMobileView) {
+              return (
+                <div key={pi} style={{ display: "flex", gap: 12, minWidth: "100%", boxSizing: "border-box", justifyContent: "center", padding: "12px 0" }}>
+                  {s.map((p) => (
+                    <div key={p.id} style={{ width: "85%", maxWidth: 360, boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+                      <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                        <ProductCard product={{ ...(p as any), category: (p.metadata?.category ?? (p as any).category) }} imageHeightPx={320} />
                       </div>
-                    ))}
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+
+            return (
+              <div key={pi} style={{ display: "grid", gridTemplateColumns: `repeat(${itemsPerPage}, minmax(0, 1fr))`, gap: 12, minWidth: "100%", boxSizing: "border-box", alignItems: "stretch" }}>
+                {s.map((p) => (
+                  <div key={p.id} style={{ width: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+                    {/* Ensure ProductCard sees a `category` prop like shop data (fallback to metadata.category) */}
+                    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                      <ProductCard product={{ ...(p as any), category: (p.metadata?.category ?? (p as any).category) }} />
+                    </div>
                   </div>
+                ))}
+              </div>
             );
           })}
         </div>
