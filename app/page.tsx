@@ -67,6 +67,14 @@ export default function HomePage() {
 
     const CONFIG_GROUPS: { title: string; items: ConfiguratorItem[] }[] = [
     {
+      title: 'Fonduri UE',
+      items: [
+        { title: 'Fonduri PNRR', href: '/fonduri-pnrr', image: '/products/banner/1.jpg' },
+        { title: 'Fonduri REGIO', href: '/fonduri-regio', image: '/products/afise/1.jpg' },
+        { title: 'Fonduri Naționale', href: '/fonduri-nationale', image: '/products/autocolante/1.jpg' },
+      ],
+    },
+    {
       title: 'Publicitar',
       items: [
         { title: 'Afișe', href: '/afise', image: '/products/afise/1.jpg' },

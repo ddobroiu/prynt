@@ -50,8 +50,13 @@ export default function Footer() {
             Produse
           </h3>
           <ul className="text-base text-ui space-y-3">
+            <li className="pt-0.5 text-indigo-300/90 font-semibold">Fonduri UE</li>
+            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/fonduri-pnrr"><span>Fonduri PNRR</span></a></li>
+            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/fonduri-regio"><span>Fonduri REGIO</span></a></li>
+            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/fonduri-nationale"><span>Fonduri Naționale</span></a></li>
+            <li className="pt-2 text-indigo-300/90 font-semibold">Publicitar</li>
             <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/banner"><span>Banner</span></a></li>
-            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/flayer"><span>Flayer</span></a></li>
+            <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/flayere"><span>Flayere</span></a></li>
             <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/canvas"><span>Canvas</span></a></li>
             <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/autocolante"><span>Autocolante</span></a></li>
             <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/materiale-rigide"><span>Materiale rigide</span></a></li>
