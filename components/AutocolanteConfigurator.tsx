@@ -511,7 +511,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-muted">Autocolante personalizate. Finisaje profesionale.</div>
+              {/* Footer promo eliminat pentru consistență UI */}
             </div>
           </aside>
         </div>

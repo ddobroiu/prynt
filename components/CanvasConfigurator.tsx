@@ -588,7 +588,7 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-muted">Canvas Fine Art 330 g/mp, șasiu lemn, finisaje profesionale.</div>
+              {/* Footer descriptiv eliminat pentru consistență UI */}
             </div>
           </aside>
         </div>

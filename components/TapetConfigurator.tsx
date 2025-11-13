@@ -451,7 +451,7 @@ export default function TapetConfigurator({ productSlug, initialWidth: initW, in
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-white/60">Print durabil. Livrare rapidă.</div>
+              {/* Footer promo eliminat pentru consistență UI */}
             </div>
           </aside>
         </div>

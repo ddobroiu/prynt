@@ -525,7 +525,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               </div>
             </div>
 
-            <div className="card-muted p-3 text-xs text-muted">Print durabil. Livrare rapidă.</div>
+            {/* Footer promo eliminat pentru consistență UI */}
           </div>
         </aside>
       </div>

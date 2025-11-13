@@ -414,9 +414,9 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
                   <div>
                     Hârtie: <strong>{PAPER_WEIGHTS.find((p) => p.key === paperWeightKey)?.label}</strong>
                   </div>
-                  <div className="text-2xl font-extrabold flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span>Total:</span>
-                    <span className="text-ui">{total.toFixed(2)} RON</span>
+                    <span className="text-2xl font-extrabold text-ui">{total.toFixed(2)} RON</span>
                     <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
                   </div>
                 </div>
@@ -432,7 +432,7 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-muted">Prețurile afișate includ opțiuni selectate.</div>
+              {/* Footer informativ eliminat pentru consistență UI */}
             </div>
           </aside>
         </div>

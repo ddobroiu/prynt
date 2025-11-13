@@ -557,9 +557,9 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
                 <p>Tiraj: <span className="text-ui font-semibold">{quantity} buc</span></p>
                 <p>Preț/unitate: <span className="text-white font-semibold">{unitPrice.toFixed(2)} RON</span></p>
                 {designOption === "pro" && <p>Taxă grafică Pro: <span className="text-white font-semibold">{PRO_DESIGN_FEE} RON</span></p>}
-                <p className="text-xl font-bold flex items-center gap-2 flex-wrap">
+                <p className="flex items-center gap-2 flex-wrap">
                   <span>Total:</span>
-                  <span className="text-indigo-400">{total.toFixed(2)} RON</span>
+                  <span className="text-2xl font-extrabold text-ui">{total.toFixed(2)} RON</span>
                   <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
                 </p>
                 <p className="text-sm text-white/60">Preț per bucată: {pricePerUnitDisplayed.toFixed(2)} RON</p>

@@ -274,9 +274,9 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
                   <p>Tip pliere: <span className="text-ui font-semibold">{FOLDS[fold].label}</span></p>
                   <p>Preț bază/unitate: <span className="text-ui font-semibold">{unitBasePrice.toFixed(2)} RON</span></p>
                   {designOption === "pro" && <p>Taxă grafică Pro: <span className="text-ui font-semibold">{proFee} RON</span></p>}
-                  <p className="text-xl font-bold flex items-center gap-2 flex-wrap">
+                  <p className="flex items-center gap-2 flex-wrap">
                     <span>Total:</span>
-                    <span className="text-indigo-400">{displayedTotal.toFixed(2)} RON</span>
+                    <span className="text-2xl font-extrabold text-ui">{displayedTotal.toFixed(2)} RON</span>
                     <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
                   </p>
                   <p className="text-sm text-muted">Preț per bucată: {pricePerUnitDisplayed.toFixed(2)} RON</p>

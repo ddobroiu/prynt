@@ -352,9 +352,9 @@ export default function FonduriEUConfigurator() {
                   {orderNotes && (
                     <p className="pt-2 border-t border-white/10 text-ui/80"><span className="font-semibold text-ui">Detalii:</span> {orderNotes}</p>
                   )}
-                  <p className="text-xl font-bold flex items-center gap-2 flex-wrap">
+                  <p className="flex items-center gap-2 flex-wrap">
                     <span>Total:</span>
-                    <span className="text-indigo-400">{sum.toFixed(2)} RON</span>
+                    <span className="text-2xl font-extrabold text-ui">{sum.toFixed(2)} RON</span>
                     <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
                   </p>
                 </div>
