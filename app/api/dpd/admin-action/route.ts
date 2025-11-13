@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const token = searchParams.get('token') || '';
+    const sidParam = searchParams.get('sid');
     const payload = verifyAdminAction(token);
     if (!payload) {
       return htmlPage('Link invalid', '<h1>Link invalid sau expirat</h1><p>Îți rugăm să soliciți un link nou.</p>');
@@ -30,9 +31,20 @@ export async function GET(req: NextRequest) {
     if (payload.action === 'confirm_awb') {
       // Build minimal shipment from payload
       const address = payload.address;
-      const serviceId = Number(process.env.DPD_DEFAULT_SERVICE_ID || '');
+      const serviceId = Number(sidParam || process.env.DPD_DEFAULT_SERVICE_ID || '');
       if (!serviceId) {
-        return htmlPage('Configurare lipsă', '<h1>Lipsește DPD_DEFAULT_SERVICE_ID</h1><p>Setează variabila de mediu DPD_DEFAULT_SERVICE_ID pentru a putea emite AWB.</p>');
+        const tokenEsc = encodeURIComponent(token);
+        return htmlPage(
+          'Configurare lipsă',
+          `<h1>Lipsește DPD_DEFAULT_SERVICE_ID</h1>
+           <p>Poți încerca manual un serviceId cunoscut:</p>
+           <form method="get" style="margin-top:12px;">
+             <input type="hidden" name="token" value="${tokenEsc}" />
+             <label>serviceId:</label>
+             <input name="sid" type="number" min="1" step="1" style="margin:0 8px;padding:6px;" />
+             <button type="submit" style="padding:6px 10px;">Încearcă</button>
+           </form>`
+        );
       }
 
       // Optional default sender from env
@@ -64,6 +76,14 @@ export async function GET(req: NextRequest) {
 
   const contentDesc = (payload.items || []).map((it) => `${it.name} x${it.qty}`).join(', ').slice(0, 200) || 'Materiale tipar';
 
+      const isRamburs = (payload.paymentType || 'Ramburs') === 'Ramburs';
+      const codAmount = isRamburs ? Math.max(0, Number(payload.totalAmount || 0)) : 0;
+
+      // Optional COD bank account for sender (used by DPD to transfer COD)
+      const senderBankAccount = process.env.DPD_COD_IBAN && process.env.DPD_COD_ACCOUNT_HOLDER
+        ? { iban: process.env.DPD_COD_IBAN, accountHolder: process.env.DPD_COD_ACCOUNT_HOLDER }
+        : undefined;
+
       const shipment = {
         sender,
         recipient: {
@@ -82,6 +102,7 @@ export async function GET(req: NextRequest) {
         service: {
           serviceId,
           autoAdjustPickupDate: true,
+          additionalServices: codAmount > 0 ? { cod: { amount: codAmount, currencyCode: 'RON' } } : undefined,
         },
         content: {
           parcelsCount: 1,
@@ -91,6 +112,7 @@ export async function GET(req: NextRequest) {
         },
         payment: {
           courierServicePayer: 'SENDER',
+          senderBankAccount,
         },
         ref1: 'Order Email Action',
       } as any;
@@ -98,7 +120,21 @@ export async function GET(req: NextRequest) {
       const created = await createShipment(shipment);
       if (created?.error || !created?.id) {
         const msg = created?.error?.message || 'Eroare creare expediție';
-        return htmlPage('Eroare AWB', `<h1>Nu am putut crea AWB</h1><pre style="white-space:pre-wrap;background:#f6f6f6;padding:12px;border-radius:6px;">${msg}</pre>`);
+        const tokenEsc = encodeURIComponent(token);
+        return htmlPage(
+          'Eroare AWB',
+          `<h1>Nu am putut crea AWB</h1>
+           <pre style="white-space:pre-wrap;background:#f6f6f6;padding:12px;border-radius:6px;">${msg}</pre>
+           <div style="margin-top:12px;padding:10px;border:1px solid #eee;border-radius:6px;">
+             <p style="margin:0 0 8px;">Dacă mesajul indică „Serviciu nevalid”, poți încerca alt <code>serviceId</code>:</p>
+             <form method="get">
+               <input type="hidden" name="token" value="${tokenEsc}" />
+               <label>serviceId:</label>
+               <input name="sid" type="number" min="1" step="1" style="margin:0 8px;padding:6px;" />
+               <button type="submit" style="padding:6px 10px;">Încearcă din nou</button>
+             </form>
+           </div>`
+        );
       }
 
       const shipmentId = created.id!;

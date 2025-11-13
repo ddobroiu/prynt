@@ -18,6 +18,7 @@ export type AdminActionPayload = {
   };
   items?: { name: string; qty: number }[]; // optional to keep token short
   paymentType?: 'Ramburs' | 'Card';
+  totalAmount?: number; // total order amount (RON) – used for COD when Ramburs
 };
 
 function getSecret(): string {

@@ -263,12 +263,14 @@ async function sendEmails(
         address,
         // Keep token short: omit items list (optional)
         paymentType,
+        totalAmount: totalComanda,
       });
       const tokenCancel = signAdminAction({
         action: 'cancel_awb',
         address,
         // Keep token short
         paymentType,
+        totalAmount: totalComanda,
       });
       const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
       const urlConfirm = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenConfirm)}`;
