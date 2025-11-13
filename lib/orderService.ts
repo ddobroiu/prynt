@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { signAdminAction } from './adminAction';
 
 type AnyRecord = Record<string, any>;
 
@@ -253,6 +254,35 @@ async function sendEmails(
     .join('');
 
   // Build admin email HTML (includes artwork links / text)
+  // Build quick action buttons if config allows
+  let actionButtons = '';
+  try {
+    if (process.env.ADMIN_ACTION_SECRET && process.env.DPD_DEFAULT_SERVICE_ID) {
+      const tokenConfirm = signAdminAction({
+        action: 'confirm_awb',
+        address,
+        // Keep token short: omit items list (optional)
+        paymentType,
+      });
+      const tokenCancel = signAdminAction({
+        action: 'cancel_awb',
+        address,
+        // Keep token short
+        paymentType,
+      });
+      const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
+      const urlConfirm = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenConfirm)}`;
+      const urlCancel = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenCancel)}`;
+      actionButtons = `
+        <div style="margin:20px 0; text-align:center;">
+          <a href="${urlConfirm}" style="display:inline-block; background:#16a34a; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; margin-right:8px;">Validează AWB</a>
+          <a href="${urlCancel}" style="display:inline-block; background:#dc2626; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none;">Respinge</a>
+        </div>`;
+    }
+  } catch (e) {
+    console.warn('[OrderService] Quick actions disabled:', (e as any)?.message || e);
+  }
+
   const adminHtml = `
     <div style="font-family: sans-serif; padding: 20px; background-color: #f4f4f4;">
       <div style="max-width: 640px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 8px;">
@@ -283,6 +313,8 @@ async function sendEmails(
           <p style="margin: 4px 0; color: #333;">Taxă livrare: ${formatRON(SHIPPING_FEE)} RON</p>
           <h3 style="text-align: right; color: #111; margin: 8px 0 0;">Total Comandă: ${formatRON(totalComanda)} RON</h3>
         </div>
+
+        ${actionButtons || ''}
 
         ${
           invoiceLink
