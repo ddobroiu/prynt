@@ -123,9 +123,9 @@ export async function POST(req: NextRequest) {
     });
     await browser.close();
 
-    // Convert Node Buffer -> ArrayBuffer for Web Response type safety
-    const ab = pdf.buffer.slice(pdf.byteOffset, pdf.byteOffset + pdf.byteLength);
-    return new Response(ab, {
+    // Convert Buffer -> Uint8Array (detached ArrayBuffer) for Response
+    const u8 = Uint8Array.from(pdf);
+    return new Response(u8, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
