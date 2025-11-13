@@ -101,10 +101,10 @@ export default function Header() {
   return (
     <header
       className="
-        sticky top-0 z-50 w-full border-b
+        sticky top-0 z-[80] w-full border-b
         bg-white/70 dark:bg-slate-950/60
         border-gray-200/70 dark:border-slate-800/70
-  backdrop-blur-md supports-backdrop-filter:backdrop-blur
+        backdrop-blur-md supports-backdrop-filter:backdrop-blur
       "
     >
       <div className="page">

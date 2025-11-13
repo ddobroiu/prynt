@@ -357,7 +357,7 @@ export default function CheckoutPage() {
       </div>
 
       {showEmbed && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur flex items-center justify-center p-4">
           <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-gray-950 p-4">
             <div className="mb-3 text-center text-muted">Finalizează plata în siguranță</div>
             <div id="stripe-embedded" />
