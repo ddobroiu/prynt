@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
-import puppeteer from 'puppeteer-core';
+// Use dynamic imports to allow a lightweight system-Chrome path on local,
+// and a reliable fallback to bundled Chromium in production when needed.
 import path from 'path';
 import fs from 'fs';
 import { renderOfferHTML } from '../../../../lib/pdfTemplate';
@@ -87,10 +88,11 @@ export async function POST(req: NextRequest) {
     const logoDataUrl = await getLogoDataUrl();
     const html = renderOfferHTML({ items, subtotal, shipping, total, date, logoDataUrl });
 
-    // Launch system Chrome (smaller install via puppeteer-core)
-    // Prefer explicit env var, otherwise probe common paths per-OS (Railway uses Linux)
+    // Launch Chrome via puppeteer-core if system Chrome exists; otherwise fallback to puppeteer (bundled Chromium)
+    const core = (await import('puppeteer-core')).default;
     const candidates = [
       process.env.CHROME_PATH,
+      process.env.PUPPETEER_EXECUTABLE_PATH,
       process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : undefined,
       '/usr/bin/chromium',
       '/usr/bin/chromium-browser',
@@ -98,21 +100,26 @@ export async function POST(req: NextRequest) {
       '/usr/bin/google-chrome-stable',
     ].filter(Boolean) as string[];
 
-    const executablePath = candidates.find((p) => {
-      try { return !!p && fs.existsSync(p); } catch { return false; }
-    });
+    let executablePath: string | undefined;
+    for (const p of candidates) {
+      try { if (p && fs.existsSync(p)) { executablePath = p; break; } } catch {}
+    }
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      executablePath,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-gpu',
-        '--no-zygote',
-        '--single-process'
-      ],
-    });
+    let browser;
+    const commonArgs = [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-gpu',
+      '--no-zygote',
+      '--single-process'
+    ];
+
+    if (executablePath) {
+      browser = await core.launch({ headless: true, executablePath, args: commonArgs });
+    } else {
+      const puppeteerFallback = (await import('puppeteer')).default;
+      browser = await puppeteerFallback.launch({ headless: true, args: commonArgs });
+    }
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
