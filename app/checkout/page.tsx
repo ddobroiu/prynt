@@ -1,9 +1,6 @@
 "use client";
 
 import { useMemo, useState, useRef } from "react";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-import { pdfOfferConfig } from "../../lib/pdfConfig";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../../components/CartContext";
 import { ShieldCheck, Truck, X } from "lucide-react";
@@ -276,165 +273,6 @@ export default function CheckoutPage() {
     return parts.join(" \u2022 "); // bullet separator
   }
 
-  async function exportOfferPdf() {
-    const cfg = pdfOfferConfig;
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = cfg.layout.margin;
-    const fmtRON = (v: number) => new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON', maximumFractionDigits: 2 }).format(v);
-    const date = new Date().toLocaleDateString('ro-RO');
-
-    const fetchAsDataUrl = async (src: string) => {
-      if (!src) return '';
-      try {
-        const res = await fetch(src, { cache: 'no-store' });
-        if (!res.ok) return '';
-        const blob = await res.blob();
-        return await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(blob);
-        });
-      } catch {
-        return '';
-      }
-    };
-
-    // Try to load and register custom fonts (optional)
-    let fontFamily = 'helvetica';
-    try {
-      const [reg, bold] = await Promise.all([
-        fetch(cfg.fonts.regular).then(r => r.ok ? r.arrayBuffer() : Promise.reject()).catch(() => null),
-        fetch(cfg.fonts.bold).then(r => r.ok ? r.arrayBuffer() : Promise.reject()).catch(() => null),
-      ]);
-      if (reg) {
-        const regB64 = btoa(String.fromCharCode(...new Uint8Array(reg)));
-        doc.addFileToVFS('regular.ttf', regB64);
-        doc.addFont('regular.ttf', cfg.fonts.familyName, 'normal');
-        fontFamily = cfg.fonts.familyName;
-        doc.setFont(fontFamily, 'normal');
-      }
-      if (bold) {
-        const boldB64 = btoa(String.fromCharCode(...new Uint8Array(bold)));
-        doc.addFileToVFS('bold.ttf', boldB64);
-        doc.addFont('bold.ttf', cfg.fonts.familyName, 'bold');
-      }
-    } catch {}
-
-    // Optional letterhead background
-    const bg = await fetchAsDataUrl(cfg.letterheadPath);
-    if (bg) {
-      try { doc.addImage(bg, 'PNG', 0, 0, pageWidth, pageHeight); } catch {}
-    }
-
-    // Header with logo + company block
-    const logo = await fetchAsDataUrl(cfg.logoPath);
-    const headerY = margin;
-    const logoSize = 64;
-    if (logo) {
-      try { doc.addImage(logo, 'PNG', margin, headerY, logoSize, logoSize); } catch {}
-    }
-
-    const rightX = margin + logoSize + 16;
-    doc.setFont(fontFamily, 'bold');
-    doc.setFontSize(14);
-    doc.setTextColor(20);
-    doc.text(cfg.company.name, rightX, headerY + 16);
-    doc.setFont(fontFamily, 'normal');
-    doc.setFontSize(11);
-    doc.setTextColor(...cfg.layout.textMuted);
-    doc.text(`CUI: ${cfg.company.cui}`, rightX, headerY + 36);
-    doc.text(`Nr. Reg. Com.: ${cfg.company.regCom}`, rightX, headerY + 54);
-
-    // Offer title + date aligned to the right
-    doc.setFont(fontFamily, 'bold');
-    doc.setFontSize(18);
-    doc.setTextColor(20);
-    const title = 'Ofertă';
-    const titleWidth = doc.getTextWidth(title);
-    doc.text(title, pageWidth - margin - titleWidth, headerY + 18);
-    doc.setFont(fontFamily, 'normal');
-    doc.setFontSize(11);
-    doc.setTextColor(...cfg.layout.textMuted);
-    const dateText = `Data: ${date}`;
-    const dateWidth = doc.getTextWidth(dateText);
-    doc.text(dateText, pageWidth - margin - dateWidth, headerY + 36);
-
-    // Separator line
-    doc.setDrawColor(...cfg.layout.border);
-    doc.line(margin, headerY + logoSize + 16, pageWidth - margin, headerY + logoSize + 16);
-
-    // Build table rows
-    const rows = (items ?? []).map((it: any) => {
-      const title = it.title ?? it.name ?? it.slug ?? 'Produs';
-      const qty = Number(it.quantity ?? 1) || 1;
-      const unit = Number(it.price ?? it.unitAmount ?? 0) || 0;
-      const lineTotal = unit > 0 ? unit * qty : Number(it.totalAmount ?? 0) || 0;
-      const details = buildItemDetailsText(it);
-      return [title, details || '-', String(qty), unit ? fmtRON(unit) : '-', fmtRON(lineTotal)];
-    });
-
-    const startY = headerY + logoSize + 32;
-    autoTable(doc, {
-      startY,
-      head: [["Produs", "Detalii", "Cant.", "Preț unitar", "Total"]],
-      body: rows,
-      styles: { font: fontFamily, fontSize: 10, cellPadding: 6, overflow: 'linebreak', textColor: 20 },
-      headStyles: { fillColor: cfg.layout.primary, textColor: 255, halign: 'left' },
-      bodyStyles: { valign: 'top' },
-      tableWidth: pageWidth - margin * 2,
-      columnStyles: {
-        0: { cellWidth: 190 },
-        1: { cellWidth: 240 },
-        2: { halign: 'right', cellWidth: 60 },
-        3: { halign: 'right', cellWidth: 100 },
-        4: { halign: 'right', cellWidth: 100 },
-      },
-      didDrawPage: () => {
-        // Footer page number
-        const page = doc.getNumberOfPages();
-        const str = `Pagina ${page}`;
-        doc.setFont(fontFamily, 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(...cfg.layout.textMuted);
-        doc.text(str, pageWidth - margin - doc.getTextWidth(str), pageHeight - 20);
-      },
-    });
-
-    // Totals panel (right aligned)
-    const afterTableY = (doc as any).lastAutoTable?.finalY || startY;
-    const boxWidth = 280;
-    const boxX = pageWidth - margin - boxWidth;
-    const boxHeight = 96;
-    let y = afterTableY + 20;
-    doc.setDrawColor(...cfg.layout.border);
-    const [pR, pG, pB] = cfg.layout.panelBg;
-    doc.setFillColor(pR, pG, pB);
-    doc.roundedRect(boxX, y, boxWidth, boxHeight, 6, 6, 'FD');
-    doc.setFont(fontFamily, 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(20);
-    doc.text('Rezumat', boxX + 12, y + 18);
-    doc.setFont(fontFamily, 'normal');
-    doc.setFontSize(11);
-    doc.setTextColor(20);
-    doc.text(`Produse: ${fmtRON(subtotal)}`, boxX + 12, y + 38);
-    doc.text(`Livrare: ${fmtRON(costLivrare)}`, boxX + 12, y + 56);
-    doc.setFont(fontFamily, 'bold');
-    doc.text(`Total: ${fmtRON(totalPlata)}`, boxX + 12, y + 76);
-
-    // Footer note + contact
-    const noteY = y + boxHeight + 28;
-    doc.setFont(fontFamily, 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(...cfg.layout.textMuted);
-    doc.text(cfg.notes.validity, margin, noteY);
-    const contact = `${cfg.company.email} · ${cfg.company.phone} · ${cfg.company.website}`;
-    doc.text(contact, margin, noteY + 16);
-
-    doc.save(`oferta-${date}.pdf`);
-  }
 
   async function exportOfferPdfServer() {
     try {
@@ -468,27 +306,13 @@ export default function CheckoutPage() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={exportOfferPdf}
-              disabled={(items ?? []).length === 0}
-              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold hover:bg-white/10 transition disabled:opacity-60"
-            >
-              Exportă ofertă în PDF
-            </button>
-            <button
-              type="button"
               onClick={exportOfferPdfServer}
               disabled={(items ?? []).length === 0}
-              title="PDF de calitate (HTML→PDF)"
+              title="Generează ofertă în PDF (calitate)"
               className="inline-flex items-center justify-center rounded-xl bg-indigo-600/90 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition disabled:opacity-60"
             >
-              PDF calitate
+              Generează ofertă în PDF
             </button>
-            <a
-              href="/"
-              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold hover:bg-white/10 transition"
-            >
-              Continuă cumpărăturile
-            </a>
           </div>
         </div>
 
@@ -597,6 +421,12 @@ function SummaryCard({
       </div>
 
       <div className="mt-5">
+        <a
+          href="/"
+          className="mb-3 inline-flex w-full items-center justify-center rounded-lg border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold hover:bg-white/10 transition"
+        >
+          Continuă cumpărăturile
+        </a>
         <div className="mb-3 flex gap-3">
           <button
             onClick={() => setPaymentMethod("ramburs")}
