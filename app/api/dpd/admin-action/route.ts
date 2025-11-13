@@ -32,8 +32,12 @@ export async function GET(req: NextRequest) {
       const senderIdsEnv = (process.env.DPD_SENDER_CLIENT_IDS || '').trim();
       const senderIds = senderIdsEnv
         ? senderIdsEnv.split(',').map((x) => x.trim()).filter(Boolean)
-        : [];
-      const options = senderIds.length > 0 ? senderIds : (process.env.DPD_SENDER_CLIENT_ID ? [String(process.env.DPD_SENDER_CLIENT_ID)] : []);
+        : [
+            '44820819006:Sibiu',
+            '44820819002:Bucuresti',
+            '44820819000:Topliceni',
+          ];
+      const options = senderIds;
       const optsHtml = options
         .map((id) => {
           const [val, label] = id.includes(':') ? id.split(':', 2) : [id, `Sediu ${id}`];
@@ -90,10 +94,7 @@ export async function GET(req: NextRequest) {
       return htmlPage('Editează AWB', body);
     }
 
-    if (payload.action === 'cancel_awb') {
-      // No-op for now; just acknowledge
-      return htmlPage('Comandă marcată', '<h1>Comanda a fost marcată ca respinsă</h1><p>Nu s-a emis AWB.</p>');
-    }
+    // cancel_awb a fost eliminat din flux
 
     if (payload.action === 'validate') {
       const address = payload.address;
