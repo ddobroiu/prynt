@@ -45,18 +45,19 @@ export async function GET(req: NextRequest) {
         const postCode = process.env.DPD_SENDER_POST_CODE || undefined;
         const addressNote = process.env.DPD_SENDER_ADDRESS_NOTE || undefined;
         const dropoffOfficeId = process.env.DPD_PICKUP_OFFICE_ID ? Number(process.env.DPD_PICKUP_OFFICE_ID) : undefined;
-        if (!clientId && !siteName && !addressNote && !dropoffOfficeId) return undefined; // nothing configured
+        if (!clientId && !siteName && !addressNote && !dropoffOfficeId && !name && !phone && !email) return undefined; // nothing configured
+        // If clientId is provided, DPD forbids clientName; send minimal structure
+        if (clientId) {
+          return {
+            clientId,
+            dropoffOfficeId,
+          } as ShipmentSender;
+        }
         return {
-          clientId,
           clientName: name,
           email,
-          phone1: phone ? { number: phone } : { number: '' },
-          address: siteName || postCode || addressNote ? {
-            countryId: 642,
-            siteName: siteName,
-            postCode: postCode,
-            addressNote,
-          } : undefined,
+          phone1: phone ? { number: phone } : undefined as any,
+          address: siteName || postCode || addressNote ? { countryId: 642, siteName, postCode, addressNote } : undefined,
           dropoffOfficeId,
         } as ShipmentSender;
       })();

@@ -5,7 +5,7 @@ import { fulfillOrder } from '../../../../lib/orderService';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+// Do not create Stripe client at module load; build may not provide env
 
 export async function POST(req: NextRequest) {
   const signature = req.headers.get('stripe-signature') || '';
@@ -14,6 +14,12 @@ export async function POST(req: NextRequest) {
     console.error('[Stripe Webhook] Missing STRIPE_WEBHOOK_SECRET');
     return NextResponse.json({ error: 'Missing webhook secret' }, { status: 500 });
   }
+  const secret = process.env.STRIPE_SECRET_KEY;
+  if (!secret) {
+    console.error('[Stripe Webhook] Missing STRIPE_SECRET_KEY');
+    return NextResponse.json({ error: 'Missing Stripe secret key' }, { status: 500 });
+  }
+  const stripe = new Stripe(secret);
 
   let event: Stripe.Event;
   try {

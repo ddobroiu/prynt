@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+// Lazy-init inside handler to avoid build-time env requirements on platforms
 
 export async function POST(req: NextRequest) {
   // 1. Primește TOATE datele comenzii
@@ -22,6 +22,11 @@ export async function POST(req: NextRequest) {
       process.env.PUBLIC_BASE_URL ||
       'http://localhost:3000';
 
+    const secret = process.env.STRIPE_SECRET_KEY;
+    if (!secret) {
+      return NextResponse.json({ error: 'STRIPE_SECRET_KEY nu este setat' }, { status: 500 });
+    }
+    const stripe = new Stripe(secret);
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded',
       mode: 'payment',
