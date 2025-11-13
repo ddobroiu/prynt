@@ -236,62 +236,58 @@ export default function FonduriEUConfigurator() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* LEFT - options (single page, compact selects) */}
           <div className="order-2 lg:order-1 lg:col-span-3">
-            {/* Comunicat full width first */}
-              <div className="card p-4">
-                <div className="aspect-square overflow-hidden rounded-xl border border-white/10 bg-black">
-            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Group groupKey="comunicat" />
               <Group groupKey="bannerSite" />
               <Group groupKey="afisInformativ" />
-                    <button
+              <Group groupKey="autoMici" />
               <Group groupKey="autoMari" />
-                      className={`relative overflow-hidden rounded-md border transition aspect-square ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`}
+              <Group groupKey="panouTemporar" />
               <Group groupKey="placaPermanenta" />
             </div>
 
             {/* Grafică (opțional) */}
             <div className="card p-4 mt-4">
               <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">Grafică (opțional)</h2></div>
-                      <img src={src} alt={`thumb-${i + 1}`} className="w-full h-full object-cover" />
-                <div>
-                  <label className="field-label">Încarcă fișier</label>
-                  <input
-                    type="file"
-                    accept=".pdf,.ai,.psd,.jpg,.jpeg,.png"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0] || null;
-                      setUploadError(null);
-                      setArtworkUrl(null);
-                      if (!file) return;
+              <div>
+                <label className="field-label">Încarcă fișier</label>
+                <input
+                  type="file"
+                  accept=".pdf,.ai,.psd,.jpg,.jpeg,.png"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0] || null;
+                    setUploadError(null);
+                    setArtworkUrl(null);
+                    if (!file) return;
+                    try {
+                      setUploading(true);
+                      const form = new FormData();
+                      form.append("file", file);
+                      const res = await fetch("/api/upload", { method: "POST", body: form });
+                      if (!res.ok) throw new Error("Upload eșuat");
+                      const data = await res.json();
+                      setArtworkUrl(data.url);
+                      setArtworkLink("");
+                    } catch (err: any) {
                       try {
-                        setUploading(true);
-                        const form = new FormData();
-                        form.append("file", file);
-                        const res = await fetch("/api/upload", { method: "POST", body: form });
-                        if (!res.ok) throw new Error("Upload eșuat");
-                        const data = await res.json();
-                        setArtworkUrl(data.url);
-                        setArtworkLink("");
-                      } catch (err: any) {
-                        try {
-                          const preview = URL.createObjectURL(file);
-                          setArtworkUrl(preview);
-                        } catch {}
-                        setUploadError(err?.message ?? "Eroare la upload");
-                      } finally {
-                        setUploading(false);
-                      }
-                    }}
-                    className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500"
-                  />
-                  <div className="text-xs text-muted mt-1">sau</div>
-                </div>
-
-                <div>
-                  <label className="field-label">Link descărcare (opțional)</label>
-                  <input type="url" value={artworkLink} onChange={(e) => setArtworkLink(e.target.value)} placeholder="Ex: https://.../fisier.pdf" className="input" />
-                </div>
+                        const preview = file ? URL.createObjectURL(file) : null;
+                        setArtworkUrl(preview);
+                      } catch {}
+                      setUploadError(err?.message ?? "Eroare la upload");
+                    } finally {
+                      setUploading(false);
+                    }
+                  }}
+                  className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500"
+                />
+                <div className="text-xs text-muted mt-1">sau</div>
               </div>
+
+              <div className="mt-2">
+                <label className="field-label">Link descărcare (opțional)</label>
+                <input type="url" value={artworkLink} onChange={(e) => setArtworkLink(e.target.value)} placeholder="Ex: https://.../fisier.pdf" className="input" />
+              </div>
+
               <div className="text-xs text-muted mt-2">
                 {uploading && "Se încarcă…"}
                 {uploadError && "Eroare upload"}

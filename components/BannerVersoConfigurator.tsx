@@ -3,6 +3,7 @@ import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
+import DeliveryInfo from "@/components/DeliveryInfo";
 import { usePathname, useRouter } from "next/navigation";
 
 /* GALLERY (exemplu pentru verso) */
@@ -525,7 +526,15 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
                 <div className="space-y-2 text-muted text-sm">
                   <p>Suprafață: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
-                  <p>Preț: <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span></p>
+                  <p className="flex items-center gap-2 flex-wrap">
+                    <span>Preț:</span>
+                    <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span>
+                    <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
+                  </p>
+                </div>
+
+                <div className="mt-4">
+                  <DeliveryInfo variant="minimal" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="hidden lg:block mt-4">

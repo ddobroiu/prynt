@@ -3,6 +3,7 @@ import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { CheckCircle, Plus, Minus, ShoppingCart, Info } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
+import DeliveryInfo from "@/components/DeliveryInfo";
 
 /* Gallery images (placeholder) */
 const GALLERY = ["/products/flyere/1.webp", "/products/flyere/2.webp", "/products/flyere/3.webp", "/products/flyere/4.webp"] as const;
@@ -413,7 +414,15 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
                   <div>
                     Hârtie: <strong>{PAPER_WEIGHTS.find((p) => p.key === paperWeightKey)?.label}</strong>
                   </div>
-                  <div className="text-2xl font-extrabold">Total: {total.toFixed(2)} RON</div>
+                  <div className="text-2xl font-extrabold flex items-center gap-2 flex-wrap">
+                    <span>Total:</span>
+                    <span>{total.toFixed(2)} RON</span>
+                    <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <DeliveryInfo variant="minimal" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="mt-4">
