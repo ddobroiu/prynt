@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createShipment, printExtended, decodeBase64PdfToBuffer, trackingUrlForAwb, type CreateShipmentRequest } from '../../../../lib/dpdService';
+import { createShipment, printExtended, decodeBase64PdfToBuffer, trackingUrlForAwb, type CreateShipmentRequest, type ShipmentSender } from '../../../../lib/dpdService';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,6 +30,29 @@ export async function POST(req: NextRequest) {
     }
 
     // Create shipment
+    // Merge optional default sender from env if not present
+    if (!shipment.sender) {
+      const clientId = process.env.DPD_SENDER_CLIENT_ID ? Number(process.env.DPD_SENDER_CLIENT_ID) : undefined;
+      const phone = process.env.DPD_SENDER_PHONE || undefined;
+      const email = process.env.DPD_SENDER_EMAIL || undefined;
+      const name = process.env.DPD_SENDER_NAME || undefined;
+      const siteName = process.env.DPD_SENDER_SITE_NAME || undefined;
+      const postCode = process.env.DPD_SENDER_POST_CODE || undefined;
+      const addressNote = process.env.DPD_SENDER_ADDRESS_NOTE || undefined;
+      const dropoffOfficeId = process.env.DPD_PICKUP_OFFICE_ID ? Number(process.env.DPD_PICKUP_OFFICE_ID) : undefined;
+      const sender: ShipmentSender | undefined = (clientId || siteName || addressNote || dropoffOfficeId)
+        ? {
+            clientId,
+            clientName: name,
+            email,
+            phone1: phone ? { number: phone } : { number: '' },
+            address: siteName || postCode || addressNote ? { countryId: 642, siteName, postCode, addressNote } : undefined,
+            dropoffOfficeId,
+          }
+        : undefined;
+      if (sender) (shipment as any).sender = sender;
+    }
+
     const resp = await createShipment(shipment);
     if (resp?.error || !resp?.id) {
       return NextResponse.json(

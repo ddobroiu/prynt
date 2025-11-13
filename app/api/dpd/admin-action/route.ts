@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { verifyAdminAction } from '../../../../lib/adminAction';
-import { createShipment, printExtended, trackingUrlForAwb } from '../../../../lib/dpdService';
+import { createShipment, printExtended, trackingUrlForAwb, type ShipmentSender } from '../../../../lib/dpdService';
 import { Resend } from 'resend';
 
 export const runtime = 'nodejs';
@@ -35,9 +35,36 @@ export async function GET(req: NextRequest) {
         return htmlPage('Configurare lipsă', '<h1>Lipsește DPD_DEFAULT_SERVICE_ID</h1><p>Setează variabila de mediu DPD_DEFAULT_SERVICE_ID pentru a putea emite AWB.</p>');
       }
 
+      // Optional default sender from env
+      const sender: ShipmentSender | undefined = ((): ShipmentSender | undefined => {
+        const clientId = process.env.DPD_SENDER_CLIENT_ID ? Number(process.env.DPD_SENDER_CLIENT_ID) : undefined;
+        const phone = process.env.DPD_SENDER_PHONE || undefined;
+        const email = process.env.DPD_SENDER_EMAIL || undefined;
+        const name = process.env.DPD_SENDER_NAME || undefined;
+        const siteName = process.env.DPD_SENDER_SITE_NAME || undefined;
+        const postCode = process.env.DPD_SENDER_POST_CODE || undefined;
+        const addressNote = process.env.DPD_SENDER_ADDRESS_NOTE || undefined;
+        const dropoffOfficeId = process.env.DPD_PICKUP_OFFICE_ID ? Number(process.env.DPD_PICKUP_OFFICE_ID) : undefined;
+        if (!clientId && !siteName && !addressNote && !dropoffOfficeId) return undefined; // nothing configured
+        return {
+          clientId,
+          clientName: name,
+          email,
+          phone1: phone ? { number: phone } : { number: '' },
+          address: siteName || postCode || addressNote ? {
+            countryId: 642,
+            siteName: siteName,
+            postCode: postCode,
+            addressNote,
+          } : undefined,
+          dropoffOfficeId,
+        } as ShipmentSender;
+      })();
+
   const contentDesc = (payload.items || []).map((it) => `${it.name} x${it.qty}`).join(', ').slice(0, 200) || 'Materiale tipar';
 
       const shipment = {
+        sender,
         recipient: {
           clientName: address.nume_prenume,
           contactName: address.nume_prenume,
