@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 import path from 'path';
 import fs from 'fs';
 import { renderOfferHTML } from '../../../../lib/pdfTemplate';
@@ -87,8 +87,15 @@ export async function POST(req: NextRequest) {
     const logoDataUrl = await getLogoDataUrl();
     const html = renderOfferHTML({ items, subtotal, shipping, total, date, logoDataUrl });
 
-    // Launch bundled Chromium from puppeteer (works locally)
-    const browser = await puppeteer.launch({ headless: 'new' });
+    // Launch system Chrome (smaller install via puppeteer-core)
+    const chromePath =
+      process.env.CHROME_PATH ||
+      'C:/Program Files/Google/Chrome/Application/chrome.exe';
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      executablePath: chromePath,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
