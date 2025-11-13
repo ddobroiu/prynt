@@ -1032,12 +1032,78 @@ export default function AssistantWidget() {
     };
   }, []);
 
+  // Sugestii contextuale în funcție de pasul curent
+  function getSuggestions(): string[] {
+    // Banner simplu
+    if (bannerWizard.active) {
+      if (bannerWizard.step === 2) return ['440g', '510g'];
+      if (bannerWizard.step === 3) return ['Da', 'Nu'];
+      if (bannerWizard.step === 4) return ['Da', 'Nu'];
+      if (bannerWizard.step === 5) return ['upload', 'pro'];
+      return [];
+    }
+    // Tapet
+    if (tapetWizard.active) {
+      if (tapetWizard.step === 2) return ['Da', 'Nu'];
+      if (tapetWizard.step === 3) return ['upload', 'pro'];
+      return [];
+    }
+    // Autocolante
+    if (autocolanteWizard.active) {
+      if (autocolanteWizard.step === 2) return ['Hârtie lucioasă', 'Hârtie mată', 'Vinyl'];
+      if (autocolanteWizard.step === 3) return ['Da', 'Nu'];
+      if (autocolanteWizard.step === 4) return ['Da', 'Nu'];
+      if (autocolanteWizard.step === 5) return ['upload', 'text', 'pro'];
+      return [];
+    }
+    // Panouri rigide
+    if (panelWizard.active) {
+      if (panelWizard.step === 2) return ['PVC Forex', 'Alucobond', 'Polipropilenă'];
+      if (panelWizard.step === 3) {
+        const t = panelWizard.data.productType;
+        if (t === 'alucobond') return ['3 mm', '4 mm'];
+        if (t === 'polipropilena') return ['3 mm', '5 mm'];
+        return ['1 mm', '2 mm', '3 mm', '4 mm', '5 mm', '6 mm', '8 mm', '10 mm'];
+      }
+      return [];
+    }
+    // Banner Verso
+    if (bannerVersoWizard.active) {
+      if (bannerVersoWizard.step === 2) return ['Da', 'Nu'];
+      if (bannerVersoWizard.step === 3) return ['Da', 'Nu'];
+      if (bannerVersoWizard.step === 4) return ['Da', 'Nu'];
+      if (bannerVersoWizard.step === 5) return ['upload', 'pro'];
+      return [];
+    }
+    // Canvas
+    if (canvasWizard.active) {
+      if (canvasWizard.step === 0) return ['Cu', 'Fără'];
+      if (canvasWizard.step === 1) return ['50x70', '60x90', '80x120'];
+      return [];
+    }
+    return [];
+  }
+
+  function quickReply(answer: string) {
+    const text = answer.trim();
+    if (!text) return;
+    const userMsg: ChatMessage = { id: `u-${Date.now()}`, role: 'user', content: text };
+    setMessages((m) => [...m, userMsg]);
+
+    if (bannerWizard.active) return handleBannerWizardAnswer(text);
+    if (tapetWizard.active) return handleTapetWizardAnswer(text);
+    if (autocolanteWizard.active) return handleAutocolanteWizardAnswer(text);
+    if (panelWizard.active) return handlePanelWizardAnswer(text);
+    if (bannerVersoWizard.active) return handleBannerVersoWizardAnswer(text);
+    if (canvasWizard.active) return handleCanvasWizardAnswer(text);
+  }
+
   return (
-    <div className="fixed bottom-20 right-4 z-40">
+    <div className="fixed right-4 bottom-20 z-40 sm:right-4 sm:bottom-20">
       {/* Panel only (no floating toggle button). Opened via Contact button events. */}
       {open && (
-        <div className="mt-2 w-[360px] sm:w-[420px] max-h-[70vh] overflow-hidden rounded-xl border border-white/10 bg-[#0b0b0b] text-white shadow-xl">
-          <div className="p-3 border-b border-white/10 flex items-center justify-between gap-2">
+  <div className="fixed inset-0 sm:static sm:mt-2 w-full sm:w-[420px] h-svh sm:max-h-[70vh] sm:h-auto overflow-hidden sm:rounded-xl sm:border border-white/10 bg-[#0b0b0b] text-white shadow-xl flex flex-col">
+          <div className="p-3 border-b border-white/10 flex items-center justify-between gap-2 shrink-0">
             <div>
               <div className="font-semibold">Asistent Prynt</div>
               <div className="text-xs text-white/60">Recomandări pentru servicii de print</div>
@@ -1055,7 +1121,7 @@ export default function AssistantWidget() {
             </div>
           </div>
 
-          <div className="p-3 space-y-3 overflow-y-auto max-h-[50vh]">
+          <div className="p-3 space-y-3 overflow-y-auto flex-1">
             {messages.map((m) => (
               <div key={m.id} className={m.role === 'user' ? 'text-right' : 'text-left'}>
                 <div
@@ -1350,7 +1416,10 @@ export default function AssistantWidget() {
             </div>
           )}
 
-          <form onSubmit={sendMessage} className="p-3 border-t border-white/10 flex gap-2 bg-[#0f0f0f]">
+          {/* Context-aware răspunsuri rapide */}
+          <QuickReplies getSuggestions={() => getSuggestions()} onPick={(ans) => quickReply(ans)} />
+
+          <form onSubmit={sendMessage} className="p-3 border-t border-white/10 flex gap-2 bg-[#0f0f0f] shrink-0">
             <input
               type="text"
               className="flex-1 rounded-md border border-white/10 bg-[#0b0b0b] text-white px-3 py-2 text-sm focus:outline-none"
@@ -1369,6 +1438,24 @@ export default function AssistantWidget() {
           </form>
         </div>
       )}
+    </div>
+  );
+}
+
+
+// Inline component to render quick replies without causing horizontal scroll
+function QuickReplies({ getSuggestions, onPick }: { getSuggestions: () => string[]; onPick: (s: string) => void }) {
+  const suggestions = getSuggestions();
+  if (!suggestions || suggestions.length === 0) return null;
+  return (
+    <div className="px-3 pt-2 border-t border-white/10 bg-[#0f0f0f] overflow-x-auto">
+      <div className="flex gap-2 py-1">
+        {suggestions.map((s, i) => (
+          <button key={i} type="button" onClick={() => onPick(s)} className="rounded-full px-3 py-1 text-xs bg-white/10 hover:bg-white/15 whitespace-nowrap">
+            {s}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

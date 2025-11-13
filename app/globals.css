@@ -63,6 +63,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Previne scroll-ul orizontal pe mobil pe tot site-ul */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 @layer components {
   /* Layout */
   .page {
