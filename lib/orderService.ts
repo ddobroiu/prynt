@@ -564,24 +564,13 @@ export async function fulfillOrder(
             data = await createOblioInvoice(payloadAltCUI, token);
           }
 
-          // Dacă tot nu merge, abia acum încercăm cu detalii din formular (ultimul resort)
-          if (data?.status !== 200) {
-            const payloadWithDetails = {
-              ...basePayload,
-              client: {
-                cif: cuiNorm.primary || billing.cui,
-                name: billing.name || address.nume_prenume,
-                address: billingAddressLine,
-                email: address.email,
-              },
-            };
-            data = await createOblioInvoice(payloadWithDetails, token);
-          }
+          // Nu mai trimitem nume/adresă/email pentru juridică, ca să nu suprascriem datele oficiale din Oblio
         }
     }
 
-    if (data?.status === 200 && data?.data?.link) {
-      invoiceLink = data.data.link as string;
+      const link = (data && (data.data?.link || data.link || data.data?.url || data.url)) as string | undefined;
+      if (link) {
+        invoiceLink = link;
       console.log('[OrderService] Factura Oblio generată:', invoiceLink);
     } else if (data) {
       console.warn('[OrderService] Oblio nu a emis factura:', data?.statusMessage || data?.message || data);
