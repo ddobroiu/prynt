@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { fulfillOrder } from '../../../../lib/orderService';
+import { mapStripeSessionToOrder } from '../../../../lib/orderStore';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -47,7 +48,14 @@ export async function POST(req: NextRequest) {
       };
 
       // NU aruncăm dacă Oblio pică – comanda merge oricum
-      await fulfillOrder(orderData, 'Card');
+      const result = await fulfillOrder(orderData, 'Card');
+      try {
+        if (result?.orderNo && result?.orderId && session.id) {
+          await mapStripeSessionToOrder(session.id, result.orderId, result.orderNo);
+        }
+      } catch (e) {
+        console.warn('[Stripe Webhook] session->order map failed:', (e as any)?.message || e);
+      }
     }
   } catch (err: any) {
     console.error('[Stripe Webhook] Handler error:', err?.message || err);

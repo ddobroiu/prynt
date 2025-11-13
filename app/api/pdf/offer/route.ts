@@ -1,0 +1,113 @@
+import { NextRequest } from 'next/server';
+import puppeteer from 'puppeteer';
+import path from 'path';
+import fs from 'fs';
+import { renderOfferHTML } from '../../../../lib/pdfTemplate';
+import { pdfOfferConfig } from '../../../../lib/pdfConfig';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+function buildItems(raw: any[]): { title: string; details: string; qty: number; unit: number; total: number }[] {
+  return (raw || []).map((it: any) => {
+    const title = it.title ?? it.name ?? it.slug ?? 'Produs';
+    const qty = Number(it.quantity ?? 1) || 1;
+    const unit = Number(it.price ?? it.unitAmount ?? it.metadata?.price ?? 0) || 0;
+    const total = unit > 0 ? unit * qty : Number(it.totalAmount ?? 0) || 0;
+
+    // details from metadata, similar to client buildItemDetailsText
+    const meta = it.metadata ?? {};
+    const width = it.width ?? it.width_cm ?? meta.width_cm ?? meta.width;
+    const height = it.height ?? it.height_cm ?? meta.height_cm ?? meta.height;
+    const parts: string[] = [];
+    if (width || height) parts.push(`Dimensiune: ${width ?? '—'} x ${height ?? '—'} cm`);
+    const isFonduri = (it?.slug === 'fonduri-eu') || (it?.productId === 'fonduri-eu');
+    if (isFonduri && typeof meta.selectedReadable === 'string' && meta.selectedReadable.trim()) {
+      parts.push(`Opțiuni selectate: ${meta.selectedReadable}`);
+    }
+    const labelForKey: Record<string, string> = {
+      width: 'Lățime (cm)', height: 'Înălțime (cm)', width_cm: 'Lățime (cm)', height_cm: 'Înălțime (cm)',
+      totalSqm: 'Suprafață totală (m²)', sqmPerUnit: 'm²/buc', pricePerSqm: 'Preț pe m² (RON)',
+      materialId: 'Material', material: 'Material', laminated: 'Laminare', designOption: 'Grafică',
+      proDesignFee: 'Taxă grafică Pro (RON)', want_adhesive: 'Adeziv', want_hem_and_grommets: 'Tiv și capse',
+      want_wind_holes: 'Găuri pentru vânt', shape_diecut: 'Tăiere la contur', productType: 'Tip panou',
+      thickness_mm: 'Grosime (mm)', sameGraphicFrontBack: 'Aceeași grafică față/spate', framed: 'Șasiu',
+      sizeKey: 'Dimensiune preset', mode: 'Mod canvas', orderNotes: 'Observații',
+    };
+    const pretty = (k: string, v: any) => {
+      if (k === 'materialId') return v === 'frontlit_510' ? 'Frontlit 510g' : v === 'frontlit_440' ? 'Frontlit 440g' : String(v);
+      if (k === 'productType') return v === 'alucobond' ? 'Alucobond' : v === 'polipropilena' ? 'Polipropilenă' : v === 'pvc-forex' ? 'PVC Forex' : String(v);
+      if (k === 'designOption') return v === 'pro' ? 'Pro' : v === 'upload' ? 'Am fișier' : v === 'text_only' ? 'Text' : String(v);
+      if (typeof v === 'boolean') return v ? 'Da' : 'Nu';
+      return String(v);
+    };
+    const exclude = new Set(['price','totalAmount','qty','quantity','artwork','artworkUrl','artworkLink','text','textDesign','selectedReadable','selections','title','name']);
+    Object.keys(meta).forEach((k) => {
+      if (exclude.has(k)) return;
+      if (!(k in labelForKey)) return;
+      if (k === 'proDesignFee') {
+        const num = Number(meta[k]);
+        if (!isFinite(num) || num <= 0) return;
+      }
+      const val = meta[k];
+      if (val === null || val === undefined) return;
+      if (typeof val === 'number' && val === 0) return;
+      if (typeof val === 'string' && val.trim() === '') return;
+      parts.push(`${labelForKey[k]}: ${pretty(k, val)}`);
+    });
+
+    return { title, details: parts.join(' • '), qty, unit, total };
+  });
+}
+
+async function getLogoDataUrl(): Promise<string | null> {
+  try {
+    const rel = (pdfOfferConfig.logoPath || '').replace(/^\//, '');
+    if (!rel) return null;
+    const p = path.join(process.cwd(), 'public', rel);
+    if (!fs.existsSync(p)) return null;
+    const buf = await fs.promises.readFile(p);
+    const ext = path.extname(p).toLowerCase();
+    const mime = ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : 'image/png';
+    return `data:${mime};base64,${buf.toString('base64')}`;
+  } catch {
+    return null;
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const items = buildItems(body?.items || body?.cart || []);
+    const subtotal = items.reduce((s, it) => s + (Number(it.total) || 0), 0);
+    const shipping = typeof body?.shipping === 'number' ? body.shipping : 19.99;
+    const total = subtotal + shipping;
+    const date = new Date().toLocaleDateString('ro-RO');
+
+    const logoDataUrl = await getLogoDataUrl();
+    const html = renderOfferHTML({ items, subtotal, shipping, total, date, logoDataUrl });
+
+    // Launch bundled Chromium from puppeteer (works locally)
+    const browser = await puppeteer.launch({ headless: 'new' });
+
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    const pdf = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '12mm', right: '10mm', bottom: '14mm', left: '10mm' },
+    });
+    await browser.close();
+
+    return new Response(pdf, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="oferta-${date}.pdf"`,
+      },
+    });
+  } catch (e: any) {
+    console.error('[PDF Offer] error:', e?.message || e);
+    return new Response(JSON.stringify({ error: 'Nu s-a putut genera PDF-ul.' }), { status: 500 });
+  }
+}

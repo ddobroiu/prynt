@@ -51,6 +51,7 @@ export type NewOrder = Omit<StoredOrder, 'id' | 'createdAt' | 'orderNo'>;
 const DATA_DIR = path.join(process.cwd(), '.data');
 const FILE_PATH = path.join(DATA_DIR, 'orders.jsonl');
 const SEQ_PATH = path.join(DATA_DIR, 'order-seq.txt');
+const SESSION_MAP_PATH = path.join(DATA_DIR, 'session-map.json');
 
 function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -123,4 +124,39 @@ export async function getOrder(id: string): Promise<StoredOrder | null> {
     } catch {}
   }
   return null;
+}
+
+// Stripe session -> order mapping helpers
+type SessionMap = Record<string, { orderId: string; orderNo: number; createdAt: string }>;
+
+function ensureSessionMap(): void {
+  ensureDir();
+  if (!fs.existsSync(SESSION_MAP_PATH)) {
+    fs.writeFileSync(SESSION_MAP_PATH, '{}', 'utf8');
+  }
+}
+
+export async function mapStripeSessionToOrder(sessionId: string, orderId: string, orderNo: number): Promise<void> {
+  try {
+    ensureSessionMap();
+    const raw = await fs.promises.readFile(SESSION_MAP_PATH, 'utf8').catch(() => '{}');
+    let map: SessionMap = {};
+    try { map = JSON.parse(raw || '{}'); } catch { map = {}; }
+    map[sessionId] = { orderId, orderNo, createdAt: new Date().toISOString() };
+    await fs.promises.writeFile(SESSION_MAP_PATH, JSON.stringify(map, null, 2), 'utf8');
+  } catch (e) {
+    console.warn('[orderStore] Nu pot scrie session-map:', (e as any)?.message || e);
+  }
+}
+
+export async function getOrderNoByStripeSession(sessionId: string): Promise<number | undefined> {
+  try {
+    ensureSessionMap();
+    const raw = await fs.promises.readFile(SESSION_MAP_PATH, 'utf8').catch(() => '{}');
+    const map = JSON.parse(raw || '{}') as SessionMap;
+    const rec = map[sessionId];
+    return rec?.orderNo;
+  } catch {
+    return undefined;
+  }
 }
