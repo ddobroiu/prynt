@@ -71,6 +71,7 @@ export async function GET(req: NextRequest) {
           contactName: address.nume_prenume,
           email: address.email,
           phone1: { number: address.telefon },
+          privatePerson: true,
           address: {
             countryId: 642,
             siteName: address.localitate,
