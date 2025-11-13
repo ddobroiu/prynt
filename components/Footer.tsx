@@ -1,3 +1,4 @@
+"use client";
 // components/Footer.tsx
 // Am înlocuit Image și Link din Next.js cu tag-uri standard <img> și <a>.
 
