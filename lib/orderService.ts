@@ -258,10 +258,9 @@ async function sendEmails(
   let actionButtons = '';
   try {
     if (process.env.ADMIN_ACTION_SECRET && process.env.DPD_DEFAULT_SERVICE_ID) {
-      const tokenEmit = signAdminAction({
-        action: 'emit_awb',
+      const tokenEdit = signAdminAction({
+        action: 'edit',
         address,
-        // Keep token short: omit items list (optional)
         paymentType,
         totalAmount: totalComanda,
       });
@@ -271,20 +270,14 @@ async function sendEmails(
         paymentType,
         totalAmount: totalComanda,
       });
-      const tokenCancel = signAdminAction({
-        action: 'cancel_awb',
-        address,
-        // Keep token short
-        paymentType,
-        totalAmount: totalComanda,
-      });
       const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
-      const urlEmit = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenEmit)}`;
-      const urlConfirm = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenConfirm)}`;
+      const defaultSid = encodeURIComponent(String(process.env.DPD_DEFAULT_SERVICE_ID));
+      const urlEdit = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenEdit)}&sid=${defaultSid}`;
+      const urlConfirm = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenConfirm)}&sid=${defaultSid}`;
       actionButtons = `
         <div style="margin:20px 0; text-align:center;">
-          <a href="${urlEmit}" style="display:inline-block; background:#0ea5e9; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; margin-right:8px;">Emite AWB (fără tipărire)</a>
-          <a href="${urlConfirm}" style="display:inline-block; background:#16a34a; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none;">Trimite AWB clientului</a>
+          <a href="${urlConfirm}" style="display:inline-block; background:#16a34a; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; margin-right:8px;">Validează și trimite</a>
+          <a href="${urlEdit}" style="display:inline-block; background:#0ea5e9; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none;">Editează AWB</a>
         </div>`;
     }
   } catch (e) {

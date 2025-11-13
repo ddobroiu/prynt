@@ -18,9 +18,76 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const token = searchParams.get('token') || '';
     const sidParam = searchParams.get('sid');
+    const scidParam = searchParams.get('scid');
     const payload = verifyAdminAction(token);
     if (!payload) {
       return htmlPage('Link invalid', '<h1>Link invalid sau expirat</h1><p>Îți rugăm să soliciți un link nou.</p>');
+    }
+
+    if (payload.action === 'edit') {
+      const address = payload.address;
+      const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
+      const currentServiceId = Number(payload.serviceId || sidParam || process.env.DPD_DEFAULT_SERVICE_ID || '') || '';
+      const currentSenderId = Number(payload.senderClientId || scidParam || process.env.DPD_SENDER_CLIENT_ID || '') || '';
+      const senderIdsEnv = (process.env.DPD_SENDER_CLIENT_IDS || '').trim();
+      const senderIds = senderIdsEnv
+        ? senderIdsEnv.split(',').map((x) => x.trim()).filter(Boolean)
+        : [];
+      const options = senderIds.length > 0 ? senderIds : (process.env.DPD_SENDER_CLIENT_ID ? [String(process.env.DPD_SENDER_CLIENT_ID)] : []);
+      const optsHtml = options
+        .map((id) => {
+          const [val, label] = id.includes(':') ? id.split(':', 2) : [id, `Sediu ${id}`];
+          const sel = String(currentSenderId) === String(val) ? 'selected' : '';
+          return `<option value="${val}" ${sel}>${label} (${val})</option>`;
+        })
+        .join('');
+
+      const tokenEsc = encodeURIComponent(token);
+      const body = `
+        <h1>Editează datele pentru AWB</h1>
+        <form method="post" style="margin-top:12px;max-width:720px;">
+          <input type="hidden" name="token" value="${tokenEsc}" />
+          <input type="hidden" name="intent" value="edit_submit" />
+          <fieldset style="border:1px solid #eee;padding:12px;border-radius:8px;margin-bottom:12px;">
+            <legend style="padding:0 6px;">Destinatar</legend>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <label>Nume<br/><input name="nume_prenume" value="${address.nume_prenume}" style="width:100%;padding:6px" /></label>
+              <label>Email<br/><input name="email" value="${address.email}" style="width:100%;padding:6px" /></label>
+              <label>Telefon<br/><input name="telefon" value="${address.telefon}" style="width:100%;padding:6px" /></label>
+              <label>Cod poștal<br/><input name="postCode" value="${address.postCode || ''}" style="width:100%;padding:6px" /></label>
+              <label>Județ<br/><input name="judet" value="${address.judet}" style="width:100%;padding:6px" /></label>
+              <label>Localitate<br/><input name="localitate" value="${address.localitate}" style="width:100%;padding:6px" /></label>
+            </div>
+            <label style="display:block;margin-top:8px;">Stradă și număr<br/><input name="strada_nr" value="${address.strada_nr}" style="width:100%;padding:6px" /></label>
+          </fieldset>
+
+          <fieldset style="border:1px solid #eee;padding:12px;border-radius:8px;margin-bottom:12px;">
+            <legend style="padding:0 6px;">Livrare și plată</legend>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end;">
+              <label>Tip plată
+                <select name="paymentType" style="width:100%;padding:6px">
+                  <option value="Ramburs" ${payload.paymentType !== 'Card' ? 'selected' : ''}>Ramburs</option>
+                  <option value="Card" ${payload.paymentType === 'Card' ? 'selected' : ''}>Card</option>
+                </select>
+              </label>
+              <label>Total comandă (RON) – pentru COD<br/><input name="totalAmount" type="number" step="0.01" value="${typeof payload.totalAmount === 'number' ? payload.totalAmount : ''}" style="width:100%;padding:6px" /></label>
+              <label>Serviciu DPD (serviceId)<br/><input name="serviceId" type="number" step="1" value="${currentServiceId}" style="width:100%;padding:6px" /></label>
+              <label>Expediere din sediu (senderClientId)<br/>
+                <select name="senderClientId" style="width:100%;padding:6px">
+                  <option value="">(implicit din .env)</option>
+                  ${optsHtml}
+                </select>
+              </label>
+            </div>
+          </fieldset>
+
+          <div style="display:flex;gap:8px;">
+            <button type="submit" style="padding:10px 16px;background:#16a34a;color:#fff;border:0;border-radius:8px;">Salvează și trimite</button>
+            <a href="${baseUrl}/api/dpd/admin-action?token=${tokenEsc}" style="padding:10px 16px;background:#64748b;color:#fff;border-radius:8px;text-decoration:none;">Anulează</a>
+          </div>
+        </form>
+      `;
+      return htmlPage('Editează AWB', body);
     }
 
     if (payload.action === 'cancel_awb') {
@@ -62,7 +129,7 @@ export async function GET(req: NextRequest) {
     if (payload.action === 'emit_awb' || payload.action === 'confirm_awb') {
       // Build minimal shipment from payload
       const address = payload.address;
-      const serviceId = Number(sidParam || process.env.DPD_DEFAULT_SERVICE_ID || '');
+      const serviceId = Number(payload.serviceId || sidParam || process.env.DPD_DEFAULT_SERVICE_ID || '');
       if (!serviceId) {
         const tokenEsc = encodeURIComponent(token);
         return htmlPage(
@@ -80,7 +147,8 @@ export async function GET(req: NextRequest) {
 
       // Optional default sender from env
       const sender: ShipmentSender | undefined = ((): ShipmentSender | undefined => {
-        const clientId = process.env.DPD_SENDER_CLIENT_ID ? Number(process.env.DPD_SENDER_CLIENT_ID) : undefined;
+        const overrideClientId = scidParam ? Number(scidParam) : (payload as any).senderClientId;
+        const clientId = (overrideClientId ? Number(overrideClientId) : undefined) ?? (process.env.DPD_SENDER_CLIENT_ID ? Number(process.env.DPD_SENDER_CLIENT_ID) : undefined);
         const phone = process.env.DPD_SENDER_PHONE || undefined;
         const email = process.env.DPD_SENDER_EMAIL || undefined;
         const name = process.env.DPD_SENDER_NAME || undefined;
@@ -147,6 +215,29 @@ export async function GET(req: NextRequest) {
         },
         ref1: 'Order Email Action',
       } as any;
+
+      // Before creating/printing, if action is confirm_awb, run validation
+      if (payload.action === 'confirm_awb') {
+        const v = await validateShipment(shipment as any);
+        if (!v.valid) {
+          const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
+          const tokenEdit = signAdminAction({
+            action: 'edit',
+            address,
+            paymentType: payload.paymentType,
+            totalAmount: payload.totalAmount,
+            serviceId,
+            senderClientId: (sender as any)?.clientId,
+          });
+          const editUrl = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenEdit)}&sid=${serviceId}${(sender as any)?.clientId ? `&scid=${(sender as any).clientId}` : ''}`;
+          return htmlPage(
+            'Validare eșuată',
+            `<h1>Validare AWB eșuată</h1>
+             <pre style="white-space:pre-wrap;background:#f6f6f6;padding:12px;border-radius:6px;">${(v.error && (v.error.message || JSON.stringify(v.error))) || 'Eroare necunoscută'}</pre>
+             <p style="margin-top:12px;"><a href="${editUrl}" style="display:inline-block;padding:8px 12px;background:#0ea5e9;color:#fff;border-radius:8px;text-decoration:none;">Editează datele și reîncearcă</a></p>`
+          );
+        }
+      }
 
       // If we already have a shipmentId in token (emitted earlier), skip creation
       const preCreatedId = payload.shipmentId || searchParams.get('ship') || '';
@@ -248,6 +339,50 @@ export async function GET(req: NextRequest) {
     return htmlPage('Acțiune necunoscută', '<h1>Acțiune necunoscută</h1>');
   } catch (e: any) {
     console.error('[API /dpd/admin-action] Error:', e?.message || e);
+    return htmlPage('Eroare', '<h1>Eroare internă</h1>');
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const form = await req.formData();
+    const token = String(form.get('token') || '');
+    const intent = String(form.get('intent') || '');
+    const payload = verifyAdminAction(token);
+    if (!payload || intent !== 'edit_submit') {
+      return htmlPage('Link invalid', '<h1>Link invalid sau acțiune nepermisă</h1>');
+    }
+
+    const address = {
+      nume_prenume: String(form.get('nume_prenume') || payload.address.nume_prenume || ''),
+      email: String(form.get('email') || payload.address.email || ''),
+      telefon: String(form.get('telefon') || payload.address.telefon || ''),
+      judet: String(form.get('judet') || payload.address.judet || ''),
+      localitate: String(form.get('localitate') || payload.address.localitate || ''),
+      strada_nr: String(form.get('strada_nr') || payload.address.strada_nr || ''),
+      postCode: String(form.get('postCode') || payload.address.postCode || ''),
+    };
+    const paymentType = (String(form.get('paymentType') || payload.paymentType || 'Ramburs') === 'Card') ? 'Card' : 'Ramburs';
+    const totalAmountRaw = Number(String(form.get('totalAmount') || ''));
+    const totalAmount = Number.isFinite(totalAmountRaw) ? totalAmountRaw : payload.totalAmount;
+    const serviceIdRaw = Number(String(form.get('serviceId') || ''));
+    const serviceId = Number.isFinite(serviceIdRaw) ? serviceIdRaw : (payload as any).serviceId;
+    const senderClientIdRaw = Number(String(form.get('senderClientId') || ''));
+    const senderClientId = Number.isFinite(senderClientIdRaw) ? senderClientIdRaw : (payload as any).senderClientId;
+
+    const updatedToken = signAdminAction({
+      action: 'confirm_awb',
+      address,
+      paymentType,
+      totalAmount,
+      serviceId,
+      senderClientId,
+    });
+    const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
+    const url = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(updatedToken)}&sid=${serviceId}${senderClientId ? `&scid=${senderClientId}` : ''}`;
+    return new Response(null, { status: 303, headers: { Location: url } });
+  } catch (e: any) {
+    console.error('[API /dpd/admin-action POST] Error:', e?.message || e);
     return htmlPage('Eroare', '<h1>Eroare internă</h1>');
   }
 }
