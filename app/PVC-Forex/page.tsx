@@ -36,23 +36,29 @@ export default function Page() {
         ]}
       />
       <ConfiguratorPVCForex />
-      <FaqAccordion qa={qa} />
-      <FaqJsonLd qa={qa} />
-      <RevealBlock buttonLabel="Cum comand?">
-        <HowToSection
-          title="Cum comanzi PVC Forex tipărit"
-          steps={[
-            "Alege grosimea și dimensiunile",
-            "Adaugă opțiuni de montaj dacă e cazul",
-            "Încarcă fișierele",
-            "Preț instant și adaugă în coș",
-            "Finalizează – livrare 24–48h",
-          ]}
-        />
-      </RevealBlock>
-      <RevealBlock buttonLabel="Citește mai mult">
-        <CategorySeoContent kind="pvc-forex" />
-      </RevealBlock>
+      <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
+        <div className="md:col-span-2">
+          <FaqAccordion qa={qa} fullWidth />
+          <FaqJsonLd qa={qa} />
+        </div>
+        <aside className="mt-4 md:mt-0 space-y-4">
+          <RevealBlock buttonLabel="Cum comand?">
+            <HowToSection
+              title="Cum comanzi PVC Forex tipărit"
+              steps={[
+                "Alege grosimea și dimensiunile",
+                "Adaugă opțiuni de montaj dacă e cazul",
+                "Încarcă fișierele",
+                "Preț instant și adaugă în coș",
+                "Finalizează – livrare 24–48h",
+              ]}
+            />
+          </RevealBlock>
+          <RevealBlock buttonLabel="Citește mai mult">
+            <CategorySeoContent kind="pvc-forex" />
+          </RevealBlock>
+        </aside>
+      </section>
     </div>
   );
 }

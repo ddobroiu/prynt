@@ -36,23 +36,29 @@ export default function Page() {
         ]}
       />
       <ConfiguratorPolipropilena />
-      <FaqAccordion qa={qa} />
-      <FaqJsonLd qa={qa} />
-      <RevealBlock buttonLabel="Cum comand?">
-        <HowToSection
-          title="Cum comanzi panouri din polipropilenă"
-          steps={[
-            "Alege grosimea și dimensiunile",
-            "Selectează față/verso",
-            "Încarcă fișierele",
-            "Preț instant și adaugă în coș",
-            "Finalizează – livrare 24–48h",
-          ]}
-        />
-      </RevealBlock>
-      <RevealBlock buttonLabel="Citește mai mult">
-        <CategorySeoContent kind="polipropilena" />
-      </RevealBlock>
+        <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
+          <div className="md:col-span-2">
+            <FaqAccordion qa={qa} fullWidth />
+            <FaqJsonLd qa={qa} />
+          </div>
+          <aside className="mt-4 md:mt-0 space-y-4">
+            <RevealBlock buttonLabel="Cum comand?">
+              <HowToSection
+                title="Cum comanzi polipropilenă celulară"
+                steps={[
+                  "Alege grosimea și dimensiunile",
+                  "Adaugă cerințe de montaj (la nevoie)",
+                  "Încarcă fișierele",
+                  "Preț instant și adaugă în coș",
+                  "Finalizează – livrare 24–48h",
+                ]}
+              />
+            </RevealBlock>
+            <RevealBlock buttonLabel="Citește mai mult">
+              <CategorySeoContent kind="polipropilena" />
+            </RevealBlock>
+          </aside>
+        </section>
     </div>
   );
 }

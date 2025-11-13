@@ -44,26 +44,31 @@ export default function Page() {
       <section>
         <BannerConfigurator />
       </section>
-      <RevealBlock buttonLabel="Cum comand?">
-        <HowToSection
-          title="Cum comanzi bannere publicitare"
-          steps={[
-            "Alege dimensiunea exactă în cm și materialul potrivit (Frontlit/Blockout)",
-            "Selectează finisajele: tiv, capse, buzunare",
-            "Încarcă grafica sau lasă un link (WeTransfer/Drive)",
-            "Vezi prețul instant și adaugă în coș",
-            "Finalizează comanda – livrare 24–48h",
-          ]}
-        />
-      </RevealBlock>
-      <RevealBlock buttonLabel="Citește mai mult">
-        <CategorySeoContent kind="banner" />
-      </RevealBlock>
+      <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
+        <div className="md:col-span-2">
+          {/* Optional SEO/extra content can go here, but not the visual H1 to avoid duplication */}
+          <FaqAccordion qa={qa} fullWidth />
+          <FaqJsonLd qa={qa} />
+        </div>
+        <aside className="mt-4 md:mt-0 space-y-4">
+          <RevealBlock buttonLabel="Cum comand?">
+            <HowToSection
+              title="Cum comanzi bannere publicitare"
+              steps={[
+                "Alege dimensiunea exactă în cm și materialul potrivit (Frontlit/Blockout)",
+                "Selectează finisajele: tiv, capse, buzunare",
+                "Încarcă grafica sau lasă un link (WeTransfer/Drive)",
+                "Vezi prețul instant și adaugă în coș",
+                "Finalizează comanda – livrare 24–48h",
+              ]}
+            />
+          </RevealBlock>
+          <RevealBlock buttonLabel="Citește mai mult">
+            <CategorySeoContent kind="banner" />
+          </RevealBlock>
+        </aside>
+      </section>
       {/* Produse similare section removed as requested */}
-
-      {/* Optional SEO/extra content can go here, but not the visual H1 to avoid duplication */}
-      <FaqAccordion qa={qa} />
-      <FaqJsonLd qa={qa} />
     </main>
   );
 }

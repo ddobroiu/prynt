@@ -1,11 +1,19 @@
 import React from "react";
 import type { QA } from "./FaqJsonLd";
 
-export default function FaqAccordion({ qa, title = "Întrebări frecvente" }: { qa: QA[]; title?: string }) {
+export default function FaqAccordion({
+  qa,
+  title = "Întrebări frecvente",
+  fullWidth = false,
+}: {
+  qa: QA[];
+  title?: string;
+  fullWidth?: boolean;
+}) {
   if (!qa || qa.length === 0) return null;
   return (
     <section className="mt-6">
-      <div className="mx-auto max-w-3xl card p-4">
+      <div className={(fullWidth ? "" : "mx-auto max-w-3xl ") + "card p-4"}>
         <h2 className="text-lg font-bold mb-2">{title}</h2>
         <div className="divide-y divide-white/10">
           {qa.map((q, i) => (
