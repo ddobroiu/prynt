@@ -6,7 +6,7 @@ import { Resend } from 'resend';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Avoid top-level Resend init; may fail at build when env missing on platform
 
 function htmlPage(title: string, body: string): Response {
   const html = `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>${title}</title></head><body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:24px;">${body}</body></html>`;
@@ -109,20 +109,26 @@ export async function GET(req: NextRequest) {
 
       // Email client
       try {
+        const apiKey = process.env.RESEND_API_KEY;
+        const resend = apiKey ? new Resend(apiKey) : null;
         const trackingUrl = trackingUrlForAwb(shipmentId);
         const subject = `AWB DPD ${shipmentId}`;
         const html = `<p>Bună ${address.nume_prenume},</p>
 <p>Expediția ta a fost confirmată. AWB: <strong>${shipmentId}</strong>.</p>
 <p>Poți urmări statusul livrării aici: <a href="${trackingUrl}">${trackingUrl}</a>.</p>
 <p>Eticheta PDF este atașată.</p>`;
-        await resend.emails.send({
-          from: process.env.EMAIL_FROM || 'contact@prynt.ro',
-          to: address.email,
-          bcc: process.env.ADMIN_EMAIL ? [process.env.ADMIN_EMAIL] : undefined,
-          subject,
-          html,
-          attachments: base64 ? [{ filename: `DPD_${shipmentId}.pdf`, content: Buffer.from(base64, 'base64') }] : undefined,
-        } as any);
+        if (resend) {
+          await resend.emails.send({
+            from: process.env.EMAIL_FROM || 'contact@prynt.ro',
+            to: address.email,
+            bcc: process.env.ADMIN_EMAIL ? [process.env.ADMIN_EMAIL] : undefined,
+            subject,
+            html,
+            attachments: base64 ? [{ filename: `DPD_${shipmentId}.pdf`, content: Buffer.from(base64, 'base64') }] : undefined,
+          } as any);
+        } else {
+          console.warn('[admin-action] RESEND_API_KEY missing – skipping client email');
+        }
       } catch (e) {
         // Continue; the AWB exists even if email fails
         console.warn('[admin-action] Email client failed:', (e as any)?.message || e);

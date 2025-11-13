@@ -36,7 +36,7 @@ interface Billing {
   strada_nr?: string;
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Do not instantiate Resend at module load to avoid build failures in envs without key
 const SHIPPING_FEE = 19.99;
 
 // Cache token Oblio
@@ -333,6 +333,8 @@ async function sendEmails(
 
   // Admin email
   try {
+    const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+    if (!resend) throw new Error('RESEND_API_KEY lipsă');
     const adminResp = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'comenzi@prynt.ro',
       to: process.env.ADMIN_EMAIL || 'contact@prynt.ro',
@@ -397,6 +399,8 @@ async function sendEmails(
   `;
 
   try {
+    const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+    if (!resend) throw new Error('RESEND_API_KEY lipsă');
     const clientResp = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'contact@prynt.ro',
       to: address.email,

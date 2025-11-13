@@ -5,7 +5,7 @@ import { createShipment, printExtended, trackingUrlForAwb, type CreateShipmentRe
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Do NOT instantiate Resend at module load; Railway build may not have env set.
 
 /**
  * POST /api/dpd/confirm-awb
@@ -54,6 +54,9 @@ export async function POST(req: NextRequest) {
     // Send email to client (if provided)
     if (email) {
       try {
+        const apiKey = process.env.RESEND_API_KEY;
+        const resend = apiKey ? new Resend(apiKey) : null;
+        if (!resend) throw new Error('RESEND_API_KEY lipsă');
         const subject = `AWB DPD ${shipmentId}`;
         const html = `<p>Bună${name ? ' ' + name : ''},</p>
 <p>Expediția ta a fost confirmată. AWB: <strong>${shipmentId}</strong>.</p>
