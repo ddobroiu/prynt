@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../../components/CartContext";
@@ -212,11 +212,12 @@ export default function CheckoutPage() {
       setShowEmbed(true);
       const stripe = await stripePromise;
       if (!stripe) throw new Error("Stripe nu a putut fi inițializat.");
-
-      const embeddedCheckout = await stripe.initEmbeddedCheckout({
-        clientSecret: data.clientSecret,
-      });
-      embeddedCheckout.mount("#stripe-embedded");
+      const embeddedCheckout = await stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret });
+      // Așteptăm ca elementul #stripe-embedded să existe (render după setShowEmbed)
+      setTimeout(() => {
+        const host = document.getElementById('stripe-embedded');
+        if (host) embeddedCheckout.mount('#stripe-embedded');
+      }, 0);
     } catch (err: any) {
       console.error("[placeOrder] error:", err?.message || err);
       alert(err?.message || "A apărut o eroare. Reîncearcă.");
@@ -305,23 +306,7 @@ export default function CheckoutPage() {
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Coșul tău</h1>
         </div>
-        <nav className={`mb-8 flex flex-wrap gap-2 text-xs md:text-sm relative ${showEmbed ? 'z-[85] bg-black/40 backdrop-blur rounded-xl p-3' : ''}`}>
-          <Link href="/shop" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Shop</Link>
-          <Link href="/banner" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Bannere</Link>
-          <Link href="/banner-verso" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Banner Verso</Link>
-          <Link href="/canvas" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Canvas</Link>
-          <Link href="/tapet" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Tapet</Link>
-          <Link href="/afise" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Afișe</Link>
-          <Link href="/flayere" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Flayere</Link>
-          <Link href="/pliante" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Pliante</Link>
-          <Link href="/autocolante" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Autocolante</Link>
-          <Link href="/plexiglass" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Plexiglas</Link>
-          <Link href="/alucobond" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Alucobond</Link>
-          <Link href="/carton" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Carton</Link>
-          <Link href="/polipropilena" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Polipropilenă</Link>
-          <Link href="/pvc-forex" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">PVC Forex</Link>
-          <Link href="/fonduri-pnrr" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Fonduri PNRR</Link>
-        </nav>
+        {/* Bara de navigare suplimentară eliminată conform cerinței */}
 
         {isEmpty ? (
           <EmptyCart />
@@ -343,10 +328,12 @@ export default function CheckoutPage() {
                 onPlaceOrder={placeOrder}
                 placing={placing}
                 county={address.judet}
+                showEmbed={showEmbed}
+                setShowEmbed={setShowEmbed}
               />
             </aside>
 
-            <section className={`order-2 lg:order-1 lg:col-span-2 space-y-6 ${showEmbed ? "hidden" : ""}`}>
+            <section className={`order-2 lg:order-1 lg:col-span-2 space-y-6`}>
               <div className="flex items-center justify-start -mb-2">
                 <button
                   type="button"
@@ -374,26 +361,7 @@ export default function CheckoutPage() {
         )}
       </div>
 
-      {showEmbed && (
-        <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur flex items-center justify-center p-4 pointer-events-none">
-          <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-gray-950 p-4 pointer-events-auto">
-            <div className="mb-3 text-center text-muted">Finalizează plata în siguranță</div>
-            <div id="stripe-embedded" />
-            <div className="mt-3 text-center text-xs text-muted">
-              După finalizare, vei fi redirecționat înapoi pentru confirmare.
-            </div>
-            <div className="mt-4 text-center">
-              <button
-                type="button"
-                onClick={() => setShowEmbed(false)}
-                className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20"
-              >
-                Închide și revino la coș
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Eliminat overlay-ul; embed este integrat în cardul sumar */}
     </main>
   );
 }
@@ -422,6 +390,8 @@ function SummaryCard({
   onPlaceOrder,
   placing,
   county,
+  showEmbed,
+  setShowEmbed,
 }: {
   subtotal: number;
   shipping: number;
@@ -431,6 +401,8 @@ function SummaryCard({
   onPlaceOrder: () => void;
   placing: boolean;
   county?: string;
+  showEmbed: boolean;
+  setShowEmbed: (v: boolean) => void;
 }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
@@ -477,15 +449,40 @@ function SummaryCard({
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={onPlaceOrder}
-          disabled={placing}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition disabled:opacity-60"
-        >
-          <ShieldCheck size={16} />
-          {placing ? "Se procesează..." : "Plasează comanda"}
-        </button>
+        {!showEmbed && (
+          <button
+            type="button"
+            onClick={onPlaceOrder}
+            disabled={placing}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition disabled:opacity-60"
+          >
+            <ShieldCheck size={16} />
+            {placing ? "Se procesează..." : paymentMethod === 'card' ? 'Plătește' : 'Plasează comanda'}
+          </button>
+        )}
+
+        {showEmbed && (
+          <div className="mt-4 space-y-3">
+            <div className="text-sm font-semibold text-ui">Finalizează plata în siguranță</div>
+            <div id="stripe-embedded" className="rounded-lg border border-white/10 bg-white/5 p-3" />
+            <div className="text-center text-xs text-muted">După finalizare revenim la confirmare.</div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowEmbed(false)}
+                className="flex-1 inline-flex items-center justify-center rounded-md border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20"
+              >
+                Anulează plata
+              </button>
+              <a
+                href="/"
+                className="flex-1 inline-flex items-center justify-center rounded-md border border-emerald-500/50 bg-emerald-600/20 px-3 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-600/30"
+              >
+                Mergi la Shop
+              </a>
+            </div>
+          </div>
+        )}
 
   <p className="mt-2 text-[11px] text-muted text-center">
           Plata cu cardul este securizată. Pentru ramburs, plătești la curier.

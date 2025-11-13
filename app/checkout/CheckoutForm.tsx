@@ -45,18 +45,25 @@ export default function CheckoutForm({
   const onAddr = (k: keyof Address, v: string) => setAddress((a) => ({ ...a, [k]: v }));
   const onBill = <K extends keyof Billing>(k: K, v: Billing[K]) => setBilling((b) => ({ ...b, [k]: v }));
 
-  // 1) Sincronizare continuă când “aceeași adresă” este bifat
+  // 1) Sincronizare când “aceeași adresă” este bifat – evităm bucla infinită
   useEffect(() => {
-    if (sameAsDelivery) {
-      setBilling((b) => ({
+    if (!sameAsDelivery) return;
+    setBilling((b) => {
+      const alreadySame =
+        b.judet === address.judet &&
+        b.localitate === address.localitate &&
+        b.strada_nr === address.strada_nr &&
+        b.postCode === address.postCode;
+      if (alreadySame) return b; // nu setează din nou => evită re-randări infinite
+      return {
         ...b,
         judet: address.judet,
         localitate: address.localitate,
         strada_nr: address.strada_nr,
         postCode: address.postCode,
-      }));
-    }
-  }, [sameAsDelivery, address.judet, address.localitate, address.strada_nr, setBilling]);
+      };
+    });
+  }, [sameAsDelivery, address.judet, address.localitate, address.strada_nr, address.postCode, setBilling]);
 
   // 2) Copiere one-click când bifa e debifată (prefill fără a bloca editarea)
   function copyBillingFromDeliveryOnce() {
