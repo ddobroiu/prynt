@@ -63,6 +63,7 @@ async function getOblioAccessToken() {
   const params = new URLSearchParams({
     client_id: process.env.OBLIO_CLIENT_ID!,
     client_secret: process.env.OBLIO_CLIENT_SECRET!,
+    grant_type: 'client_credentials',
   });
 
   const response = await fetch('https://www.oblio.eu/api/authorize/token', {
@@ -106,35 +107,45 @@ function buildAddressLine(
   return [s, l, j].filter(Boolean).join(', ');
 }
 
-// Apel Oblio – endpoint ca în proiectul care îți mergea
+// Apel Oblio – încercăm mai multe endpoint-uri cunoscute
 async function createOblioInvoice(payload: any, token: string) {
-  const resp = await fetch('https://www.oblio.eu/api/docs/invoice', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify(payload),
-  });
+  const endpoints = [
+    'https://www.oblio.eu/api/invoices',
+    'https://www.oblio.eu/api/invoice',
+    'https://www.oblio.eu/api/1.0/invoices',
+    'https://www.oblio.eu/api/docs/invoice',
+  ];
+  let lastErr: any = null;
+  for (const url of endpoints) {
+    try {
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      });
+      const ct = resp.headers.get('content-type') || '';
+      if (ct.includes('application/json')) {
+        const json = await resp.json();
+        return { ...json, _endpoint: url };
+      }
+      const text = await resp.text();
+      lastErr = new Error(`Oblio non-JSON (${resp.status}) @ ${url}: ${text.slice(0, 200)}`);
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('Oblio: nu s-a putut emite factura (fără răspuns valid)');
+}
+
 function normalizeCUI(input?: string): { primary?: string; alternate?: string } {
   if (!input) return {};
   let raw = String(input).trim().toUpperCase();
-  // Remove spaces and common separators
   raw = raw.replace(/\s|-/g, '');
-  // Extract digits
   const digits = raw.replace(/\D/g, '');
   const hasRO = /^RO\d+$/i.test(raw);
   const primary = hasRO ? raw : digits;
   const alternate = hasRO ? digits : (digits ? `RO${digits}` : undefined);
   return { primary, alternate };
-}
-
-
-  const ct = resp.headers.get('content-type') || '';
-  if (ct.includes('application/json')) {
-    return await resp.json();
-  } else {
-    const text = await resp.text();
-    // Nu injectăm în email; doar logăm scurt.
-    throw new Error(`Oblio răspuns non-JSON (status ${resp.status}): ${text.slice(0, 200)}`);
-  }
 }
 
 /**
@@ -515,14 +526,18 @@ export async function fulfillOrder(
 
     // 1) Încercare “doar CUI” dacă e Companie și avem CUI
     const isCompany = billing.tip_factura !== 'persoana_fizica';
-    let client =
-      isCompany && billing.cui
-        ? { cif: billing.cui }
-        : {
-            name: billing.name || address.nume_prenume,
-            address: billingAddressLine,
-            email: address.email,
-          };
+    const cuiNorm = normalizeCUI(billing.cui);
+    let client = isCompany && billing.cui
+      ? {
+          // Lăsăm Oblio să identifice clientul și să folosească datele oficiale
+          cif: cuiNorm.primary || billing.cui,
+        }
+      : {
+          // Persoană fizică – trimitem doar nume + adresă, fără email pentru a evita potrivirea
+          // cu un client firmă existent în Oblio pe baza emailului de test.
+          name: billing.name || address.nume_prenume,
+          address: billingAddressLine,
+        };
 
     const basePayload = {
       cif: process.env.OBLIO_CIF_FIRMA,
@@ -540,28 +555,27 @@ export async function fulfillOrder(
         const needDetails = /selecteaza\s+clientul|alege\s+clientul|client|cif/i.test(msg) || (data?.status && data.status >= 400 && data.status < 500);
 
         if (needDetails && isCompany && billing.cui) {
-          const payloadWithDetails = {
-            ...basePayload,
-            client: {
-              cif: cuiNorm.primary || billing.cui,
-              name: billing.name || address.nume_prenume,
-              address: billingAddressLine,
-              email: address.email,
-            },
-          };
-          data = await createOblioInvoice(payloadWithDetails, token);
-
-          if (data?.status !== 200 && cuiNorm.alternate) {
+          // Încercăm mai întâi CUI în format alternativ, doar cu cif (fără a suprascrie nume/adresă)
+          if (cuiNorm.alternate) {
             const payloadAltCUI = {
               ...basePayload,
+              client: { cif: cuiNorm.alternate },
+            };
+            data = await createOblioInvoice(payloadAltCUI, token);
+          }
+
+          // Dacă tot nu merge, abia acum încercăm cu detalii din formular (ultimul resort)
+          if (data?.status !== 200) {
+            const payloadWithDetails = {
+              ...basePayload,
               client: {
-                cif: cuiNorm.alternate,
+                cif: cuiNorm.primary || billing.cui,
                 name: billing.name || address.nume_prenume,
                 address: billingAddressLine,
                 email: address.email,
               },
             };
-            data = await createOblioInvoice(payloadAltCUI, token);
+            data = await createOblioInvoice(payloadWithDetails, token);
           }
         }
     }

@@ -11,12 +11,13 @@ export const metadata = {
 };
 
 type PageProps = {
-  searchParams: { session_id?: string; o?: string };
+  searchParams: Promise<{ session_id?: string; o?: string }>;
 };
 
 export default async function SuccessPage({ searchParams }: PageProps) {
-  const sessionId = searchParams?.session_id;
-  const qsOrder = Number(searchParams?.o);
+  const params = await searchParams;
+  const sessionId = params?.session_id;
+  const qsOrder = Number(params?.o);
   let orderNo: number | null = Number.isFinite(qsOrder) && qsOrder > 0 ? qsOrder : null;
   let paymentStatus: string | null = null;
 
