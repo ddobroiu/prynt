@@ -52,6 +52,7 @@ export default async function OrdersPage() {
           <table className="w-full text-sm">
             <thead className="text-left text-muted">
               <tr>
+                <th className="px-3 py-2">Nr.</th>
                 <th className="px-3 py-2">Data</th>
                 <th className="px-3 py-2">Client</th>
                 <th className="px-3 py-2">Contact</th>
@@ -69,6 +70,7 @@ export default async function OrdersPage() {
                 const urlConfirm = `/api/dpd/admin-action?token=${encodeURIComponent(tokenConfirm)}&sid=${defaultSid}`;
                 return (
                   <tr key={o.id} className="border-t border-white/10">
+                    <td className="px-3 py-2 align-top whitespace-nowrap font-semibold">#{o.orderNo ?? '—'}</td>
                     <td className="px-3 py-2 align-top whitespace-nowrap">{new Date(o.createdAt).toLocaleString('ro-RO')}</td>
                     <td className="px-3 py-2 align-top">
                       <div className="font-semibold">{o.address.nume_prenume}</div>

@@ -136,7 +136,8 @@ async function sendEmails(
   cart: CartItem[],
   invoiceLink: string | null,
   paymentType: 'Ramburs' | 'Card',
-  marketing?: MarketingInfo
+  marketing?: MarketingInfo,
+  orderNo?: number
 ) {
   // Normalize cart for totals and for listing in emails
   const normalized = cart.map((raw) => {
@@ -386,7 +387,7 @@ async function sendEmails(
     const adminResp = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'comenzi@prynt.ro',
       to: process.env.ADMIN_EMAIL || 'contact@prynt.ro',
-      subject: `Comandă Nouă (${paymentType}) - ${escapeHtml(address.nume_prenume)}`,
+      subject: `Comandă${orderNo ? ` #${orderNo}` : ''} (${paymentType}) - ${escapeHtml(address.nume_prenume)}`,
       html: adminHtml,
     });
     console.log('[OrderService] Admin email sent, resend response:', adminResp);
@@ -452,7 +453,7 @@ async function sendEmails(
     const clientResp = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'contact@prynt.ro',
       to: address.email,
-      subject: 'Confirmare comandă Prynt.ro',
+      subject: `Confirmare comandă${orderNo ? ` #${orderNo}` : ''} - Prynt.ro`,
       html: clientHtml,
     });
     console.log('[OrderService] Client email sent, resend response:', clientResp);
@@ -560,7 +561,7 @@ export async function fulfillOrder(
       });
       const subtotal = normalized.reduce((s, it) => s + (Number(it.total) || 0), 0);
       const totalComanda = subtotal + SHIPPING_FEE;
-      await appendOrder({
+      const saved = await appendOrder({
         paymentType,
         address,
         billing,
@@ -570,11 +571,13 @@ export async function fulfillOrder(
         invoiceLink: invoiceLink ?? null,
         marketing,
       });
+      // Trimite emailurile cu numărul comenzii în subiect
+      await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing, saved.orderNo);
+      return { invoiceLink };
     } catch (e: any) {
       console.warn('[OrderService] Salvare comandă a eșuat (non-blocant):', e?.message || e);
     }
-
-    // 2) Trimite emailuri
+    // Dacă salvarea eșuează, tot trimitem emailuri (fără orderNo)
     await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing);
   } catch (e: any) {
     console.error('[OrderService] Eroare trimitere emailuri:', e?.message || e);
