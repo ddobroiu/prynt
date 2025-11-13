@@ -12,11 +12,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'ADMIN_PANEL_TOKEN lipsă' }, { status: 500 });
   }
   if (password !== expected) {
-    return NextResponse.redirect(new URL('/admin/login?err=1', req.url), { status: 303 });
+    const base = (process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || req.headers.get('origin') || 'https://www.prynt.ro').replace(/\/$/, '');
+    return NextResponse.redirect(`${base}/admin/login?err=1`, { status: 303 });
   }
 
   const token = signAdminSession();
-  const res = NextResponse.redirect(new URL('/admin/orders', req.url), { status: 303 });
+  const base = (process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || req.headers.get('origin') || 'https://www.prynt.ro').replace(/\/$/, '');
+  const res = NextResponse.redirect(`${base}/admin/orders`, { status: 303 });
   res.cookies.set('admin_auth', token, {
     httpOnly: true,
     sameSite: 'lax',
