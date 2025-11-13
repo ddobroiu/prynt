@@ -380,6 +380,112 @@ function SummaryCard({
 function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemove: (id: string) => void }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
+  // Map chei metadata -> etichete prietenoase
+  const labelForKey: Record<string, string> = {
+    width: "Lățime (cm)",
+    height: "Înălțime (cm)",
+    width_cm: "Lățime (cm)",
+    height_cm: "Înălțime (cm)",
+    totalSqm: "Suprafață totală (m²)",
+    sqmPerUnit: "m²/buc",
+    pricePerSqm: "Preț pe m² (RON)",
+    materialId: "Material",
+    material: "Material",
+    laminated: "Laminare",
+    designOption: "Grafică",
+    want_adhesive: "Adeziv",
+    want_hem_and_grommets: "Tiv și capse",
+    want_wind_holes: "Găuri pentru vânt",
+    shape_diecut: "Tăiere la contur",
+    productType: "Tip panou",
+    thickness_mm: "Grosime (mm)",
+    sameGraphicFrontBack: "Aceeași grafică față/spate",
+    framed: "Șasiu",
+    sizeKey: "Dimensiune preset",
+    mode: "Mod canvas",
+    orderNotes: "Observații",
+  };
+
+  function formatYesNo(v: any) {
+    if (typeof v === "boolean") return v ? "Da" : "Nu";
+    if (typeof v === "string") {
+      const t = v.toLowerCase();
+      if (["true", "da", "yes", "y", "1"].includes(t)) return "Da";
+      if (["false", "nu", "no", "n", "0"].includes(t)) return "Nu";
+    }
+    return String(v);
+  }
+
+  function prettyValue(k: string, v: any) {
+    if (k === "materialId") return v === "frontlit_510" ? "Frontlit 510g" : v === "frontlit_440" ? "Frontlit 440g" : String(v);
+    if (k === "productType") return v === "alucobond" ? "Alucobond" : v === "polipropilena" ? "Polipropilenă" : v === "pvc-forex" ? "PVC Forex" : String(v);
+    if (k === "designOption") return v === "pro" ? "Pro" : v === "upload" ? "Am fișier" : v === "text_only" ? "Text" : String(v);
+    if (k === "framed") return formatYesNo(v);
+    if (typeof v === "boolean") return formatYesNo(v);
+    return String(v);
+  }
+
+  function renderDetails(item: any) {
+    const meta = item.metadata ?? {};
+    const details: Array<{ label: string; value: string }> = [];
+
+    // Dimensiuni (dacă există la top-level sau în metadata)
+    const width = item.width ?? item.width_cm ?? meta.width_cm ?? meta.width;
+    const height = item.height ?? item.height_cm ?? meta.height_cm ?? meta.height;
+    if (width || height) {
+      details.push({ label: "Dimensiune", value: `${width ?? "—"} x ${height ?? "—"} cm` });
+    }
+
+    // Chei cunoscute
+    const knownKeys = Object.keys(labelForKey).filter((k) => meta[k] !== undefined);
+    knownKeys.forEach((k) => {
+      const label = labelForKey[k];
+      const val = prettyValue(k, meta[k]);
+      details.push({ label, value: val });
+    });
+
+    // Dacă avem sqm/prices non-duplicate
+    ["sqmPerUnit", "totalSqm", "pricePerSqm"].forEach((k) => {
+      if (!knownKeys.includes(k) && meta[k] !== undefined) {
+        const label = (labelForKey as any)[k] || k;
+        details.push({ label, value: String(meta[k]) });
+      }
+    });
+
+    // Leftovers (exclude chei zgomotoase)
+    const exclude = new Set([
+      "price",
+      "totalAmount",
+      "qty",
+      "quantity",
+      "artwork",
+      "artworkUrl",
+      "artworkLink",
+      "text",
+      "textDesign",
+      "selectedReadable",
+      "selections",
+      "title",
+      "name",
+    ]);
+    Object.keys(meta)
+      .filter((k) => !knownKeys.includes(k) && !exclude.has(k))
+      .forEach((k) => details.push({ label: k, value: String(meta[k]) }));
+
+    if (details.length === 0) return null;
+
+    return (
+      <div className="mt-2 rounded-md border border-white/10 bg-white/5 p-2 text-xs text-muted">
+        {details.map((d, idx) => (
+          <div key={idx} className="flex gap-2 py-0.5">
+            <span className="opacity-80">{d.label}:</span>
+            <span className="font-medium text-ui">{d.value}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
   <div className="rounded-2xl border card-bg p-4 text-ui">
       <h2 className="text-xl font-bold mb-4">Produsele tale</h2>
@@ -399,23 +505,9 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
                   <p className="font-semibold truncate pr-2">{title}</p>
                   <span className="text-muted text-sm">x{qty}</span>
                 </div>
+                {renderDetails(item)}
                 <div className="mt-1 text-sm text-muted">
-                  {item.artworkUrl && (
-                    <a className="underline text-indigo-300" href={item.artworkUrl} target="_blank" rel="noopener noreferrer">
-                      fișier încărcat
-                    </a>
-                  )}
-                  {(!item.artworkUrl && item.metadata?.artworkLink) && (
-                    <a className="underline text-indigo-300" href={item.metadata.artworkLink} target="_blank" rel="noopener noreferrer">
-                      link grafică
-                    </a>
-                  )}
-                  {"textDesign" in item && item.textDesign && (
-                    <span className="ml-2 inline-block rounded bg-white/10 px-2 py-0.5 text-[11px]">
-                      text inclus
-                    </span>
-                  )}
-                  {/* unit price + line total */}
+                  {/* detalii preț */}
                   <div className="mt-2">
                     <div className="text-xs text-muted">
                       {unit > 0 ? `Preț unitar: ${fmt(unit)}` : "Preț unitar: —"}
