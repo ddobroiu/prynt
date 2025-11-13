@@ -5,6 +5,7 @@ import FlyerConfigurator from "@/components/FlyerConfigurator";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export default function FlyerePage() {
   const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
@@ -16,6 +17,7 @@ export default function FlyerePage() {
   return (
     <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Flyere", url: `${base}/flayere` }]} />
+      <ServiceJsonLd name="Flyere promoționale" url={`${base}/flayere`} />
       <FlyerConfigurator />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />

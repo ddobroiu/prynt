@@ -51,7 +51,11 @@ export async function GET() {
       } catch {}
     }
     if (!lastmod) lastmod = formatDateISO(new Date());
-    return { url: `${base}/banner/${s}`, priority: 0.8, lastmod };
+    const catRaw = String(prod?.metadata?.category ?? "").toLowerCase();
+    const category = catRaw || "bannere";
+    const pathCategory = category === "bannere" ? "banner" : category;
+    const slugPart = String(s).replace(/^\/+/, "");
+    return { url: `${base}/${pathCategory}/${slugPart}`.replace(/\/+$/, ""), priority: 0.8, lastmod };
   });
 
   const blogPages = blogSlugs.map((s) => ({ url: `${base}/blog/${s}`, priority: 0.5, lastmod: formatDateISO(new Date()) }));

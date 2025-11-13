@@ -5,6 +5,7 @@ import PlianteConfigurator from "@/components/PlianteConfigurator";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export default function PliantePage() {
   const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
@@ -16,6 +17,7 @@ export default function PliantePage() {
   return (
     <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Pliante", url: `${base}/pliante` }]} />
+      <ServiceJsonLd name="Pliante personalizate" url={`${base}/pliante`} />
       <PlianteConfigurator />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />

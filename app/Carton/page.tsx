@@ -3,6 +3,7 @@ import ConfiguratorCarton from "@/components/ConfiguratorCarton";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export const metadata = {
   title: "Carton - Configurator",
@@ -19,6 +20,7 @@ export default function Page() {
   return (
     <div>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Carton", url: `${base}/carton` }]} />
+      <ServiceJsonLd name="Print pe carton" url={`${base}/carton`} />
       <ConfiguratorCarton />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />

@@ -3,6 +3,7 @@ import ConfiguratorPVCForex from "@/components/ConfiguratorPVCForex";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export const metadata = {
   title: "PVC Forex - Configurator",
@@ -19,6 +20,7 @@ export default function Page() {
   return (
     <div>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "PVC Forex", url: `${base}/pvc-forex` }]} />
+      <ServiceJsonLd name="Print pe PVC Forex" url={`${base}/pvc-forex`} />
       <ConfiguratorPVCForex />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />

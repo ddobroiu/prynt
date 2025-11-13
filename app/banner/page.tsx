@@ -3,6 +3,7 @@ import BannerConfigurator from "@/components/BannerConfigurator";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export const metadata = {
   title: "Banner — Configurează online | Prynt",
@@ -25,6 +26,7 @@ export default function Page() {
   return (
     <main style={{ padding: 16 }}>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Banner", url: `${base}/banner` }]} />
+      <ServiceJsonLd name="Bannere publicitare" url={`${base}/banner`} />
       <section>
         <BannerConfigurator />
       </section>

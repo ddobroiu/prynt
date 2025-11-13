@@ -3,6 +3,7 @@ import AfiseConfigurator from "@/components/AfiseConfigurator";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export const metadata = {
   title: "Afișe — Print digital | Prynt",
@@ -23,6 +24,7 @@ export default function Page() {
   return (
     <main style={{ padding: 16 }}>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Afișe", url: `${base}/afise` }]} />
+      <ServiceJsonLd name="Afișe tipărite" url={`${base}/afise`} />
       <section>
         <AfiseConfigurator />
       </section>

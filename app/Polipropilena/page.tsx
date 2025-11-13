@@ -3,6 +3,7 @@ import ConfiguratorPolipropilena from "@/components/ConfiguratorPolipropilena";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export const metadata = {
   title: "Polipropilenă - Configurator",
@@ -19,6 +20,7 @@ export default function Page() {
   return (
     <div>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Polipropilenă", url: `${base}/polipropilena` }]} />
+      <ServiceJsonLd name="Panouri din polipropilenă celulară" url={`${base}/polipropilena`} />
       <ConfiguratorPolipropilena />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />

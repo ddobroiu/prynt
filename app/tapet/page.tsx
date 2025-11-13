@@ -3,6 +3,7 @@ import TapetConfigurator from "@/components/TapetConfigurator";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export const metadata = {
   title: "Tapet — Configurator",
@@ -20,6 +21,7 @@ export default function Page() {
   return (
     <main style={{ padding: 16 }}>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Tapet", url: `${base}/tapet` }]} />
+      <ServiceJsonLd name="Tapet personalizat" url={`${base}/tapet`} />
       <section>
         <TapetConfigurator />
       </section>

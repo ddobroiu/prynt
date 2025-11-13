@@ -3,6 +3,7 @@ import CanvasConfigurator from "@/components/CanvasConfigurator";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export const metadata = {
   title: "Canvas — Configurează online | Prynt",
@@ -20,6 +21,7 @@ export default function Page() {
   return (
     <main style={{ padding: 16 }}>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Canvas", url: `${base}/canvas` }]} />
+      <ServiceJsonLd name="Tablouri canvas" url={`${base}/canvas`} />
       <section>
         <CanvasConfigurator />
       </section>

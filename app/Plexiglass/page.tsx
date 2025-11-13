@@ -3,6 +3,7 @@ import ConfiguratorPlexiglass from "@/components/ConfiguratorPlexiglass";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export const metadata = {
   title: "Plexiglass - Configurator",
@@ -19,6 +20,7 @@ export default function Page() {
   return (
     <div>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Plexiglass", url: `${base}/plexiglass` }]} />
+      <ServiceJsonLd name="Print/decupare pe Plexiglass" url={`${base}/plexiglass`} />
       <ConfiguratorPlexiglass />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />

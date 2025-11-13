@@ -3,6 +3,7 @@ import ConfiguratorAlucobond from "@/components/ConfiguratorAlucobond";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export const metadata = {
   title: "Alucobond - Configurator",
@@ -19,6 +20,7 @@ export default function Page() {
   return (
     <div>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Alucobond", url: `${base}/alucobond` }]} />
+      <ServiceJsonLd name="Print pe Alucobond / panouri compozite" url={`${base}/alucobond`} />
       <ConfiguratorAlucobond />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />

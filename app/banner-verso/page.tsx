@@ -3,6 +3,7 @@ import BannerVersoConfigurator from "@/components/BannerVersoConfigurator";
 import FaqJsonLd from "@/components/FaqJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import ServiceJsonLd from "@/components/ServiceJsonLd";
 
 export const metadata = {
   title: "Banner Verso — Configurator",
@@ -21,6 +22,7 @@ export default function BannerVersoPage() {
   return (
     <div>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Banner Verso", url: `${base}/banner-verso` }]} />
+      <ServiceJsonLd name="Banner față–verso (blockout)" url={`${base}/banner-verso`} />
       <BannerVersoConfigurator productSlug="banner-verso" />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
