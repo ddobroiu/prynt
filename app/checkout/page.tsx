@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useRef } from "react";
+import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../../components/CartContext";
 import { ShieldCheck, Truck, X } from "lucide-react";
@@ -301,9 +302,26 @@ export default function CheckoutPage() {
   return (
   <main className="bg-ui min-h-screen">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Coșul tău</h1>
         </div>
+        <nav className="mb-8 flex flex-wrap gap-2 text-xs md:text-sm">
+          <Link href="/shop" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Shop</Link>
+          <Link href="/banner" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Bannere</Link>
+          <Link href="/banner-verso" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Banner Verso</Link>
+          <Link href="/canvas" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Canvas</Link>
+          <Link href="/tapet" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Tapet</Link>
+          <Link href="/afise" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Afișe</Link>
+          <Link href="/flayere" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Flayere</Link>
+          <Link href="/pliante" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Pliante</Link>
+          <Link href="/autocolante" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Autocolante</Link>
+          <Link href="/plexiglass" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Plexiglas</Link>
+          <Link href="/alucobond" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Alucobond</Link>
+          <Link href="/carton" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Carton</Link>
+          <Link href="/polipropilena" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Polipropilenă</Link>
+          <Link href="/pvc-forex" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">PVC Forex</Link>
+          <Link href="/fonduri-pnrr" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Fonduri PNRR</Link>
+        </nav>
 
         {isEmpty ? (
           <EmptyCart />
@@ -357,12 +375,21 @@ export default function CheckoutPage() {
       </div>
 
       {showEmbed && (
-        <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-gray-950 p-4">
+        <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur flex items-center justify-center p-4 pointer-events-none">
+          <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-gray-950 p-4 pointer-events-auto">
             <div className="mb-3 text-center text-muted">Finalizează plata în siguranță</div>
             <div id="stripe-embedded" />
             <div className="mt-3 text-center text-xs text-muted">
               După finalizare, vei fi redirecționat înapoi pentru confirmare.
+            </div>
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => setShowEmbed(false)}
+                className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20"
+              >
+                Închide și revino la coș
+              </button>
             </div>
           </div>
         </div>

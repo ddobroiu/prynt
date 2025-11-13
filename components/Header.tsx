@@ -302,7 +302,7 @@ export default function Header() {
                       border border-gray-200/80 dark:border-slate-800/80
                       bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-2
                       shadow-2xl shadow-black/5 ring-1 ring-black/5
-                      z-50 transition-all origin-top
+                      z-[120] transition-all origin-top pointer-events-auto
                       ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}
                     `}
                   >
