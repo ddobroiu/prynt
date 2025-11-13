@@ -61,6 +61,44 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Linkuri ANPC / UE - badge-uri clickable */}
+      <div className="px-4 pb-6">
+        <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-center gap-6">
+          <a
+            href="https://anpc.ro/ce-este-sal/"
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center justify-center"
+            title="Soluționarea Alternativă a Litigiilor – ANPC"
+          >
+            <img
+              src="/250x50_icon_ANPC-SAL.webp"
+              alt="ANPC – SAL"
+              width={250}
+              height={50}
+              loading="lazy"
+              className="h-[50px] w-[250px] object-contain border border-indigo-700/30 rounded bg-white"
+            />
+          </a>
+          <a
+            href="https://consumer-redress.ec.europa.eu/index_ro"
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center justify-center"
+            title="Platforma europeană SOL – Soluționarea Online a Litigiilor"
+          >
+            <img
+              src="/250x50_icon_ANPC-SAL.webp"
+              alt="UE – Platformă SOL (Soluționarea Online a Litigiilor)"
+              width={250}
+              height={50}
+              loading="lazy"
+              className="h-[50px] w-[250px] object-contain border border-indigo-700/30 rounded bg-white"
+            />
+          </a>
+        </div>
+      </div>
+
       {/* Bară de jos */}
   <div className="border-t border-indigo-700/40 py-5 text-center text-sm text-muted font-medium tracking-wide bg-indigo-950/60">
         © {new Date().getFullYear()} Prynt.ro — Toate drepturile rezervate.
