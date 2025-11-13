@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { MessageCircle, Mail } from "lucide-react";
+import { MessageCircle, Mail, Bot } from "lucide-react";
 
 export default function ContactButton() {
   const [open, setOpen] = useState(false);
@@ -31,6 +31,20 @@ export default function ContactButton() {
             <Mail size={18} />
             <span>Email</span>
           </a>
+
+          <button
+            onClick={() => {
+              // Deschide asistentul AI printr-un eveniment global
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('assistant:open'));
+              }
+              setOpen(false);
+            }}
+            className="flex items-center gap-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 shadow-lg transition"
+          >
+            <Bot size={18} />
+            <span>Chat AI</span>
+          </button>
         </div>
       )}
 

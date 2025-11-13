@@ -6,8 +6,7 @@ import Providers from "../components/Providers";
 import ContactButton from "../components/ContactButton";
 import AssistantWidget from "../components/AssistantWidget";
 
-// Cart provider + widget (client components)
-import { CartProvider } from "../components/CartContext";
+// Cart widget (optional; already inside global Providers which includes CartProvider)
 import CartWidget from "../components/CartWidget";
 
 export const metadata = {
@@ -118,15 +117,8 @@ var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n
   <body className="bg-ui text-ui antialiased">
         <Providers>
           <Header />
-
-          {/* CartProvider trebuie să învăluie părțile care folosesc useCart */}
-          <CartProvider>
-            <main>{children}</main>
-
-            {/* CartWidget folosește useCart, deci trebuie în interiorul CartProvider */}
-            <CartWidget />
-          </CartProvider>
-
+          <main>{children}</main>
+          <CartWidget />
           <Footer />
           <AssistantWidget />
           <ContactButton />

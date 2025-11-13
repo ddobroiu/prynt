@@ -37,12 +37,12 @@ export async function POST(request: Request) {
     const totalSqm = sqmPerUnit * quantity;
 
     // Determine price per sqm by bands (based on total area of the order)
-    let pricePerSqm = 35;
-    if (totalSqm < 1) pricePerSqm = 100;
-    else if (totalSqm <= 5) pricePerSqm = 75;
-    else if (totalSqm <= 20) pricePerSqm = 50;
-    else if (totalSqm <= 50) pricePerSqm = 35;
-    else pricePerSqm = 35;
+  let pricePerSqm = 35;
+  if (totalSqm < 1) pricePerSqm = 100;
+  else if (totalSqm <= 5) pricePerSqm = 75;
+  else if (totalSqm <= 20) pricePerSqm = 60;
+  else if (totalSqm <= 50) pricePerSqm = 45;
+  else pricePerSqm = 35;
 
     // Base price (before surcharges) = total area * pricePerSqm
     const basePrice = totalSqm * pricePerSqm;
@@ -50,9 +50,9 @@ export async function POST(request: Request) {
     // Surcharges: percentages applied to the basePrice
     let multiplier = 1;
 
-    // material surcharge: 510g -> +15%
+    // material surcharge: 510g -> +10%
     if (materialId.includes("510") || materialId.includes("frontlit_510") || materialId.includes("pvc-510")) {
-      multiplier *= 1.15;
+      multiplier *= 1.10;
     }
 
     // tiv si capse -> +10%
@@ -63,8 +63,8 @@ export async function POST(request: Request) {
 
     const priceAfterMultipliers = basePrice * multiplier;
 
-    // Graphic (pro) fee: +50 RON one-time per order
-    const designFee = designOption === "pro" ? 50 : 0;
+  // Graphic (pro) fee: +50 RON one-time per order
+  const designFee = designOption === "pro" ? 50 : 0;
 
     // Final total (rounded)
     const finalTotal = roundMoney(priceAfterMultipliers + designFee);
