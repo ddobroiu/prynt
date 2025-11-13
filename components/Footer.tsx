@@ -21,6 +21,41 @@ export default function Footer() {
           <p className="mt-5 text-base text-muted max-w-xs font-light">
             Tipar digital & producție publicitară: bannere, flayere, canvas, autocolante și materiale rigide. Calitate, viteză și preț corect.
           </p>
+          {/* Linkuri ANPC / UE – plasate sub descriere */}
+          <div className="mt-6 flex flex-nowrap items-center gap-4">
+            <a
+              href="https://anpc.ro/ce-este-sal/"
+              target="_blank"
+              rel="noopener"
+              className="inline-flex items-center justify-center"
+              title="Soluționarea Alternativă a Litigiilor – ANPC"
+            >
+              <img
+                src="/250x50_icon_ANPC-SAL.webp"
+                alt="ANPC – SAL"
+                width={200}
+                height={40}
+                loading="lazy"
+                className="h-10 w-[200px] object-contain border border-indigo-700/30 rounded bg-white"
+              />
+            </a>
+            <a
+              href="https://consumer-redress.ec.europa.eu/index_ro"
+              target="_blank"
+              rel="noopener"
+              className="inline-flex items-center justify-center"
+              title="Platforma europeană SOL – Soluționarea Online a Litigiilor"
+            >
+              <img
+                src="/250x50_icon_ANPC-SOL.webp"
+                alt="UE – Platformă SOL (Soluționarea Online a Litigiilor)"
+                width={200}
+                height={40}
+                loading="lazy"
+                className="h-10 w-[200px] object-contain border border-indigo-700/30 rounded bg-white"
+              />
+            </a>
+          </div>
         </div>
 
         {/* Col 2 – Contact */}
@@ -58,44 +93,6 @@ export default function Footer() {
             <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/blog"><span>Blog</span></a></li>
             <li><a className="hover:text-indigo-300 transition-colors flex items-center gap-1" href="/contact"><span>Contact</span></a></li>
           </ul>
-        </div>
-      </div>
-
-      {/* Linkuri ANPC / UE - badge-uri clickable */}
-      <div className="px-4 pb-6">
-        <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-center gap-6">
-          <a
-            href="https://anpc.ro/ce-este-sal/"
-            target="_blank"
-            rel="noopener"
-            className="inline-flex items-center justify-center"
-            title="Soluționarea Alternativă a Litigiilor – ANPC"
-          >
-            <img
-              src="/250x50_icon_ANPC-SAL.webp"
-              alt="ANPC – SAL"
-              width={250}
-              height={50}
-              loading="lazy"
-              className="h-[50px] w-[250px] object-contain border border-indigo-700/30 rounded bg-white"
-            />
-          </a>
-          <a
-            href="https://consumer-redress.ec.europa.eu/index_ro"
-            target="_blank"
-            rel="noopener"
-            className="inline-flex items-center justify-center"
-            title="Platforma europeană SOL – Soluționarea Online a Litigiilor"
-          >
-            <img
-              src="/250x50_icon_ANPC-SAL.webp"
-              alt="UE – Platformă SOL (Soluționarea Online a Litigiilor)"
-              width={250}
-              height={50}
-              loading="lazy"
-              className="h-[50px] w-[250px] object-contain border border-indigo-700/30 rounded bg-white"
-            />
-          </a>
         </div>
       </div>
 
