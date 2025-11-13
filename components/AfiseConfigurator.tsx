@@ -543,8 +543,8 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
   <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
           <div className="space-y-6 lg:sticky lg:top-6">
             <div className="card p-4">
-              <div className="aspect-video rounded overflow-hidden bg-black">
-                <img src="/products/afise/1.jpg" alt="preview" className="w-full h-full object-cover" />
+              <div className="aspect-square rounded overflow-hidden bg-black">
+                <img src="/products/afise/1.webp" alt="preview" className="w-full h-full object-cover" />
               </div>
             </div>
 

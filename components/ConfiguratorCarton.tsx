@@ -6,10 +6,10 @@ import MobilePriceBar from "./MobilePriceBar";
 
 /* GALLERY (example images - adjust paths) */
 const GALLERY = [
-  "/products/carton/1.jpg",
-  "/products/carton/2.jpg",
-  "/products/carton/3.jpg",
-  "/products/carton/4.jpg",
+  "/products/carton/1.webp",
+  "/products/carton/2.webp",
+  "/products/carton/3.webp",
+  "/products/carton/4.webp",
 ] as const;
 
 /* HELPERS */
@@ -509,13 +509,13 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
           <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
-                <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
+                <div className="aspect-square overflow-hidden rounded-xl border border-white/10 bg-black">
                   <img src={activeImage} alt="Carton preview" className="h-full w-full object-cover" loading="eager" />
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
                   {GALLERY.map((src, i) => (
-                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
-                      <img src={src} alt="Thumb" className="h-20 w-full object-cover" loading="lazy" />
+                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition aspect-square ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
+                      <img src={src} alt="Thumb" className="w-full h-full object-cover" loading="lazy" />
                     </button>
                   ))}
                 </div>

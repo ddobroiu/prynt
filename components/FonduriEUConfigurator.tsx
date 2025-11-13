@@ -9,10 +9,10 @@ type Option = { id: string; label: string; price: number };
 
 // Simple gallery images (reuse existing assets to avoid missing files)
 const GALLERY = [
-  "/products/banner/1.jpg",
-  "/products/afise/1.jpg",
-  "/products/autocolante/1.jpg",
-  "/products/canvas/1.jpg",
+  "/products/banner/1.webp",
+  "/products/afise/1.webp",
+  "/products/autocolante/1.webp",
+  "/products/canvas/1.webp",
 ] as const;
 
 // Groups and options (prices in RON)
@@ -237,22 +237,22 @@ export default function FonduriEUConfigurator() {
           {/* LEFT - options (single page, compact selects) */}
           <div className="order-2 lg:order-1 lg:col-span-3">
             {/* Comunicat full width first */}
-            <div className="mb-4">
-              <Group groupKey="comunicat" />
+              <div className="card p-4">
+                <div className="aspect-square overflow-hidden rounded-xl border border-white/10 bg-black">
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Group groupKey="bannerSite" />
               <Group groupKey="afisInformativ" />
-              <Group groupKey="autoMici" />
+                    <button
               <Group groupKey="autoMari" />
-              <Group groupKey="panouTemporar" />
+                      className={`relative overflow-hidden rounded-md border transition aspect-square ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`}
               <Group groupKey="placaPermanenta" />
             </div>
 
             {/* Grafică (opțional) */}
             <div className="card p-4 mt-4">
               <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">Grafică (opțional)</h2></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <img src={src} alt={`thumb-${i + 1}`} className="w-full h-full object-cover" />
                 <div>
                   <label className="field-label">Încarcă fișier</label>
                   <input
@@ -319,7 +319,7 @@ export default function FonduriEUConfigurator() {
           <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
-                <div className="aspect-video overflow-hidden rounded border bg-black">
+                <div className="aspect-square overflow-hidden rounded border bg-black">
                   <img src={activeImage} alt="Previzualizare" className="h-full w-full object-cover" />
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
@@ -327,10 +327,10 @@ export default function FonduriEUConfigurator() {
                     <button
                       key={src}
                       onClick={() => { setActiveImage(src); setActiveIndex(i); }}
-                      className={`rounded-md overflow-hidden border ${activeIndex === i ? "border-indigo-500" : "border-white/10"}`}
+                      className={`rounded-md overflow-hidden border aspect-square ${activeIndex === i ? "border-indigo-500" : "border-white/10"}`}
                       aria-label={`Imagine ${i + 1}`}
                     >
-                      <img src={src} alt={`thumb-${i + 1}`} className="h-20 w-full object-cover" />
+                      <img src={src} alt={`thumb-${i + 1}`} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>

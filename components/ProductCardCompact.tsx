@@ -7,15 +7,15 @@ type Product = LibProduct & { category?: string };
 export default function ProductCardCompact({ product }: { product: Product }) {
   const slugKey = String(product.slug ?? (product as any).routeSlug ?? product.id ?? "").toLowerCase();
   const genericSet = new Set<string>([
-    "/products/banner/1.jpg",
-    "/products/banner/2.jpg",
-    "/products/banner/3.jpg",
-    "/products/banner/4.jpg",
+    "/products/banner/1.webp",
+    "/products/banner/2.webp",
+    "/products/banner/3.webp",
+    "/products/banner/4.webp",
     "/placeholder.png",
   ]);
   const imgs = product.images ?? [];
   let img = imgs.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
-  if (!img) img = imgs.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgs[0] ?? "/products/banner/1.jpg";
+  if (!img) img = imgs.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgs[0] ?? "/products/banner/1.webp";
 
   const isBanner = String((product.metadata as any)?.category ?? product.category ?? "").toLowerCase() === "bannere";
   const priceDisplay = isBanner ? "De la 50 RON" : "Detalii";
@@ -24,7 +24,7 @@ export default function ProductCardCompact({ product }: { product: Product }) {
   return (
     <article className="relative w-full overflow-hidden rounded-2xl shadow-lg bg-slate-900/60">
       <Link href={href} className="block group" aria-label={`Configurează ${product.title}`}>
-        <div className="relative" style={{ height: 320 }}>
+        <div className="relative aspect-square">
           <img
             src={img}
             alt={product.title ?? "Imagine produs"}
@@ -34,7 +34,7 @@ export default function ProductCardCompact({ product }: { product: Product }) {
               const el = e.currentTarget as HTMLImageElement;
               if (!el.dataset.fallback) {
                 el.dataset.fallback = "1";
-                el.src = "/products/banner/1.jpg";
+                el.src = "/products/banner/1.webp";
               }
             }}
           />

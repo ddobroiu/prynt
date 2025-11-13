@@ -6,9 +6,9 @@ import MobilePriceBar from "./MobilePriceBar";
 
 /* GALLERY (adjust images if needed) */
 const GALLERY = [
-  "/products/polipropilena/1.jpg",
-  "/products/polipropilena/2.jpg",
-  "/products/polipropilena/3.jpg",
+  "/products/polipropilena/1.webp",
+  "/products/polipropilena/2.webp",
+  "/products/polipropilena/3.webp",
 ] as const;
 
 /* HELPERS */
@@ -370,13 +370,13 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
           <aside id="order-summary" className="lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
-                <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
+                <div className="aspect-square overflow-hidden rounded-xl border border-white/10 bg-black">
                   <img src={activeImage} alt="Polipropilena preview" className="h-full w-full object-cover" loading="eager" />
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
                   {GALLERY.map((src, i) => (
-                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
-                      <img src={src} alt="Thumb" className="h-20 w-full object-cover" loading="lazy" />
+                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition aspect-square ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
+                      <img src={src} alt="Thumb" className="w-full h-full object-cover" loading="lazy" />
                     </button>
                   ))}
                 </div>

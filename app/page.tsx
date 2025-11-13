@@ -28,13 +28,13 @@ const ConfiguratorCard: React.FC<ConfiguratorItem> = ({ title, href, image }) =>
       href={href}
       className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/50 shadow-lg transition-all duration-300 hover:border-white/20 hover:shadow-indigo-500/20 hover:-translate-y-1"
     >
-      {/* --- MODIFICARE AICI --- Am adăugat un wrapper pentru imagine --- */}
-      <div className="flex h-48 w-full items-center justify-center bg-zinc-100 dark:bg-zinc-800">
+      {/* Wrapper imagine pătrat */}
+      <div className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800">
         <img 
           src={image} 
           alt={title} 
           loading="lazy" 
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </div>
   <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
@@ -59,7 +59,7 @@ export default function HomePage() {
       id: p.id,
       title: p.title,
       desc: p.description ?? '',
-      img: p.images?.[0] ?? '/products/banner/1.jpg',
+      img: p.images?.[0] ?? '/products/banner/1.webp',
       href: category === 'bannere' ? `/banner/${slug}` : `/${category}/${slug}`,
       price: category === 'bannere' ? 50 : (p.priceBase ?? 0),
     };
@@ -69,42 +69,42 @@ export default function HomePage() {
     {
       title: 'Fonduri UE',
       items: [
-        { title: 'Fonduri PNRR', href: '/fonduri-pnrr', image: '/products/banner/1.jpg' },
-        { title: 'Fonduri REGIO', href: '/fonduri-regio', image: '/products/afise/1.jpg' },
-        { title: 'Fonduri Naționale', href: '/fonduri-nationale', image: '/products/autocolante/1.jpg' },
+        { title: 'Fonduri PNRR', href: '/fonduri-pnrr', image: '/products/banner/1.webp' },
+        { title: 'Fonduri REGIO', href: '/fonduri-regio', image: '/products/afise/1.webp' },
+        { title: 'Fonduri Naționale', href: '/fonduri-nationale', image: '/products/autocolante/1.webp' },
       ],
     },
     {
       title: 'Publicitar',
       items: [
-        { title: 'Afișe', href: '/afise', image: '/products/afise/1.jpg' },
-        { title: 'Flyere', href: '/flayere', image: '/products/flyere/1.jpg' },
-        { title: 'Pliante', href: '/pliante', image: '/products/pliante/1.jpg' },
-        { title: 'Autocolante', href: '/autocolante', image: '/products/autocolante/1.jpg' },
+        { title: 'Afișe', href: '/afise', image: '/products/afise/1.webp' },
+        { title: 'Flyere', href: '/flayere', image: '/products/flyere/1.webp' },
+        { title: 'Pliante', href: '/pliante', image: '/products/pliante/1.webp' },
+        { title: 'Autocolante', href: '/autocolante', image: '/products/autocolante/1.webp' },
       ],
     },
     {
       title: 'Banner',
       items: [
-        { title: 'Banner', href: '/banner', image: '/products/banner/1.jpg' },
-        { title: 'Banner față-verso', href: '/banner-verso', image: '/products/banner/verso/1.jpg' },
+        { title: 'Banner', href: '/banner', image: '/products/banner/1.webp' },
+        { title: 'Banner față-verso', href: '/banner-verso', image: '/products/banner/verso/1.webp' },
       ],
     },
     {
       title: 'Decor',
       items: [
-        { title: 'Canvas', href: '/canvas', image: '/products/canvas/1.jpg' },
-        { title: 'Tapet', href: '/tapet', image: '/products/wallpaper/1.jpg' },
+        { title: 'Canvas', href: '/canvas', image: '/products/canvas/1.webp' },
+        { title: 'Tapet', href: '/tapet', image: '/products/wallpaper/1.webp' },
       ],
     },
     {
       title: 'Materiale rigide',
       items: [
-        { title: 'Plexiglas', href: '/plexiglass', image: '/products/plexiglass/1.jpg' },
-        { title: 'Alucobond', href: '/alucobond', image: '/products/alucobond/1.jpg' },
-        { title: 'Carton', href: '/carton', image: '/products/carton/1.jpg' },
-        { title: 'Polipropilenă', href: '/polipropilena', image: '/products/polipropilena/1.jpg' },
-        { title: 'PVC Forex', href: '/pvc-forex', image: '/products/PVC-Forex/1.jpg' },
+        { title: 'Plexiglas', href: '/plexiglass', image: '/products/plexiglass/1.webp' },
+        { title: 'Alucobond', href: '/alucobond', image: '/products/alucobond/1.webp' },
+        { title: 'Carton', href: '/carton', image: '/products/carton/1.webp' },
+        { title: 'Polipropilenă', href: '/polipropilena', image: '/products/polipropilena/1.webp' },
+        { title: 'PVC Forex', href: '/pvc-forex', image: '/products/PVC-Forex/1.webp' },
       ],
     },
   ];
@@ -197,14 +197,14 @@ export default function HomePage() {
                 href={p.href}
                 className="group relative block overflow-hidden rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900/50 shadow-lg transition-all duration-300 hover:border-zinc-300 dark:hover:border-white/20 hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/20 hover:-translate-y-1"
               >
-                {/* --- MODIFICARE AICI --- Am adăugat un wrapper pentru imagine --- */}
-                <div className="flex h-48 w-full items-center justify-center bg-zinc-100 dark:bg-zinc-800">
-                    <img 
-                        src={p.img} 
-                        alt={p.title} 
-                        loading="lazy" 
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+                {/* Wrapper imagine pătrat */}
+                <div className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800">
+                  <img 
+                    src={p.img} 
+                    alt={p.title} 
+                    loading="lazy" 
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                 </div>
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                 <div className="p-4 flex flex-col justify-end h-full">

@@ -520,63 +520,38 @@ export async function fulfillOrder(
     };
   });
 
-  // Încercăm Oblio, dar nu blocăm dacă pică
-  try {
-    const token = await getOblioAccessToken();
+  // Emitem automat doar pentru persoană fizică; pentru juridică lăsăm manual
+  if (billing.tip_factura === 'persoana_fizica') {
+    try {
+      const token = await getOblioAccessToken();
+      const client = {
+        name: billing.name || address.nume_prenume,
+        address: billingAddressLine,
+        email: address.email,
+        phone: address.telefon,
+      } as any;
 
-    // 1) Încercare “doar CUI” dacă e Companie și avem CUI
-    const isCompany = billing.tip_factura !== 'persoana_fizica';
-    const cuiNorm = normalizeCUI(billing.cui);
-    let client = isCompany && billing.cui
-      ? {
-          // Lăsăm Oblio să identifice clientul și să folosească datele oficiale
-          cif: cuiNorm.primary || billing.cui,
-        }
-      : {
-          // Persoană fizică – trimitem doar nume + adresă, fără email pentru a evita potrivirea
-          // cu un client firmă existent în Oblio pe baza emailului de test.
-          name: billing.name || address.nume_prenume,
-          address: billingAddressLine,
-        };
+      const basePayload = {
+        cif: process.env.OBLIO_CIF_FIRMA,
+        client,
+        issueDate: new Date().toISOString().slice(0, 10),
+        seriesName: process.env.OBLIO_SERIE_FACTURA,
+        products,
+      };
 
-    const basePayload = {
-      cif: process.env.OBLIO_CIF_FIRMA,
-      client,
-      issueDate: new Date().toISOString().slice(0, 10),
-      seriesName: process.env.OBLIO_SERIE_FACTURA,
-      products,
-    };
-
-    let data = await createOblioInvoice(basePayload, token);
-
-    // 2) Dacă cere selectarea clientului, reîncercăm cu detalii minime
-      if (data?.status !== 200) {
-        const msg = (data?.statusMessage || data?.message || '').toString();
-        const needDetails = /selecteaza\s+clientul|alege\s+clientul|client|cif/i.test(msg) || (data?.status && data.status >= 400 && data.status < 500);
-
-        if (needDetails && isCompany && billing.cui) {
-          // Încercăm mai întâi CUI în format alternativ, doar cu cif (fără a suprascrie nume/adresă)
-          if (cuiNorm.alternate) {
-            const payloadAltCUI = {
-              ...basePayload,
-              client: { cif: cuiNorm.alternate },
-            };
-            data = await createOblioInvoice(payloadAltCUI, token);
-          }
-
-          // Nu mai trimitem nume/adresă/email pentru juridică, ca să nu suprascriem datele oficiale din Oblio
-        }
-    }
-
+      const data = await createOblioInvoice(basePayload, token);
       const link = (data && (data.data?.link || data.link || data.data?.url || data.url)) as string | undefined;
       if (link) {
         invoiceLink = link;
-      console.log('[OrderService] Factura Oblio generată:', invoiceLink);
-    } else if (data) {
-      console.warn('[OrderService] Oblio nu a emis factura:', data?.statusMessage || data?.message || data);
+        console.log('[OrderService] Factura Oblio PF generată:', invoiceLink);
+      } else if (data) {
+        console.warn('[OrderService] Oblio (PF) nu a emis factura:', data?.statusMessage || data?.message || data);
+      }
+    } catch (e: any) {
+      console.warn('[OrderService] Oblio PF a eșuat (comanda continuă):', e?.message || e);
     }
-  } catch (e: any) {
-    console.warn('[OrderService] Oblio a eșuat (comanda continuă):', e?.message || e);
+  } else {
+    invoiceLink = null; // juridică – emisă manual ulterior
   }
 
   // Emailuri – întotdeauna; sendEmails este tolerant la forma cart-ului

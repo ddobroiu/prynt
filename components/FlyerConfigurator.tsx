@@ -5,7 +5,7 @@ import { CheckCircle, Plus, Minus, ShoppingCart, Info } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
 
 /* Gallery images (placeholder) */
-const GALLERY = ["/products/flyere/1.jpg", "/products/flyere/2.jpg", "/products/flyere/3.jpg", "/products/flyere/4.jpg"] as const;
+const GALLERY = ["/products/flyere/1.webp", "/products/flyere/2.webp", "/products/flyere/3.webp", "/products/flyere/4.webp"] as const;
 
 /* Sizes & pricing (values doubled from screenshot per request) */
 type PriceBracket = { max: number; oneSided: number; twoSided: number };
@@ -379,7 +379,7 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
           <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
-                <div className="aspect-video overflow-hidden rounded border bg-black">
+                <div className="aspect-square overflow-hidden rounded border bg-black">
                   <img src={activeImage} alt="preview" className="h-full w-full object-cover" />
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
@@ -390,9 +390,9 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
                         setActiveImage(src);
                         setActiveIndex(i);
                       }}
-                      className={`rounded-md overflow-hidden border ${activeIndex === i ? "border-indigo-500" : "border-white/10"}`}
+                      className={`rounded-md overflow-hidden border aspect-square ${activeIndex === i ? "border-indigo-500" : "border-white/10"}`}
                     >
-                      <img src={src} alt="thumb" className="h-20 w-full object-cover" />
+                      <img src={src} alt="thumb" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>

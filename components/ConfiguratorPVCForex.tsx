@@ -6,19 +6,19 @@ import MobilePriceBar from "./MobilePriceBar";
 
 /* Default GALLERIES */
 const GALLERY_PVC = [
-  "/products/pvc-forex/1.jpg",
-  "/products/pvc-forex/2.jpg",
-  "/products/pvc-forex/3.jpg",
-  "/products/pvc-forex/4.jpg",
+  "/products/pvc-forex/1.webp",
+  "/products/pvc-forex/2.webp",
+  "/products/pvc-forex/3.webp",
+  "/products/pvc-forex/4.webp",
 ] as const;
 const GALLERY_ALU = [
-  "/products/alucobond/1.jpg",
-  "/products/alucobond/2.jpg",
-  "/products/alucobond/3.jpg",
+  "/products/alucobond/1.webp",
+  "/products/alucobond/2.webp",
+  "/products/alucobond/3.webp",
 ] as const;
 const GALLERY_PP = [
-  "/products/polipropilena/1.jpg",
-  "/products/polipropilena/2.jpg",
+  "/products/polipropilena/1.webp",
+  "/products/polipropilena/2.webp",
 ] as const;
 
 /* HELPERS */
@@ -499,7 +499,7 @@ export default function ConfiguratorPVCForex({
           <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
-                <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
+                <div className="aspect-square overflow-hidden rounded-xl border border-white/10 bg-black">
                   <img src={activeImage} alt="preview" className="h-full w-full object-cover" loading="eager" />
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
@@ -510,10 +510,10 @@ export default function ConfiguratorPVCForex({
                         setActiveImage(src);
                         setActiveIndex(i);
                       }}
-                      className={`relative overflow-hidden rounded-md border transition ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`}
+                      className={`relative overflow-hidden rounded-md border transition aspect-square ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`}
                       aria-label="Previzualizare"
                     >
-                      <img src={src} alt="Thumb" className="h-20 w-full object-cover" loading="lazy" />
+                      <img src={src} alt="Thumb" className="w-full h-full object-cover" loading="lazy" />
                     </button>
                   ))}
                 </div>

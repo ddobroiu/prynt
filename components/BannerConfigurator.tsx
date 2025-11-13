@@ -7,10 +7,10 @@ import { usePathname, useRouter } from "next/navigation";
 
 /* GALLERY (exemplu) */
 const GALLERY = [
-  "/products/banner/1.jpg",
-  "/products/banner/2.jpg",
-  "/products/banner/3.jpg",
-  "/products/banner/4.jpg",
+  "/products/banner/1.webp",
+  "/products/banner/2.webp",
+  "/products/banner/3.webp",
+  "/products/banner/4.webp",
 ] as const;
 
 /* LOGICA PREȚ LOCAL (preview instant) */
@@ -155,8 +155,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const [heightText, setHeightText] = useState(initH ? String(initH) : "");
   // Gallery: if productImage is provided, use it as first image, then only 1,2,3 (not 4)
   const galleryImages = productImage
-    ? [productImage, "/products/banner/1.jpg", "/products/banner/2.jpg", "/products/banner/3.jpg"]
-    : ["/products/banner/1.jpg", "/products/banner/2.jpg", "/products/banner/3.jpg"];
+    ? [productImage, "/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"]
+    : ["/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"];
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeImage, setActiveImage] = useState<string>(galleryImages[0]);
   const [designOption, setDesignOption] = useState<DesignOption>("upload");
@@ -490,13 +490,13 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
           <div className="space-y-6 lg:sticky lg:top-6">
             <div className="card p-4">
-              <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
+              <div className="aspect-square overflow-hidden rounded-xl border border-white/10 bg-black">
                 <img src={activeImage} alt="Banner preview" className="h-full w-full object-cover" loading="eager" />
               </div>
               <div className="mt-3 grid grid-cols-4 gap-3">
                 {galleryImages.map((src, i) => (
-                  <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
-                    <img src={src} alt="Thumb" className="h-20 w-full object-cover" loading="lazy" />
+                  <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition aspect-square ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
+                    <img src={src} alt="Thumb" className="w-full h-full object-cover" loading="lazy" />
                   </button>
                 ))}
               </div>

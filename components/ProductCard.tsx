@@ -15,32 +15,32 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
   const imgCandidates = product.images ?? [];
   const slugKey = String(product.slug ?? (product as any).routeSlug ?? product.id ?? "").toLowerCase();
   const genericSet = new Set<string>([
-    "/products/banner/1.jpg",
-    "/products/banner/2.jpg",
-    "/products/banner/3.jpg",
-    "/products/banner/4.jpg",
-    "/products/canvas/1.jpg",
-    "/products/canvas/2.jpg",
-    "/products/canvas/3.jpg",
-    "/products/afise/1.jpg",
-    "/products/afise/2.jpg",
-    "/products/afise/3.jpg",
-    "/products/flayere/1.jpg",
-    "/products/flayere/2.jpg",
-    "/products/flayere/3.jpg",
-    "/products/autocolante/1.jpg",
-    "/products/autocolante/2.jpg",
-    "/products/autocolante/3.jpg",
-    "/products/tapet/1.jpg",
-    "/products/tapet/2.jpg",
-    "/products/tapet/3.jpg",
+    "/products/banner/1.webp",
+    "/products/banner/2.webp",
+    "/products/banner/3.webp",
+    "/products/banner/4.webp",
+    "/products/canvas/1.webp",
+    "/products/canvas/2.webp",
+    "/products/canvas/3.webp",
+    "/products/afise/1.webp",
+    "/products/afise/2.webp",
+    "/products/afise/3.webp",
+    "/products/flayere/1.webp",
+    "/products/flayere/2.webp",
+    "/products/flayere/3.webp",
+    "/products/autocolante/1.webp",
+    "/products/autocolante/2.webp",
+    "/products/autocolante/3.webp",
+    "/products/tapet/1.webp",
+    "/products/tapet/2.webp",
+    "/products/tapet/3.webp",
     "/placeholder.png",
   ]);
   // Prefer an image that contains the product slug/id in its path (product-specific).
   let initialImg = imgCandidates.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
   if (!initialImg) {
     // Otherwise prefer the first non-generic image
-    initialImg = imgCandidates.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgCandidates[0] ?? "/products/banner/1.jpg";
+    initialImg = imgCandidates.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgCandidates[0] ?? "/products/banner/1.webp";
   }
   const priceNum = typeof product.price === "number" ? product.price : Number(product.price || 0);
   const categoryLower = String(product.category || "").toLowerCase();
@@ -71,7 +71,7 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
   return (
   <article className="card bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-xl rounded-2xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-2xl h-full">
       <Link href={productUrl} className="block group" aria-label={`Configurează ${product.title}`}>
-        <div className="w-full relative bg-gray-100 h-56 overflow-hidden" style={imageHeightPx ? { height: imageHeightPx } : undefined}>
+        <div className="w-full relative bg-gray-100 aspect-square overflow-hidden">
           <img
             src={initialImg}
             alt={product.title ?? "Imagine produs"}
@@ -82,16 +82,16 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
               if (step === "0") {
                 el.dataset.fallback = "1";
                 el.src = isCanvas
-                  ? "/products/canvas/1.jpg"
+                  ? "/products/canvas/1.webp"
                   : isAfise
-                    ? "/products/afise/1.jpg"
+                    ? "/products/afise/1.webp"
                     : isFlayere
-                      ? "/products/flayere/1.jpg"
+                      ? "/products/flayere/1.webp"
                       : isAutocolante
-                        ? "/products/autocolante/1.jpg"
+                        ? "/products/autocolante/1.webp"
                         : isTapet
-                          ? "/products/tapet/1.jpg"
-                          : "/products/banner/1.jpg";
+                          ? "/products/tapet/1.webp"
+                          : "/products/banner/1.webp";
               } else if (step === "1") {
                 el.dataset.fallback = "2";
                 el.src = "/placeholder.png";

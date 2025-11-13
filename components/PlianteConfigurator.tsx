@@ -16,10 +16,10 @@ type WeightKey = "115" | "170" | "250";
 
 /* Gallery images (follow repo convention; adjust paths if you place images elsewhere) */
 const GALLERY = [
-  "/products/pliante/1.jpg",
-  "/products/pliante/2.jpg",
-  "/products/pliante/3.jpg",
-  "/products/pliante/4.jpg",
+  "/products/pliante/1.webp",
+  "/products/pliante/2.webp",
+  "/products/pliante/3.webp",
+  "/products/pliante/4.webp",
 ] as const;
 
 /* Fold types and sizes (keeps same structure/pattern as other configurators) */
@@ -253,13 +253,13 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
           <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
             <div className="space-y-6 lg:sticky lg:top-6">
               <div className="card p-4">
-                <div className="aspect-video overflow-hidden rounded border bg-black">
+                <div className="aspect-square overflow-hidden rounded border bg-black">
                   <img src={activeImage} alt="preview" className="h-full w-full object-cover" />
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-3">
                   {GALLERY.map((src, i) => (
-                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`rounded-md overflow-hidden border ${activeIndex === i ? "border-indigo-500" : "border-white/10"}`}>
-                      <img src={src} alt={`thumb-${i}`} className="h-20 w-full object-cover" />
+                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`rounded-md overflow-hidden border aspect-square ${activeIndex === i ? "border-indigo-500" : "border-white/10"}`}>
+                      <img src={src} alt={`thumb-${i}`} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>

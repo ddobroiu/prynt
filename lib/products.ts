@@ -55,6 +55,23 @@ const BASE_PRODUCTS: Product[] = [];
   // Append user-provided extras, avoiding duplicates by routeSlug/slug/id
   const existingSlugs = new Set(BASE_PRODUCTS.map((p) => String(p.routeSlug ?? p.slug ?? p.id)));
 
+// Convert product image paths to .webp when they reference our `/products/` assets.
+function toWebpPaths(imgs?: string[]): string[] | undefined {
+  if (!imgs) return undefined;
+  return imgs.map((src) => {
+    try {
+      const s = String(src);
+      // Only rewrite assets under our products folder and with jpg/jpeg extension
+      if (s.startsWith("/products/") && /\.(jpg|jpeg)$/i.test(s)) {
+        return s.replace(/\.(jpg|jpeg)$/i, ".webp");
+      }
+      return s;
+    } catch {
+      return src as string;
+    }
+  });
+}
+
 export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
   const slug = String(p.slug ?? p.routeSlug ?? p.id ?? "");
   const categoryRaw = String(p.metadata?.category ?? "bannere");
@@ -67,7 +84,9 @@ export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
     routeSlug: p.routeSlug ?? p.slug ?? slug,
     title: p.title ?? slug,
     description: p.description ?? "",
-    images: p.images ?? [`/products/${dir}/${slug}.jpg`, `/products/${dir}/1.jpg`, `/products/${dir}/2.jpg`, `/products/${dir}/3.jpg`],
+    images: toWebpPaths(
+      p.images ?? [`/products/${dir}/${slug}.webp`, `/products/${dir}/1.webp`, `/products/${dir}/2.webp`, `/products/${dir}/3.webp`]
+    ),
     priceBase: p.priceBase ?? 250,
     currency: p.currency ?? "RON",
     tags: p.tags ?? [],
