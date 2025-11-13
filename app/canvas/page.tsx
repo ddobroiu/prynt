@@ -23,7 +23,7 @@ export default function Page() {
   { question: "Termene și livrare", answer: "Termen total (producție + livrare): 24–48 ore." },
   ];
   return (
-    <main style={{ padding: 16 }}>
+    <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Canvas", url: `${base}/canvas` }]} />
       <ServiceJsonLd name="Tablouri canvas" url={`${base}/canvas`} />
       <HowToJsonLd
@@ -39,23 +39,29 @@ export default function Page() {
       <section>
         <CanvasConfigurator />
       </section>
-      <FaqAccordion qa={qa} />
-      <FaqJsonLd qa={qa} />
-      <RevealBlock buttonLabel="Cum comand?">
-        <HowToSection
-          title="Cum comanzi tablouri canvas"
-          steps={[
-            "Alege dimensiunea potrivită",
-            "Selectează șasiul/ramă (opțional)",
-            "Încarcă imaginea",
-            "Vezi prețul instant și adaugă în coș",
-            "Finalizează – livrare 24–48h",
-          ]}
-        />
-      </RevealBlock>
-      <RevealBlock buttonLabel="Citește mai mult">
-        <CategorySeoContent kind="canvas" />
-      </RevealBlock>
+      <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
+        <div className="md:col-span-2">
+          <FaqAccordion qa={qa} fullWidth />
+          <FaqJsonLd qa={qa} />
+        </div>
+        <aside className="mt-4 md:mt-0 space-y-4">
+          <RevealBlock buttonLabel="Cum comand?">
+            <HowToSection
+              title="Cum comanzi tablouri canvas"
+              steps={[
+                "Alege dimensiunea potrivită",
+                "Selectează șasiul/ramă (opțional)",
+                "Încarcă imaginea",
+                "Vezi prețul instant și adaugă în coș",
+                "Finalizează – livrare 24–48h",
+              ]}
+            />
+          </RevealBlock>
+          <RevealBlock buttonLabel="Citește mai mult">
+            <CategorySeoContent kind="canvas" />
+          </RevealBlock>
+        </aside>
+      </section>
     </main>
   );
 }

@@ -23,7 +23,7 @@ export default function Page() {
   ];
   const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
   return (
-    <main style={{ padding: 16 }}>
+    <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Tapet", url: `${base}/tapet` }]} />
       <ServiceJsonLd name="Tapet personalizat" url={`${base}/tapet`} />
       <HowToJsonLd
@@ -39,23 +39,29 @@ export default function Page() {
       <section>
         <TapetConfigurator />
       </section>
-      <FaqAccordion qa={qa} />
-      <FaqJsonLd qa={qa} />
-      <RevealBlock buttonLabel="Cum comand?">
-        <HowToSection
-          title="Cum comanzi tapet personalizat"
-          steps={[
-            "Măsoară peretele (lățime × înălțime)",
-            "Alege materialul potrivit (texturat/lavabil)",
-            "Încarcă designul",
-            "Preț instant și adaugă în coș",
-            "Finalizează – livrare 24–48h",
-          ]}
-        />
-      </RevealBlock>
-      <RevealBlock buttonLabel="Citește mai mult">
-        <CategorySeoContent kind="tapet" />
-      </RevealBlock>
+      <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
+        <div className="md:col-span-2">
+          <FaqAccordion qa={qa} fullWidth />
+          <FaqJsonLd qa={qa} />
+        </div>
+        <aside className="mt-4 md:mt-0 space-y-4">
+          <RevealBlock buttonLabel="Cum comand?">
+            <HowToSection
+              title="Cum comanzi tapet personalizat"
+              steps={[
+                "Măsoară peretele (lățime × înălțime)",
+                "Alege materialul potrivit (texturat/lavabil)",
+                "Încarcă designul",
+                "Preț instant și adaugă în coș",
+                "Finalizează – livrare 24–48h",
+              ]}
+            />
+          </RevealBlock>
+          <RevealBlock buttonLabel="Citește mai mult">
+            <CategorySeoContent kind="tapet" />
+          </RevealBlock>
+        </aside>
+      </section>
     </main>
   );
 }

@@ -27,7 +27,7 @@ export default function Page() {
     { question: "Retur pentru produse personalizate?", answer: "Produsele personalizate nu se pot returna, dar remediem orice neconformitate rapid." },
   ];
   return (
-    <main style={{ padding: 16 }}>
+    <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Autocolante", url: `${base}/autocolante` }]} />
       <ServiceJsonLd name="Autocolante personalizate" url={`${base}/autocolante`} />
       <HowToJsonLd

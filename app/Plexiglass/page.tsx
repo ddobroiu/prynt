@@ -22,7 +22,7 @@ export default function Page() {
     { question: "Se poate decupa la formă?", answer: "Da, putem debita și finisa plexiglasul la cerere. Menționează în detalii comandă." },
   ];
   return (
-    <div>
+    <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Plexiglass", url: `${base}/plexiglass` }]} />
       <ServiceJsonLd name="Print/decupare pe Plexiglass" url={`${base}/plexiglass`} />
       <HowToJsonLd
@@ -36,23 +36,29 @@ export default function Page() {
         ]}
       />
       <ConfiguratorPlexiglass />
-      <FaqAccordion qa={qa} />
-      <FaqJsonLd qa={qa} />
-      <RevealBlock buttonLabel="Cum comand?">
-        <HowToSection
-          title="Cum comanzi plexiglass tipărit/decupat"
-          steps={[
-            "Alege grosimea și dimensiunile",
-            "Adaugă cerințe de finisare (găuri/decupare)",
-            "Încarcă fișierele",
-            "Preț instant și adaugă în coș",
-            "Finalizează – livrare 24–48h",
-          ]}
-        />
-      </RevealBlock>
-      <RevealBlock buttonLabel="Citește mai mult">
-        <CategorySeoContent kind="plexiglass" />
-      </RevealBlock>
-    </div>
+      <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
+        <div className="md:col-span-2">
+          <FaqAccordion qa={qa} fullWidth />
+          <FaqJsonLd qa={qa} />
+        </div>
+        <aside className="mt-4 md:mt-0 space-y-4">
+          <RevealBlock buttonLabel="Cum comand?">
+            <HowToSection
+              title="Cum comanzi plexiglass tipărit/decupat"
+              steps={[
+                "Alege grosimea și dimensiunile",
+                "Adaugă cerințe de finisare (găuri/decupare)",
+                "Încarcă fișierele",
+                "Preț instant și adaugă în coș",
+                "Finalizează – livrare 24–48h",
+              ]}
+            />
+          </RevealBlock>
+          <RevealBlock buttonLabel="Citește mai mult">
+            <CategorySeoContent kind="plexiglass" />
+          </RevealBlock>
+        </aside>
+      </section>
+    </main>
   );
 }

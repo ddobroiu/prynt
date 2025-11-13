@@ -26,7 +26,7 @@ export default function Page() {
     { question: "Se pot returna afișele personalizate?", answer: "Produsele personalizate nu se returnează, dar remediem rapid orice neconformitate conform legislației în vigoare." },
   ];
   return (
-    <main style={{ padding: 16 }}>
+    <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Afișe", url: `${base}/afise` }]} />
       <ServiceJsonLd name="Afișe tipărite" url={`${base}/afise`} />
       <HowToJsonLd
@@ -42,23 +42,29 @@ export default function Page() {
       <section>
         <AfiseConfigurator />
       </section>
-      <FaqAccordion qa={qa} />
-      <FaqJsonLd qa={qa} />
-      <RevealBlock buttonLabel="Cum comand?">
-        <HowToSection
-          title="Cum comanzi afișe"
-          steps={[
-            "Alege formatul și materialul potrivit",
-            "Setează tirajul",
-            "Încarcă fișierele (PDF/AI/PSD/JPG/PNG)",
-            "Preț instant și adaugă în coș",
-            "Finalizează – livrare 24–48h",
-          ]}
-        />
-      </RevealBlock>
-      <RevealBlock buttonLabel="Citește mai mult">
-        <CategorySeoContent kind="afise" />
-      </RevealBlock>
+      <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
+        <div className="md:col-span-2">
+          <FaqAccordion qa={qa} fullWidth />
+          <FaqJsonLd qa={qa} />
+        </div>
+        <aside className="mt-4 md:mt-0 space-y-4">
+          <RevealBlock buttonLabel="Cum comand?">
+            <HowToSection
+              title="Cum comanzi afișe"
+              steps={[
+                "Alege formatul și materialul potrivit",
+                "Setează tirajul",
+                "Încarcă fișierele (PDF/AI/PSD/JPG/PNG)",
+                "Preț instant și adaugă în coș",
+                "Finalizează – livrare 24–48h",
+              ]}
+            />
+          </RevealBlock>
+          <RevealBlock buttonLabel="Citește mai mult">
+            <CategorySeoContent kind="afise" />
+          </RevealBlock>
+        </aside>
+      </section>
     </main>
   );
 }

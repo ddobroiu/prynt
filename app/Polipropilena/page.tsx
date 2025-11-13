@@ -22,7 +22,7 @@ export default function Page() {
     { question: "Se poate printa pe ambele fețe?", answer: "Da, putem printa față/verso conform cerințelor. Specifică în comandă." },
   ];
   return (
-    <div>
+    <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Polipropilenă", url: `${base}/polipropilena` }]} />
       <ServiceJsonLd name="Panouri din polipropilenă celulară" url={`${base}/polipropilena`} />
       <HowToJsonLd
@@ -59,6 +59,6 @@ export default function Page() {
             </RevealBlock>
           </aside>
         </section>
-    </div>
+    </main>
   );
 }

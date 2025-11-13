@@ -28,7 +28,7 @@ export default function Page() {
     { question: "Metode de plată?", answer: "Ramburs la curier sau card online securizat. Factura este emisă electronic." },
   ];
   return (
-    <main style={{ padding: 16 }}>
+    <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Banner", url: `${base}/banner` }]} />
       <ServiceJsonLd name="Bannere publicitare" url={`${base}/banner`} />
       <HowToJsonLd

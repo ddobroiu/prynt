@@ -24,7 +24,7 @@ export default function BannerVersoPage() {
     { question: "Ce finisări oferim?", answer: "Tiv și capse, buzunare pentru bară, personalizabile în configurator sau la cerere." },
   ];
   return (
-    <div>
+    <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Banner Verso", url: `${base}/banner-verso` }]} />
       <ServiceJsonLd name="Banner față–verso (blockout)" url={`${base}/banner-verso`} />
       <HowToJsonLd
@@ -61,6 +61,6 @@ export default function BannerVersoPage() {
           </RevealBlock>
         </aside>
       </section>
-    </div>
+    </main>
   );
 }

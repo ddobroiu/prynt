@@ -22,7 +22,7 @@ export default function Page() {
     { question: "Puteți bigui/cresta cartonul?", answer: "Da, oferim finisaje la cerere. Specifică detaliile în comandă." },
   ];
   return (
-    <div>
+    <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Carton", url: `${base}/carton` }]} />
       <ServiceJsonLd name="Print pe carton" url={`${base}/carton`} />
       <HowToJsonLd
@@ -36,23 +36,29 @@ export default function Page() {
         ]}
       />
       <ConfiguratorCarton />
-      <FaqAccordion qa={qa} />
-      <FaqJsonLd qa={qa} />
-        <RevealBlock buttonLabel="Cum comand?">
-          <HowToSection
-            title="Cum comanzi print pe carton"
-            steps={[
-              "Alege formatul și grosimea",
-              "Selectează finisajele necesare",
-              "Încarcă fișierele",
-              "Preț instant și adaugă în coș",
-              "Finalizează – livrare 24–48h",
-            ]}
-          />
-        </RevealBlock>
-        <RevealBlock buttonLabel="Citește mai mult">
-          <CategorySeoContent kind="carton" />
-        </RevealBlock>
-    </div>
+      <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
+        <div className="md:col-span-2">
+          <FaqAccordion qa={qa} fullWidth />
+          <FaqJsonLd qa={qa} />
+        </div>
+        <aside className="mt-4 md:mt-0 space-y-4">
+          <RevealBlock buttonLabel="Cum comand?">
+            <HowToSection
+              title="Cum comanzi print pe carton"
+              steps={[
+                "Alege formatul și grosimea",
+                "Selectează finisajele necesare",
+                "Încarcă fișierele",
+                "Preț instant și adaugă în coș",
+                "Finalizează – livrare 24–48h",
+              ]}
+            />
+          </RevealBlock>
+          <RevealBlock buttonLabel="Citește mai mult">
+            <CategorySeoContent kind="carton" />
+          </RevealBlock>
+        </aside>
+      </section>
+    </main>
   );
 }

@@ -22,7 +22,7 @@ export default function Page() {
     { question: "Este potrivit pentru exterior?", answer: "PVC Forex este potrivit mai ales pentru interior; pentru exterior sugerăm materiale rigide alternative (alucobond) sau laminare potrivită." },
   ];
   return (
-    <div>
+    <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "PVC Forex", url: `${base}/pvc-forex` }]} />
       <ServiceJsonLd name="Print pe PVC Forex" url={`${base}/pvc-forex`} />
       <HowToJsonLd
@@ -59,6 +59,6 @@ export default function Page() {
           </RevealBlock>
         </aside>
       </section>
-    </div>
+    </main>
   );
 }
