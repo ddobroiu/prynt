@@ -49,22 +49,29 @@ export default function Page() {
         </div>
         <aside className="mt-4 md:mt-0 space-y-4">
           <RevealBlock buttonLabel="Cum comand?">
-            <HowToSection
-              title="Cum comanzi afișe"
-              steps={[
-                "Alege formatul și materialul potrivit",
-                "Setează tirajul",
-                "Încarcă fișierele (PDF/AI/PSD/JPG/PNG)",
-                "Preț instant și adaugă în coș",
-                "Finalizează – livrare 24–48h",
-              ]}
-            />
-          </RevealBlock>
-          <RevealBlock buttonLabel="Citește mai mult">
-            <CategorySeoContent kind="afise" />
-          </RevealBlock>
-        </aside>
-      </section>
-    </main>
-  );
-}
+            <section>
+              <AfiseConfigurator />
+            </section>
+            <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
+              <div className="md:col-span-2">
+                <FaqAccordion qa={qa} fullWidth />
+                <FaqJsonLd qa={qa} />
+              </div>
+              <aside className="mt-4 md:mt-0 space-y-4">
+                <RevealBlock buttonLabel="Cum comand?">
+                  <HowToSection
+                    title="Cum comanzi afișe"
+                    steps={[
+                      "Alege formatul și materialul potrivit",
+                      "Setează tirajul",
+                      "Încarcă fișierele (PDF/AI/PSD/JPG/PNG)",
+                      "Preț instant și adaugă în coș",
+                      "Finalizează – livrare 24–48h",
+                    ]}
+                  />
+                </RevealBlock>
+                <RevealBlock buttonLabel="Citește mai mult">
+                  <CategorySeoContent kind="afise" />
+                </RevealBlock>
+              </aside>
+            </section>
