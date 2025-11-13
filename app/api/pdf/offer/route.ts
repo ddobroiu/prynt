@@ -88,13 +88,30 @@ export async function POST(req: NextRequest) {
     const html = renderOfferHTML({ items, subtotal, shipping, total, date, logoDataUrl });
 
     // Launch system Chrome (smaller install via puppeteer-core)
-    const chromePath =
-      process.env.CHROME_PATH ||
-      'C:/Program Files/Google/Chrome/Application/chrome.exe';
+    // Prefer explicit env var, otherwise probe common paths per-OS (Railway uses Linux)
+    const candidates = [
+      process.env.CHROME_PATH,
+      process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : undefined,
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+      '/usr/bin/google-chrome',
+      '/usr/bin/google-chrome-stable',
+    ].filter(Boolean) as string[];
+
+    const executablePath = candidates.find((p) => {
+      try { return !!p && fs.existsSync(p); } catch { return false; }
+    });
+
     const browser = await puppeteer.launch({
-      headless: 'new',
-      executablePath: chromePath,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: true,
+      executablePath,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-gpu',
+        '--no-zygote',
+        '--single-process'
+      ],
     });
 
     const page = await browser.newPage();
@@ -106,7 +123,9 @@ export async function POST(req: NextRequest) {
     });
     await browser.close();
 
-    return new Response(pdf, {
+    // Convert Node Buffer -> ArrayBuffer for Web Response type safety
+    const ab = pdf.buffer.slice(pdf.byteOffset, pdf.byteOffset + pdf.byteLength);
+    return new Response(ab, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
