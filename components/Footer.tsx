@@ -78,7 +78,48 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Col 3 – eliminat lista produse, la cerere */}
+        {/* Col 3 – Newsletter */}
+        <div>
+          <h3 className="font-bold mb-5 text-xl text-indigo-300 flex items-center gap-2">
+            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><path d="M3 8l8 5 8-5"/><path d="M21 8v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8m18-3a2 2 0 00-2-2H5a2 2 0 00-2 2v0"/></svg>
+            Newsletter
+          </h3>
+          <form
+            className="flex gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const form = e.currentTarget as HTMLFormElement;
+              const email = (form.querySelector('input[name="email"]') as HTMLInputElement)?.value || '';
+              if (!email) return;
+              fetch('/api/subscribers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, source: 'footer' }),
+              })
+                .then((r) => r.json())
+                .then((res) => {
+                  alert(res?.message || 'Verifică emailul pentru confirmare.');
+                  (form.querySelector('input[name="email"]') as HTMLInputElement).value = '';
+                })
+                .catch(() => alert('Nu am putut trimite cererea. Încearcă din nou.'));
+            }}
+          >
+            <input
+              type="email"
+              required
+              name="email"
+              placeholder="Emailul tău"
+              className="flex-1 rounded-md border px-3 py-2 bg-surface border-[--border] text-ui focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            />
+            <button
+              type="submit"
+              className="rounded-md px-4 py-2 bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
+            >
+              Abonează-mă
+            </button>
+          </form>
+          <p className="text-xs text-muted mt-2">Primești un email de confirmare (double opt‑in).</p>
+        </div>
 
         {/* Col 4 – Informații Legale */}
         <div>
