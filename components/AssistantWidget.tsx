@@ -99,6 +99,51 @@ type PanelWizardState = {
   loading?: boolean;
 };
 
+// Guided flow for Banner Verso (blockout 610 double-sided)
+type BannerVersoWizardState = {
+  active: boolean;
+  step: number; // 0..5
+  data: {
+    widthCm?: number;
+    heightCm?: number;
+    quantity?: number;
+    sameGraphicFrontBack?: boolean;
+    want_hem_and_grommets?: boolean;
+    want_wind_holes?: boolean;
+    designOption?: 'upload' | 'pro';
+  };
+  result?: {
+    price: number;
+    pricePerUnit: number;
+    pricePerSqm?: number;
+    sqmPerUnit?: number;
+    totalSqm?: number;
+  } | null;
+  loading?: boolean;
+};
+
+// Guided flow for Canvas (framed presets or no-frame by m²)
+type CanvasWizardState = {
+  active: boolean;
+  step: number; // 0..3 framed | 0..2 noframe
+  data: {
+    framed?: boolean;
+    sizeKey?: string;
+    widthCm?: number;
+    heightCm?: number;
+    quantity?: number;
+  };
+  result?: {
+    price: number;
+    pricePerUnit: number;
+    mode: 'framed' | 'noframe';
+    pricePerSqm?: number;
+    sqmPerUnit?: number;
+    totalSqm?: number;
+  } | null;
+  loading?: boolean;
+};
+
 export default function AssistantWidget() {
   const [open, setOpen] = React.useState(false);
   const { addItem } = useCart();
@@ -145,6 +190,22 @@ export default function AssistantWidget() {
     loading: false,
   });
 
+  const [bannerVersoWizard, setBannerVersoWizard] = React.useState<BannerVersoWizardState>({
+    active: false,
+    step: 0,
+    data: {},
+    result: null,
+    loading: false,
+  });
+
+  const [canvasWizard, setCanvasWizard] = React.useState<CanvasWizardState>({
+    active: false,
+    step: 0,
+    data: {},
+    result: null,
+    loading: false,
+  });
+
   async function sendMessage(e?: React.FormEvent) {
     e?.preventDefault();
     const text = input.trim();
@@ -179,9 +240,21 @@ export default function AssistantWidget() {
       return;
     }
 
+    if (bannerVersoWizard.active) {
+      handleBannerVersoWizardAnswer(text);
+      return;
+    }
+
+    if (canvasWizard.active) {
+      handleCanvasWizardAnswer(text);
+      return;
+    }
+
     // If user intent looks like banner, start the wizard
     if (/banner|baner/i.test(text)) {
-      startBannerWizard();
+      // route verso vs single if specified
+      if (/verso|față[- ]?verso|fata[- ]?verso|blockout/i.test(text)) startBannerVersoWizard();
+      else startBannerWizard();
       return;
     }
 
@@ -200,6 +273,55 @@ export default function AssistantWidget() {
     // Detect rigid panels
     if (/pvc|forex|alucobond|polipropilen[aă]/i.test(text)) {
       startPanelWizard();
+      return;
+    }
+
+    // Detect banner verso directly
+    if (/verso|față[- ]?verso|fata[- ]?verso|blockout/i.test(text)) {
+      startBannerVersoWizard();
+      return;
+    }
+
+    // Detect canvas
+    if (/canvas|tablou|panza|pânză/i.test(text)) {
+      startCanvasWizard();
+      return;
+    }
+
+    // Small site-knowledge shortcuts
+    if (/contact|telefon|whats?app|email/i.test(text)) {
+      setMessages((m) => [
+        ...m,
+        {
+          id: `a-${Date.now()}`,
+          role: 'assistant',
+          content:
+            'Date de contact: WhatsApp +40 750 473 111, Email contact@prynt.ro. Program: luni–vineri. Livrare 24–48h.',
+        },
+      ]);
+      return;
+    }
+    if (/livrare|termene|c[aă]t dureaz[aă]/i.test(text)) {
+      setMessages((m) => [
+        ...m,
+        {
+          id: `a-${Date.now()}`,
+          role: 'assistant',
+          content: 'Termen total (producție + livrare): 24–48 ore. Urgențe posibile la cerere.',
+        },
+      ]);
+      return;
+    }
+    if (/fonduri|europen[eă]|pnrr|regio|funding/i.test(text)) {
+      setMessages((m) => [
+        ...m,
+        {
+          id: `a-${Date.now()}`,
+          role: 'assistant',
+          content:
+            'Informații despre finanțări: vezi paginile Fonduri UE (/fonduri-eu), PNRR (/fonduri-pnrr), Regio (/fonduri-regio). Dacă ai nevoie de un document anume, scrie-ne pe contact@prynt.ro.',
+        },
+      ]);
       return;
     }
 
@@ -653,6 +775,244 @@ export default function AssistantWidget() {
     }
   }
 
+  function startBannerVersoWizard() {
+    // reset others
+    setBannerWizard((s) => ({ ...s, active: false }));
+    setTapetWizard((s) => ({ ...s, active: false }));
+    setAutocolanteWizard((s) => ({ ...s, active: false }));
+    setPanelWizard((s) => ({ ...s, active: false }));
+    setCanvasWizard((s) => ({ ...s, active: false }));
+    setBannerVersoWizard({ active: true, step: 0, data: {}, result: null, loading: false });
+    setMessages((m) => [
+      ...m,
+      { id: `a-${Date.now()}`, role: 'assistant', content: 'Calculăm Banner față–verso. 1) Dimensiuni? Scrie lățime×înălțime în cm (ex: 300×100).' },
+    ]);
+  }
+
+  function handleBannerVersoWizardAnswer(text: string) {
+    const s = { ...bannerVersoWizard };
+    const next = (content: string) => setMessages((m) => [...m, { id: `a-${Date.now()}`, role: 'assistant', content }]);
+
+    if (s.step === 0) {
+      const m = text.match(/(\d{2,4})\s*[x×]\s*(\d{2,4})/) || text.match(/(\d{2,4})\s+(\d{2,4})/);
+      if (!m) {
+        next('Nu am înțeles dimensiunile. Te rog folosește formatul 300×100 (cm).');
+        return;
+      }
+      s.data.widthCm = Number(m[1]);
+      s.data.heightCm = Number(m[2]);
+      s.step = 1;
+      setBannerVersoWizard(s);
+      next('2) Câte bucăți dorești? (scrie un număr întreg)');
+      return;
+    }
+
+    if (s.step === 1) {
+      const q = Math.max(1, Math.floor(Number(text)) || 0);
+      if (!q) {
+        next('Te rog scrie un număr valid (ex: 2).');
+        return;
+      }
+      s.data.quantity = q;
+      s.step = 2;
+      setBannerVersoWizard(s);
+      next('3) Aceeași grafică pe ambele fețe? (da/nu)');
+      return;
+    }
+
+    if (s.step === 2) {
+      s.data.sameGraphicFrontBack = isYes(text);
+      s.step = 3;
+      setBannerVersoWizard(s);
+      next('4) Vrei tiv și capse? (da/nu)');
+      return;
+    }
+
+    if (s.step === 3) {
+      s.data.want_hem_and_grommets = isYes(text);
+      s.step = 4;
+      setBannerVersoWizard(s);
+      next('5) Vrei găuri pentru vânt? (da/nu)');
+      return;
+    }
+
+    if (s.step === 4) {
+      s.data.want_wind_holes = isYes(text);
+      s.step = 5;
+      setBannerVersoWizard(s);
+      next('6) Grafică: ai fișier sau dorești Pro? (scrie: upload sau pro)');
+      return;
+    }
+
+    if (s.step === 5) {
+      s.data.designOption = /pro/i.test(text) ? 'pro' : 'upload';
+      setBannerVersoWizard((bw) => ({ ...bw, loading: true }));
+      fetch('/api/calc-price/banner-verso', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          widthCm: s.data.widthCm,
+          heightCm: s.data.heightCm,
+          quantity: s.data.quantity,
+          want_wind_holes: s.data.want_wind_holes,
+          want_hem_and_grommets: s.data.want_hem_and_grommets,
+          sameGraphicFrontBack: s.data.sameGraphicFrontBack,
+          designOption: s.data.designOption,
+        }),
+      })
+        .then(async (r) => {
+          if (!r.ok) throw new Error('calc failed');
+          const j = await r.json();
+          setBannerVersoWizard((bw) => ({
+            ...bw,
+            result: {
+              price: j.price,
+              pricePerUnit: j.pricePerUnit,
+              pricePerSqm: j.pricePerSqm,
+              sqmPerUnit: j.sqmPerUnit,
+              totalSqm: j.totalSqm,
+            },
+            loading: false,
+          }));
+          next(`Preț total: ${formatRON(j.price)} (${formatRON(j.pricePerUnit)}/buc). Suprafață: ${j.totalSqm} m². Adăugăm în coș sau deschidem configuratorul Banner Verso?`);
+        })
+        .catch(() => {
+          setBannerVersoWizard((bw) => ({ ...bw, loading: false }));
+          next('A apărut o eroare la calcul. Te rog încearcă din nou sau folosește configuratorul Banner Verso.');
+        });
+      s.step = 6;
+      setBannerVersoWizard(s);
+      return;
+    }
+  }
+
+  function startCanvasWizard() {
+    // reset others
+    setBannerWizard((s) => ({ ...s, active: false }));
+    setTapetWizard((s) => ({ ...s, active: false }));
+    setAutocolanteWizard((s) => ({ ...s, active: false }));
+    setPanelWizard((s) => ({ ...s, active: false }));
+    setBannerVersoWizard((s) => ({ ...s, active: false }));
+    setCanvasWizard({ active: true, step: 0, data: {}, result: null, loading: false });
+    setMessages((m) => [
+      ...m,
+      { id: `a-${Date.now()}`, role: 'assistant', content: 'Canvas: 1) Vrei cu șasiu (preț fix) sau fără șasiu (calcul pe m²)? Scrie: "cu" sau "fără".' },
+    ]);
+  }
+
+  function handleCanvasWizardAnswer(text: string) {
+    const s = { ...canvasWizard };
+    const next = (content: string) => setMessages((m) => [...m, { id: `a-${Date.now()}`, role: 'assistant', content }]);
+
+    if (s.step === 0) {
+      const t = text.toLowerCase();
+      const framed = /(cu|sasiu|șasiu|rama|ramă|frame)/.test(t) && !/(fara|fără)/.test(t);
+      s.data.framed = framed;
+      if (framed) {
+        s.step = 1;
+        setCanvasWizard(s);
+        next('2) Dimensiune preset (ex: 50x70 sau 80x120).');
+      } else {
+        s.step = 10; // noframe branch
+        setCanvasWizard(s);
+        next('2) Dimensiuni personalizate: scrie lățime×înălțime în cm (ex: 100×70).');
+      }
+      return;
+    }
+
+    // framed branch
+    if (s.data.framed && s.step === 1) {
+      const m = text.match(/(\d{2,3})\s*[x×]\s*(\d{2,3})/) || text.match(/(\d{2,3})\s+(\d{2,3})/);
+      if (!m) {
+        next('Te rog alege o dimensiune preset validă (ex: 50x70).');
+        return;
+      }
+      const key = `${Number(m[1])}x${Number(m[2])}`;
+      s.data.sizeKey = key;
+      s.step = 2;
+      setCanvasWizard(s);
+      next('3) Cantitate?');
+      return;
+    }
+    if (s.data.framed && s.step === 2) {
+      const q = Math.max(1, Math.floor(Number(text)) || 0);
+      if (!q) {
+        next('Te rog scrie un număr valid (ex: 2).');
+        return;
+      }
+      s.data.quantity = q;
+      setCanvasWizard((cw) => ({ ...cw, loading: true }));
+      fetch('/api/calc-price/canvas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ framed: true, sizeKey: s.data.sizeKey, quantity: s.data.quantity }),
+      })
+        .then(async (r) => {
+          if (!r.ok) throw new Error('calc failed');
+          const j = await r.json();
+          setCanvasWizard((cw) => ({
+            ...cw,
+            result: { price: j.price, pricePerUnit: j.pricePerUnit, mode: 'framed' },
+            loading: false,
+          }));
+          next(`Preț total: ${formatRON(j.price)} (${formatRON(j.pricePerUnit)}/buc). Adăugăm în coș sau deschidem configuratorul Canvas?`);
+        })
+        .catch(() => {
+          setCanvasWizard((cw) => ({ ...cw, loading: false }));
+          next('A apărut o eroare la calcul. Te rog încearcă din nou sau folosește configuratorul Canvas.');
+        });
+      s.step = 3;
+      setCanvasWizard(s);
+      return;
+    }
+
+    // no-frame branch
+    if (!s.data.framed && s.step === 10) {
+      const m = text.match(/(\d{2,4})\s*[x×]\s*(\d{2,4})/) || text.match(/(\d{2,4})\s+(\d{2,4})/);
+      if (!m) {
+        next('Nu am înțeles dimensiunile. Te rog folosește formatul 100×70 (cm).');
+        return;
+      }
+      s.data.widthCm = Number(m[1]);
+      s.data.heightCm = Number(m[2]);
+      s.step = 11;
+      setCanvasWizard(s);
+      next('3) Cantitate?');
+      return;
+    }
+    if (!s.data.framed && s.step === 11) {
+      const q = Math.max(1, Math.floor(Number(text)) || 0);
+      if (!q) {
+        next('Te rog scrie un număr valid (ex: 2).');
+        return;
+      }
+      s.data.quantity = q;
+      setCanvasWizard((cw) => ({ ...cw, loading: true }));
+      fetch('/api/calc-price/canvas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ framed: false, widthCm: s.data.widthCm, heightCm: s.data.heightCm, quantity: s.data.quantity }),
+      })
+        .then(async (r) => {
+          if (!r.ok) throw new Error('calc failed');
+          const j = await r.json();
+          setCanvasWizard((cw) => ({
+            ...cw,
+            result: { price: j.price, pricePerUnit: j.pricePerUnit, mode: 'noframe', pricePerSqm: j.pricePerSqm, sqmPerUnit: j.sqmPerUnit, totalSqm: j.totalSqm },
+            loading: false,
+          }));
+          next(`Preț total: ${formatRON(j.price)} (${formatRON(j.pricePerUnit)}/buc). Suprafață: ${j.totalSqm} m². Adăugăm în coș sau deschidem configuratorul Canvas?`);
+        })
+        .catch(() => {
+          setCanvasWizard((cw) => ({ ...cw, loading: false }));
+          next('A apărut o eroare la calcul. Te rog încearcă din nou sau folosește configuratorul Canvas.');
+        });
+      s.step = 12;
+      setCanvasWizard(s);
+      return;
+    }
+  }
+
   React.useEffect(() => {
     function onOpen() {
       setOpen(true);
@@ -888,6 +1248,101 @@ export default function AssistantWidget() {
               </button>
               <a
                 href={`/${panelWizard.data.productType || 'pvc-forex'}?w=${panelWizard.data.widthCm}&h=${panelWizard.data.heightCm}&qty=${panelWizard.data.quantity || 1}&t=${panelWizard.data.thicknessMm}`}
+                className="px-3 py-2 rounded-md border text-sm"
+              >
+                Deschide configuratorul
+              </a>
+            </div>
+          )}
+
+          {bannerVersoWizard.active && bannerVersoWizard.loading && (
+            <div className="p-2 text-center text-xs text-muted-foreground">Se calculează…</div>
+          )}
+
+          {bannerVersoWizard.active && bannerVersoWizard.result && (
+            <div className="p-3 border-t flex flex-wrap gap-2">
+              <button
+                className="px-3 py-2 rounded-md bg-primary text-white text-sm"
+                onClick={() => {
+                  const d = bannerVersoWizard.data;
+                  const r = bannerVersoWizard.result!;
+                  const qty = d.quantity || 1;
+                  const title = `Banner Verso - ${d.widthCm}x${d.heightCm} cm`;
+                  addItem({
+                    id: `banner-verso-${d.widthCm}x${d.heightCm}-${d.want_wind_holes?'g':''}-${d.want_hem_and_grommets?'c':''}-${d.sameGraphicFrontBack?'same':'diff'}-${Date.now()}`,
+                    productId: 'banner-verso',
+                    slug: 'banner-verso',
+                    title,
+                    width: d.widthCm,
+                    height: d.heightCm,
+                    price: r.pricePerUnit,
+                    quantity: qty,
+                    currency: 'RON',
+                    metadata: {
+                      sameGraphicFrontBack: d.sameGraphicFrontBack,
+                      want_hem_and_grommets: d.want_hem_and_grommets,
+                      want_wind_holes: d.want_wind_holes,
+                      designOption: d.designOption,
+                      totalSqm: bannerVersoWizard.result?.totalSqm,
+                      sqmPerUnit: bannerVersoWizard.result?.sqmPerUnit,
+                      pricePerSqm: bannerVersoWizard.result?.pricePerSqm,
+                    },
+                  });
+                  setMessages((m) => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Am adăugat în coș. Poți continua cumpărăturile sau finaliza comanda.' }]);
+                }}
+              >
+                Adaugă în coș
+              </button>
+              <a
+                href={`/banner-verso`}
+                className="px-3 py-2 rounded-md border text-sm"
+              >
+                Deschide configuratorul
+              </a>
+            </div>
+          )}
+
+          {canvasWizard.active && canvasWizard.loading && (
+            <div className="p-2 text-center text-xs text-muted-foreground">Se calculează…</div>
+          )}
+
+          {canvasWizard.active && canvasWizard.result && (
+            <div className="p-3 border-t flex flex-wrap gap-2">
+              <button
+                className="px-3 py-2 rounded-md bg-primary text-white text-sm"
+                onClick={() => {
+                  const d = canvasWizard.data;
+                  const r = canvasWizard.result!;
+                  const qty = d.quantity || 1;
+                  const frameText = d.framed ? 'Cu șasiu' : 'Fără șasiu';
+                  const sizeLabel = d.framed ? (d.sizeKey || '') : `${d.widthCm}x${d.heightCm}`;
+                  const title = `Canvas Fine Art - ${sizeLabel} cm (${frameText})`;
+                  addItem({
+                    id: `canvas-${d.framed?'framed':'noframe'}-${sizeLabel}-${Date.now()}`,
+                    productId: 'canvas',
+                    slug: 'canvas',
+                    title,
+                    width: d.framed ? Number((d.sizeKey||'0x0').split('x')[0]) : d.widthCm,
+                    height: d.framed ? Number((d.sizeKey||'0x0').split('x')[1]) : d.heightCm,
+                    price: r.pricePerUnit,
+                    quantity: qty,
+                    currency: 'RON',
+                    metadata: {
+                      framed: d.framed,
+                      sizeKey: d.sizeKey,
+                      mode: r.mode,
+                      totalSqm: r.totalSqm,
+                      sqmPerUnit: r.sqmPerUnit,
+                      pricePerSqm: r.pricePerSqm,
+                    },
+                  });
+                  setMessages((m) => [...m, { id: `a-${Date.now()}`, role: 'assistant', content: 'Am adăugat în coș. Poți continua cumpărăturile sau finaliza comanda.' }]);
+                }}
+              >
+                Adaugă în coș
+              </button>
+              <a
+                href={`/canvas`}
                 className="px-3 py-2 rounded-md border text-sm"
               >
                 Deschide configuratorul
