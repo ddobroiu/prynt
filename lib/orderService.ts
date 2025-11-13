@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { signAdminAction } from './adminAction';
+import { appendOrder } from './orderStore';
 
 type AnyRecord = Record<string, any>;
 
@@ -548,6 +549,32 @@ export async function fulfillOrder(
 
   // Emailuri – întotdeauna; sendEmails este tolerant la forma cart-ului
   try {
+    // 1) Persist order (append-only). Normalize minimal for listing
+    try {
+      const normalized = (cart ?? []).map((raw) => {
+        const qty = Number(raw.quantity ?? 1) || 1;
+        const unit = Number((raw as any).unitAmount ?? (raw as any).price ?? (raw as any)?.metadata?.price ?? 0) || 0;
+        const total = Number((raw as any).totalAmount ?? (unit > 0 ? unit * qty : (raw as any)?.metadata?.totalAmount ?? 0)) || 0;
+        const name = (raw as any).name ?? (raw as any).title ?? (raw as any).slug ?? (raw as any)?.metadata?.title ?? 'Produs';
+        return { name, qty, unit, total };
+      });
+      const subtotal = normalized.reduce((s, it) => s + (Number(it.total) || 0), 0);
+      const totalComanda = subtotal + SHIPPING_FEE;
+      await appendOrder({
+        paymentType,
+        address,
+        billing,
+        items: normalized,
+        shippingFee: SHIPPING_FEE,
+        total: totalComanda,
+        invoiceLink: invoiceLink ?? null,
+        marketing,
+      });
+    } catch (e: any) {
+      console.warn('[OrderService] Salvare comandă a eșuat (non-blocant):', e?.message || e);
+    }
+
+    // 2) Trimite emailuri
     await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing);
   } catch (e: any) {
     console.error('[OrderService] Eroare trimitere emailuri:', e?.message || e);
