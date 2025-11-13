@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useMemo, useState } from "react";
 
 type Props = {
   label?: string;
@@ -17,7 +18,34 @@ const DEFAULT_JUDETE = [
 ];
 
 export default function JudetSelector({ label = "Județ", value, onChange, options, disabled }: Props) {
-  const list = options && Array.isArray(options) ? options : DEFAULT_JUDETE;
+  const [remote, setRemote] = useState<string[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      if (options && options.length) return; // caller-provided list has priority
+      setLoading(true);
+      try {
+        const res = await fetch("/api/dpd/judete", { cache: "force-cache" });
+        const data = await res.json().catch(() => null);
+        if (!cancelled && data?.ok && Array.isArray(data.judete)) {
+          setRemote(data.judete as string[]);
+        }
+      } catch {}
+      finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [options]);
+
+  const list = useMemo(() => {
+    if (options && Array.isArray(options) && options.length) return options;
+    if (remote && remote.length) return remote;
+    return DEFAULT_JUDETE;
+  }, [options, remote]);
 
   return (
     <label className="text-sm block">
@@ -25,7 +53,7 @@ export default function JudetSelector({ label = "Județ", value, onChange, optio
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
+        disabled={disabled || loading}
         className="select disabled:opacity-60"
       >
         <option value="" disabled>— selectează un județ —</option>

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import JudetSelector from "../../components/JudetSelector";
+import LocalitateSelector from "../../components/LocalitateSelector";
 
 type Address = {
   nume_prenume: string;
@@ -10,6 +11,7 @@ type Address = {
   judet: string;
   localitate: string;
   strada_nr: string;
+  postCode?: string;
 };
 
 type Billing = {
@@ -20,6 +22,7 @@ type Billing = {
   judet?: string;
   localitate?: string;
   strada_nr?: string;
+  postCode?: string;
 };
 
 export default function CheckoutForm({
@@ -50,6 +53,7 @@ export default function CheckoutForm({
         judet: address.judet,
         localitate: address.localitate,
         strada_nr: address.strada_nr,
+        postCode: address.postCode,
       }));
     }
   }, [sameAsDelivery, address.judet, address.localitate, address.strada_nr, setBilling]);
@@ -61,6 +65,7 @@ export default function CheckoutForm({
       judet: address.judet,
       localitate: address.localitate,
       strada_nr: address.strada_nr,
+      postCode: address.postCode,
     }));
   }
 
@@ -111,15 +116,16 @@ export default function CheckoutForm({
             {errors["address.judet"] && <p className="mt-1 text-xs text-red-400">{errors["address.judet"]}</p>}
           </div>
 
-          <Field id="address.localitate" label="Localitate" error={errors["address.localitate"]}>
-            <input
-              data-field="address.localitate"
-              className={inputCls(errors["address.localitate"])}
+          <div>
+            <LocalitateSelector
+              judet={address.judet}
               value={address.localitate}
-              onChange={(e) => onAddr("localitate", e.target.value)}
-              autoComplete="section-shipping address-level2"
+              onChange={(v) => onAddr("localitate", v)}
+              onPostCodeChange={(pc) => onAddr("postCode", pc)}
+              label="Localitate"
             />
-          </Field>
+            {errors["address.localitate"] && <p className="mt-1 text-xs text-red-400">{errors["address.localitate"]}</p>}
+          </div>
 
           <Field id="address.strada_nr" label="Stradă, nr." error={errors["address.strada_nr"]}>
             <input
@@ -128,6 +134,17 @@ export default function CheckoutForm({
               value={address.strada_nr}
               onChange={(e) => onAddr("strada_nr", e.target.value)}
               autoComplete="section-shipping street-address"
+            />
+          </Field>
+
+          <Field id="address.postCode" label="Cod poștal">
+            <input
+              data-field="address.postCode"
+              className={inputCls(undefined)}
+              value={address.postCode ?? ""}
+              onChange={(e) => onAddr("postCode", e.target.value)}
+              autoComplete="postal-code"
+              inputMode="numeric"
             />
           </Field>
         </div>
@@ -231,16 +248,17 @@ export default function CheckoutForm({
             {errors["billing.judet"] && <p className="mt-1 text-xs text-red-400">{errors["billing.judet"]}</p>}
           </div>
 
-          <Field id="billing.localitate" label="Localitate (facturare)" error={errors["billing.localitate"]} disabled={sameAsDelivery}>
-            <input
-              data-field="billing.localitate"
-              className={inputCls(errors["billing.localitate"], sameAsDelivery)}
+          <div className={sameAsDelivery ? "opacity-60" : ""}>
+            <LocalitateSelector
+              judet={billing.judet ?? ""}
               value={billing.localitate ?? ""}
-              onChange={(e) => onBill("localitate", e.target.value)}
+              onChange={(v) => onBill("localitate", v)}
+              onPostCodeChange={(pc) => onBill("postCode", pc)}
+              label="Localitate (facturare)"
               disabled={sameAsDelivery}
-              autoComplete="section-billing address-level2"
             />
-          </Field>
+            {errors["billing.localitate"] && <p className="mt-1 text-xs text-red-400">{errors["billing.localitate"]}</p>}
+          </div>
 
           <Field id="billing.strada_nr" label="Stradă, nr. (facturare)" error={errors["billing.strada_nr"]} disabled={sameAsDelivery}>
             <input
@@ -250,6 +268,20 @@ export default function CheckoutForm({
               onChange={(e) => onBill("strada_nr", e.target.value)}
               disabled={sameAsDelivery}
               autoComplete="section-billing street-address"
+            />
+          </Field>
+        </div>
+
+        <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <Field id="billing.postCode" label="Cod poștal (facturare)" disabled={sameAsDelivery}>
+            <input
+              data-field="billing.postCode"
+              className={inputCls(undefined, sameAsDelivery)}
+              value={billing.postCode ?? ""}
+              onChange={(e) => onBill("postCode", e.target.value)}
+              disabled={sameAsDelivery}
+              autoComplete="postal-code"
+              inputMode="numeric"
             />
           </Field>
         </div>

@@ -24,6 +24,7 @@ interface Address {
   judet: string;
   localitate: string;
   strada_nr: string;
+  postCode?: string;
 }
 interface Billing {
   tip_factura: 'persoana_fizica' | 'companie';
