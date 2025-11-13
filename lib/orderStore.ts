@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { prisma } from './prisma';
+import { Prisma } from '@prisma/client';
 
 export type Address = {
   nume_prenume: string;
@@ -86,6 +88,47 @@ async function nextOrderNo(): Promise<number> {
 }
 
 export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
+  // If DATABASE_URL exists, persist in PostgreSQL via Prisma; else fallback to file
+  if (process.env.DATABASE_URL) {
+    // Compute next orderNo from DB to keep continuity; fallback to 1000 series
+    const last = await prisma.order.findFirst({ orderBy: { orderNo: 'desc' } }).catch(() => null);
+    const orderNo = (last?.orderNo ?? 999) + 1;
+    const created = await prisma.order.create({
+      data: {
+        orderNo,
+        paymentType: input.paymentType,
+        address: input.address as any,
+        billing: input.billing as any,
+        shippingFee: new Prisma.Decimal(input.shippingFee ?? 0),
+        total: new Prisma.Decimal(input.total ?? 0),
+        invoiceLink: input.invoiceLink || null,
+        marketing: (input.marketing as any) || undefined,
+        items: {
+          create: (input.items || []).map((it) => ({
+            name: it.name,
+            qty: it.qty,
+            unit: new Prisma.Decimal(it.unit ?? 0),
+            total: new Prisma.Decimal(it.total ?? 0),
+          })),
+        },
+      },
+    });
+    return {
+      id: created.id,
+      orderNo: created.orderNo,
+      createdAt: created.createdAt.toISOString(),
+      paymentType: created.paymentType as any,
+      address: created.address as any,
+      billing: created.billing as any,
+      items: (input.items || []) as any,
+      shippingFee: Number(created.shippingFee),
+      total: Number(created.total),
+      invoiceLink: created.invoiceLink,
+      marketing: created.marketing as any,
+    };
+  }
+
+  // File fallback (development without DB)
   ensureDir();
   const orderNo = await nextOrderNo();
   const order: StoredOrder = {
