@@ -1,8 +1,9 @@
 "use client";
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function AdminLoginPage() {
+function LoginInner() {
   const sp = useSearchParams();
   const err = sp.get('err');
   return (
@@ -34,5 +35,13 @@ export default function AdminLoginPage() {
         </form>
       </div>
     </main>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen flex items-center justify-center bg-ui p-6"></main>}>
+      <LoginInner />
+    </Suspense>
   );
 }
