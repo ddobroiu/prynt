@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createShipment, printExtended, decodeBase64PdfToBuffer, type CreateShipmentRequest } from '../../../../lib/dpdService';
+import { createShipment, printExtended, decodeBase64PdfToBuffer, trackingUrlForAwb, type CreateShipmentRequest } from '../../../../lib/dpdService';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, shipmentId, parcels, labelBase64, labelFileName });
+    const trackingUrl = trackingUrlForAwb(shipmentId);
+    return NextResponse.json({ success: true, shipmentId, parcels, labelBase64, labelFileName, trackingUrl });
   } catch (e: any) {
     console.error('[API /dpd/awb] Error:', e?.message || e);
     return NextResponse.json({ success: false, message: 'Eroare internă.' }, { status: 500 });

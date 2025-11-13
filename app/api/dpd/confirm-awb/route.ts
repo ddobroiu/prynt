@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { createShipment, printExtended, type CreateShipmentRequest } from '../../../../lib/dpdService';
+import { createShipment, printExtended, trackingUrlForAwb, type CreateShipmentRequest } from '../../../../lib/dpdService';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -40,8 +40,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const shipmentId = created.id!;
+  const shipmentId = created.id!;
     const parcels = created.parcels || [];
+  const trackingUrl = trackingUrlForAwb(shipmentId);
 
     // Print label
     const { base64 } = await printExtended({
@@ -56,6 +57,7 @@ export async function POST(req: NextRequest) {
         const subject = `AWB DPD ${shipmentId}`;
         const html = `<p>Bună${name ? ' ' + name : ''},</p>
 <p>Expediția ta a fost confirmată. AWB: <strong>${shipmentId}</strong>.</p>
+<p>Poți urmări statusul livrării aici: <a href="${trackingUrl}">${trackingUrl}</a> (introdu AWB-ul dacă este necesar).</p>
 <p>Găsești atașat fișierul PDF al etichetei (A6) pentru livrare.</p>
 <p>Îți mulțumim!</p>`;
         const attachments = base64
@@ -64,6 +66,7 @@ export async function POST(req: NextRequest) {
         await resend.emails.send({
           from: process.env.EMAIL_FROM || 'contact@prynt.ro',
           to: email,
+          bcc: process.env.ADMIN_EMAIL ? [process.env.ADMIN_EMAIL] : undefined,
           subject,
           html,
           attachments,
@@ -73,7 +76,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ ok: true, shipmentId, parcels, hasLabel: !!base64 });
+    return NextResponse.json({ ok: true, shipmentId, parcels, hasLabel: !!base64, trackingUrl });
   } catch (e: any) {
     console.error('[API /dpd/confirm-awb] Error:', e?.message || e);
     return NextResponse.json({ ok: false, message: 'Eroare internă' }, { status: 500 });

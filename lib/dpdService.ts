@@ -208,6 +208,14 @@ export function decodeBase64PdfToBuffer(base64?: string): Buffer | null {
   return Buffer.from(base64, 'base64');
 }
 
+// Public tracking URL generator for DPD Romania
+// Note: DPD RO tracking page does not document a prefilled query param.
+// We return the main tracking portal and include the AWB separately in emails/UI.
+export function trackingUrlForAwb(awb: string): string {
+  // If in the future DPD documents a deep-link format, update this function.
+  return 'https://tracking.dpd.ro/';
+}
+
 // --- Location: Sites CSV (for RO counties/localities) ---
 export type DpdSiteRow = {
   id: number;
