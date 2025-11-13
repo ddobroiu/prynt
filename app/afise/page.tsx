@@ -4,6 +4,8 @@ import FaqJsonLd from "@/components/FaqJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
+import HowToJsonLd from "@/components/HowToJsonLd";
+import HowToSection from "@/components/HowToSection";
 
 export const metadata = {
   title: "Afișe — Print digital | Prynt",
@@ -25,11 +27,31 @@ export default function Page() {
     <main style={{ padding: 16 }}>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Afișe", url: `${base}/afise` }]} />
       <ServiceJsonLd name="Afișe tipărite" url={`${base}/afise`} />
+      <HowToJsonLd
+        name="Cum comanzi afișe"
+        steps={[
+          { name: "Alege formatul și materialul", text: "Formate A3–A0/S5/S7; materiale Blueback/Whiteback/Satin/Foto sau hârtie 150/300 g." },
+          { name: "Setează cantitatea", text: "Alege tirajul în funcție de distribuție." },
+          { name: "Încarcă fișierele", text: "PDF/AI/PSD/JPG/PNG; recomandat 150–300 dpi pentru formate mari." },
+          { name: "Preț instant & comandă", text: "Vezi prețul în timp real și finalizează." },
+          { name: "Livrare 24–48h", text: "Expediem rapid în toată țara." },
+        ]}
+      />
       <section>
         <AfiseConfigurator />
       </section>
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
+      <HowToSection
+        title="Cum comanzi afișe"
+        steps={[
+          "Alege formatul și materialul potrivit",
+          "Setează tirajul",
+          "Încarcă fișierele (PDF/AI/PSD/JPG/PNG)",
+          "Preț instant și adaugă în coș",
+          "Finalizează – livrare 24–48h",
+        ]}
+      />
     </main>
   );
 }

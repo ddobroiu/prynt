@@ -6,6 +6,8 @@ import FaqJsonLd from "@/components/FaqJsonLd";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
+import HowToJsonLd from "@/components/HowToJsonLd";
+import HowToSection from "@/components/HowToSection";
 
 export default function FlyerePage() {
   const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
@@ -18,9 +20,29 @@ export default function FlyerePage() {
     <main className="page py-10">
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Flyere", url: `${base}/flayere` }]} />
       <ServiceJsonLd name="Flyere promoționale" url={`${base}/flayere`} />
+      <HowToJsonLd
+        name="Cum comanzi flyere"
+        steps={[
+          { name: "Alege formatul", text: "Formate uzuale A6/A5/A4 în funcție de mesaj și buget." },
+          { name: "Selectează hârtia și finisajul", text: "130–300 g, lucios sau mat, opțional plastifiere." },
+          { name: "Încarcă fișierele", text: "PDF/AI/PSD/JPG/PNG acceptate. Verificare gratuită." },
+          { name: "Preț instant și comandă", text: "Vezi prețul în timp real și finalizează comanda." },
+          { name: "Livrare 24–48h", text: "Tipărire rapidă și livrare națională." },
+        ]}
+      />
       <FlyerConfigurator />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
+      <HowToSection
+        title="Cum comanzi flyere"
+        steps={[
+          "Alege formatul dorit (A6/A5/A4)",
+          "Selectează hârtia și finisajul",
+          "Încarcă fișierele sau adaugă linkul",
+          "Vezi prețul instant și adaugă în coș",
+          "Finalizează – livrare 24–48h",
+        ]}
+      />
     </main>
   );
 }

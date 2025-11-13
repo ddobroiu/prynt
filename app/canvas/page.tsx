@@ -4,6 +4,8 @@ import FaqJsonLd from "@/components/FaqJsonLd";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
+import HowToJsonLd from "@/components/HowToJsonLd";
+import HowToSection from "@/components/HowToSection";
 
 export const metadata = {
   title: "Canvas — Configurează online | Prynt",
@@ -22,11 +24,31 @@ export default function Page() {
     <main style={{ padding: 16 }}>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Canvas", url: `${base}/canvas` }]} />
       <ServiceJsonLd name="Tablouri canvas" url={`${base}/canvas`} />
+      <HowToJsonLd
+        name="Cum comanzi tablouri canvas"
+        steps={[
+          { name: "Alege dimensiunea", text: "Selectează dimensiunea dorită sau introdu una personalizată." },
+          { name: "Alege șasiul/ramă", text: "Opțional ramă; canvas întins pe șasiu din lemn." },
+          { name: "Încarcă imaginea", text: "PDF/AI/PSD/JPG/PNG – recomandat fișiere mari pentru claritate." },
+          { name: "Preț & comandă", text: "Vezi prețul instant și finalizează." },
+          { name: "Livrare 24–48h", text: "Ambalare sigură și livrare rapidă." },
+        ]}
+      />
       <section>
         <CanvasConfigurator />
       </section>
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
+      <HowToSection
+        title="Cum comanzi tablouri canvas"
+        steps={[
+          "Alege dimensiunea potrivită",
+          "Selectează șasiul/ramă (opțional)",
+          "Încarcă imaginea",
+          "Vezi prețul instant și adaugă în coș",
+          "Finalizează – livrare 24–48h",
+        ]}
+      />
     </main>
   );
 }
