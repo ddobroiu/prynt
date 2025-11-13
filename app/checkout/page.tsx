@@ -393,6 +393,7 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
     material: "Material",
     laminated: "Laminare",
     designOption: "Grafică",
+    proDesignFee: "Taxă grafică Pro (RON)",
     want_adhesive: "Adeziv",
     want_hem_and_grommets: "Tiv și capse",
     want_wind_holes: "Găuri pentru vânt",
@@ -436,9 +437,20 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
       details.push({ label: "Dimensiune", value: `${width ?? "—"} x ${height ?? "—"} cm` });
     }
 
+    // Fonduri EU: afișăm sumarul opțiunilor configurate
+    const isFonduri = (item?.slug === 'fonduri-eu') || (item?.productId === 'fonduri-eu');
+    if (isFonduri && typeof meta.selectedReadable === 'string' && meta.selectedReadable.trim().length > 0) {
+      details.push({ label: 'Opțiuni selectate', value: String(meta.selectedReadable) });
+    }
+
     // Chei cunoscute
     const knownKeys = Object.keys(labelForKey).filter((k) => meta[k] !== undefined);
     knownKeys.forEach((k) => {
+      // ascundem proDesignFee dacă e 0 sau falsy
+      if (k === 'proDesignFee') {
+        const num = Number(meta[k]);
+        if (!isFinite(num) || num <= 0) return;
+      }
       const label = labelForKey[k];
       const val = prettyValue(k, meta[k]);
       details.push({ label, value: val });
@@ -470,7 +482,18 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
     ]);
     Object.keys(meta)
       .filter((k) => !knownKeys.includes(k) && !exclude.has(k))
-      .forEach((k) => details.push({ label: k, value: String(meta[k]) }));
+      .forEach((k) => {
+        // ascundem valori 0 / goale și proDesignFee=0
+        const v = meta[k];
+        if (k === 'proDesignFee') {
+          const num = Number(v);
+          if (!isFinite(num) || num <= 0) return;
+        }
+        if (v === null || v === undefined) return;
+        if (typeof v === 'number' && v === 0) return;
+        if (typeof v === 'string' && v.trim() === '') return;
+        details.push({ label: k, value: String(v) });
+      });
 
     if (details.length === 0) return null;
 
