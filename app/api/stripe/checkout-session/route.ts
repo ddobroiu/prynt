@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   // 1. Primește TOATE datele comenzii
-  const { cart, address, billing } = await req.json();
+  const { cart, address, billing, marketing } = await req.json();
 
   if (!Array.isArray(cart) || cart.length === 0) {
     return NextResponse.json({ error: 'Coșul este gol.' }, { status: 400 });
@@ -27,6 +27,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'STRIPE_SECRET_KEY nu este setat' }, { status: 500 });
     }
     const stripe = new Stripe(secret);
+    const metadata: Record<string, string> = {
+      cart: JSON.stringify(cart),
+      address: JSON.stringify(address),
+      billing: JSON.stringify(billing),
+    };
+    if (marketing) {
+      try { metadata.marketing = JSON.stringify(marketing); } catch {}
+    }
+
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded',
       mode: 'payment',
@@ -51,11 +60,7 @@ export async function POST(req: NextRequest) {
         },
       ],
       // 2. Datele comenzii în metadata (webhook le folosește la fulfillOrder)
-      metadata: {
-        cart: JSON.stringify(cart),
-        address: JSON.stringify(address),
-        billing: JSON.stringify(billing),
-      },
+      metadata,
       // 3. Redirect după plată (Embedded Checkout)
       return_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     });

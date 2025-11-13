@@ -36,6 +36,19 @@ interface Billing {
   strada_nr?: string;
 }
 
+interface MarketingInfo {
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmContent?: string;
+  utmTerm?: string;
+  gclid?: string;
+  fbclid?: string;
+  referrer?: string; // full referrer url
+  landingPage?: string; // path + query
+  userAgent?: string;
+}
+
 // Do not instantiate Resend at module load to avoid build failures in envs without key
 const SHIPPING_FEE = 19.99;
 
@@ -121,7 +134,8 @@ async function sendEmails(
   billing: Billing,
   cart: CartItem[],
   invoiceLink: string | null,
-  paymentType: 'Ramburs' | 'Card'
+  paymentType: 'Ramburs' | 'Card',
+  marketing?: MarketingInfo
 ) {
   // Normalize cart for totals and for listing in emails
   const normalized = cart.map((raw) => {
@@ -284,6 +298,36 @@ async function sendEmails(
     console.warn('[OrderService] Quick actions disabled:', (e as any)?.message || e);
   }
 
+  // Build marketing/source block for admin
+  function sourceLabel(m?: MarketingInfo) {
+    if (!m) return '—';
+    if (m.utmSource) return m.utmSource;
+    try {
+      if (m.referrer) {
+        const u = new URL(m.referrer);
+        return u.hostname.replace(/^www\./, '');
+      }
+    } catch {}
+    return 'direct';
+  }
+
+  const marketingBlock = `
+    <div style="margin-top:16px;padding:10px 12px;background:#fafafa;border:1px solid #eee;border-radius:8px;color:#333;">
+      <div style="font-weight:600;margin-bottom:6px;">Sursă trafic: ${escapeHtml(sourceLabel(marketing))}</div>
+      <div style="font-size:12px;line-height:1.5;color:#555;">
+        ${marketing?.utmSource ? `<div><strong>utm_source:</strong> ${escapeHtml(marketing.utmSource)}</div>` : ''}
+        ${marketing?.utmMedium ? `<div><strong>utm_medium:</strong> ${escapeHtml(marketing.utmMedium)}</div>` : ''}
+        ${marketing?.utmCampaign ? `<div><strong>utm_campaign:</strong> ${escapeHtml(marketing.utmCampaign)}</div>` : ''}
+        ${marketing?.utmContent ? `<div><strong>utm_content:</strong> ${escapeHtml(marketing.utmContent)}</div>` : ''}
+        ${marketing?.utmTerm ? `<div><strong>utm_term:</strong> ${escapeHtml(marketing.utmTerm)}</div>` : ''}
+        ${marketing?.gclid ? `<div><strong>gclid:</strong> ${escapeHtml(marketing.gclid)}</div>` : ''}
+        ${marketing?.fbclid ? `<div><strong>fbclid:</strong> ${escapeHtml(marketing.fbclid)}</div>` : ''}
+        ${marketing?.referrer ? `<div><strong>referrer:</strong> ${escapeHtml(marketing.referrer)}</div>` : ''}
+        ${marketing?.landingPage ? `<div><strong>landing:</strong> ${escapeHtml(marketing.landingPage)}</div>` : ''}
+      </div>
+    </div>
+  `;
+
   const adminHtml = `
     <div style="font-family: sans-serif; padding: 20px; background-color: #f4f4f4;">
       <div style="max-width: 640px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 8px;">
@@ -316,6 +360,8 @@ async function sendEmails(
         </div>
 
         ${actionButtons || ''}
+
+        ${marketingBlock}
 
         ${
           invoiceLink
@@ -420,10 +466,10 @@ async function sendEmails(
  * - Emailuri se trimit oricum; dacă factura nu iese, nu blocăm comanda
  */
 export async function fulfillOrder(
-  orderData: { address: Address; billing: Billing; cart: CartItem[] },
+  orderData: { address: Address; billing: Billing; cart: CartItem[]; marketing?: MarketingInfo },
   paymentType: 'Ramburs' | 'Card'
 ): Promise<{ invoiceLink: string | null }> {
-  const { address, billing, cart } = orderData;
+  const { address, billing, cart, marketing } = orderData;
 
   let invoiceLink: string | null = null;
 
@@ -502,7 +548,7 @@ export async function fulfillOrder(
 
   // Emailuri – întotdeauna; sendEmails este tolerant la forma cart-ului
   try {
-    await sendEmails(address, billing, cart, invoiceLink, paymentType);
+    await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing);
   } catch (e: any) {
     console.error('[OrderService] Eroare trimitere emailuri:', e?.message || e);
   }

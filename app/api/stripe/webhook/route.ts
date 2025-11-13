@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
         cart: JSON.parse(session.metadata.cart),
         address: JSON.parse(session.metadata.address),
         billing: JSON.parse(session.metadata.billing),
+        marketing: session.metadata.marketing ? JSON.parse(session.metadata.marketing) : undefined,
       };
 
       // NU aruncăm dacă Oblio pică – comanda merge oricum

@@ -147,6 +147,22 @@ export default function CheckoutPage() {
     // Normalized cart (robust)
     const normalizedCart = normalizeCart(items);
 
+    // Capture simple marketing info (UTM, referrer)
+    const url = typeof window !== 'undefined' ? new URL(window.location.href) : null;
+    const params = url ? Object.fromEntries(url.searchParams.entries()) : {} as any;
+    const marketing = {
+      utmSource: params.utm_source || '',
+      utmMedium: params.utm_medium || '',
+      utmCampaign: params.utm_campaign || '',
+      utmContent: params.utm_content || '',
+      utmTerm: params.utm_term || '',
+      gclid: params.gclid || '',
+      fbclid: params.fbclid || '',
+      referrer: typeof document !== 'undefined' ? document.referrer : '',
+      landingPage: url ? url.pathname + (url.search || '') : '',
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+    };
+
     const orderData = {
       cart: normalizedCart,
       address,
@@ -160,6 +176,7 @@ export default function CheckoutPage() {
             }
           : {}),
       },
+      marketing,
     };
 
     try {
