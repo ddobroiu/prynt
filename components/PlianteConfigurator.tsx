@@ -239,15 +239,7 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
               )}
             </div>
 
-            {/* 3. Info / Detalii */}
-            <div className="card p-4">
-              <h2 className="text-lg font-bold text-ui">Informații</h2>
-              <div className="text-sm text-muted mt-2">
-                <p>- Formatele afișate sunt estimative; pentru artă finală respectați bleed 3 mm.</p>
-                <p>- Timp producție standard: 2–5 zile lucrătoare (depinde de tiraj).</p>
-                <p>- Pentru tiraje mari sau finisări speciale cere o ofertă personalizată.</p>
-              </div>
-            </div>
+            {/* Card 'Informații' eliminat conform cerință */}
           </div>
 
           {/* RIGHT - gallery + summary */}
