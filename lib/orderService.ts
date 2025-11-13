@@ -403,6 +403,7 @@ async function sendEmails(
         <p style="margin:0 0 16px; color:#444;">
           Am primit comanda ta și am început procesarea. Mai jos ai un rezumat.
         </p>
+        ${orderNo ? `<p style="margin:0 0 12px; color:#111;"><strong>Nr. comandă:</strong> #${orderNo}</p>` : ''}
 
         <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Datele tale</h2>
         <p style="margin:4px 0;"><strong>Nume:</strong> ${escapeHtml(address.nume_prenume)}</p>
@@ -470,7 +471,7 @@ async function sendEmails(
 export async function fulfillOrder(
   orderData: { address: Address; billing: Billing; cart: CartItem[]; marketing?: MarketingInfo },
   paymentType: 'Ramburs' | 'Card'
-): Promise<{ invoiceLink: string | null }> {
+): Promise<{ invoiceLink: string | null; orderNo?: number; orderId?: string }> {
   const { address, billing, cart, marketing } = orderData;
 
   let invoiceLink: string | null = null;
@@ -573,7 +574,7 @@ export async function fulfillOrder(
       });
       // Trimite emailurile cu numărul comenzii în subiect
       await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing, saved.orderNo);
-      return { invoiceLink };
+      return { invoiceLink, orderNo: saved.orderNo, orderId: saved.id };
     } catch (e: any) {
       console.warn('[OrderService] Salvare comandă a eșuat (non-blocant):', e?.message || e);
     }
