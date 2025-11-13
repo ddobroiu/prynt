@@ -43,23 +43,29 @@ export default function Page() {
       <section>
         <AutocolanteConfigurator />
       </section>
-      <RevealBlock buttonLabel="Cum comand?">
-        <HowToSection
-          title="Cum comanzi autocolante"
-          steps={[
-            "Alege materialul (monomeric/polimeric) și opțional laminarea",
-            "Setează dimensiunea și forma (inclusiv cut-path)",
-            "Încarcă fișierele sau adaugă linkul",
-            "Vezi prețul instant și adaugă în coș",
-            "Finalizează – livrare 24–48h",
-          ]}
-        />
-      </RevealBlock>
-      <RevealBlock buttonLabel="Citește mai mult">
-        <CategorySeoContent kind="autocolante" />
-      </RevealBlock>
-      <FaqAccordion qa={qa} />
-      <FaqJsonLd qa={qa} />
+      <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
+        <div className="md:col-span-2">
+          <FaqAccordion qa={qa} fullWidth />
+          <FaqJsonLd qa={qa} />
+        </div>
+        <aside className="mt-4 md:mt-0 space-y-4">
+          <RevealBlock buttonLabel="Cum comand?">
+            <HowToSection
+              title="Cum comanzi autocolante"
+              steps={[
+                "Alege materialul (monomeric/polimeric) și opțional laminarea",
+                "Setează dimensiunea și forma (inclusiv cut-path)",
+                "Încarcă fișierele sau adaugă linkul",
+                "Vezi prețul instant și adaugă în coș",
+                "Finalizează – livrare 24–48h",
+              ]}
+            />
+          </RevealBlock>
+          <RevealBlock buttonLabel="Citește mai mult">
+            <CategorySeoContent kind="autocolante" />
+          </RevealBlock>
+        </aside>
+      </section>
     </main>
   );
 }
