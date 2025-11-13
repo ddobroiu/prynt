@@ -305,7 +305,7 @@ export default function CheckoutPage() {
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Coșul tău</h1>
         </div>
-        <nav className="mb-8 flex flex-wrap gap-2 text-xs md:text-sm">
+        <nav className={`mb-8 flex flex-wrap gap-2 text-xs md:text-sm relative ${showEmbed ? 'z-[85] bg-black/40 backdrop-blur rounded-xl p-3' : ''}`}>
           <Link href="/shop" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Shop</Link>
           <Link href="/banner" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Bannere</Link>
           <Link href="/banner-verso" className="px-3 py-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10">Banner Verso</Link>
