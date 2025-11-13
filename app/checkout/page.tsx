@@ -5,6 +5,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../../components/CartContext";
 import { ShieldCheck, Truck, X } from "lucide-react";
 import CheckoutForm from "./CheckoutForm";
+import DeliveryInfo from "@/components/DeliveryInfo";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -323,6 +324,7 @@ export default function CheckoutPage() {
                 setPaymentMethod={setPaymentMethod}
                 onPlaceOrder={placeOrder}
                 placing={placing}
+                county={address.judet}
               />
             </aside>
 
@@ -392,6 +394,7 @@ function SummaryCard({
   setPaymentMethod,
   onPlaceOrder,
   placing,
+  county,
 }: {
   subtotal: number;
   shipping: number;
@@ -400,6 +403,7 @@ function SummaryCard({
   setPaymentMethod: (v: "ramburs" | "card") => void;
   onPlaceOrder: () => void;
   placing: boolean;
+  county?: string;
 }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
@@ -408,6 +412,7 @@ function SummaryCard({
       <h2 className="text-xl font-bold mb-4">Sumar comandă</h2>
 
       <div className="space-y-3 text-sm">
+        <DeliveryInfo county={county} variant="text" size="xs" showCod={false} showShippingFrom={false} />
         <div className="flex items-center justify-between">
           <span className="text-muted">Produse</span>
           <span className="font-semibold">{fmt(subtotal)}</span>

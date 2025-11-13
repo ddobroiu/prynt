@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
+import DeliveryInfo from "@/components/DeliveryInfo";
 
 /* Default GALLERIES */
 const GALLERY_PVC = [
@@ -534,6 +535,10 @@ export default function ConfiguratorPVCForex({
                   <p className="text-xs text-muted">
                     Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong>
                   </p>
+                </div>
+
+                <div className="mt-3">
+                  <DeliveryInfo variant="minimal" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="hidden lg:block mt-4">

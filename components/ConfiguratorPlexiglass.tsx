@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
+import DeliveryInfo from "@/components/DeliveryInfo";
 
 /* GALLERY (adjust image paths if needed) */
 const GALLERY = [
@@ -481,6 +482,10 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
                   <p>Preț: <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span></p>
                   <p className="text-xs text-muted">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—"}</strong></p>
                   <p className="text-xs text-muted">Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong></p>
+                </div>
+
+                <div className="mt-3">
+                  <DeliveryInfo variant="minimal" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="hidden lg:block mt-4">

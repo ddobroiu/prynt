@@ -4,6 +4,7 @@ import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { Ruler, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
+import DeliveryInfo from "@/components/DeliveryInfo";
 
 /* GALLERY */
 const GALLERY = [
@@ -558,7 +559,11 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
                   <p>Șasiu: <span className="text-ui font-semibold">{framed ? "Da" : "Nu"}</span></p>
                   <p>Cantitate: <span className="text-ui font-semibold">{quantity}</span></p>
                   <p>Preț per unitate: <span className="text-ui font-semibold">{formatMoneyDisplay(unitPrice)} RON</span></p>
-                  <p className="text-2xl font-extrabold text-ui">Total: {formatMoneyDisplay(serverPrice ?? totalPrice)} RON</p>
+                  <p className="flex items-center gap-2 flex-wrap">
+                    <span>Total:</span>
+                    <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(serverPrice ?? totalPrice)} RON</span>
+                    <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
+                  </p>
                   {addTextOption && textDesign.trim() !== "" && <div className="text-sm text-muted">Text pe comandă: "{textDesign.trim()}"</div>}
                   {/* show uploaded file info only in summary (thumb + label) */}
                   {artworkUrl && (
@@ -570,6 +575,10 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
                       </div>
                     </div>
                   )}
+                </div>
+
+                <div className="mt-3">
+                  <DeliveryInfo variant="minimal" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="hidden lg:block mt-4">

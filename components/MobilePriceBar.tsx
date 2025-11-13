@@ -1,4 +1,5 @@
 "use client";
+import DeliveryInfo from "@/components/DeliveryInfo";
 
 export default function MobilePriceBar({
   total,
@@ -22,7 +23,10 @@ export default function MobilePriceBar({
           Sumar
         </button>
         <div className="flex-1 text-right">
-          <div className="text-base font-bold text-white">{total > 0 ? `${total.toFixed(2)} RON` : "—"}</div>
+          <div className="flex items-center justify-end gap-2">
+            <div className="text-base font-bold text-white">{total > 0 ? `${total.toFixed(2)} RON` : "—"}</div>
+            <DeliveryInfo variant="text" size="xs" showCod={false} showShippingFrom={false} />
+          </div>
           <button
             onClick={onAddToCart}
             disabled={disabled}

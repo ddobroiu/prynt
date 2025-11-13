@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
+import DeliveryInfo from "@/components/DeliveryInfo";
 import { usePathname, useRouter } from "next/navigation";
 
 /* GALLERY */
@@ -465,6 +466,10 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                   <p>Preț: <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span></p>
                   <p className="text-xs text-muted">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm} RON</strong></p>
                   {designOption === "pro" && <p className="text-xs text-muted">Taxă design pro: <strong>{PRO_DESIGN_FEE} RON</strong></p>}
+                </div>
+
+                <div className="mt-3">
+                  <DeliveryInfo variant="minimal" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="hidden lg:block mt-4">

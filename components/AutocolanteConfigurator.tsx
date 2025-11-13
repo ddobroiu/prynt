@@ -4,6 +4,7 @@ import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
+import DeliveryInfo from "@/components/DeliveryInfo";
 import { usePathname, useRouter } from "next/navigation";
 
 /* GALLERY (exemplu) — păstrăm același pattern ca la bannere */
@@ -491,8 +492,16 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                 <div className="space-y-2 text-muted text-sm">
                   <p>Suprafață per bucată: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.sqm_per_unit)} m²</span></p>
                   <p>Total suprafață: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
-                  <p>Preț total: <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span></p>
+                  <p className="flex items-center gap-2 flex-wrap">
+                    <span>Preț total:</span>
+                    <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span>
+                    <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
+                  </p>
                   <p className="text-sm text-muted">Preț per bucată: {pricePerUnitLocal} RON</p>
+                </div>
+
+                <div className="mt-3">
+                  <DeliveryInfo variant="minimal" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="hidden lg:block mt-4">

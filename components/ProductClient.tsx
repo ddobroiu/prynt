@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import type { Product } from "@/lib/products";
 import { useCart } from "@/components/CartContext";
+import DeliveryInfo from "@/components/DeliveryInfo";
 
 /**
  * Helper: returnează un number sigur.
@@ -122,6 +123,10 @@ export default function ProductClient({
         <button className="btn-primary" onClick={handleAddToCart}>
           Adaugă în coș — {price.toFixed(2)} {product.currency ?? "RON"}
         </button>
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <DeliveryInfo shippingFrom={19.99} />
       </div>
     </div>
   );
