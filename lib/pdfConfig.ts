@@ -9,7 +9,7 @@ export const pdfOfferConfig = {
     cui: '44820819',
     regCom: 'J2021001108100',
     addressLine: 'București, România',
-    phone: '+40 7xx xxx xxx',
+    phone: '0750473111',
     email: 'contact@prynt.ro',
     website: 'www.prynt.ro',
   },

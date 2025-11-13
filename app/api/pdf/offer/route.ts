@@ -22,9 +22,46 @@ function buildItems(raw: any[]): { title: string; details: string; qty: number; 
     const height = it.height ?? it.height_cm ?? meta.height_cm ?? meta.height;
     const parts: string[] = [];
     if (width || height) parts.push(`Dimensiune: ${width ?? '—'} x ${height ?? '—'} cm`);
-    const isFonduri = (it?.slug === 'fonduri-eu') || (it?.productId === 'fonduri-eu');
-    if (isFonduri && typeof meta.selectedReadable === 'string' && meta.selectedReadable.trim()) {
+    // Generic selections/summary across all configuratoare
+    if (typeof meta.selectedReadable === 'string' && meta.selectedReadable.trim()) {
       parts.push(`Opțiuni selectate: ${meta.selectedReadable}`);
+    }
+    const sel = (meta as any).selections;
+    if (sel && typeof sel === 'object') {
+      try {
+        const isNoneish = (v: any): boolean => {
+          if (v === false) return true;
+          if (v && typeof v === 'object' && 'value' in v) return isNoneish((v as any).value);
+          if (typeof v === 'string') {
+            const t = v.trim().toLowerCase();
+            return t === 'none' || t === 'niciuna' || t === 'nicio' || t === 'nu' || t === 'no' || t === 'false' || t === '0' || t === 'n/a';
+          }
+          if (typeof v === 'number') return v === 0;
+          return false;
+        };
+        const fmtEntry = (x: any) => {
+          if (typeof x === 'string') return x;
+          if (x && typeof x === 'object') {
+            if ('label' in x && 'value' in x) return `${x.label}: ${x.value}`;
+            if ('name' in x && 'value' in x) return `${x.name}: ${x.value}`;
+            if ('name' in x) return String((x as any).name);
+          }
+          return JSON.stringify(x);
+        };
+        if (Array.isArray(sel)) {
+          const list = sel
+            .filter((x) => !isNoneish(x))
+            .map(fmtEntry)
+            .filter((s) => typeof s === 'string' && s.trim() !== '')
+            .join('; ');
+          if (list) parts.push(`Detalii configurare: ${list}`);
+        } else {
+          const entries = Object.entries(sel as Record<string, any>)
+            .filter(([_, v]) => v !== null && v !== undefined && !isNoneish(v) && String(v).trim() !== '')
+            .map(([k,v]) => `${k}: ${typeof v === 'string' ? v : fmtEntry(v)}`);
+          if (entries.length) parts.push(`Detalii configurare: ${entries.join('; ')}`);
+        }
+      } catch {}
     }
     const labelForKey: Record<string, string> = {
       width: 'Lățime (cm)', height: 'Înălțime (cm)', width_cm: 'Lățime (cm)', height_cm: 'Înălțime (cm)',
@@ -45,7 +82,6 @@ function buildItems(raw: any[]): { title: string; details: string; qty: number; 
     const exclude = new Set(['price','totalAmount','qty','quantity','artwork','artworkUrl','artworkLink','text','textDesign','selectedReadable','selections','title','name']);
     Object.keys(meta).forEach((k) => {
       if (exclude.has(k)) return;
-      if (!(k in labelForKey)) return;
       if (k === 'proDesignFee') {
         const num = Number(meta[k]);
         if (!isFinite(num) || num <= 0) return;
@@ -54,7 +90,8 @@ function buildItems(raw: any[]): { title: string; details: string; qty: number; 
       if (val === null || val === undefined) return;
       if (typeof val === 'number' && val === 0) return;
       if (typeof val === 'string' && val.trim() === '') return;
-      parts.push(`${labelForKey[k]}: ${pretty(k, val)}`);
+      const label = labelForKey[k] ?? k;
+      parts.push(`${label}: ${pretty(k, val)}`);
     });
 
     return { title, details: parts.join(' • '), qty, unit, total };

@@ -107,12 +107,11 @@ export default function CheckoutPage() {
     if (!address.strada_nr.trim()) e["address.strada_nr"] = "Stradă și număr obligatorii";
 
     if (billing.tip_factura === "persoana_juridica") {
-      if (!billing.denumire_companie?.trim())
-        e["billing.denumire_companie"] = "Denumire companie obligatorie";
       if (!billing.cui?.trim()) e["billing.cui"] = "CUI/CIF obligatoriu";
+      // Nu mai cerem denumirea/adresa pentru juridică; Oblio se va rezolva pe CUI
     }
 
-    if (!sameAsDelivery) {
+    if (!sameAsDelivery && billing.tip_factura === 'persoana_fizica') {
       if (!billing.judet) e["billing.judet"] = "Alege județul (facturare)";
       if (!billing.localitate?.trim())
         e["billing.localitate"] = "Localitate facturare obligatorie";
@@ -303,17 +302,6 @@ export default function CheckoutPage() {
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Coșul tău</h1>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={exportOfferPdfServer}
-              disabled={(items ?? []).length === 0}
-              title="Generează ofertă în PDF (calitate)"
-              className="inline-flex items-center justify-center rounded-xl bg-indigo-600/90 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition disabled:opacity-60"
-            >
-              Generează ofertă în PDF
-            </button>
-          </div>
         </div>
 
         {isEmpty ? (
@@ -321,6 +309,12 @@ export default function CheckoutPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <aside className="order-1 lg:order-2 lg:col-span-1">
+              <a
+                href="/"
+                className="mb-3 inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 transition"
+              >
+                Continuă cumpărăturile
+              </a>
               <SummaryCard
                 subtotal={subtotal}
                 shipping={costLivrare}
@@ -333,6 +327,17 @@ export default function CheckoutPage() {
             </aside>
 
             <section className={`order-2 lg:order-1 lg:col-span-2 space-y-6 ${showEmbed ? "hidden" : ""}`}>
+              <div className="flex items-center justify-start -mb-2">
+                <button
+                  type="button"
+                  onClick={exportOfferPdfServer}
+                  disabled={(items ?? []).length === 0}
+                  title="Generează ofertă în PDF (calitate)"
+                  className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition disabled:opacity-60"
+                >
+                  Generează ofertă în PDF
+                </button>
+              </div>
               <CartItems items={items} onRemove={removeItem} />
 
               <CheckoutForm
@@ -421,12 +426,6 @@ function SummaryCard({
       </div>
 
       <div className="mt-5">
-        <a
-          href="/"
-          className="mb-3 inline-flex w-full items-center justify-center rounded-lg border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold hover:bg-white/10 transition"
-        >
-          Continuă cumpărăturile
-        </a>
         <div className="mb-3 flex gap-3">
           <button
             onClick={() => setPaymentMethod("ramburs")}

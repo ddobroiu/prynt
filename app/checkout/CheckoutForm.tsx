@@ -155,27 +155,29 @@ export default function CheckoutForm({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-xl font-bold">Facturare</h2>
 
-          <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
-            <label className="flex select-none items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={sameAsDelivery}
-                onChange={(e) => setSameAsDelivery(e.target.checked)}
-              />
-              <span className="text-muted">Adresa de facturare este aceeași</span>
-            </label>
+          {billing.tip_factura === 'persoana_fizica' && (
+            <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+              <label className="flex select-none items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={sameAsDelivery}
+                  onChange={(e) => setSameAsDelivery(e.target.checked)}
+                />
+                <span className="text-muted">Adresa de facturare este aceeași</span>
+              </label>
 
-            {!sameAsDelivery && (
-              <button
-                type="button"
-                onClick={copyBillingFromDeliveryOnce}
-                className="rounded-md border border-[--border] bg-surface px-3 py-1.5 text-xs font-semibold text-ui hover:bg-white/10 transition"
-                title="Completează câmpurile de mai jos cu adresa de livrare"
-              >
-                Completează automat din livrare
-              </button>
-            )}
-          </div>
+              {!sameAsDelivery && (
+                <button
+                  type="button"
+                  onClick={copyBillingFromDeliveryOnce}
+                  className="rounded-md border border-[--border] bg-surface px-3 py-1.5 text-xs font-semibold text-ui hover:bg-white/10 transition"
+                  title="Completează câmpurile de mai jos cu adresa de livrare"
+                >
+                  Completează automat din livrare
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Tip facturare */}
@@ -207,15 +209,6 @@ export default function CheckoutForm({
         {/* Date companie (vizibile doar pentru juridică) */}
         {billing.tip_factura === "persoana_juridica" && (
           <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-            <Field id="billing.denumire_companie" label="Denumire companie" error={errors["billing.denumire_companie"]}>
-              <input
-                data-field="billing.denumire_companie"
-                className={inputCls(errors["billing.denumire_companie"])}
-                value={billing.denumire_companie ?? ""}
-                onChange={(e) => onBill("denumire_companie", e.target.value)}
-                autoComplete="organization"
-              />
-            </Field>
             <Field id="billing.cui" label="CUI/CIF" error={errors["billing.cui"]}>
               <input
                 data-field="billing.cui"
@@ -225,18 +218,19 @@ export default function CheckoutForm({
                 autoComplete="off"
               />
             </Field>
-            <Field id="billing.reg_com" label="Nr. Reg. Com. (opțional)">
+            <Field id="billing.denumire_companie" label="Denumire companie (opțional)">
               <input
                 className={inputCls(undefined)}
-                value={billing.reg_com ?? ""}
-                onChange={(e) => onBill("reg_com", e.target.value)}
-                autoComplete="off"
+                value={billing.denumire_companie ?? ""}
+                onChange={(e) => onBill("denumire_companie", e.target.value)}
+                autoComplete="organization"
               />
             </Field>
           </div>
         )}
 
         {/* Adresă facturare (dezactivată dacă e “aceeași”) */}
+        {billing.tip_factura === 'persoana_fizica' && (
         <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
           <div data-field="billing.judet" className={sameAsDelivery ? "opacity-60" : ""}>
             <JudetSelector
@@ -271,20 +265,23 @@ export default function CheckoutForm({
             />
           </Field>
         </div>
+        )}
 
-        <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Field id="billing.postCode" label="Cod poștal (facturare)" disabled={sameAsDelivery}>
-            <input
-              data-field="billing.postCode"
-              className={inputCls(undefined, sameAsDelivery)}
-              value={billing.postCode ?? ""}
-              onChange={(e) => onBill("postCode", e.target.value)}
-              disabled={sameAsDelivery}
-              autoComplete="postal-code"
-              inputMode="numeric"
-            />
-          </Field>
-        </div>
+        {billing.tip_factura === 'persoana_fizica' && (
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <Field id="billing.postCode" label="Cod poștal (facturare)" disabled={sameAsDelivery}>
+              <input
+                data-field="billing.postCode"
+                className={inputCls(undefined, sameAsDelivery)}
+                value={billing.postCode ?? ""}
+                onChange={(e) => onBill("postCode", e.target.value)}
+                disabled={sameAsDelivery}
+                autoComplete="postal-code"
+                inputMode="numeric"
+              />
+            </Field>
+          </div>
+        )}
       </div>
     </div>
   );

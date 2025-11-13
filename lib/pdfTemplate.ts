@@ -110,14 +110,13 @@ export function renderOfferHTML(params: {
 
       <div class="totals">
         <div class="panel">
-          <div class="row"><span class="label">Produse</span> <span class="value" style="float:right">${esc(fmtRON(subtotal))}</span></div>
-          <div class="row"><span class="label">Livrare</span>  <span class="value" style="float:right">${esc(fmtRON(shipping))}</span></div>
-          <div class="row" style="border-top:1px solid var(--border); margin-top:6px; padding-top:6px"><span class="label total">Total</span> <span class="value total" style="float:right">${esc(fmtRON(total))}</span></div>
+          <div class="row"><span class="label">Total produse</span> <span class="value" style="float:right">${esc(fmtRON(subtotal))}</span></div>
+          <div class="row"><span class="label">Livrare (tarif separat)</span>  <span class="value" style="float:right">${esc(fmtRON(shipping))}</span></div>
         </div>
       </div>
 
       <footer>
-        ${esc(cfg.notes.validity)}
+        ${esc(cfg.notes.validity)} Transportul este tarifat separat față de prețul produselor.
         ${cfg.company.email ? ` · ${esc(cfg.company.email)}` : ''}
         ${cfg.company.phone ? ` · ${esc(cfg.company.phone)}` : ''}
         ${cfg.company.website ? ` · ${esc(cfg.company.website)}` : ''}

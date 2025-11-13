@@ -29,7 +29,7 @@ interface Address {
   postCode?: string;
 }
 interface Billing {
-  tip_factura: 'persoana_fizica' | 'companie';
+  tip_factura: 'persoana_fizica' | 'companie' | 'persoana_juridica';
   cui?: string;
   name?: string;
   judet?: string;
@@ -113,6 +113,19 @@ async function createOblioInvoice(payload: any, token: string) {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
   });
+function normalizeCUI(input?: string): { primary?: string; alternate?: string } {
+  if (!input) return {};
+  let raw = String(input).trim().toUpperCase();
+  // Remove spaces and common separators
+  raw = raw.replace(/\s|-/g, '');
+  // Extract digits
+  const digits = raw.replace(/\D/g, '');
+  const hasRO = /^RO\d+$/i.test(raw);
+  const primary = hasRO ? raw : digits;
+  const alternate = hasRO ? digits : (digits ? `RO${digits}` : undefined);
+  return { primary, alternate };
+}
+
 
   const ct = resp.headers.get('content-type') || '';
   if (ct.includes('application/json')) {
@@ -344,9 +357,9 @@ async function sendEmails(
         <p>${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}</p>
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Detalii Facturare</h2>
-        <p><strong>Tip:</strong> ${billing.tip_factura === 'companie' ? 'Companie' : 'Persoană Fizică'}</p>
+        <p><strong>Tip:</strong> ${billing.tip_factura !== 'persoana_fizica' ? 'Companie' : 'Persoană Fizică'}</p>
         ${
-          billing.tip_factura === 'companie'
+          billing.tip_factura !== 'persoana_fizica'
             ? `<p><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
             : `<p><strong>Nume Factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`
         }
@@ -414,11 +427,11 @@ async function sendEmails(
         <p style="margin:4px 0;">${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}</p>
 
         <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Facturare</h2>
-        <p style="margin:4px 0;"><strong>Tip:</strong> ${billing.tip_factura === 'companie' ? 'Companie' : 'Persoană Fizică'}</p>
+        <p style="margin:4px 0;"><strong>Tip:</strong> ${billing.tip_factura !== 'persoana_fizica' ? 'Companie' : 'Persoană Fizică'}</p>
         ${
-          billing.tip_factura === 'companie'
-            ? `<p style="margin:4px 0;"><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
-            : `<p style="margin:4px 0;"><strong>Nume factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`
+          billing.tip_factura !== 'persoana_fizica'
+            ? `<p style=\"margin:4px 0;\"><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
+            : `<p style=\"margin:4px 0;\"><strong>Nume factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`
         }
 
         <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Produse</h2>
@@ -501,8 +514,9 @@ export async function fulfillOrder(
     const token = await getOblioAccessToken();
 
     // 1) Încercare “doar CUI” dacă e Companie și avem CUI
+    const isCompany = billing.tip_factura !== 'persoana_fizica';
     let client =
-      billing.tip_factura === 'companie' && billing.cui
+      isCompany && billing.cui
         ? { cif: billing.cui }
         : {
             name: billing.name || address.nume_prenume,
@@ -521,22 +535,35 @@ export async function fulfillOrder(
     let data = await createOblioInvoice(basePayload, token);
 
     // 2) Dacă cere selectarea clientului, reîncercăm cu detalii minime
-    if (data?.status !== 200) {
-      const msg = (data?.statusMessage || data?.message || '').toString();
-      const needDetails = /selecteaza clientul|alege clientul/i.test(msg) || data?.status === 422;
+      if (data?.status !== 200) {
+        const msg = (data?.statusMessage || data?.message || '').toString();
+        const needDetails = /selecteaza\s+clientul|alege\s+clientul|client|cif/i.test(msg) || (data?.status && data.status >= 400 && data.status < 500);
 
-      if (needDetails && billing.tip_factura === 'companie' && billing.cui) {
-        const payloadWithDetails = {
-          ...basePayload,
-          client: {
-            cif: billing.cui,
-            name: billing.name || address.nume_prenume,
-            address: billingAddressLine,
-            email: address.email,
-          },
-        };
-        data = await createOblioInvoice(payloadWithDetails, token);
-      }
+        if (needDetails && isCompany && billing.cui) {
+          const payloadWithDetails = {
+            ...basePayload,
+            client: {
+              cif: cuiNorm.primary || billing.cui,
+              name: billing.name || address.nume_prenume,
+              address: billingAddressLine,
+              email: address.email,
+            },
+          };
+          data = await createOblioInvoice(payloadWithDetails, token);
+
+          if (data?.status !== 200 && cuiNorm.alternate) {
+            const payloadAltCUI = {
+              ...basePayload,
+              client: {
+                cif: cuiNorm.alternate,
+                name: billing.name || address.nume_prenume,
+                address: billingAddressLine,
+                email: address.email,
+              },
+            };
+            data = await createOblioInvoice(payloadAltCUI, token);
+          }
+        }
     }
 
     if (data?.status === 200 && data?.data?.link) {

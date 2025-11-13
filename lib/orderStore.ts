@@ -11,7 +11,7 @@ export type Address = {
 };
 
 export type Billing = {
-  tip_factura: 'persoana_fizica' | 'companie';
+  tip_factura: 'persoana_fizica' | 'companie' | 'persoana_juridica';
   cui?: string;
   name?: string;
   judet?: string;

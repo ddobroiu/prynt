@@ -13,7 +13,6 @@ type Props = {
 };
 
 export default function LocalitateSelector({ judet, value, onChange, onPostCodeChange, label = "Localitate", disabled }: Props) {
-  const [q, setQ] = useState("");
   const [items, setItems] = useState<Localitate[]>([]);
   const [loading, setLoading] = useState(false);
   const lastJudet = useRef<string | null>(null);
@@ -25,7 +24,6 @@ export default function LocalitateSelector({ judet, value, onChange, onPostCodeC
       setLoading(true);
       try {
         const params = new URLSearchParams({ judet });
-        if (q.trim()) params.set('q', q.trim());
         const res = await fetch(`/api/dpd/localitati?${params.toString()}`, { cache: 'no-store' });
         const data = await res.json().catch(() => null);
         if (!cancelled && data?.ok && Array.isArray(data.localitati)) {
@@ -38,12 +36,11 @@ export default function LocalitateSelector({ judet, value, onChange, onPostCodeC
     }
     load();
     return () => { cancelled = true; };
-  }, [judet, q]);
+  }, [judet]);
 
-  // când se schimbă județul, resetăm căutarea și valoarea selectată
+  // când se schimbă județul, resetăm valoarea selectată și codul poștal
   useEffect(() => {
     if (lastJudet.current !== judet) {
-      setQ("");
       onChange("");
       onPostCodeChange?.("");
       lastJudet.current = judet;
@@ -61,13 +58,6 @@ export default function LocalitateSelector({ judet, value, onChange, onPostCodeC
     <div className="text-sm">
       <label className="block">
         <span className="field-label">{label}</span>
-        <input
-          className="input w-full mb-1"
-          placeholder="Caută localitate..."
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          disabled={!judet || disabled}
-        />
         <select
           className="select disabled:opacity-60 w-full"
           value={value}
