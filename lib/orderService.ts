@@ -258,15 +258,15 @@ async function sendEmails(
   let actionButtons = '';
   try {
     if (process.env.ADMIN_ACTION_SECRET && process.env.DPD_DEFAULT_SERVICE_ID) {
-      const tokenConfirm = signAdminAction({
-        action: 'confirm_awb',
+      const tokenEmit = signAdminAction({
+        action: 'emit_awb',
         address,
         // Keep token short: omit items list (optional)
         paymentType,
         totalAmount: totalComanda,
       });
-      const tokenValidate = signAdminAction({
-        action: 'validate',
+      const tokenConfirm = signAdminAction({
+        action: 'confirm_awb',
         address,
         paymentType,
         totalAmount: totalComanda,
@@ -279,14 +279,12 @@ async function sendEmails(
         totalAmount: totalComanda,
       });
       const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
+      const urlEmit = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenEmit)}`;
       const urlConfirm = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenConfirm)}`;
-      const urlValidate = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenValidate)}`;
-      const urlCancel = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenCancel)}`;
       actionButtons = `
         <div style="margin:20px 0; text-align:center;">
-          <a href="${urlValidate}" style="display:inline-block; background:#0ea5e9; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; margin-right:8px;">Validează date</a>
-          <a href="${urlConfirm}" style="display:inline-block; background:#16a34a; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; margin-right:8px;">Trimite AWB clientului</a>
-          <a href="${urlCancel}" style="display:inline-block; background:#dc2626; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none;">Respinge</a>
+          <a href="${urlEmit}" style="display:inline-block; background:#0ea5e9; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; margin-right:8px;">Emite AWB (fără tipărire)</a>
+          <a href="${urlConfirm}" style="display:inline-block; background:#16a34a; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none;">Trimite AWB clientului</a>
         </div>`;
     }
   } catch (e) {

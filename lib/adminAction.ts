@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-export type AdminAction = 'validate' | 'confirm_awb' | 'cancel_awb';
+export type AdminAction = 'validate' | 'emit_awb' | 'confirm_awb' | 'cancel_awb';
 
 export type AdminActionPayload = {
   action: AdminAction;
@@ -19,6 +19,9 @@ export type AdminActionPayload = {
   items?: { name: string; qty: number }[]; // optional to keep token short
   paymentType?: 'Ramburs' | 'Card';
   totalAmount?: number; // total order amount (RON) – used for COD when Ramburs
+  // optionally carry created shipment data so we can print/send later without re-creating
+  shipmentId?: string;
+  parcels?: { id: string }[];
 };
 
 function getSecret(): string {

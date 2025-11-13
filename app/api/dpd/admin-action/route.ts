@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       return htmlPage('Validare AWB', `<h1>Validare eșuată</h1><pre style="white-space:pre-wrap;background:#f6f6f6;padding:12px;border-radius:6px;">${(v.error && (v.error.message || JSON.stringify(v.error))) || 'Eroare necunoscută'}</pre>`);
     }
 
-    if (payload.action === 'confirm_awb') {
+    if (payload.action === 'emit_awb' || payload.action === 'confirm_awb') {
       // Build minimal shipment from payload
       const address = payload.address;
       const serviceId = Number(sidParam || process.env.DPD_DEFAULT_SERVICE_ID || '');
@@ -148,9 +148,13 @@ export async function GET(req: NextRequest) {
         ref1: 'Order Email Action',
       } as any;
 
-      const created = await createShipment(shipment);
-      if (created?.error || !created?.id) {
-        const msg = created?.error?.message || 'Eroare creare expediție';
+      // If we already have a shipmentId in token (emitted earlier), skip creation
+      const preCreatedId = payload.shipmentId || searchParams.get('ship') || '';
+      const created = preCreatedId
+        ? { id: preCreatedId, parcels: (payload.parcels as any) || [] }
+        : await createShipment(shipment);
+      if ((created as any)?.error || !created?.id) {
+        const msg = (created as any)?.error?.message || 'Eroare creare expediție';
         const tokenEsc = encodeURIComponent(token);
         return htmlPage(
           'Eroare AWB',
@@ -169,7 +173,31 @@ export async function GET(req: NextRequest) {
       }
 
       const shipmentId = created.id!;
-      const parcels = created.parcels || [];
+      const parcels = (created.parcels || []) as any[];
+
+      if (payload.action === 'emit_awb' && !preCreatedId) {
+        // Do NOT print or email. Provide next-step link to send.
+        const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
+        const tokenSend = signAdminAction({
+          action: 'confirm_awb',
+          address,
+          paymentType: payload.paymentType,
+          totalAmount: payload.totalAmount,
+          shipmentId,
+          parcels: parcels.map((p: any) => ({ id: p.id })),
+        });
+        const sendUrl = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenSend)}&sid=${serviceId}`;
+        const track = trackingUrlForAwb(shipmentId);
+        return htmlPage(
+          'AWB creat',
+          `<h1>AWB creat (fără tipărire)</h1>
+           <p>AWB: <strong>${shipmentId}</strong></p>
+           <p><a href="${track}">Deschide pagina de tracking (MyDPD)</a></p>
+           <p style="margin-top:16px;"><a href="${sendUrl}" style="display:inline-block;padding:8px 12px;background:#16a34a;color:#fff;border-radius:8px;text-decoration:none;">Trimite AWB clientului</a></p>
+           <p style="color:#555">Poți edita expediția în MyDPD, apoi revino aici și apasă „Trimite AWB clientului”.</p>`
+        );
+      }
+
       const { base64 } = await printExtended({
         paperSize: 'A6',
         parcels: parcels.map((p) => ({ id: p.id })),
