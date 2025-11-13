@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { useCart } from "@/components/CartContext";
 import { CheckCircle, Info, ShoppingCart, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
+import DeliveryInfo from "@/components/DeliveryInfo";
 
 type Option = { id: string; label: string; price: number };
 
@@ -351,7 +352,15 @@ export default function FonduriEUConfigurator() {
                   {orderNotes && (
                     <p className="pt-2 border-t border-white/10 text-ui/80"><span className="font-semibold text-ui">Detalii:</span> {orderNotes}</p>
                   )}
-                  <p className="text-xl font-bold">Total: <span className="text-indigo-400">{sum.toFixed(2)} RON</span></p>
+                  <p className="text-xl font-bold flex items-center gap-2 flex-wrap">
+                    <span>Total:</span>
+                    <span className="text-indigo-400">{sum.toFixed(2)} RON</span>
+                    <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
+                  </p>
+                </div>
+
+                <div className="mt-4">
+                  <DeliveryInfo className="hidden lg:block" variant="minimal" icon="📦" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="hidden lg:block mt-4">

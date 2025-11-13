@@ -416,25 +416,17 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
                   </div>
                   <div className="text-2xl font-extrabold flex items-center gap-2 flex-wrap">
                     <span>Total:</span>
-                    <span>{total.toFixed(2)} RON</span>
+                    <span className="text-ui">{total.toFixed(2)} RON</span>
                     <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
                   </div>
                 </div>
 
                 <div className="mt-4">
-                  <DeliveryInfo variant="minimal" showCod={false} showShippingFrom={false} />
+                  <DeliveryInfo className="hidden lg:block" variant="minimal" icon="📦" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="mt-4">
-                  <button
-                    onClick={() => {
-                      /* calc server if needed */
-                    }}
-                    className="btn-secondary mr-2"
-                  >
-                    Calculează
-                  </button>
-                  <button onClick={handleAddToCart} className="btn-primary w-full mt-3 py-2">
+                  <button onClick={handleAddToCart} className="btn-primary w-full py-2">
                     <ShoppingCart size={18} /> <span className="ml-2">Adaugă</span>
                   </button>
                 </div>

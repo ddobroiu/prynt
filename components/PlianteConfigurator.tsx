@@ -283,7 +283,7 @@ export default function PlianteConfigurator({ productSlug, initialWidth, initial
                 </div>
 
                 <div className="mt-4">
-                  <DeliveryInfo variant="minimal" showCod={false} showShippingFrom={false} />
+                  <DeliveryInfo className="hidden lg:block" variant="minimal" icon="📦" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="mt-4">

@@ -388,7 +388,7 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
                 <div className="space-y-2 text-muted text-sm">
                   <p>Suprafață: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
                   <p className="flex items-center gap-2 flex-wrap">
-                    <span>Preț:</span>
+                    <span>Total:</span>
                     <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span>
                     <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
                   </p>
@@ -398,20 +398,17 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
                 </div>
 
                 <div className="mt-4">
-                  <DeliveryInfo variant="minimal" showCod={false} showShippingFrom={false} />
+                  <DeliveryInfo className="hidden lg:block" variant="minimal" icon="📦" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="hidden lg:block mt-4">
-                  <button onClick={calculateServer} disabled={calcLoading} className="btn-secondary mr-2">Calculează</button>
-                  <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-full mt-3 py-2">
+                  <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-full py-2">
                     <ShoppingCart size={18} /><span className="ml-2">Adaugă</span>
                   </button>
                 </div>
               </div>
 
-              <div className="card-muted p-3 text-xs text-muted">
-                Dimensiuni maxime suportate: 300x150 cm; 400x150 cm; 300x200 cm. Prețurile afișate sunt orientative.
-              </div>
+              
             </div>
           </aside>
         </div>

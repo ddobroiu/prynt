@@ -578,12 +578,11 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
                 </div>
 
                 <div className="mt-3">
-                  <DeliveryInfo variant="minimal" showCod={false} showShippingFrom={false} />
+                  <DeliveryInfo className="hidden lg:block" variant="minimal" icon="📦" showCod={false} showShippingFrom={false} />
                 </div>
 
                 <div className="hidden lg:block mt-4">
-                  <button onClick={calculateServer} disabled={calcLoading} className="btn-secondary mr-2">Calculează</button>
-                  <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-full mt-3 py-2">
+                  <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-full py-2">
                     <ShoppingCart size={18} /><span className="ml-2">Adaugă</span>
                   </button>
                 </div>
