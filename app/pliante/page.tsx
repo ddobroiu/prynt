@@ -8,6 +8,8 @@ import FaqAccordion from "@/components/FaqAccordion";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
 import HowToJsonLd from "@/components/HowToJsonLd";
 import HowToSection from "@/components/HowToSection";
+import RevealBlock from "@/components/RevealBlock";
+import CategorySeoContent from "@/components/CategorySeoContent";
 
 export default function PliantePage() {
   const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
@@ -33,16 +35,21 @@ export default function PliantePage() {
       <PlianteConfigurator />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
-      <HowToSection
-        title="Cum comanzi pliante"
-        steps={[
-          "Alege formatul (A6–A4) și tipul de pliere",
-          "Selectează gramajul hârtiei și finisajul",
-          "Încarcă fișierele (PDF/AI/PSD/JPG/PNG)",
-          "Vezi prețul instant și adaugă în coș",
-          "Finalizează – livrare 24–48h",
-        ]}
-      />
+      <RevealBlock buttonLabel="Cum comand?">
+        <HowToSection
+          title="Cum comanzi pliante"
+          steps={[
+            "Alege formatul (A6–A4) și tipul de pliere",
+            "Selectează gramajul hârtiei și finisajul",
+            "Încarcă fișierele (PDF/AI/PSD/JPG/PNG)",
+            "Vezi prețul instant și adaugă în coș",
+            "Finalizează – livrare 24–48h",
+          ]}
+        />
+      </RevealBlock>
+      <RevealBlock buttonLabel="Citește mai mult">
+        <CategorySeoContent kind="pliante" />
+      </RevealBlock>
     </main>
   );
 }

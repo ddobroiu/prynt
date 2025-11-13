@@ -6,6 +6,8 @@ import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
 import HowToJsonLd from "@/components/HowToJsonLd";
 import HowToSection from "@/components/HowToSection";
+import RevealBlock from "@/components/RevealBlock";
+import CategorySeoContent from "@/components/CategorySeoContent";
 
 export const metadata = {
   title: "Banner — Configurează online | Prynt",
@@ -42,16 +44,21 @@ export default function Page() {
       <section>
         <BannerConfigurator />
       </section>
-      <HowToSection
-        title="Cum comanzi bannere publicitare"
-        steps={[
-          "Alege dimensiunea exactă în cm și materialul potrivit (Frontlit/Blockout)",
-          "Selectează finisajele: tiv, capse, buzunare",
-          "Încarcă grafica sau lasă un link (WeTransfer/Drive)",
-          "Vezi prețul instant și adaugă în coș",
-          "Finalizează comanda – livrare 24–48h",
-        ]}
-      />
+      <RevealBlock buttonLabel="Cum comand?">
+        <HowToSection
+          title="Cum comanzi bannere publicitare"
+          steps={[
+            "Alege dimensiunea exactă în cm și materialul potrivit (Frontlit/Blockout)",
+            "Selectează finisajele: tiv, capse, buzunare",
+            "Încarcă grafica sau lasă un link (WeTransfer/Drive)",
+            "Vezi prețul instant și adaugă în coș",
+            "Finalizează comanda – livrare 24–48h",
+          ]}
+        />
+      </RevealBlock>
+      <RevealBlock buttonLabel="Citește mai mult">
+        <CategorySeoContent kind="banner" />
+      </RevealBlock>
       {/* Produse similare section removed as requested */}
 
       {/* Optional SEO/extra content can go here, but not the visual H1 to avoid duplication */}

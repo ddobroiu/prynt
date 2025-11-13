@@ -6,6 +6,8 @@ import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
 import HowToJsonLd from "@/components/HowToJsonLd";
 import HowToSection from "@/components/HowToSection";
+import RevealBlock from "@/components/RevealBlock";
+import CategorySeoContent from "@/components/CategorySeoContent";
 
 export const metadata = {
   title: "Afișe — Print digital | Prynt",
@@ -42,16 +44,21 @@ export default function Page() {
       </section>
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
-      <HowToSection
-        title="Cum comanzi afișe"
-        steps={[
-          "Alege formatul și materialul potrivit",
-          "Setează tirajul",
-          "Încarcă fișierele (PDF/AI/PSD/JPG/PNG)",
-          "Preț instant și adaugă în coș",
-          "Finalizează – livrare 24–48h",
-        ]}
-      />
+      <RevealBlock buttonLabel="Cum comand?">
+        <HowToSection
+          title="Cum comanzi afișe"
+          steps={[
+            "Alege formatul și materialul potrivit",
+            "Setează tirajul",
+            "Încarcă fișierele (PDF/AI/PSD/JPG/PNG)",
+            "Preț instant și adaugă în coș",
+            "Finalizează – livrare 24–48h",
+          ]}
+        />
+      </RevealBlock>
+      <RevealBlock buttonLabel="Citește mai mult">
+        <CategorySeoContent kind="afise" />
+      </RevealBlock>
     </main>
   );
 }

@@ -6,6 +6,8 @@ import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
 import HowToJsonLd from "@/components/HowToJsonLd";
 import HowToSection from "@/components/HowToSection";
+import RevealBlock from "@/components/RevealBlock";
+import CategorySeoContent from "@/components/CategorySeoContent";
 
 export const metadata = {
   title: "Plexiglass - Configurator",
@@ -36,16 +38,21 @@ export default function Page() {
       <ConfiguratorPlexiglass />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
-      <HowToSection
-        title="Cum comanzi plexiglass tipărit/decupat"
-        steps={[
-          "Alege grosimea și dimensiunile",
-          "Adaugă cerințe de finisare (găuri/decupare)",
-          "Încarcă fișierele",
-          "Preț instant și adaugă în coș",
-          "Finalizează – livrare 24–48h",
-        ]}
-      />
+      <RevealBlock buttonLabel="Cum comand?">
+        <HowToSection
+          title="Cum comanzi plexiglass tipărit/decupat"
+          steps={[
+            "Alege grosimea și dimensiunile",
+            "Adaugă cerințe de finisare (găuri/decupare)",
+            "Încarcă fișierele",
+            "Preț instant și adaugă în coș",
+            "Finalizează – livrare 24–48h",
+          ]}
+        />
+      </RevealBlock>
+      <RevealBlock buttonLabel="Citește mai mult">
+        <CategorySeoContent kind="plexiglass" />
+      </RevealBlock>
     </div>
   );
 }

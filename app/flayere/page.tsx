@@ -8,6 +8,8 @@ import FaqAccordion from "@/components/FaqAccordion";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
 import HowToJsonLd from "@/components/HowToJsonLd";
 import HowToSection from "@/components/HowToSection";
+import RevealBlock from "@/components/RevealBlock";
+import CategorySeoContent from "@/components/CategorySeoContent";
 
 export default function FlyerePage() {
   const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
@@ -33,16 +35,21 @@ export default function FlyerePage() {
       <FlyerConfigurator />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
-      <HowToSection
-        title="Cum comanzi flyere"
-        steps={[
-          "Alege formatul dorit (A6/A5/A4)",
-          "Selectează hârtia și finisajul",
-          "Încarcă fișierele sau adaugă linkul",
-          "Vezi prețul instant și adaugă în coș",
-          "Finalizează – livrare 24–48h",
-        ]}
-      />
+      <RevealBlock buttonLabel="Cum comand?">
+        <HowToSection
+          title="Cum comanzi flyere"
+          steps={[
+            "Alege formatul dorit (A6/A5/A4)",
+            "Selectează hârtia și finisajul",
+            "Încarcă fișierele sau adaugă linkul",
+            "Vezi prețul instant și adaugă în coș",
+            "Finalizează – livrare 24–48h",
+          ]}
+        />
+      </RevealBlock>
+      <RevealBlock buttonLabel="Citește mai mult">
+        <CategorySeoContent kind="flayere" />
+      </RevealBlock>
     </main>
   );
 }

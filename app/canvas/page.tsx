@@ -6,6 +6,8 @@ import FaqAccordion from "@/components/FaqAccordion";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
 import HowToJsonLd from "@/components/HowToJsonLd";
 import HowToSection from "@/components/HowToSection";
+import RevealBlock from "@/components/RevealBlock";
+import CategorySeoContent from "@/components/CategorySeoContent";
 
 export const metadata = {
   title: "Canvas — Configurează online | Prynt",
@@ -39,16 +41,21 @@ export default function Page() {
       </section>
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
-      <HowToSection
-        title="Cum comanzi tablouri canvas"
-        steps={[
-          "Alege dimensiunea potrivită",
-          "Selectează șasiul/ramă (opțional)",
-          "Încarcă imaginea",
-          "Vezi prețul instant și adaugă în coș",
-          "Finalizează – livrare 24–48h",
-        ]}
-      />
+      <RevealBlock buttonLabel="Cum comand?">
+        <HowToSection
+          title="Cum comanzi tablouri canvas"
+          steps={[
+            "Alege dimensiunea potrivită",
+            "Selectează șasiul/ramă (opțional)",
+            "Încarcă imaginea",
+            "Vezi prețul instant și adaugă în coș",
+            "Finalizează – livrare 24–48h",
+          ]}
+        />
+      </RevealBlock>
+      <RevealBlock buttonLabel="Citește mai mult">
+        <CategorySeoContent kind="canvas" />
+      </RevealBlock>
     </main>
   );
 }

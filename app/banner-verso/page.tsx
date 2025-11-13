@@ -4,6 +4,10 @@ import FaqJsonLd from "@/components/FaqJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
+import HowToJsonLd from "@/components/HowToJsonLd";
+import HowToSection from "@/components/HowToSection";
+import RevealBlock from "@/components/RevealBlock";
+import CategorySeoContent from "@/components/CategorySeoContent";
 
 export const metadata = {
   title: "Banner Verso — Configurator",
@@ -23,9 +27,34 @@ export default function BannerVersoPage() {
     <div>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Banner Verso", url: `${base}/banner-verso` }]} />
       <ServiceJsonLd name="Banner față–verso (blockout)" url={`${base}/banner-verso`} />
+      <HowToJsonLd
+        name="Cum comanzi banner față–verso"
+        steps={[
+          { name: "Alege dimensiunea", text: "Introdu dimensiunile exacte pentru bannerul suspendat." },
+          { name: "Finisaje", text: "Alege tiv/capse sau buzunare pentru structură." },
+          { name: "Încarcă fișierul", text: "PDF/AI/PSD/JPG/PNG acceptate." },
+          { name: "Preț & comandă", text: "Vezi prețul instant și finalizează." },
+          { name: "Livrare 24–48h", text: "Producție și livrare rapidă." },
+        ]}
+      />
       <BannerVersoConfigurator productSlug="banner-verso" />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
+      <RevealBlock buttonLabel="Cum comand?">
+        <HowToSection
+          title="Cum comanzi banner față–verso"
+          steps={[
+            "Alege dimensiunea corectă",
+            "Setează finisajele (tiv/capse/buzunare)",
+            "Încarcă fișierele",
+            "Preț instant și adaugă în coș",
+            "Finalizează – livrare 24–48h",
+          ]}
+        />
+      </RevealBlock>
+      <RevealBlock buttonLabel="Citește mai mult">
+        <CategorySeoContent kind="banner-verso" />
+      </RevealBlock>
     </div>
   );
 }

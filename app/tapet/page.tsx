@@ -4,6 +4,10 @@ import FaqJsonLd from "@/components/FaqJsonLd";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
+import HowToJsonLd from "@/components/HowToJsonLd";
+import HowToSection from "@/components/HowToSection";
+import RevealBlock from "@/components/RevealBlock";
+import CategorySeoContent from "@/components/CategorySeoContent";
 
 export const metadata = {
   title: "Tapet — Configurator",
@@ -22,11 +26,36 @@ export default function Page() {
     <main style={{ padding: 16 }}>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Tapet", url: `${base}/tapet` }]} />
       <ServiceJsonLd name="Tapet personalizat" url={`${base}/tapet`} />
+      <HowToJsonLd
+        name="Cum comanzi tapet personalizat"
+        steps={[
+          { name: "Măsoară peretele", text: "Notează lățimea și înălțimea utile, adaugă o marjă de siguranță." },
+          { name: "Alege materialul", text: "Tapet texturat/lavabil în funcție de spațiu și întreținere." },
+          { name: "Încarcă designul", text: "PDF/AI/PSD/JPG/PNG; recomandat fișier mare pentru claritate." },
+          { name: "Preț & comandă", text: "Vezi prețul instant și finalizează." },
+          { name: "Livrare 24–48h", text: "Ambalare și livrare rapidă." },
+        ]}
+      />
       <section>
         <TapetConfigurator />
       </section>
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
+      <RevealBlock buttonLabel="Cum comand?">
+        <HowToSection
+          title="Cum comanzi tapet personalizat"
+          steps={[
+            "Măsoară peretele (lățime × înălțime)",
+            "Alege materialul potrivit (texturat/lavabil)",
+            "Încarcă designul",
+            "Preț instant și adaugă în coș",
+            "Finalizează – livrare 24–48h",
+          ]}
+        />
+      </RevealBlock>
+      <RevealBlock buttonLabel="Citește mai mult">
+        <CategorySeoContent kind="tapet" />
+      </RevealBlock>
     </main>
   );
 }

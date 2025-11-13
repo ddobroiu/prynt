@@ -6,6 +6,8 @@ import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
 import HowToJsonLd from "@/components/HowToJsonLd";
 import HowToSection from "@/components/HowToSection";
+import RevealBlock from "@/components/RevealBlock";
+import CategorySeoContent from "@/components/CategorySeoContent";
 
 export const metadata = {
   title: "Autocolante — Configurează online | Prynt",
@@ -41,16 +43,21 @@ export default function Page() {
       <section>
         <AutocolanteConfigurator />
       </section>
-      <HowToSection
-        title="Cum comanzi autocolante"
-        steps={[
-          "Alege materialul (monomeric/polimeric) și opțional laminarea",
-          "Setează dimensiunea și forma (inclusiv cut-path)",
-          "Încarcă fișierele sau adaugă linkul",
-          "Vezi prețul instant și adaugă în coș",
-          "Finalizează – livrare 24–48h",
-        ]}
-      />
+      <RevealBlock buttonLabel="Cum comand?">
+        <HowToSection
+          title="Cum comanzi autocolante"
+          steps={[
+            "Alege materialul (monomeric/polimeric) și opțional laminarea",
+            "Setează dimensiunea și forma (inclusiv cut-path)",
+            "Încarcă fișierele sau adaugă linkul",
+            "Vezi prețul instant și adaugă în coș",
+            "Finalizează – livrare 24–48h",
+          ]}
+        />
+      </RevealBlock>
+      <RevealBlock buttonLabel="Citește mai mult">
+        <CategorySeoContent kind="autocolante" />
+      </RevealBlock>
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
     </main>
