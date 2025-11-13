@@ -4,6 +4,8 @@ import FaqJsonLd from "@/components/FaqJsonLd";
 import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
+import HowToJsonLd from "@/components/HowToJsonLd";
+import HowToSection from "@/components/HowToSection";
 
 export const metadata = {
   title: "Polipropilenă - Configurator",
@@ -21,9 +23,29 @@ export default function Page() {
     <div>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Polipropilenă", url: `${base}/polipropilena` }]} />
       <ServiceJsonLd name="Panouri din polipropilenă celulară" url={`${base}/polipropilena`} />
+      <HowToJsonLd
+        name="Cum comanzi panouri din polipropilenă"
+        steps={[
+          { name: "Alege grosimea și dimensiunea", text: "Selectează grosimea (ex. 3/5 mm) și dimensiunile panourilor." },
+          { name: "Față/verso", text: "Alege printul pe o față sau pe ambele fețe în funcție de aplicație." },
+          { name: "Încarcă fișierele", text: "PDF/AI/PSD/JPG/PNG; vectorial preferabil pentru text/grafice." },
+          { name: "Preț & comandă", text: "Vezi prețul instant și finalizează comanda." },
+          { name: "Livrare 24–48h", text: "Expediere rapidă în țară." },
+        ]}
+      />
       <ConfiguratorPolipropilena />
       <FaqAccordion qa={qa} />
       <FaqJsonLd qa={qa} />
+      <HowToSection
+        title="Cum comanzi panouri din polipropilenă"
+        steps={[
+          "Alege grosimea și dimensiunile",
+          "Selectează față/verso",
+          "Încarcă fișierele",
+          "Preț instant și adaugă în coș",
+          "Finalizează – livrare 24–48h",
+        ]}
+      />
     </div>
   );
 }
