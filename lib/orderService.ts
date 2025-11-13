@@ -142,20 +142,112 @@ async function sendEmails(
   const subtotal = normalized.reduce((acc, it) => acc + (Number(it.total) || 0), 0);
   const totalComanda = subtotal + SHIPPING_FEE;
 
+  function formatYesNo(v: any) {
+    if (typeof v === 'boolean') return v ? 'Da' : 'Nu';
+    if (typeof v === 'string') {
+      const t = v.toLowerCase();
+      if (['true', 'da', 'yes', 'y', '1'].includes(t)) return 'Da';
+      if (['false', 'nu', 'no', 'n', '0'].includes(t)) return 'Nu';
+    }
+    return String(v);
+  }
+
+  const labelForKey: Record<string, string> = {
+    width: 'Lățime (cm)',
+    height: 'Înălțime (cm)',
+    width_cm: 'Lățime (cm)',
+    height_cm: 'Înălțime (cm)',
+    totalSqm: 'Suprafață totală (m²)',
+    sqmPerUnit: 'm²/buc',
+    pricePerSqm: 'Preț pe m² (RON)',
+    materialId: 'Material',
+    want_hem_and_grommets: 'Tiv și capse',
+    want_wind_holes: 'Găuri pentru vânt',
+    designOption: 'Grafică',
+    want_adhesive: 'Adeziv',
+    material: 'Material',
+    laminated: 'Laminare',
+    shape_diecut: 'Tăiere la contur',
+    productType: 'Tip panou',
+    thickness_mm: 'Grosime (mm)',
+    sameGraphicFrontBack: 'Aceeași grafică față/spate',
+    framed: 'Șasiu',
+    sizeKey: 'Dimensiune preset',
+    mode: 'Mod canvas',
+    orderNotes: 'Observații',
+  };
+
+  function prettyValue(k: string, v: any) {
+    if (k === 'materialId') return v === 'frontlit_510' ? 'Frontlit 510g' : v === 'frontlit_440' ? 'Frontlit 440g' : String(v);
+    if (k === 'productType') return v === 'alucobond' ? 'Alucobond' : v === 'polipropilena' ? 'Polipropilenă' : v === 'pvc-forex' ? 'PVC Forex' : String(v);
+    if (k === 'designOption') return v === 'pro' ? 'Pro' : v === 'upload' ? 'Am fișier' : v === 'text_only' ? 'Text' : String(v);
+    if (k === 'framed') return formatYesNo(v);
+    if (typeof v === 'boolean') return formatYesNo(v);
+    return String(v);
+  }
+
+  function buildDetailsHTML(item: AnyRecord) {
+    const details: string[] = [];
+    // width/height if present at top-level or metadata
+    const width = item.width ?? item.width_cm ?? item.rawMetadata?.width_cm ?? item.rawMetadata?.width;
+    const height = item.height ?? item.height_cm ?? item.rawMetadata?.height_cm ?? item.rawMetadata?.height;
+    if (width || height) {
+      details.push(`<div><strong>Dimensiune:</strong> ${escapeHtml(String(width || '—'))} x ${escapeHtml(String(height || '—'))} cm</div>`);
+    }
+    // List known metadata keys
+    const meta = item.rawMetadata || {};
+    const knownKeys = Object.keys(labelForKey).filter((k) => meta[k] !== undefined);
+    knownKeys.forEach((k) => {
+      const label = labelForKey[k];
+      const val = prettyValue(k, meta[k]);
+      details.push(`<div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(val)}</div>`);
+    });
+    // If sqm/prices are at top-level in metadata
+    ['sqmPerUnit', 'totalSqm', 'pricePerSqm'].forEach((k) => {
+      if (!knownKeys.includes(k) && meta[k] !== undefined) {
+        const label = labelForKey[k] || k;
+        details.push(`<div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(String(meta[k]))}</div>`);
+      }
+    });
+    // Fallback other keys (exclude noisy/duplicate ones)
+    const exclude = new Set([
+      'price',
+      'totalAmount',
+      'qty',
+      'quantity',
+      // duplicates handled separately
+      'artwork',
+      'artworkUrl',
+      'artworkLink',
+      'text',
+      'textDesign',
+      // internal snapshot fields from configurators
+      'selectedReadable',
+      'selections',
+      'title',
+      'name',
+    ]);
+    const leftovers = Object.keys(meta).filter((k) => !knownKeys.includes(k) && !exclude.has(k));
+    leftovers.forEach((k) => {
+      const v = meta[k];
+      details.push(`<div><strong>${escapeHtml(k)}:</strong> ${escapeHtml(String(v))}</div>`);
+    });
+    if (item.artwork) {
+      details.push(`<div><strong>Fișier:</strong> <a href="${escapeHtml(item.artwork)}" target="_blank" rel="noopener noreferrer">link</a></div>`);
+    }
+    if (item.textDesign) {
+      details.push(`<div><strong>Text:</strong> <em>${escapeHtml(item.textDesign)}</em></div>`);
+    }
+    if (details.length === 0) return '';
+    return `<div style="margin-top:6px;padding:8px 10px;background:#fafafa;border:1px solid #eee;border-radius:6px;color:#333">${details.join('')}</div>`;
+  }
+
   const produseListHTML = normalized
     .map((item) => {
       const escapedName = escapeHtml(String(item.name));
       const line = `${escapedName} - <strong>${item.qty} buc.</strong> - ${formatRON(Number(item.total) || 0)} RON`;
-      const artworkHtml = item.artwork
-        ? ` — <a href="${escapeHtml(item.artwork)}" target="_blank" rel="noopener noreferrer">Fișier grafică</a>`
-        : '';
-      const textHtml = item.textDesign ? ` — <em>Text: ${escapeHtml(item.textDesign)}</em>` : '';
-      // include metadata summary small (if present) for admin
-      const metaSummary =
-        item.rawMetadata && Object.keys(item.rawMetadata).length > 0
-          ? `<div style="font-size:12px;color:#666;margin-top:6px">Metadata: ${escapeHtml(JSON.stringify(item.rawMetadata))}</div>`
-          : '';
-      return `<li style="margin-bottom:8px;">${line}${artworkHtml}${textHtml}${metaSummary}</li>`;
+      const detailsBlock = buildDetailsHTML(item);
+      return `<li style="margin-bottom:12px;">${line}${detailsBlock}</li>`;
     })
     .join('');
 
