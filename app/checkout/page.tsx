@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState, useRef } from "react";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../../components/CartContext";
 import { ShieldCheck, Truck, X } from "lucide-react";
@@ -222,17 +224,196 @@ export default function CheckoutPage() {
     }
   }
 
+  function buildItemDetailsText(item: any) {
+    const meta = item.metadata ?? {};
+    const parts: string[] = [];
+    // Size
+    const width = item.width ?? item.width_cm ?? meta.width_cm ?? meta.width;
+    const height = item.height ?? item.height_cm ?? meta.height_cm ?? meta.height;
+    if (width || height) parts.push(`Dimensiune: ${width ?? "—"} x ${height ?? "—"} cm`);
+
+    // Fonduri EU readable selection
+    const isFonduri = (item?.slug === 'fonduri-eu') || (item?.productId === 'fonduri-eu');
+    if (isFonduri && typeof meta.selectedReadable === 'string' && meta.selectedReadable.trim()) {
+      parts.push(`Opțiuni selectate: ${meta.selectedReadable}`);
+    }
+
+    const labelForKey: Record<string, string> = {
+      width: "Lățime (cm)", height: "Înălțime (cm)", width_cm: "Lățime (cm)", height_cm: "Înălțime (cm)",
+      totalSqm: "Suprafață totală (m²)", sqmPerUnit: "m²/buc", pricePerSqm: "Preț pe m² (RON)",
+      materialId: "Material", material: "Material", laminated: "Laminare", designOption: "Grafică",
+      proDesignFee: "Taxă grafică Pro (RON)", want_adhesive: "Adeziv", want_hem_and_grommets: "Tiv și capse",
+      want_wind_holes: "Găuri pentru vânt", shape_diecut: "Tăiere la contur", productType: "Tip panou",
+      thickness_mm: "Grosime (mm)", sameGraphicFrontBack: "Aceeași grafică față/spate", framed: "Șasiu",
+      sizeKey: "Dimensiune preset", mode: "Mod canvas", orderNotes: "Observații",
+    };
+    const prettyValue = (k: string, v: any) => {
+      const yesNo = (x: any) => (typeof x === 'boolean' ? (x ? 'Da' : 'Nu') : String(x));
+      if (k === 'materialId') return v === 'frontlit_510' ? 'Frontlit 510g' : v === 'frontlit_440' ? 'Frontlit 440g' : String(v);
+      if (k === 'productType') return v === 'alucobond' ? 'Alucobond' : v === 'polipropilena' ? 'Polipropilenă' : v === 'pvc-forex' ? 'PVC Forex' : String(v);
+      if (k === 'designOption') return v === 'pro' ? 'Pro' : v === 'upload' ? 'Am fișier' : v === 'text_only' ? 'Text' : String(v);
+      if (k === 'framed' || typeof v === 'boolean') return yesNo(v);
+      return String(v);
+    };
+    const exclude = new Set(["price","totalAmount","qty","quantity","artwork","artworkUrl","artworkLink","text","textDesign","selectedReadable","selections","title","name"]);
+    Object.keys(meta).forEach((k) => {
+      if (exclude.has(k)) return;
+      if (!(k in labelForKey)) return; // only known keys to keep PDF concise
+      if (k === 'proDesignFee') {
+        const num = Number(meta[k]);
+        if (!isFinite(num) || num <= 0) return;
+      }
+      const val = meta[k];
+      if (val === null || val === undefined) return;
+      if (typeof val === 'number' && val === 0) return;
+      if (typeof val === 'string' && val.trim() === '') return;
+      parts.push(`${labelForKey[k]}: ${prettyValue(k, val)}`);
+    });
+    return parts.join(" \u2022 "); // bullet separator
+  }
+
+  async function exportOfferPdf() {
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 40;
+
+    const fetchImageAsDataUrl = async (src: string) => {
+      try {
+        const res = await fetch(src, { cache: 'no-store' });
+        const blob = await res.blob();
+        return await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+      } catch {
+        return '';
+      }
+    };
+
+    // Header with logo + company block
+    const logoData = await fetchImageAsDataUrl('/logo.png');
+    const headerY = margin;
+    const logoSize = 64;
+    if (logoData) {
+      doc.addImage(logoData, 'PNG', margin, headerY, logoSize, logoSize);
+    }
+
+    const rightX = margin + logoSize + 16;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.text('CULOAREA DIN VIATA SA SRL', rightX, headerY + 16);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text('CUI: 44820819', rightX, headerY + 36);
+    doc.text('Nr. Reg. Com.: J2021001108100', rightX, headerY + 54);
+
+    // Offer title + date aligned to the right
+    const date = new Date().toLocaleDateString('ro-RO');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    const title = 'Ofertă';
+    const titleWidth = doc.getTextWidth(title);
+    doc.text(title, pageWidth - margin - titleWidth, headerY + 18);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    const dateText = `Data: ${date}`;
+    const dateWidth = doc.getTextWidth(dateText);
+    doc.text(dateText, pageWidth - margin - dateWidth, headerY + 36);
+
+    // Separator line
+    doc.setDrawColor(230);
+    doc.line(margin, headerY + logoSize + 16, pageWidth - margin, headerY + logoSize + 16);
+
+    // Build table rows
+    const rows = (items ?? []).map((it: any) => {
+      const title = it.title ?? it.name ?? it.slug ?? 'Produs';
+      const qty = Number(it.quantity ?? 1) || 1;
+      const unit = Number(it.price ?? it.unitAmount ?? 0) || 0;
+      const lineTotal = unit > 0 ? unit * qty : Number(it.totalAmount ?? 0) || 0;
+      const details = buildItemDetailsText(it);
+      return [title, details || '-', String(qty), unit ? unit.toFixed(2) : '-', lineTotal.toFixed(2)];
+    });
+
+    const startY = headerY + logoSize + 32;
+    autoTable(doc, {
+      startY,
+      head: [["Produs", "Detalii", "Cant.", "Preț unitar (RON)", "Total (RON)"]],
+      body: rows,
+      styles: { font: 'helvetica', fontSize: 10, cellPadding: 6, overflow: 'linebreak' },
+      headStyles: { fillColor: [67, 56, 202], textColor: 255, halign: 'left' },
+      bodyStyles: { valign: 'top' },
+      tableWidth: pageWidth - margin * 2,
+      columnStyles: {
+        0: { cellWidth: 180 },
+        1: { cellWidth: 250 },
+        2: { halign: 'right', cellWidth: 50 },
+        3: { halign: 'right', cellWidth: 90 },
+        4: { halign: 'right', cellWidth: 90 },
+      },
+      didDrawPage: (data) => {
+        // Optional: page footer with page numbers
+        const page = doc.getNumberOfPages();
+        const str = `Pagina ${page}`;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(130);
+        doc.text(str, pageWidth - margin - doc.getTextWidth(str), pageHeight - 20);
+      },
+    });
+
+    // Totals box (right aligned)
+    const afterTableY = (doc as any).lastAutoTable?.finalY || startY;
+    const fmtNum = (v: number) => new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON', maximumFractionDigits: 2 }).format(v);
+    const boxWidth = 260;
+    const boxX = pageWidth - margin - boxWidth;
+    let y = afterTableY + 20;
+    const boxHeight = 90;
+    doc.setDrawColor(220);
+    doc.setFillColor(248, 249, 251);
+    doc.roundedRect(boxX, y, boxWidth, boxHeight, 6, 6, 'FD');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text('Rezumat', boxX + 12, y + 18);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text(`Produse: ${fmtNum(subtotal)}`, boxX + 12, y + 38);
+    doc.text(`Livrare: ${fmtNum(costLivrare)}`, boxX + 12, y + 56);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Total: ${fmtNum(totalPlata)}`, boxX + 12, y + 76);
+
+    // Footer note
+    const noteY = y + boxHeight + 28;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(80);
+    doc.text('Oferta este valabilă 7 zile și nu reprezintă o factură fiscală.', margin, noteY);
+
+    doc.save(`oferta-${date}.pdf`);
+  }
+
   return (
   <main className="bg-ui min-h-screen">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Coșul tău</h1>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold hover:bg-white/10 transition"
-          >
-            Continuă cumpărăturile
-          </a>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={exportOfferPdf}
+              disabled={(items ?? []).length === 0}
+              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold hover:bg-white/10 transition disabled:opacity-60"
+            >
+              Exportă ofertă în PDF
+            </button>
+            <a
+              href="/"
+              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold hover:bg-white/10 transition"
+            >
+              Continuă cumpărăturile
+            </a>
+          </div>
         </div>
 
         {isEmpty ? (
