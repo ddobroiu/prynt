@@ -54,6 +54,7 @@ export default function RootLayout({
   return (
     <html lang="ro">
       <head>
+        <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Prynt Blog" />
         {/* Organization & WebSite JSON-LD */}
         <script
           type="application/ld+json"
