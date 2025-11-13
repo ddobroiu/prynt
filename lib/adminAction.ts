@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-export type AdminAction = 'confirm_awb' | 'cancel_awb';
+export type AdminAction = 'validate' | 'confirm_awb' | 'cancel_awb';
 
 export type AdminActionPayload = {
   action: AdminAction;

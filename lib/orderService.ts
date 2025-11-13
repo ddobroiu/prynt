@@ -265,6 +265,12 @@ async function sendEmails(
         paymentType,
         totalAmount: totalComanda,
       });
+      const tokenValidate = signAdminAction({
+        action: 'validate',
+        address,
+        paymentType,
+        totalAmount: totalComanda,
+      });
       const tokenCancel = signAdminAction({
         action: 'cancel_awb',
         address,
@@ -274,10 +280,12 @@ async function sendEmails(
       });
       const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
       const urlConfirm = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenConfirm)}`;
+      const urlValidate = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenValidate)}`;
       const urlCancel = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenCancel)}`;
       actionButtons = `
         <div style="margin:20px 0; text-align:center;">
-          <a href="${urlConfirm}" style="display:inline-block; background:#16a34a; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; margin-right:8px;">Validează AWB</a>
+          <a href="${urlValidate}" style="display:inline-block; background:#0ea5e9; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; margin-right:8px;">Validează date</a>
+          <a href="${urlConfirm}" style="display:inline-block; background:#16a34a; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; margin-right:8px;">Trimite AWB clientului</a>
           <a href="${urlCancel}" style="display:inline-block; background:#dc2626; color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none;">Respinge</a>
         </div>`;
     }

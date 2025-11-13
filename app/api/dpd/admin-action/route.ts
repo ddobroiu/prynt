@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
-import { verifyAdminAction } from '../../../../lib/adminAction';
-import { createShipment, printExtended, trackingUrlForAwb, type ShipmentSender } from '../../../../lib/dpdService';
+import { verifyAdminAction, signAdminAction } from '../../../../lib/adminAction';
+import { createShipment, printExtended, trackingUrlForAwb, type ShipmentSender, validateShipment } from '../../../../lib/dpdService';
 import { Resend } from 'resend';
 
 export const runtime = 'nodejs';
@@ -26,6 +26,37 @@ export async function GET(req: NextRequest) {
     if (payload.action === 'cancel_awb') {
       // No-op for now; just acknowledge
       return htmlPage('Comandă marcată', '<h1>Comanda a fost marcată ca respinsă</h1><p>Nu s-a emis AWB.</p>');
+    }
+
+    if (payload.action === 'validate') {
+      const address = payload.address;
+      const serviceId = Number(searchParams.get('sid') || process.env.DPD_DEFAULT_SERVICE_ID || '');
+      if (!serviceId) {
+        return htmlPage('Validare AWB', '<h1>Lipsește serviceId</h1><p>Adaugă ?sid=XXXX în URL sau configură DPD_DEFAULT_SERVICE_ID.</p>');
+      }
+
+      const contentDesc = (payload.items || []).map((it) => `${it.name} x${it.qty}`).join(', ').slice(0, 200) || 'Materiale tipar';
+      const req: any = {
+        recipient: {
+          clientName: address.nume_prenume,
+          contactName: address.nume_prenume,
+          email: address.email,
+          phone1: { number: address.telefon },
+          privatePerson: true,
+          address: { countryId: 642, siteName: address.localitate, postCode: address.postCode, addressNote: `${address.strada_nr}, ${address.localitate}, ${address.judet}` },
+        },
+        service: { serviceId, autoAdjustPickupDate: true },
+        content: { parcelsCount: 1, totalWeight: 1, contents: contentDesc, package: 'Pachet' },
+        payment: { courierServicePayer: 'SENDER' },
+      };
+      const v = await validateShipment(req);
+      const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
+      const tokenConfirm = signAdminAction({ action: 'confirm_awb', address, paymentType: payload.paymentType, totalAmount: payload.totalAmount });
+      const confirmUrl = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenConfirm)}&sid=${serviceId}`;
+      if (v.valid) {
+        return htmlPage('Validare AWB', `<h1>Date valide</h1><p>Poți emite AWB acum.</p><p><a href="${confirmUrl}" style="display:inline-block;padding:8px 12px;background:#16a34a;color:#fff;border-radius:8px;text-decoration:none;">Emite AWB și trimite clientului</a></p>`);
+      }
+      return htmlPage('Validare AWB', `<h1>Validare eșuată</h1><pre style="white-space:pre-wrap;background:#f6f6f6;padding:12px;border-radius:6px;">${(v.error && (v.error.message || JSON.stringify(v.error))) || 'Eroare necunoscută'}</pre>`);
     }
 
     if (payload.action === 'confirm_awb') {
@@ -173,11 +204,16 @@ export async function GET(req: NextRequest) {
       }
 
       const track = trackingUrlForAwb(shipmentId);
+      const dataHref = base64 ? `data:application/pdf;base64,${base64}` : '';
+      const download = base64 ? `<p><a href="${dataHref}" download="DPD_${shipmentId}.pdf" style="display:inline-block;padding:8px 12px;background:#334155;color:#fff;border-radius:8px;text-decoration:none;">Descarcă PDF</a></p>` : '';
+      const viewer = base64 ? `<div style="margin-top:12px;border:1px solid #e5e7eb;height:70vh"><iframe src="${dataHref}" style="width:100%;height:100%;border:0" title="Etichetă DPD"></iframe></div>` : '';
       return htmlPage(
         'AWB emis',
         `<h1>AWB emis și trimis clientului</h1>
          <p>AWB: <strong>${shipmentId}</strong></p>
-         <p><a href="${track}">Deschide pagina de tracking</a></p>`
+         <p><a href="${track}">Deschide pagina de tracking</a></p>
+         ${download}
+         ${viewer}`
       );
     }
 
