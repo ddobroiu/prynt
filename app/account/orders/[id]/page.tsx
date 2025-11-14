@@ -1,6 +1,5 @@
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import type { OrderItem } from "@prisma/client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -62,7 +61,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
       <div className="rounded-md border border-[--border] p-4">
         <div className="font-semibold mb-3">Produse</div>
         <ul className="divide-y divide-white/10">
-          {order.items.map((it: OrderItem) => (
+          {order.items.map((it: any) => (
             <li key={it.id} className="py-2 flex items-center justify-between">
               <div>
                 <div className="font-medium">{it.name}</div>
