@@ -133,11 +133,6 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
             strada_nr: a.strada_nr || '',
             postCode: a.postCode || null,
             label: 'Implicit',
-            bloc: a.bloc || null,
-            scara: a.scara || null,
-            etaj: a.etaj || null,
-            ap: a.ap || null,
-            interfon: a.interfon || null,
           },
         });
         // Persist billing address if company/juridica and has fields
@@ -154,11 +149,6 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
             localitate: b.localitate || a.localitate || '',
             strada_nr: b.strada_nr || a.strada_nr || '',
             postCode: b.postCode || a.postCode || null,
-            bloc: b.bloc || null,
-            scara: b.scara || null,
-            etaj: b.etaj || null,
-            ap: b.ap || null,
-            interfon: b.interfon || null,
             label: 'Facturare',
           };
           if (existingBilling) {
