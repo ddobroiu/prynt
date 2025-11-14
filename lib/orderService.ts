@@ -363,20 +363,20 @@ async function sendEmails(
     return 'direct';
   }
 
+  const mkLines: string[] = [];
+  if (marketing?.utmSource) mkLines.push(`<div><strong>utm_source:</strong> ${escapeHtml(marketing.utmSource)}</div>`);
+  if (marketing?.utmMedium) mkLines.push(`<div><strong>utm_medium:</strong> ${escapeHtml(marketing.utmMedium)}</div>`);
+  if (marketing?.utmCampaign) mkLines.push(`<div><strong>utm_campaign:</strong> ${escapeHtml(marketing.utmCampaign)}</div>`);
+  if (marketing?.utmContent) mkLines.push(`<div><strong>utm_content:</strong> ${escapeHtml(marketing.utmContent)}</div>`);
+  if (marketing?.utmTerm) mkLines.push(`<div><strong>utm_term:</strong> ${escapeHtml(marketing.utmTerm)}</div>`);
+  if (marketing?.gclid) mkLines.push(`<div><strong>gclid:</strong> ${escapeHtml(marketing.gclid)}</div>`);
+  if (marketing?.fbclid) mkLines.push(`<div><strong>fbclid:</strong> ${escapeHtml(marketing.fbclid)}</div>`);
+  if (marketing?.referrer) mkLines.push(`<div><strong>referrer:</strong> ${escapeHtml(marketing.referrer)}</div>`);
+  if (marketing?.landingPage) mkLines.push(`<div><strong>landing:</strong> ${escapeHtml(marketing.landingPage)}</div>`);
   const marketingBlock = `
     <div style="margin-top:16px;padding:10px 12px;background:#fafafa;border:1px solid #eee;border-radius:8px;color:#333;">
       <div style="font-weight:600;margin-bottom:6px;">Sursă trafic: ${escapeHtml(sourceLabel(marketing))}</div>
-      <div style="font-size:12px;line-height:1.5;color:#555;">
-        ${marketing?.utmSource ? `<div><strong>utm_source:</strong> ${escapeHtml(marketing.utmSource)}</div>` : ''}
-        ${marketing?.utmMedium ? `<div><strong>utm_medium:</strong> ${escapeHtml(marketing.utmMedium)}</div>` : ''}
-        ${marketing?.utmCampaign ? `<div><strong>utm_campaign:</strong> ${escapeHtml(marketing.utmCampaign)}</div>` : ''}
-        ${marketing?.utmContent ? `<div><strong>utm_content:</strong> ${escapeHtml(marketing.utmContent)}</div>` : ''}
-        ${marketing?.utmTerm ? `<div><strong>utm_term:</strong> ${escapeHtml(marketing.utmTerm)}</div>` : ''}
-        ${marketing?.gclid ? `<div><strong>gclid:</strong> ${escapeHtml(marketing.gclid)}</div>` : ''}
-        ${marketing?.fbclid ? `<div><strong>fbclid:</strong> ${escapeHtml(marketing.fbclid)}</div>` : ''}
-        ${marketing?.referrer ? `<div><strong>referrer:</strong> ${escapeHtml(marketing.referrer)}</div>` : ''}
-        ${marketing?.landingPage ? `<div><strong>landing:</strong> ${escapeHtml(marketing.landingPage)}</div>` : ''}
-      </div>
+      <div style="font-size:12px;line-height:1.5;color:#555;">${mkLines.join('')}</div>
     </div>
   `;
 
@@ -388,6 +388,11 @@ async function sendEmails(
   const invoiceBlock = invoiceLink
     ? `<p style="text-align: center; margin-top: 20px;"><a href="${invoiceLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Vezi Factura Oblio</a></p>`
     : `<p style=\"text-align:center;margin-top:20px;color:#b54708\">Factura va fi emisă manual în Oblio (client: ${escapeHtml(billing.cui || billing.name || address.nume_prenume)}).</p>`;
+
+  // Precompute billing block for admin email
+  const billingBlockAdmin = (billing.tip_factura !== 'persoana_fizica')
+    ? `<p><strong>Tip:</strong> Companie</p><p><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
+    : `<p><strong>Tip:</strong> Persoană Fizică</p><p><strong>Nume Factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`;
 
   const adminHtml = `
     <div style="font-family: sans-serif; padding: 20px; background-color: #f4f4f4;">
@@ -404,12 +409,7 @@ async function sendEmails(
         ${deliveryAptHtml}
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Detalii Facturare</h2>
-        <p><strong>Tip:</strong> ${billing.tip_factura !== 'persoana_fizica' ? 'Companie' : 'Persoană Fizică'}</p>
-        ${
-          billing.tip_factura !== 'persoana_fizica'
-            ? `<p><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
-            : `<p><strong>Nume Factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`
-        }
+        ${billingBlockAdmin}
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Produse Comandate</h2>
         <ul style="padding-left: 18px;">
@@ -462,6 +462,11 @@ async function sendEmails(
   const clientAptHtml = (address.bloc || address.scara || address.etaj || address.ap || address.interfon)
     ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml(apartmentLineText(address))}</p>`
     : '';
+  // Precompute billing block for client email
+  const billingBlockClient = (billing.tip_factura !== 'persoana_fizica')
+    ? `<p style="margin:0;color:#111"><strong>Tip:</strong> Companie</p><p style="margin:4px 0 0;color:#111"><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
+    : `<p style="margin:0;color:#111"><strong>Tip:</strong> Persoană fizică</p><p style="margin:4px 0 0;color:#111"><strong>Nume factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`;
+
   const clientHtml = `
   <!DOCTYPE html>
   <html lang="ro">
@@ -502,10 +507,7 @@ async function sendEmails(
           </div>
           <div class="col" style="flex:1;min-width:0;">
             <h3 style="margin:0 0 8px;color:#0f172a;font-size:14px;text-transform:uppercase;letter-spacing:.04em;">Facturare</h3>
-            <p style="margin:0;color:#111"><strong>Tip:</strong> ${billing.tip_factura !== 'persoana_fizica' ? 'Companie' : 'Persoană fizică'}</p>
-            ${billing.tip_factura !== 'persoana_fizica'
-              ? `<p style="margin:4px 0 0;color:#111"><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
-              : `<p style="margin:4px 0 0;color:#111"><strong>Nume factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`}
+            ${billingBlockClient}
           </div>
         </div>
         <h3 style="margin:16px 0 8px;color:#0f172a;font-size:14px;text-transform:uppercase;letter-spacing:.04em;">Produse</h3>
