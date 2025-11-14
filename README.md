@@ -65,9 +65,9 @@ This keeps responses accurate and actionable while preserving your existing pric
 
 ## Authentication (Email Magic Link + Google)
 
-We use Auth.js (NextAuth v5) with Prisma.
+We use NextAuth v4 with Prisma adapter.
 
-- Config: `lib/auth.ts`
+- Config: `lib/auth.ts` (exports `authOptions`)
 - API route: `app/api/auth/[...nextauth]/route.ts`
 - Pages: `app/login/page.tsx` and `app/account/page.tsx`
 - Session provider: wrapped in `components/Providers.tsx`
@@ -75,7 +75,7 @@ We use Auth.js (NextAuth v5) with Prisma.
 Install deps:
 
 ```bash
-npm i next-auth @auth/prisma-adapter
+npm i next-auth @next-auth/prisma-adapter
 ```
 
 Environment variables (Railway or `.env.local`):

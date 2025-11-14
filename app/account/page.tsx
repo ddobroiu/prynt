@@ -1,7 +1,8 @@
-import { auth, signOut } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
+import SignOutButton from "@/components/SignOutButton";
 
 export default async function AccountPage() {
-  const session = await auth();
+  const session = await getAuthSession();
   if (!session?.user) {
     return (
       <div className="mx-auto max-w-3xl px-6 py-16">
@@ -18,14 +19,7 @@ export default async function AccountPage() {
         <div className="text-sm text-muted">Email</div>
         <div className="font-medium">{session.user.email}</div>
       </div>
-      <form
-        action={async () => {
-          "use server";
-          await signOut({ redirectTo: "/" });
-        }}
-      >
-        <button className="rounded-md px-4 py-2 bg-indigo-600 text-white font-semibold hover:bg-indigo-500">Delogare</button>
-      </form>
+      <SignOutButton />
     </div>
   );
 }
