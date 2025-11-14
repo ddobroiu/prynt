@@ -380,6 +380,15 @@ async function sendEmails(
     </div>
   `;
 
+  // Prepare small HTML snippets to keep main templates simple (avoid nested templates)
+  const orderNoSuffix = orderNo ? ' #' + orderNo : '';
+  const deliveryAptHtml = (address.bloc || address.scara || address.etaj || address.ap || address.interfon)
+    ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml(apartmentLineText(address))}</p>`
+    : '';
+  const invoiceBlock = invoiceLink
+    ? `<p style="text-align: center; margin-top: 20px;"><a href="${invoiceLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Vezi Factura Oblio</a></p>`
+    : `<p style=\"text-align:center;margin-top:20px;color:#b54708\">Factura va fi emisă manual în Oblio (client: ${escapeHtml(billing.cui || billing.name || address.nume_prenume)}).</p>`;
+
   const adminHtml = `
     <div style="font-family: sans-serif; padding: 20px; background-color: #f4f4f4;">
       <div style="max-width: 640px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 8px;">
@@ -391,10 +400,8 @@ async function sendEmails(
         <p><strong>Telefon:</strong> ${escapeHtml(address.telefon)}</p>
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Adresă Livrare</h2>
-        <p>${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}${address.postCode ? `, ${escapeHtml(address.postCode)}` : ''}</p>
-        ${address.bloc || address.scara || address.etaj || address.ap || address.interfon
-          ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml(apartmentLineText(address))}</p>`
-          : ''}
+        <p>${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}${address.postCode ? ', ' + escapeHtml(address.postCode) : ''}</p>
+        ${deliveryAptHtml}
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Detalii Facturare</h2>
         <p><strong>Tip:</strong> ${billing.tip_factura !== 'persoana_fizica' ? 'Companie' : 'Persoană Fizică'}</p>
@@ -418,17 +425,7 @@ async function sendEmails(
 
         ${marketingBlock}
 
-        ${
-          invoiceLink
-            ? `<p style="text-align: center; margin-top: 20px;">
-                 <a href="${invoiceLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Vezi Factura Oblio</a>
-               </p>`
-            : `<p style="text-align:center;margin-top:20px;color:#b54708">
-                 Factura va fi emisă manual în Oblio (client: ${escapeHtml(
-                   billing.cui || billing.name || address.nume_prenume
-                 )}).
-               </p>`
-        }
+        ${invoiceBlock}
       </div>
     </div>
   `;
@@ -440,7 +437,7 @@ async function sendEmails(
     const adminResp = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'comenzi@prynt.ro',
       to: process.env.ADMIN_EMAIL || 'contact@prynt.ro',
-      subject: `Comandă${orderNo ? ` #${orderNo}` : ''} (${paymentType}) - ${escapeHtml(address.nume_prenume)}`,
+      subject: `Comandă${orderNoSuffix} (${paymentType}) - ${escapeHtml(address.nume_prenume)}`,
       html: adminHtml,
     });
     console.log('[OrderService] Admin email sent, resend response:', adminResp);
@@ -460,7 +457,11 @@ async function sendEmails(
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || 'https://www.prynt.ro';
   const orderLink = orderId ? `${baseUrl}/account/orders/${encodeURIComponent(orderId)}` : `${baseUrl}/account/orders`;
-  const preheader = `Mulțumim pentru comandă${orderNo ? ` #${orderNo}` : ''}!`; 
+  const preheader = 'Mulțumim pentru comandă' + orderNoSuffix + '!'; 
+  const clientInvoiceBtn = invoiceLink ? `<a href="${invoiceLink}" class="btn" style="background:#16a34a;color:#fff !important;text-decoration:none;padding:12px 16px;border-radius:10px;display:inline-block">Descarcă factura</a>` : '';
+  const clientAptHtml = (address.bloc || address.scara || address.etaj || address.ap || address.interfon)
+    ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml(apartmentLineText(address))}</p>`
+    : '';
   const clientHtml = `
   <!DOCTYPE html>
   <html lang="ro">
@@ -489,17 +490,15 @@ async function sendEmails(
       <div class="card" style="background:#ffffff;border-radius:16px;padding:24px;border:1px solid #e5e7eb;">
         <h1 style="margin:0;color:#0f172a;font-size:22px;">Mulțumim pentru comandă!</h1>
         <p style="margin:8px 0 12px;color:#334155">Am primit comanda ta și am început procesarea. Mai jos ai un rezumat.</p>
-        ${orderNo ? `<p style="margin:0 0 12px;color:#111;"><strong>Nr. comandă:</strong> #${orderNo}</p>` : ''}
+        ${orderNo ? '<p style="margin:0 0 12px;color:#111;"><strong>Nr. comandă:</strong> #' + orderNo + '</p>' : ''}
         ${accountBlock}
         <div class="grid" style="display:flex;gap:16px;margin-top:12px;">
           <div class="col" style="flex:1;min-width:0;">
             <h3 style="margin:0 0 8px;color:#0f172a;font-size:14px;text-transform:uppercase;letter-spacing:.04em;">Livrare</h3>
             <p style="margin:0;color:#111;font-weight:600;">${escapeHtml(address.nume_prenume)}</p>
             <p class="muted" style="margin:2px 0 0;color:#64748b;font-size:13px">${escapeHtml(address.email)} • ${escapeHtml(address.telefon)}</p>
-            <p style="margin:6px 0 0;color:#111">${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}${address.postCode ? `, ${escapeHtml(address.postCode)}` : ''}</p>
-            ${address.bloc || address.scara || address.etaj || address.ap || address.interfon
-              ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml(apartmentLineText(address))}</p>`
-              : ''}
+            <p style="margin:6px 0 0;color:#111">${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}${address.postCode ? ', ' + escapeHtml(address.postCode) : ''}</p>
+            ${clientAptHtml}
           </div>
           <div class="col" style="flex:1;min-width:0;">
             <h3 style="margin:0 0 8px;color:#0f172a;font-size:14px;text-transform:uppercase;letter-spacing:.04em;">Facturare</h3>
@@ -519,7 +518,7 @@ async function sendEmails(
         </div>
         <div style="text-align:center;margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
           <a href="${orderLink}" class="btn" style="background:#4f46e5;color:#fff !important;text-decoration:none;padding:12px 16px;border-radius:10px;display:inline-block">Vezi comanda în cont</a>
-          ${invoiceLink ? `<a href="${invoiceLink}" class="btn" style="background:#16a34a;color:#fff !important;text-decoration:none;padding:12px 16px;border-radius:10px;display:inline-block">Descarcă factura</a>` : ''}
+          ${clientInvoiceBtn}
         </div>
         <p class="muted" style="margin:18px 0 0;color:#64748b;font-size:13px;">Metodă de plată: <strong>${paymentType}</strong></p>
       </div>
@@ -535,7 +534,7 @@ async function sendEmails(
     const clientResp = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'contact@prynt.ro',
       to: address.email,
-      subject: `Confirmare comandă${orderNo ? ` #${orderNo}` : ''} - Prynt.ro`,
+      subject: `Confirmare comandă${orderNoSuffix} - Prynt.ro`,
       html: clientHtml,
     });
     console.log('[OrderService] Client email sent, resend response:', clientResp);

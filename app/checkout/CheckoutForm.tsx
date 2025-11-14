@@ -10,9 +10,9 @@ type Address = {
   telefon: string;
   judet: string;
   localitate: string;
-  strada_nr: string;
+  strada_nr: string; // Folosit ca unicul câmp "Adresă" (stradă, nr., bloc, sc., etc.)
   postCode?: string;
-  bloc?: string;
+  bloc?: string; // nefolosite în UI; păstrate pentru compatibilitate
   scara?: string;
   etaj?: string;
   ap?: string;
@@ -27,9 +27,9 @@ type Billing = {
   reg_com?: string;
   judet?: string;
   localitate?: string;
-  strada_nr?: string;
+  strada_nr?: string; // unicul câmp "Adresă" pentru facturare
   postCode?: string;
-  bloc?: string;
+  bloc?: string; // nefolosite în UI
   scara?: string;
   etaj?: string;
   ap?: string;
@@ -65,11 +65,6 @@ export default function CheckoutForm({
         b.localitate === address.localitate &&
         b.strada_nr === address.strada_nr &&
         b.postCode === address.postCode &&
-        (b.bloc || "") === (address.bloc || "") &&
-        (b.scara || "") === (address.scara || "") &&
-        (b.etaj || "") === (address.etaj || "") &&
-        (b.ap || "") === (address.ap || "") &&
-        (b.interfon || "") === (address.interfon || "") &&
         (b.name || "") === (address.nume_prenume || "");
       if (alreadySame) return b; // nu setează din nou => evită re-randări infinite
       return {
@@ -79,14 +74,9 @@ export default function CheckoutForm({
         localitate: address.localitate,
         strada_nr: address.strada_nr,
         postCode: address.postCode,
-        bloc: address.bloc,
-        scara: address.scara,
-        etaj: address.etaj,
-        ap: address.ap,
-        interfon: address.interfon,
       };
     });
-  }, [sameAsDelivery, address.nume_prenume, address.judet, address.localitate, address.strada_nr, address.postCode, address.bloc, address.scara, address.etaj, address.ap, address.interfon, setBilling]);
+  }, [sameAsDelivery, address.nume_prenume, address.judet, address.localitate, address.strada_nr, address.postCode, setBilling]);
 
   // 2) Copiere one-click când bifa e debifată (prefill fără a bloca editarea)
   function copyBillingFromDeliveryOnce() {
@@ -97,11 +87,6 @@ export default function CheckoutForm({
       localitate: address.localitate,
       strada_nr: address.strada_nr,
       postCode: address.postCode,
-      bloc: address.bloc,
-      scara: address.scara,
-      etaj: address.etaj,
-      ap: address.ap,
-      interfon: address.interfon,
     }));
   }
 
@@ -163,79 +148,30 @@ export default function CheckoutForm({
             {errors["address.localitate"] && <p className="mt-1 text-xs text-red-400">{errors["address.localitate"]}</p>}
           </div>
 
-          <Field id="address.strada_nr" label="Stradă, nr." error={errors["address.strada_nr"]}>
+          <Field id="address.strada_nr" label="Adresă" error={errors["address.strada_nr"]}>
             <input
               data-field="address.strada_nr"
               className={inputCls(errors["address.strada_nr"])}
               value={address.strada_nr}
               onChange={(e) => onAddr("strada_nr", e.target.value)}
               autoComplete="section-shipping street-address"
+              placeholder="Stradă, număr, bloc, sc., etaj, ap."
             />
           </Field>
-
-          {/* Detalii apartament și cod poștal pe un singur rând */}
-          <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
-            <Field id="address.ap" label="Ap., scară etc.">
+          {/* Cod poștal pe același rând (dreapta) */}
+          <Field id="address.postCode" label="Cod poștal">
+            <div className="md:w-28">
               <input
-                data-field="address.ap"
+                data-field="address.postCode"
                 className={inputCls(undefined)}
-                value={address.ap ?? ""}
-                onChange={(e) => onAddr("ap", e.target.value)}
-                placeholder="Ap."
-              />
-            </Field>
-            <Field id="address.scara" label=" ">
-              <input
-                data-field="address.scara"
-                className={inputCls(undefined)}
-                value={address.scara ?? ""}
-                onChange={(e) => onAddr("scara", e.target.value)}
-                placeholder="Sc."
-              />
-            </Field>
-            <Field id="address.etaj" label=" ">
-              <input
-                data-field="address.etaj"
-                className={inputCls(undefined)}
-                value={address.etaj ?? ""}
-                onChange={(e) => onAddr("etaj", e.target.value)}
+                value={address.postCode ?? ""}
+                onChange={(e) => onAddr("postCode", e.target.value)}
+                autoComplete="postal-code"
                 inputMode="numeric"
-                placeholder="Et."
+                placeholder="000000"
               />
-            </Field>
-            <Field id="address.bloc" label=" ">
-              <input
-                data-field="address.bloc"
-                className={inputCls(undefined)}
-                value={address.bloc ?? ""}
-                onChange={(e) => onAddr("bloc", e.target.value)}
-                autoComplete="address-line2"
-                placeholder="Bloc"
-              />
-            </Field>
-            <Field id="address.interfon" label=" ">
-              <input
-                data-field="address.interfon"
-                className={inputCls(undefined)}
-                value={address.interfon ?? ""}
-                onChange={(e) => onAddr("interfon", e.target.value)}
-                placeholder="Interfon"
-              />
-            </Field>
-            <Field id="address.postCode" label="Cod poștal">
-              <div className="md:w-28">
-                <input
-                  data-field="address.postCode"
-                  className={inputCls(undefined)}
-                  value={address.postCode ?? ""}
-                  onChange={(e) => onAddr("postCode", e.target.value)}
-                  autoComplete="postal-code"
-                  inputMode="numeric"
-                  placeholder="000000"
-                />
-              </div>
-            </Field>
-          </div>
+            </div>
+          </Field>
         </div>
       </div>
 
@@ -358,7 +294,7 @@ export default function CheckoutForm({
               </div>
 
               <div className="md:col-span-3">
-                <Field id="billing.strada_nr" label="Stradă, nr. (facturare)" error={errors["billing.strada_nr"]} disabled={sameAsDelivery}>
+                <Field id="billing.strada_nr" label="Adresă (facturare)" error={errors["billing.strada_nr"]} disabled={sameAsDelivery}>
                   <input
                     data-field="billing.strada_nr"
                     className={inputCls(errors["billing.strada_nr"], sameAsDelivery)}
@@ -366,6 +302,7 @@ export default function CheckoutForm({
                     onChange={(e) => onBill("strada_nr", e.target.value)}
                     disabled={sameAsDelivery}
                     autoComplete="section-billing street-address"
+                    placeholder="Stradă, număr, bloc, sc., etaj, ap."
                   />
                 </Field>
               </div>
@@ -384,55 +321,7 @@ export default function CheckoutForm({
               </div>
             </div>
 
-            {/* Detalii adresă facturare (opțional) */}
-            <div className="mt-3 grid grid-cols-2 md:grid-cols-5 gap-3">
-              <Field id="billing.bloc" label="Bloc" disabled={sameAsDelivery}>
-                <input
-                  data-field="billing.bloc"
-                  className={inputCls(undefined, sameAsDelivery)}
-                  value={billing.bloc ?? ""}
-                  onChange={(e) => onBill("bloc", e.target.value)}
-                  disabled={sameAsDelivery}
-                />
-              </Field>
-              <Field id="billing.scara" label="Scară" disabled={sameAsDelivery}>
-                <input
-                  data-field="billing.scara"
-                  className={inputCls(undefined, sameAsDelivery)}
-                  value={billing.scara ?? ""}
-                  onChange={(e) => onBill("scara", e.target.value)}
-                  disabled={sameAsDelivery}
-                />
-              </Field>
-              <Field id="billing.etaj" label="Etaj" disabled={sameAsDelivery}>
-                <input
-                  data-field="billing.etaj"
-                  className={inputCls(undefined, sameAsDelivery)}
-                  value={billing.etaj ?? ""}
-                  onChange={(e) => onBill("etaj", e.target.value)}
-                  disabled={sameAsDelivery}
-                  inputMode="numeric"
-                />
-              </Field>
-              <Field id="billing.ap" label="Ap." disabled={sameAsDelivery}>
-                <input
-                  data-field="billing.ap"
-                  className={inputCls(undefined, sameAsDelivery)}
-                  value={billing.ap ?? ""}
-                  onChange={(e) => onBill("ap", e.target.value)}
-                  disabled={sameAsDelivery}
-                />
-              </Field>
-              <Field id="billing.interfon" label="Interfon" disabled={sameAsDelivery}>
-                <input
-                  data-field="billing.interfon"
-                  className={inputCls(undefined, sameAsDelivery)}
-                  value={billing.interfon ?? ""}
-                  onChange={(e) => onBill("interfon", e.target.value)}
-                  disabled={sameAsDelivery}
-                />
-              </Field>
-            </div>
+            {/* Câmpuri suplimentare eliminate – folosim un singur câmp Adresă */}
           </>
         )}
       </div>
