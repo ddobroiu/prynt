@@ -3,15 +3,17 @@ import type { RouteHandler } from "next/dist/server/future/route-modules/types";
 
 export const POST: RouteHandler = async (request, { params }) => {
   const orderId = params.id;
+  let response;
   try {
     await prisma.order.update({
       where: { id: orderId },
       data: { status: "fulfilled" },
     });
-    return new Response("Comanda marcată ca finalizată", { status: 200 });
+    response = new Response("Comanda marcată ca finalizată", { status: 200 });
   } catch (e) {
-    return new Response("Eroare la finalizare", { status: 500 });
+    response = new Response("Eroare la finalizare", { status: 500 });
   }
+  return response;
 };
   const orderId = params.id;
   try {
