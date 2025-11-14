@@ -171,6 +171,7 @@ export default async function AccountPage({
               return (
                 <>
                   <div className="text-muted text-xs">Persoană fizică</div>
+                  {billing?.name && <div className="font-medium">{billing?.name}</div>}
                   <div>{billing?.strada_nr || '-'}, {billing?.localitate || '-'}, {billing?.judet || '-'}{billing?.postCode ? `, ${billing?.postCode}` : ''}</div>
                 </>
               );

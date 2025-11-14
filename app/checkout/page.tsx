@@ -25,6 +25,7 @@ type Address = {
 
 type Billing = {
   tip_factura: "persoana_fizica" | "persoana_juridica";
+  name?: string;
   denumire_companie?: string;
   cui?: string;
   reg_com?: string;
@@ -203,6 +204,7 @@ export default function CheckoutPage() {
         ...billing,
         ...(sameAsDelivery
           ? {
+              name: address.nume_prenume,
               judet: address.judet,
               localitate: address.localitate,
               strada_nr: address.strada_nr,

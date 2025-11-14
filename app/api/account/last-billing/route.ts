@@ -24,6 +24,7 @@ export async function GET() {
     const tip_factura = b.tip_factura || b.type || 'persoana_fizica';
     const response = {
       tip_factura,
+      name: b.name || undefined,
       cui: b.cui || b.cif || '',
       denumire_companie: b.name || b.denumire_companie || '',
       judet: b.judet || '',

@@ -16,6 +16,7 @@ type Address = {
 
 type Billing = {
   tip_factura: "persoana_fizica" | "persoana_juridica";
+  name?: string; // nume pentru facturare (PF)
   denumire_companie?: string;
   cui?: string;
   reg_com?: string;
@@ -53,22 +54,25 @@ export default function CheckoutForm({
         b.judet === address.judet &&
         b.localitate === address.localitate &&
         b.strada_nr === address.strada_nr &&
-        b.postCode === address.postCode;
+        b.postCode === address.postCode &&
+        (b.name || "") === (address.nume_prenume || "");
       if (alreadySame) return b; // nu setează din nou => evită re-randări infinite
       return {
         ...b,
+        name: address.nume_prenume,
         judet: address.judet,
         localitate: address.localitate,
         strada_nr: address.strada_nr,
         postCode: address.postCode,
       };
     });
-  }, [sameAsDelivery, address.judet, address.localitate, address.strada_nr, address.postCode, setBilling]);
+  }, [sameAsDelivery, address.nume_prenume, address.judet, address.localitate, address.strada_nr, address.postCode, setBilling]);
 
   // 2) Copiere one-click când bifa e debifată (prefill fără a bloca editarea)
   function copyBillingFromDeliveryOnce() {
     setBilling((b) => ({
       ...b,
+      name: address.nume_prenume,
       judet: address.judet,
       localitate: address.localitate,
       strada_nr: address.strada_nr,
@@ -239,6 +243,16 @@ export default function CheckoutForm({
         {/* Adresă facturare (dezactivată dacă e “aceeași”) */}
         {billing.tip_factura === 'persoana_fizica' && (
         <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <Field id="billing.name" label="Nume pentru facturare (PF)" error={errors["billing.name"]} disabled={sameAsDelivery}>
+            <input
+              data-field="billing.name"
+              className={inputCls(errors["billing.name"], sameAsDelivery)}
+              value={billing.name ?? ""}
+              onChange={(e) => onBill("name", e.target.value)}
+              disabled={sameAsDelivery}
+              autoComplete="section-billing name"
+            />
+          </Field>
           <div data-field="billing.judet" className={sameAsDelivery ? "opacity-60" : ""}>
             <JudetSelector
               label="Județ (facturare)"
