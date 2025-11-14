@@ -30,7 +30,7 @@ async function fileCancel(id: string) {
 
 export async function POST(_req: Request, ctx: any) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get('admin_auth')?.value;
     const session = verifyAdminSession(token);
     if (!session) {
