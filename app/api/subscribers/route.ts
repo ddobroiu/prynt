@@ -45,7 +45,8 @@ export async function POST(req: Request) {
       throw e;
     }
 
-    const base = process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "http://localhost:3000";
+    const { origin } = new URL(req.url);
+    const base = process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || origin || "http://localhost:3000";
     // Use a non-API route for robustness on various deploy targets
     const confirmUrl = `${base}/subscribers/confirm?token=${encodeURIComponent(sub.token)}`;
 
