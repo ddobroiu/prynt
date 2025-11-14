@@ -218,7 +218,6 @@ async function sendEmails(
     }
     return String(v);
   }
-  }
 
   const labelForKey: Record<string, string> = {
     width: 'Lățime (cm)',
