@@ -1,8 +1,8 @@
 
-import type { Request } from "next/server";
+import type { NextRequest } from "next/server";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const orderId = params.id;
+export async function POST(request: NextRequest, context: { params: { id: string } }) {
+  const orderId = context.params.id;
   const result = await prisma.order.update({
     where: { id: orderId },
     data: { status: "canceled", canceledAt: new Date() },
