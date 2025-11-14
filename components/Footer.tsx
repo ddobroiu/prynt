@@ -72,7 +72,7 @@ export default function Footer() {
             </li>
             <li>
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className="inline mr-2 align-middle"><path d="M3 5a4 4 0 018 0c0 2.5-2 4.5-4 4.5S3 7.5 3 5z"/><path d="M11 11v2a2 2 0 01-2 2H7a2 2 0 01-2-2v-2"/></svg>
-              <a className="hover:text-indigo-300 transition-colors" href="tel:+40734123456">+40 734 123 456</a>
+              <a className="hover:text-indigo-300 transition-colors" href="tel:+40750473111">+40 750 473 111</a>
             </li>
             <li>Program: L–V 9:00–18:00</li>
             <li className="pt-2 text-muted">Livrăm în toată România (DPD)</li>
