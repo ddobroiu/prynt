@@ -40,6 +40,20 @@ export default async function AccountPage({
     itemsCount: o.items.length,
   }));
 
+  // Load addresses (saved)
+  const addresses = await prisma.address.findMany({
+    where: { userId },
+    orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }],
+  });
+
+  // Load last billing info from latest order
+  const lastBillingOrder = await prisma.order.findFirst({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    select: { billing: true },
+  });
+  const billing = (lastBillingOrder?.billing as any) || null;
+
   return (
     <div className="mx-auto max-w-3xl px-6 py-16 space-y-6">
       <h1 className="text-2xl font-bold">Bun venit, {session.user.name || session.user.email}</h1>
@@ -76,6 +90,66 @@ export default async function AccountPage({
               </li>
             ))}
           </ul>
+        )}
+      </div>
+
+      {/* Adrese salvate */}
+      <div className="rounded-md border border-[--border]">
+        <div className="flex items-center justify-between p-4">
+          <div className="font-semibold">Adrese</div>
+        </div>
+        {addresses.length === 0 ? (
+          <div className="p-4 text-sm text-muted">Nu ai adrese salvate încă.</div>
+        ) : (
+          <ul className="divide-y divide-white/10">
+            {addresses.map((a: any) => (
+              <li key={a.id} className="p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="font-medium">
+                      {a.label || (a.type === 'billing' ? 'Facturare' : 'Livrare')}
+                      {a.isDefault && <span className="ml-2 inline-block rounded bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 align-middle">Implicit</span>}
+                    </div>
+                    <div className="text-xs text-muted">{a.nume || ''}{a.telefon ? ` • ${a.telefon}` : ''}</div>
+                    <div className="text-sm">
+                      {a.strada_nr}, {a.localitate}, {a.judet}{a.postCode ? `, ${a.postCode}` : ''}
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted capitalize">{a.type || 'shipping'}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Date facturare (ultimele folosite) */}
+      <div className="rounded-md border border-[--border] p-4 space-y-1">
+        <div className="font-semibold">Facturare</div>
+        {!billing ? (
+          <div className="text-sm text-muted">Nu există date de facturare încă.</div>
+        ) : (
+          <div className="text-sm space-y-0.5">
+            {(() => {
+              const tip = billing?.tip_factura || billing?.type || 'persoana_fizica';
+              if (tip === 'firma' || tip === 'juridica' || tip === 'company') {
+                return (
+                  <>
+                    <div className="text-muted text-xs">Companie</div>
+                    <div className="font-medium">{billing?.denumire_companie || billing?.name || '-'}</div>
+                    <div>CUI: {billing?.cui || billing?.cif || '-'}</div>
+                    <div>{billing?.strada_nr || '-'}, {billing?.localitate || '-'}, {billing?.judet || '-'}{billing?.postCode ? `, ${billing?.postCode}` : ''}</div>
+                  </>
+                );
+              }
+              return (
+                <>
+                  <div className="text-muted text-xs">Persoană fizică</div>
+                  <div>{billing?.strada_nr || '-'}, {billing?.localitate || '-'}, {billing?.judet || '-'}{billing?.postCode ? `, ${billing?.postCode}` : ''}</div>
+                </>
+              );
+            })()}
+          </div>
         )}
       </div>
 
