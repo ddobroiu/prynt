@@ -4,6 +4,9 @@ import SignOutButton from "@/components/SignOutButton";
 import ChangePasswordForm from "@/components/ChangePasswordForm";
 import RequestPasswordReset from "@/components/RequestPasswordReset";
 
+// Forțează randare dinamică ca să nu fie folosită o versiune cache care ar pierde sesiunea
+export const dynamic = 'force-dynamic';
+
 export default async function AccountPage({
   searchParams,
 }: {
