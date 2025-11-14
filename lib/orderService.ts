@@ -359,7 +359,7 @@ async function sendEmails(
         const u = new URL(m.referrer);
         return u.hostname.replace(/^www\./, '');
       }
-    } catch {}
+    } catch (err) {}
     return 'direct';
   }
 
