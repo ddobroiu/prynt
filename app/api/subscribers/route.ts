@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     // Reuse existing subscriber if exists
     const existing = await prisma.subscriber
       .findUnique({ where: { email: em } })
-      .catch((e) => {
+      .catch((e: any) => {
         if ((e as any)?.code === "P1001" || e instanceof Prisma.PrismaClientInitializationError) {
           return NextResponse.json(
             { ok: false, message: "Baza de date este indisponibilă. Te rugăm încearcă mai târziu." },
