@@ -64,6 +64,20 @@ export const authOptions: NextAuthOptions = {
       if (session?.user) (session.user as any).id = (user as any)?.id;
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      try {
+        // Allow relative callback URLs (always on current origin)
+        if (url.startsWith("/")) return `${baseUrl}${url}`;
+
+        // If it's an absolute URL, normalize it onto our current origin
+        const u = new URL(url);
+        // Keep the path/search/hash but force our origin
+        return `${baseUrl}${u.pathname}${u.search}${u.hash}`;
+      } catch {
+        // Fallback: stay on site root
+        return baseUrl;
+      }
+    },
   },
 };
 

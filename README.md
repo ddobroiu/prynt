@@ -82,6 +82,12 @@ Environment variables (Railway or `.env.local`):
 
 ```
 AUTH_SECRET= # openssl rand -base64 32
+# REQUIRED in production to avoid localhost redirects
+NEXTAUTH_URL=https://www.prynt.ro
+# Optional if using proxies (e.g. Vercel):
+# NEXTAUTH_URL_INTERNAL=https://www.prynt.ro
+# or set AUTH_TRUST_HOST=true
+
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 EMAIL_FROM=contact@prynt.ro
@@ -97,3 +103,7 @@ DATABASE_INTERNAL_URL=
 Usage:
 - Go to `/login` to request an email link or continue with Google.
 - After sign in, account page lives at `/account`.
+
+Notes:
+- Set `NEXTAUTH_URL` to your public site origin in production. If it’s missing, NextAuth can default to `http://localhost:3000` and generate wrong callback URLs.
+- We also normalize redirects in `lib/auth.ts` so any absolute callback URL is forced onto the current origin.
