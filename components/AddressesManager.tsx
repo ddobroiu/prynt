@@ -10,13 +10,8 @@ type Address = {
   telefon?: string | null;
   judet: string;
   localitate: string;
-  strada_nr: string;
+  strada_nr: string; // Unicul câmp Adresă
   postCode?: string | null;
-  bloc?: string | null;
-  scara?: string | null;
-  etaj?: string | null;
-  ap?: string | null;
-  interfon?: string | null;
   isDefault?: boolean;
 };
 
@@ -110,13 +105,8 @@ export default function AddressesManager() {
           <input className="input" placeholder="Telefon" value={form.telefon || ""} onChange={(e) => onForm("telefon", e.target.value)} />
           <input className="input" placeholder="Județ" value={form.judet} onChange={(e) => onForm("judet", e.target.value)} />
           <input className="input" placeholder="Localitate" value={form.localitate} onChange={(e) => onForm("localitate", e.target.value)} />
-          <input className="input md:col-span-2" placeholder="Stradă, număr" value={form.strada_nr} onChange={(e) => onForm("strada_nr", e.target.value)} />
+          <input className="input md:col-span-2" placeholder="Adresă (Stradă, număr, bloc, sc., etaj, ap.)" value={form.strada_nr} onChange={(e) => onForm("strada_nr", e.target.value)} />
           <input className="input" placeholder="Cod poștal" value={form.postCode || ""} onChange={(e) => onForm("postCode", e.target.value)} />
-          <input className="input" placeholder="Bloc" value={form.bloc || ""} onChange={(e) => onForm("bloc", e.target.value)} />
-          <input className="input" placeholder="Scară" value={form.scara || ""} onChange={(e) => onForm("scara", e.target.value)} />
-          <input className="input" placeholder="Etaj" value={form.etaj || ""} onChange={(e) => onForm("etaj", e.target.value)} />
-          <input className="input" placeholder="Ap." value={form.ap || ""} onChange={(e) => onForm("ap", e.target.value)} />
-          <input className="input" placeholder="Interfon" value={form.interfon || ""} onChange={(e) => onForm("interfon", e.target.value)} />
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={!!form.isDefault} onChange={(e) => onForm("isDefault", e.target.checked)} />
             <span>Setează ca implicit (doar Livrare)</span>
@@ -147,9 +137,6 @@ export default function AddressesManager() {
                       </div>
                       <div className="text-xs text-muted">{a.nume || ''}{a.telefon ? ` • ${a.telefon}` : ''}</div>
                       <div className="text-sm">{a.strada_nr}, {a.localitate}, {a.judet}{a.postCode ? `, ${a.postCode}` : ''}</div>
-                      {(a.bloc || a.scara || a.etaj || a.ap || a.interfon) && (
-                        <div className="text-xs text-muted">{[a.bloc ? `Bloc ${a.bloc}` : '', a.scara ? `Sc. ${a.scara}` : '', a.etaj ? `Et. ${a.etaj}` : '', a.ap ? `Ap. ${a.ap}` : '', a.interfon ? `Interfon ${a.interfon}` : ''].filter(Boolean).join(', ')}</div>
-                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       {a.type === 'shipping' && !a.isDefault && (
@@ -181,13 +168,8 @@ function EditRow({ a, onCancel, onSave }: { a: Address; onCancel: () => void; on
       <input className="input" placeholder="Telefon" value={f.telefon || ''} onChange={(e) => on('telefon', e.target.value)} />
       <input className="input" placeholder="Județ" value={f.judet} onChange={(e) => on('judet', e.target.value)} />
       <input className="input" placeholder="Localitate" value={f.localitate} onChange={(e) => on('localitate', e.target.value)} />
-      <input className="input md:col-span-2" placeholder="Stradă, nr." value={f.strada_nr} onChange={(e) => on('strada_nr', e.target.value)} />
+      <input className="input md:col-span-2" placeholder="Adresă (Stradă, număr, bloc, sc., etaj, ap.)" value={f.strada_nr} onChange={(e) => on('strada_nr', e.target.value)} />
       <input className="input" placeholder="Cod poștal" value={f.postCode || ''} onChange={(e) => on('postCode', e.target.value)} />
-      <input className="input" placeholder="Bloc" value={f.bloc || ''} onChange={(e) => on('bloc', e.target.value)} />
-      <input className="input" placeholder="Scară" value={f.scara || ''} onChange={(e) => on('scara', e.target.value)} />
-      <input className="input" placeholder="Etaj" value={f.etaj || ''} onChange={(e) => on('etaj', e.target.value)} />
-      <input className="input" placeholder="Ap." value={f.ap || ''} onChange={(e) => on('ap', e.target.value)} />
-      <input className="input" placeholder="Interfon" value={f.interfon || ''} onChange={(e) => on('interfon', e.target.value)} />
       {a.type === 'shipping' && (
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={!!f.isDefault} onChange={(e) => on('isDefault', e.target.checked)} />
