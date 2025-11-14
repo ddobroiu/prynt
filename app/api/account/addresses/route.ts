@@ -31,11 +31,6 @@ export async function POST(req: NextRequest) {
       localitate: body.localitate || '',
       strada_nr: body.strada_nr || '',
       postCode: body.postCode || null,
-      bloc: body.bloc || null,
-      scara: body.scara || null,
-      etaj: body.etaj || null,
-      ap: body.ap || null,
-      interfon: body.interfon || null,
     };
 
     if (data.isDefault && type === 'shipping') {

@@ -23,11 +23,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       localitate: body.localitate ?? existing.localitate,
       strada_nr: body.strada_nr ?? existing.strada_nr,
       postCode: body.postCode ?? existing.postCode,
-      bloc: body.bloc ?? existing.bloc,
-      scara: body.scara ?? existing.scara,
-      etaj: body.etaj ?? existing.etaj,
-      ap: body.ap ?? existing.ap,
-      interfon: body.interfon ?? existing.interfon,
     };
 
     if (body.isDefault === true && existing.type === 'shipping') {
