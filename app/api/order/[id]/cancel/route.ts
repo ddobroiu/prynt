@@ -1,18 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import type { RouteHandler } from "next/dist/server/future/route-modules/types";
 
-export const POST = async (request, { params }) => {
+export async function POST(request, { params }) {
   const orderId = params.id;
-  const result = await prisma.order.update({
-    where: { id: orderId },
-    data: { status: "canceled", canceledAt: new Date() },
-  }).then(() => {
+  try {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status: "canceled", canceledAt: new Date() },
+    });
     return new Response("Comanda anulată", { status: 200 });
-  }).catch(() => {
+  } catch {
     return new Response("Eroare la anulare", { status: 500 });
-  });
-  return result;
-};
+  }
+}
   const orderId = params.id;
   try {
     await prisma.order.update({
