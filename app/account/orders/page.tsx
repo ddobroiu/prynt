@@ -26,6 +26,9 @@ export default async function OrdersPage() {
     total: Number(o.total),
     paymentType: o.paymentType,
     itemsCount: o.items.length,
+    awbNumber: o.awbNumber,
+    awbCarrier: o.awbCarrier,
+    invoiceLink: o.invoiceLink,
   }));
 
   return (
@@ -41,6 +44,17 @@ export default async function OrdersPage() {
                 <div className="font-semibold">Comanda #{o.orderNo}</div>
                 <div className="text-xs text-muted">{new Date(o.createdAt).toLocaleString("ro-RO")}</div>
                 <div className="text-xs text-muted">{o.itemsCount} produse • {o.paymentType}</div>
+                {o.awbNumber ? (
+                  <div className="text-xs mt-1">
+                    AWB: <span className="font-semibold">{o.awbNumber}</span> {o.awbCarrier ? <span className="text-muted">({o.awbCarrier})</span> : null}
+                    <a href={`https://tracking.dpd.ro/`} target="_blank" rel="noopener noreferrer" className="ml-2 text-indigo-400 underline">Urmărește coletul</a>
+                  </div>
+                ) : null}
+                {o.invoiceLink ? (
+                  <div className="text-xs mt-1">
+                    <a href={o.invoiceLink} target="_blank" rel="noopener noreferrer" className="text-indigo-400 underline">Descarcă factura</a>
+                  </div>
+                ) : null}
               </div>
               <div className="text-right">
                 <div className="font-bold">{new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(o.total)}</div>
