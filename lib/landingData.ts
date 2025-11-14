@@ -321,13 +321,16 @@ export function listAllLandingRoutes() {
       const val = entries[key];
       // If the value looks like a LandingInfo (has .key), push it directly
       if (val && typeof val === 'object' && 'key' in val) {
-        out.push({ category, slug: key });
+        // normalize slug: prefer hyphenated form for URLs
+        const slugNormalized = String(key).replace(/_/g, '-');
+        out.push({ category, slug: slugNormalized });
         return;
       }
       // Otherwise assume it's a grouped map and iterate its children
       if (val && typeof val === 'object') {
         Object.keys(val as LandingGroup).forEach((childSlug) => {
-          out.push({ category, slug: childSlug });
+          const slugNormalized = String(childSlug).replace(/_/g, '-');
+          out.push({ category, slug: slugNormalized });
         });
       }
     });
@@ -339,13 +342,21 @@ export function listAllLandingRoutes() {
 export function getLandingInfo(category: string, slug: string) {
   const cat = (LANDING_CATALOG as any)[category];
   if (!cat) return undefined;
-  const direct = (cat as Record<string, any>)[slug];
-  if (direct && typeof direct === 'object' && 'key' in direct) return direct as LandingInfo;
+  // try direct match, then underscore/hyphen variants
+  const tryKeys = [slug, slug.replace(/-/g, '_'), slug.replace(/_/g, '-')];
+  for (const k of tryKeys) {
+    const direct = (cat as Record<string, any>)[k];
+    if (direct && typeof direct === 'object' && 'key' in direct) return direct as LandingInfo;
+  }
   // search nested groups
   for (const k of Object.keys(cat)) {
     const v = (cat as any)[k];
     if (v && typeof v === 'object' && !( 'key' in v)) {
-      if ((v as LandingGroup)[slug]) return (v as LandingGroup)[slug];
+      // try child variants too
+      const childKeys = [slug, slug.replace(/-/g, '_'), slug.replace(/_/g, '-')];
+      for (const ck of childKeys) {
+        if ((v as LandingGroup)[ck]) return (v as LandingGroup)[ck];
+      }
     }
   }
   return undefined;
