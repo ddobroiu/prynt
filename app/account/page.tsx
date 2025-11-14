@@ -1,6 +1,8 @@
 import { getAuthSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import SignOutButton from "@/components/SignOutButton";
 import ChangePasswordForm from "@/components/ChangePasswordForm";
+import RequestPasswordReset from "@/components/RequestPasswordReset";
 
 export default async function AccountPage({
   searchParams,
@@ -21,6 +23,23 @@ export default async function AccountPage({
     );
   }
 
+  // Load latest orders (preview)
+  const userId = (session.user as any).id as string;
+  const recent = await prisma.order.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    include: { items: { select: { id: true } } },
+  });
+  const orders = recent.map((o: any) => ({
+    id: o.id,
+    orderNo: o.orderNo,
+    createdAt: o.createdAt,
+    total: Number(o.total),
+    paymentType: o.paymentType,
+    itemsCount: o.items.length,
+  }));
+
   return (
     <div className="mx-auto max-w-3xl px-6 py-16 space-y-6">
       <h1 className="text-2xl font-bold">Bun venit, {session.user.name || session.user.email}</h1>
@@ -34,20 +53,35 @@ export default async function AccountPage({
         <div className="font-medium">{session.user.email}</div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <a href="/account/orders" className="rounded-md border border-[--border] p-4 hover:bg-white/5 transition">
-          <div className="font-semibold">Comenzile mele</div>
-          <div className="text-sm text-muted">Vezi istoricul comenzilor</div>
-        </a>
-        {/* Placeholder pentru adrese / setări cont */}
-        <a href="/checkout" className="rounded-md border border-[--border] p-4 hover:bg-white/5 transition">
-          <div className="font-semibold">Cumpără din nou</div>
-          <div className="text-sm text-muted">Revino la coș și finalizează</div>
-        </a>
+      {/* Istoric comenzi (ultimele 5) */}
+      <div className="rounded-md border border-[--border]">
+        <div className="flex items-center justify-between p-4">
+          <div className="font-semibold">Istoric comenzi</div>
+          <a href="/account/orders" className="text-sm text-indigo-400 underline">Vezi toate</a>
+        </div>
+        {orders.length === 0 ? (
+          <div className="p-4 text-sm text-muted">Nu ai comenzi încă.</div>
+        ) : (
+          <ul className="divide-y divide-white/10">
+            {orders.map((o: any) => (
+              <li key={o.id} className="p-4 flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Comanda #{o.orderNo}</div>
+                  <div className="text-xs text-muted">{new Date(o.createdAt).toLocaleString("ro-RO")}</div>
+                  <div className="text-xs text-muted">{o.itemsCount} produse • {o.paymentType}</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-semibold">{new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(o.total)}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <SignOutButton />
       <ChangePasswordForm />
+      <RequestPasswordReset email={String(session.user.email || "")} />
     </div>
   );
 }
