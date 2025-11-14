@@ -207,12 +207,10 @@ async function sendEmails(
       if (['false', 'nu', 'no', 'n', '0'].includes(t)) return 'Nu';
     }
     return String(v);
-              ${address.bloc || address.scara || address.etaj || address.ap || address.interfon ? `<p class=\"muted\" style=\"margin:4px 0 0;color:#64748b;font-size:13px\">${escapeHtml([address.bloc ? `Bloc ${address.bloc}` : '', address.scara ? `Sc. ${address.scara}` : '', address.etaj ? `Et. ${address.etaj}` : '', address.ap ? `Ap. ${address.ap}` : '', address.interfon ? `Interfon ${address.interfon}` : ''].filter(Boolean).join(', '))}</p>` : ''}
+  }
   }
 
   const labelForKey: Record<string, string> = {
-              ${(billing.strada_nr || billing.localitate || billing.judet) ? `<p style=\"margin:6px 0 0;color:#111\">${escapeHtml(billing.strada_nr || '-')}, ${escapeHtml(billing.localitate || '-')}, ${escapeHtml(billing.judet || '-')}${billing.postCode ? `, ${escapeHtml(billing.postCode)}` : ''}</p>` : ''}
-              ${billing.bloc || billing.scara || billing.etaj || billing.ap || billing.interfon ? `<p class=\"muted\" style=\"margin:4px 0 0;color:#64748b;font-size:13px\">${escapeHtml([billing.bloc ? `Bloc ${billing.bloc}` : '', billing.scara ? `Sc. ${billing.scara}` : '', billing.etaj ? `Et. ${billing.etaj}` : '', billing.ap ? `Ap. ${billing.ap}` : '', billing.interfon ? `Interfon ${billing.interfon}` : ''].filter(Boolean).join(', '))}</p>` : ''}
     width: 'Lățime (cm)',
     height: 'Înălțime (cm)',
     width_cm: 'Lățime (cm)',
@@ -383,7 +381,16 @@ async function sendEmails(
         <p><strong>Telefon:</strong> ${escapeHtml(address.telefon)}</p>
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Adresă Livrare</h2>
-        <p>${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}</p>
+        <p>${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}${address.postCode ? `, ${escapeHtml(address.postCode)}` : ''}</p>
+        ${address.bloc || address.scara || address.etaj || address.ap || address.interfon
+          ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml([
+              address.bloc ? `Bloc ${address.bloc}` : '',
+              address.scara ? `Sc. ${address.scara}` : '',
+              address.etaj ? `Et. ${address.etaj}` : '',
+              address.ap ? `Ap. ${address.ap}` : '',
+              address.interfon ? `Interfon ${address.interfon}` : '',
+            ].filter(Boolean).join(', '))}</p>`
+          : ''}
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Detalii Facturare</h2>
         <p><strong>Tip:</strong> ${billing.tip_factura !== 'persoana_fizica' ? 'Companie' : 'Persoană Fizică'}</p>
@@ -486,6 +493,15 @@ async function sendEmails(
             <p style="margin:0;color:#111;font-weight:600;">${escapeHtml(address.nume_prenume)}</p>
             <p class="muted" style="margin:2px 0 0;color:#64748b;font-size:13px">${escapeHtml(address.email)} • ${escapeHtml(address.telefon)}</p>
             <p style="margin:6px 0 0;color:#111">${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}${address.postCode ? `, ${escapeHtml(address.postCode)}` : ''}</p>
+            ${address.bloc || address.scara || address.etaj || address.ap || address.interfon
+              ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml([
+                  address.bloc ? `Bloc ${address.bloc}` : '',
+                  address.scara ? `Sc. ${address.scara}` : '',
+                  address.etaj ? `Et. ${address.etaj}` : '',
+                  address.ap ? `Ap. ${address.ap}` : '',
+                  address.interfon ? `Interfon ${address.interfon}` : '',
+                ].filter(Boolean).join(', '))}</p>`
+              : ''}
           </div>
           <div class="col" style="flex:1;min-width:0;">
             <h3 style="margin:0 0 8px;color:#0f172a;font-size:14px;text-transform:uppercase;letter-spacing:.04em;">Facturare</h3>
