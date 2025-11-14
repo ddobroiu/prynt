@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Record<string, string> }) {
   const orderId = params.id;
   try {
     await prisma.order.update({
