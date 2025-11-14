@@ -4,7 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useCart } from "./CartContext";
-import { ChevronDown, ChevronRight, Menu, ShoppingCart, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, ShoppingCart, X, User } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 type NavItem = {
   href: string;
@@ -65,6 +66,7 @@ export default function Header() {
   const [openMobile, setOpenMobile] = useState(false);
   const [openMobileSub, setOpenMobileSub] = useState<string | null>(null);
   const { count, isLoaded } = useCart();
+  const { data: session } = useSession();
 
   // Desktop dropdown control
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -140,6 +142,14 @@ export default function Header() {
             </Link>
 
             <ThemeToggle />
+
+            <Link
+              href={session?.user ? "/account" : "/login"}
+              aria-label="Contul meu"
+              className="inline-flex items-center justify-center rounded-xl p-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
+            >
+              <User size={22} />
+            </Link>
 
             <Link
               href="/checkout"
@@ -367,6 +377,18 @@ export default function Header() {
             </Link>
 
             <ThemeToggle />
+
+            <Link
+              href={session?.user ? "/account" : "/login"}
+              className="
+                relative inline-flex items-center justify-center rounded-xl px-4 py-2
+                border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition
+                dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800
+              "
+              aria-label="Contul meu"
+            >
+              <User size={20} />
+            </Link>
 
             <Link
               href="/checkout"
