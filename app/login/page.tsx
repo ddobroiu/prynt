@@ -27,6 +27,42 @@ export default function LoginPage() {
     }
   }
 
+  async function requestReset(emailValue: string) {
+    try {
+      const res = await fetch('/api/auth/request-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailValue }),
+      });
+      if (res.ok) {
+        alert('Dacă există cont pe acest email, vei primi un link de resetare.');
+      } else {
+        alert('Nu s-a putut trimite resetarea.');
+      }
+    } catch {}
+  }
+
+  async function onRegister(e: FormEvent) {
+    e.preventDefault();
+    if (!email || password.length < 8 || password !== regConfirm) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name: regName }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.success) {
+        alert(data?.message || 'Crearea contului a eșuat');
+        return;
+      }
+      await signIn('credentials', { email, password, redirect: true, callbackUrl: '/account?welcome=1' });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-md px-6 py-16">
       <h1 className="text-2xl font-bold mb-6">Cont</h1>
@@ -160,40 +196,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-  async function requestReset(emailValue: string) {
-    try {
-      const res = await fetch('/api/auth/request-reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailValue }),
-      });
-      // Silent success/fail UI minimal
-      if (res.ok) {
-        alert('Dacă există cont pe acest email, vei primi un link de resetare.');
-      } else {
-        alert('Nu s-a putut trimite resetarea.');
-      }
-    } catch {}
-  }
-
-  async function onRegister(e: FormEvent) {
-    e.preventDefault();
-    if (!email || password.length < 8 || password !== regConfirm) return;
-    setLoading(true);
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name: regName }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data?.success) {
-        alert(data?.message || 'Crearea contului a eșuat');
-        return;
-      }
-      await signIn('credentials', { email, password, redirect: true, callbackUrl: '/account?welcome=1' });
-    } finally {
-      setLoading(false);
-    }
-  }
