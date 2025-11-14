@@ -62,3 +62,38 @@ OPENAI_MODEL=gpt-4o-mini
 - `app/api/order/create` to draft carts/orders
 
 This keeps responses accurate and actionable while preserving your existing pricing and checkout flows.
+
+## Authentication (Email Magic Link + Google)
+
+We use Auth.js (NextAuth v5) with Prisma.
+
+- Config: `lib/auth.ts`
+- API route: `app/api/auth/[...nextauth]/route.ts`
+- Pages: `app/login/page.tsx` and `app/account/page.tsx`
+- Session provider: wrapped in `components/Providers.tsx`
+
+Install deps:
+
+```bash
+npm i next-auth @auth/prisma-adapter
+```
+
+Environment variables (Railway or `.env.local`):
+
+```
+AUTH_SECRET= # openssl rand -base64 32
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+EMAIL_FROM=contact@prynt.ro
+RESEND_API_KEY= # already used elsewhere
+NEXT_PUBLIC_SITE_URL=https://www.prynt.ro
+PUBLIC_BASE_URL=https://www.prynt.ro
+# DB
+DATABASE_URL=
+# optional on Railway private network
+DATABASE_INTERNAL_URL=
+```
+
+Usage:
+- Go to `/login` to request an email link or continue with Google.
+- After sign in, account page lives at `/account`.
