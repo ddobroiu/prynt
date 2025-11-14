@@ -39,6 +39,12 @@ model Address {
   localitate  String
   strada_nr   String
   postCode    String?
+  // Detalii adresă (bloc, scară etc.)
+  bloc        String?
+  scara       String?
+  etaj        String?
+  ap          String?
+  interfon    String?
   isDefault   Boolean  @default(false)
   type        String?  // shipping | billing
 
