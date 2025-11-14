@@ -3,13 +3,14 @@ import type { RouteHandler } from "next/dist/server/future/route-modules/types";
 
 export async function POST(request, { params }) {
   const orderId = params.id;
-  try {
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { status: "canceled", canceledAt: new Date() },
-    });
+  const result = await prisma.order.update({
+    where: { id: orderId },
+    data: { status: "canceled", canceledAt: new Date() },
+  }).catch(() => null);
+
+  if (result) {
     return new Response("Comanda anulată", { status: 200 });
-  } catch {
+  } else {
     return new Response("Eroare la anulare", { status: 500 });
   }
 }
