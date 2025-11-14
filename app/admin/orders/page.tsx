@@ -64,8 +64,8 @@ export default async function OrdersPage() {
             </thead>
             <tbody>
               {orders.map((o) => {
-                const tokenEdit = signAdminAction({ action: 'edit', address: o.address, paymentType: o.paymentType, totalAmount: o.total });
-                const tokenConfirm = signAdminAction({ action: 'confirm_awb', address: o.address, paymentType: o.paymentType, totalAmount: o.total });
+                const tokenEdit = signAdminAction({ action: 'edit', orderId: o.id, address: o.address, paymentType: o.paymentType, totalAmount: o.total });
+                const tokenConfirm = signAdminAction({ action: 'confirm_awb', orderId: o.id, address: o.address, paymentType: o.paymentType, totalAmount: o.total });
                 const urlEdit = `/api/dpd/admin-action?token=${encodeURIComponent(tokenEdit)}&sid=${defaultSid}`;
                 const urlConfirm = `/api/dpd/admin-action?token=${encodeURIComponent(tokenConfirm)}&sid=${defaultSid}`;
                 return (

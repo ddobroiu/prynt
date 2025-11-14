@@ -1,5 +1,6 @@
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { trackingUrlForAwb } from "@/lib/dpdService";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -45,6 +46,13 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           <div className="font-medium">{new Date(order.createdAt).toLocaleString("ro-RO")}</div>
           <div className="text-sm text-muted mt-2">Total</div>
           <div className="font-medium">{fmtRON(Number(order.total))}</div>
+          {order.awbNumber ? (
+            <div className="mt-3">
+              <div className="text-sm text-muted">AWB</div>
+              <div className="font-medium">{order.awbNumber} {order.awbCarrier ? <span className="text-xs text-muted">({order.awbCarrier})</span> : null}</div>
+              <a href={trackingUrlForAwb(order.awbNumber)} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-sm text-indigo-400 underline">Urmărește coletul</a>
+            </div>
+          ) : null}
           {order.invoiceLink ? (
             <a href={order.invoiceLink} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm text-indigo-400 underline">Descarcă factura</a>
           ) : null}

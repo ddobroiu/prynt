@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createShipment, printExtended, trackingUrlForAwb, type CreateShipmentRequest } from '../../../../lib/dpdService';
+import { prisma } from '../../../../lib/prisma';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,10 +19,11 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(req: NextRequest) {
   try {
-    const { shipment, email, name } = (await req.json()) as {
+    const { shipment, email, name, orderId } = (await req.json()) as {
       shipment?: CreateShipmentRequest;
       email?: string;
       name?: string;
+      orderId?: string;
     };
 
     if (!shipment?.recipient || !shipment?.service || !shipment?.content || !shipment?.payment) {
@@ -43,6 +45,15 @@ export async function POST(req: NextRequest) {
   const shipmentId = created.id!;
     const parcels = created.parcels || [];
   const trackingUrl = trackingUrlForAwb(shipmentId);
+
+    // Persist AWB to order if provided
+    if (orderId) {
+      try {
+        await prisma.order.update({ where: { id: orderId }, data: { awbNumber: shipmentId, awbCarrier: 'DPD' } });
+      } catch (e) {
+        console.warn('[confirm-awb] Persist AWB failed:', (e as any)?.message || e);
+      }
+    }
 
     // Print label
     const { base64 } = await printExtended({

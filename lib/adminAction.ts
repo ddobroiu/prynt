@@ -6,6 +6,8 @@ export type AdminActionPayload = {
   action: AdminAction;
   iat: number; // issued at (ms)
   exp: number; // expires at (ms)
+  // Optional: order id (when AWB is linked to an existing order)
+  orderId?: string;
   // minimal order/shipment info needed to create AWB
   address: {
     nume_prenume: string;

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { verifyAdminAction, signAdminAction } from '../../../../lib/adminAction';
 import { createShipment, printExtended, trackingUrlForAwb, type ShipmentSender, validateShipment } from '../../../../lib/dpdService';
 import { Resend } from 'resend';
+import { prisma } from '../../../../lib/prisma';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -272,12 +273,22 @@ export async function GET(req: NextRequest) {
         const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
         const tokenSend = signAdminAction({
           action: 'confirm_awb',
+          orderId: payload.orderId,
           address,
           paymentType: payload.paymentType,
           totalAmount: payload.totalAmount,
           shipmentId,
           parcels: parcels.map((p: any) => ({ id: p.id })),
         });
+
+        // Persist AWB to order if we know it
+        if (payload.orderId) {
+          try {
+            await prisma.order.update({ where: { id: payload.orderId }, data: { awbNumber: shipmentId, awbCarrier: 'DPD' } });
+          } catch (e) {
+            console.warn('[admin-action] Persist AWB failed:', (e as any)?.message || e);
+          }
+        }
         const sendUrl = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenSend)}&sid=${serviceId}`;
         const track = trackingUrlForAwb(shipmentId);
         return htmlPage(
@@ -327,6 +338,16 @@ export async function GET(req: NextRequest) {
       const dataHref = base64 ? `data:application/pdf;base64,${base64}` : '';
       const download = base64 ? `<p><a href="${dataHref}" download="DPD_${shipmentId}.pdf" style="display:inline-block;padding:8px 12px;background:#334155;color:#fff;border-radius:8px;text-decoration:none;">Descarcă PDF</a></p>` : '';
       const viewer = base64 ? `<div style="margin-top:12px;border:1px solid #e5e7eb;height:70vh"><iframe src="${dataHref}" style="width:100%;height:100%;border:0" title="Etichetă DPD"></iframe></div>` : '';
+
+      // Persist AWB to order if we know it (confirm flow)
+      if (payload.orderId) {
+        try {
+          await prisma.order.update({ where: { id: payload.orderId }, data: { awbNumber: shipmentId, awbCarrier: 'DPD' } });
+        } catch (e) {
+          console.warn('[admin-action] Persist AWB (confirm) failed:', (e as any)?.message || e);
+        }
+      }
+
       return htmlPage(
         'AWB emis',
         `<h1>AWB emis și trimis clientului</h1>

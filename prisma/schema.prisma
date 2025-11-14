@@ -73,6 +73,9 @@ model Order {
   shippingFee Decimal      @default(0)
   total       Decimal      @default(0)
   invoiceLink String?
+  // AWB / tracking info
+  awbNumber   String?
+  awbCarrier  String?
   marketing   Json?
   createdAt   DateTime     @default(now())
 }
