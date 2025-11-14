@@ -42,6 +42,9 @@ export default async function OrdersPage() {
             <li key={o.id} className="p-4 flex items-center justify-between">
               <div>
                 <div className="font-semibold">Comanda #{o.orderNo}</div>
+                                <div className="text-xs mt-1">
+                                  Status: <span className={`font-semibold ${o.status === 'canceled' ? 'text-red-500' : o.status === 'fulfilled' ? 'text-green-500' : 'text-yellow-500'}`}>{o.status === 'canceled' ? 'Anulată' : o.status === 'fulfilled' ? 'Finalizată' : 'În lucru'}</span>
+                                </div>
                 <div className="text-xs text-muted">{new Date(o.createdAt).toLocaleString("ro-RO")}</div>
                 <div className="text-xs text-muted">{o.itemsCount} produse • {o.paymentType}</div>
                 {o.awbNumber ? (
