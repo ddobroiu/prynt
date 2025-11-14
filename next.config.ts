@@ -24,6 +24,12 @@ const nextConfig = {
       { source: "/pliante/pvc-forex", destination: "/pvc-forex" },
       { source: "/pliante/polipropilena", destination: "/polipropilena" },
       { source: "/pliante/carton", destination: "/carton" },
+      // Also map top-level material routes to the nested landing (in case deploy lacks top-level pages)
+      { source: "/plexiglass", destination: "/pliante/plexiglass" },
+      { source: "/alucobond", destination: "/pliante/alucobond" },
+      { source: "/pvc-forex", destination: "/pliante/pvc-forex" },
+      { source: "/polipropilena", destination: "/pliante/polipropilena" },
+      { source: "/carton", destination: "/pliante/carton" },
     ];
   },
 };
