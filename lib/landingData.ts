@@ -13,7 +13,9 @@ export type LandingInfo = {
   metadata?: Record<string, any>;
 };
 
-export type LandingCatalog = Record<string, Record<string, LandingInfo>>;
+// Allow either a direct LandingInfo or a grouped map of LandingInfo entries
+export type LandingGroup = Record<string, LandingInfo>;
+export type LandingCatalog = Record<string, Record<string, LandingInfo | LandingGroup>>;
 
 export const LANDING_CATALOG: LandingCatalog = {
   pliante: {
@@ -314,8 +316,20 @@ export const LANDING_CATALOG: LandingCatalog = {
 export function listAllLandingRoutes() {
   const out: { category: string; slug: string }[] = [];
   Object.keys(LANDING_CATALOG).forEach((category) => {
-    Object.keys(LANDING_CATALOG[category]).forEach((slug) => {
-      out.push({ category, slug });
+    const entries = LANDING_CATALOG[category];
+    Object.keys(entries).forEach((key) => {
+      const val = entries[key];
+      // If the value looks like a LandingInfo (has .key), push it directly
+      if (val && typeof val === 'object' && 'key' in val) {
+        out.push({ category, slug: key });
+        return;
+      }
+      // Otherwise assume it's a grouped map and iterate its children
+      if (val && typeof val === 'object') {
+        Object.keys(val as LandingGroup).forEach((childSlug) => {
+          out.push({ category, slug: childSlug });
+        });
+      }
     });
   });
   return out;
