@@ -381,8 +381,10 @@ export default function CheckoutPage() {
                   Generează ofertă în PDF
                 </button>
               </div>
-              <ReturningCustomerLogin />
               <CartItems items={items} onRemove={removeItem} />
+
+              {/* Login trebuie să apară deasupra secțiunii de livrare */}
+              <ReturningCustomerLogin />
 
               <CheckoutForm
                 address={address}
