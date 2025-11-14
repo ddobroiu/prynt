@@ -21,6 +21,12 @@ type Address = {
   judet: string;
   localitate: string;
   strada_nr: string;
+  postCode?: string;
+  bloc?: string;
+  scara?: string;
+  etaj?: string;
+  ap?: string;
+  interfon?: string;
 };
 
 type Billing = {
@@ -32,6 +38,12 @@ type Billing = {
   judet?: string;
   localitate?: string;
   strada_nr?: string;
+  postCode?: string;
+  bloc?: string;
+  scara?: string;
+  etaj?: string;
+  ap?: string;
+  interfon?: string;
 };
 
 export default function CheckoutPage() {
@@ -46,6 +58,7 @@ export default function CheckoutPage() {
     judet: "",
     localitate: "",
     strada_nr: "",
+    postCode: "",
   });
 
   const [billing, setBilling] = useState<Billing>({
@@ -208,6 +221,12 @@ export default function CheckoutPage() {
               judet: address.judet,
               localitate: address.localitate,
               strada_nr: address.strada_nr,
+              postCode: address.postCode,
+              bloc: address.bloc,
+              scara: address.scara,
+              etaj: address.etaj,
+              ap: address.ap,
+              interfon: address.interfon,
             }
           : {}),
       },

@@ -27,6 +27,7 @@ export async function GET() {
           localitate: addr.localitate || '',
           strada_nr: addr.strada_nr || '',
           postCode: addr.postCode || undefined,
+          // Detalii de bloc pot exista doar în ultima comandă, modelul Address nu le stochează
         },
       });
     }
@@ -44,6 +45,11 @@ export async function GET() {
           localitate: a.localitate || '',
           strada_nr: a.strada_nr || '',
           postCode: a.postCode || undefined,
+          bloc: a.bloc || undefined,
+          scara: a.scara || undefined,
+          etaj: a.etaj || undefined,
+          ap: a.ap || undefined,
+          interfon: a.interfon || undefined,
         },
       });
     }

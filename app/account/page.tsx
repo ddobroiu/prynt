@@ -140,6 +140,13 @@ export default async function AccountPage({
                     <div className="text-sm">
                       {a.strada_nr}, {a.localitate}, {a.judet}{a.postCode ? `, ${a.postCode}` : ''}
                     </div>
+                    {a.bloc || a.scara || a.etaj || a.ap || a.interfon ? (
+                      <div className="text-xs text-muted">
+                        {[a.bloc ? `Bloc ${a.bloc}` : '', a.scara ? `Sc. ${a.scara}` : '', a.etaj ? `Et. ${a.etaj}` : '', a.ap ? `Ap. ${a.ap}` : '', a.interfon ? `Interfon ${a.interfon}` : '']
+                          .filter(Boolean)
+                          .join(', ')}
+                      </div>
+                    ) : null}
                   </div>
                   <div className="text-xs text-muted capitalize">{a.type || 'shipping'}</div>
                 </div>
