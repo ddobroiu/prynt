@@ -110,6 +110,16 @@ function escapeHtml(str: string) {
     .replaceAll("'", '&#39;');
 }
 
+function apartmentLineText(src: { bloc?: string; scara?: string; etaj?: string; ap?: string; interfon?: string }): string {
+  const parts: string[] = [];
+  if (src.bloc) parts.push('Bloc ' + src.bloc);
+  if (src.scara) parts.push('Sc. ' + src.scara);
+  if (src.etaj) parts.push('Et. ' + src.etaj);
+  if (src.ap) parts.push('Ap. ' + src.ap);
+  if (src.interfon) parts.push('Interfon ' + src.interfon);
+  return parts.join(', ');
+}
+
 function buildAddressLine(
   src: { judet?: string; localitate?: string; strada_nr?: string } | undefined,
   fallback: { judet: string; localitate: string; strada_nr: string }
@@ -383,13 +393,7 @@ async function sendEmails(
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Adresă Livrare</h2>
         <p>${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}${address.postCode ? `, ${escapeHtml(address.postCode)}` : ''}</p>
         ${address.bloc || address.scara || address.etaj || address.ap || address.interfon
-          ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml([
-              address.bloc ? `Bloc ${address.bloc}` : '',
-              address.scara ? `Sc. ${address.scara}` : '',
-              address.etaj ? `Et. ${address.etaj}` : '',
-              address.ap ? `Ap. ${address.ap}` : '',
-              address.interfon ? `Interfon ${address.interfon}` : '',
-            ].filter(Boolean).join(', '))}</p>`
+          ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml(apartmentLineText(address))}</p>`
           : ''}
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Detalii Facturare</h2>
@@ -494,13 +498,7 @@ async function sendEmails(
             <p class="muted" style="margin:2px 0 0;color:#64748b;font-size:13px">${escapeHtml(address.email)} • ${escapeHtml(address.telefon)}</p>
             <p style="margin:6px 0 0;color:#111">${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}${address.postCode ? `, ${escapeHtml(address.postCode)}` : ''}</p>
             ${address.bloc || address.scara || address.etaj || address.ap || address.interfon
-              ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml([
-                  address.bloc ? `Bloc ${address.bloc}` : '',
-                  address.scara ? `Sc. ${address.scara}` : '',
-                  address.etaj ? `Et. ${address.etaj}` : '',
-                  address.ap ? `Ap. ${address.ap}` : '',
-                  address.interfon ? `Interfon ${address.interfon}` : '',
-                ].filter(Boolean).join(', '))}</p>`
+              ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml(apartmentLineText(address))}</p>`
               : ''}
           </div>
           <div class="col" style="flex:1;min-width:0;">
