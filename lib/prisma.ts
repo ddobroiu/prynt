@@ -2,8 +2,9 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-// Prefer internal DB URL in Railway, fallback to public DATABASE_URL
-const datasourceUrl = process.env.DATABASE_INTERNAL_URL || process.env.DATABASE_URL;
+// Prefer public DATABASE_URL (proxy) for broader compatibility on Railway
+// Some environments cannot reach postgres.railway.internal during build/runtime
+const datasourceUrl = process.env.DATABASE_URL || process.env.DATABASE_INTERNAL_URL;
 
 export const prisma =
   globalForPrisma.prisma ||
