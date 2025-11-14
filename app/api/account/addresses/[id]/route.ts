@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
   const userId = (session?.user as any)?.id as string | undefined;
   if (!userId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
@@ -40,7 +40,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
   const userId = (session?.user as any)?.id as string | undefined;
   if (!userId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });

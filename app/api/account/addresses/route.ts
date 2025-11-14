@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(_req: Request) {
   const session = await getAuthSession();
   const userId = (session?.user as any)?.id as string | undefined;
   if (!userId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
@@ -13,7 +13,7 @@ export async function GET() {
   return NextResponse.json({ addresses });
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   const session = await getAuthSession();
   const userId = (session?.user as any)?.id as string | undefined;
   if (!userId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
