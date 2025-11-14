@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fulfillOrder } from '../../../../lib/orderService';
+import { getAuthSession } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -7,13 +8,15 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const orderData = await req.json();
+    const session = await getAuthSession();
+    const userId = (session?.user as any)?.id || null;
 
     if (!orderData?.address || !orderData?.billing || !orderData?.cart) {
       return NextResponse.json({ success: false, message: 'Date de comandă invalide.' }, { status: 400 });
     }
 
   // NON‑BLOCANT față de Oblio
-  const { invoiceLink, orderNo } = await fulfillOrder(orderData, 'Ramburs');
+  const { invoiceLink, orderNo } = await fulfillOrder({ ...orderData, userId }, 'Ramburs');
 
     return NextResponse.json({
       success: true,

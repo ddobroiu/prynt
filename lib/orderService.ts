@@ -507,7 +507,7 @@ async function sendEmails(
  * - Emailuri se trimit oricum; dacă factura nu iese, nu blocăm comanda
  */
 export async function fulfillOrder(
-  orderData: { address: Address; billing: Billing; cart: CartItem[]; marketing?: MarketingInfo; createAccount?: boolean },
+  orderData: { address: Address; billing: Billing; cart: CartItem[]; marketing?: MarketingInfo; createAccount?: boolean; userId?: string | null },
   paymentType: 'Ramburs' | 'Card'
 ): Promise<{ invoiceLink: string | null; orderNo?: number; orderId?: string; createdPassword?: string }> {
   const { address, billing, cart, marketing } = orderData;
@@ -591,6 +591,7 @@ export async function fulfillOrder(
         total: totalComanda,
         invoiceLink: invoiceLink ?? null,
         marketing,
+        userId: orderData.userId || null,
       });
       // Creează cont dacă este cerut și nu există deja
       if (orderData.createAccount) {
