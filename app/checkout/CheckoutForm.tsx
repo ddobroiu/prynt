@@ -173,59 +173,67 @@ export default function CheckoutForm({
             />
           </Field>
 
-          <Field id="address.postCode" label="Cod poștal">
-            <input
-              data-field="address.postCode"
-              className={inputCls(undefined)}
-              value={address.postCode ?? ""}
-              onChange={(e) => onAddr("postCode", e.target.value)}
-              autoComplete="postal-code"
-              inputMode="numeric"
-            />
-          </Field>
-          {/* Detalii adresă (opțional) */}
-          <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-5 gap-3">
-            <Field id="address.bloc" label="Bloc">
+          {/* Detalii apartament și cod poștal pe un singur rând */}
+          <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
+            <Field id="address.ap" label="Ap., scară etc.">
               <input
-                data-field="address.bloc"
+                data-field="address.ap"
                 className={inputCls(undefined)}
-                value={address.bloc ?? ""}
-                onChange={(e) => onAddr("bloc", e.target.value)}
-                autoComplete="address-line2"
+                value={address.ap ?? ""}
+                onChange={(e) => onAddr("ap", e.target.value)}
+                placeholder="Ap."
               />
             </Field>
-            <Field id="address.scara" label="Scară">
+            <Field id="address.scara" label=" ">
               <input
                 data-field="address.scara"
                 className={inputCls(undefined)}
                 value={address.scara ?? ""}
                 onChange={(e) => onAddr("scara", e.target.value)}
+                placeholder="Sc."
               />
             </Field>
-            <Field id="address.etaj" label="Etaj">
+            <Field id="address.etaj" label=" ">
               <input
                 data-field="address.etaj"
                 className={inputCls(undefined)}
                 value={address.etaj ?? ""}
                 onChange={(e) => onAddr("etaj", e.target.value)}
                 inputMode="numeric"
+                placeholder="Et."
               />
             </Field>
-            <Field id="address.ap" label="Ap.">
+            <Field id="address.bloc" label=" ">
               <input
-                data-field="address.ap"
+                data-field="address.bloc"
                 className={inputCls(undefined)}
-                value={address.ap ?? ""}
-                onChange={(e) => onAddr("ap", e.target.value)}
+                value={address.bloc ?? ""}
+                onChange={(e) => onAddr("bloc", e.target.value)}
+                autoComplete="address-line2"
+                placeholder="Bloc"
               />
             </Field>
-            <Field id="address.interfon" label="Interfon">
+            <Field id="address.interfon" label=" ">
               <input
                 data-field="address.interfon"
                 className={inputCls(undefined)}
                 value={address.interfon ?? ""}
                 onChange={(e) => onAddr("interfon", e.target.value)}
+                placeholder="Interfon"
               />
+            </Field>
+            <Field id="address.postCode" label="Cod poștal">
+              <div className="md:w-28">
+                <input
+                  data-field="address.postCode"
+                  className={inputCls(undefined)}
+                  value={address.postCode ?? ""}
+                  onChange={(e) => onAddr("postCode", e.target.value)}
+                  autoComplete="postal-code"
+                  inputMode="numeric"
+                  placeholder="000000"
+                />
+              </div>
             </Field>
           </div>
         </div>
