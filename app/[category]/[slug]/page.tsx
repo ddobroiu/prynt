@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import LandingTemplate from "@/components/LandingTemplate";
-import { LANDING_CATALOG, listAllLandingRoutes } from "@/lib/landingData";
+import { LANDING_CATALOG, listAllLandingRoutes, getLandingInfo } from "@/lib/landingData";
 import type { LandingInfo } from "@/lib/landingData";
 
 type Props = { params?: { category: string; slug: string } };
@@ -13,7 +13,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const category = String(params?.category ?? "").toLowerCase();
   const slug = String(params?.slug ?? "").toLowerCase();
-  const landing: LandingInfo | undefined = (LANDING_CATALOG as any)[category]?.[slug];
+  const landing: LandingInfo | undefined = getLandingInfo(category, slug);
   if (!landing) return {};
   const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro").replace(/\/$/, "");
   const url = `${base}/${category}/${slug}`;
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default function Page({ params }: Props) {
   const category = String(params?.category ?? "").toLowerCase();
   const slug = String(params?.slug ?? "").toLowerCase();
-  const landing: LandingInfo | undefined = (LANDING_CATALOG as any)[category]?.[slug];
+  const landing: LandingInfo | undefined = getLandingInfo(category, slug);
   if (!landing) return notFound();
 
   // Optionally compute initial sizes from lib/products if you want

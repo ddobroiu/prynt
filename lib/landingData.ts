@@ -334,3 +334,19 @@ export function listAllLandingRoutes() {
   });
   return out;
 }
+
+// Find a LandingInfo by category + slug, supporting grouped maps one level deep
+export function getLandingInfo(category: string, slug: string) {
+  const cat = (LANDING_CATALOG as any)[category];
+  if (!cat) return undefined;
+  const direct = (cat as Record<string, any>)[slug];
+  if (direct && typeof direct === 'object' && 'key' in direct) return direct as LandingInfo;
+  // search nested groups
+  for (const k of Object.keys(cat)) {
+    const v = (cat as any)[k];
+    if (v && typeof v === 'object' && !( 'key' in v)) {
+      if ((v as LandingGroup)[slug]) return (v as LandingGroup)[slug];
+    }
+  }
+  return undefined;
+}
