@@ -1,6 +1,8 @@
 import { Resend } from 'resend';
 import { signAdminAction } from './adminAction';
 import { appendOrder } from './orderStore';
+import { prisma } from './prisma';
+import bcrypt from 'bcryptjs';
 
 type AnyRecord = Record<string, any>;
 
@@ -161,7 +163,8 @@ async function sendEmails(
   invoiceLink: string | null,
   paymentType: 'Ramburs' | 'Card',
   marketing?: MarketingInfo,
-  orderNo?: number
+  orderNo?: number,
+  createdPassword?: string
 ) {
   // Normalize cart for totals and for listing in emails
   const normalized = cart.map((raw) => {
@@ -420,6 +423,15 @@ async function sendEmails(
   }
 
   // Email CLIENT – include artwork link or text if provided
+  const accountBlock = createdPassword
+    ? `
+        <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Cont creat</h2>
+        <p style="margin:4px 0;">Ți-am creat automat un cont pe Prynt.ro cu acest email.</p>
+        <p style="margin:4px 0;">Parola inițială: <strong>${escapeHtml(createdPassword)}</strong></p>
+        <p style="margin:4px 0; font-size:12px; color:#555;">Te rugăm să te autentifici și să schimbi parola din secțiunea contului pentru siguranță.</p>
+      `
+    : '';
+
   const clientHtml = `
     <div style="font-family:sans-serif; background:#f7f7fb; padding:24px;">
       <div style="max-width:640px; margin:auto; background:#ffffff; border-radius:10px; padding:24px;">
@@ -428,6 +440,8 @@ async function sendEmails(
           Am primit comanda ta și am început procesarea. Mai jos ai un rezumat.
         </p>
         ${orderNo ? `<p style="margin:0 0 12px; color:#111;"><strong>Nr. comandă:</strong> #${orderNo}</p>` : ''}
+
+        ${accountBlock}
 
         <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Datele tale</h2>
         <p style="margin:4px 0;"><strong>Nume:</strong> ${escapeHtml(address.nume_prenume)}</p>
@@ -493,10 +507,11 @@ async function sendEmails(
  * - Emailuri se trimit oricum; dacă factura nu iese, nu blocăm comanda
  */
 export async function fulfillOrder(
-  orderData: { address: Address; billing: Billing; cart: CartItem[]; marketing?: MarketingInfo },
+  orderData: { address: Address; billing: Billing; cart: CartItem[]; marketing?: MarketingInfo; createAccount?: boolean },
   paymentType: 'Ramburs' | 'Card'
-): Promise<{ invoiceLink: string | null; orderNo?: number; orderId?: string }> {
+): Promise<{ invoiceLink: string | null; orderNo?: number; orderId?: string; createdPassword?: string }> {
   const { address, billing, cart, marketing } = orderData;
+  let createdPassword: string | undefined;
 
   let invoiceLink: string | null = null;
 
@@ -577,17 +592,66 @@ export async function fulfillOrder(
         invoiceLink: invoiceLink ?? null,
         marketing,
       });
+      // Creează cont dacă este cerut și nu există deja
+      if (orderData.createAccount) {
+        try {
+          const existing = await prisma.user.findUnique({ where: { email: address.email } });
+            if (!existing) {
+              const rawPass = generateRandomPassword();
+              const hash = await bcrypt.hash(rawPass, 10);
+              await prisma.user.create({
+                data: {
+                  email: address.email,
+                  name: address.nume_prenume || undefined,
+                  passwordHash: hash,
+                  phone: address.telefon || undefined,
+                },
+              });
+              createdPassword = rawPass;
+            }
+        } catch (e: any) {
+          console.warn('[OrderService] Creare cont eșuat:', e?.message || e);
+        }
+      }
       // Trimite emailurile cu numărul comenzii în subiect
-      await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing, saved.orderNo);
-      return { invoiceLink, orderNo: saved.orderNo, orderId: saved.id };
+      await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing, saved.orderNo, createdPassword);
+      return { invoiceLink, orderNo: saved.orderNo, orderId: saved.id, createdPassword };
     } catch (e: any) {
       console.warn('[OrderService] Salvare comandă a eșuat (non-blocant):', e?.message || e);
     }
     // Dacă salvarea eșuează, tot trimitem emailuri (fără orderNo)
-    await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing);
+    if (orderData.createAccount) {
+      try {
+        const existing = await prisma.user.findUnique({ where: { email: address.email } });
+        if (!existing) {
+          const rawPass = generateRandomPassword();
+          const hash = await bcrypt.hash(rawPass, 10);
+          await prisma.user.create({
+            data: {
+              email: address.email,
+              name: address.nume_prenume || undefined,
+              passwordHash: hash,
+              phone: address.telefon || undefined,
+            },
+          });
+          createdPassword = rawPass;
+        }
+      } catch (e: any) {
+        console.warn('[OrderService] Creare cont eșuat (salvare eșuată):', e?.message || e);
+      }
+    }
+    await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing, undefined, createdPassword);
   } catch (e: any) {
     console.error('[OrderService] Eroare trimitere emailuri:', e?.message || e);
   }
+  return { invoiceLink, createdPassword };
+}
 
-  return { invoiceLink };
+function generateRandomPassword(): string {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@$%';
+  let out = '';
+  for (let i = 0; i < 12; i++) {
+    out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return out;
 }

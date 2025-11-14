@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState, useRef, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import ReturningCustomerLogin from "@/components/ReturningCustomerLogin";
 import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../../components/CartContext";
@@ -33,6 +35,7 @@ type Billing = {
 
 export default function CheckoutPage() {
   // Use CartProvider hook (items shape: title, price, quantity, metadata...)
+  const { data: session } = useSession();
   const { items = [], removeItem, isLoaded, total } = useCart();
 
   const [address, setAddress] = useState<Address>({
@@ -54,8 +57,37 @@ export default function CheckoutPage() {
   const [placing, setPlacing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showEmbed, setShowEmbed] = useState(false);
+  const [createAccount, setCreateAccount] = useState(false);
 
   const firstInvalidRef = useRef<HTMLElement | null>(null);
+
+  // Prefill address (returning customer) when logged in
+  useEffect(() => {
+    const alreadyFilled = address?.nume_prenume || address?.email || address?.telefon || address?.judet || address?.localitate || address?.strada_nr;
+    if (!session?.user || alreadyFilled) return;
+    fetch('/api/account/last-address', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((data) => { if (data?.address) setAddress((prev) => ({ ...prev, ...data.address })); })
+      .catch(() => {});
+  }, [session?.user]);
+
+  // Prefill billing from last order
+  useEffect(() => {
+    if (!session?.user) return;
+    const emptyBilling = !billing.cui && !billing.denumire_companie && !billing.judet && !billing.localitate && !billing.strada_nr;
+    if (!emptyBilling) return;
+    fetch('/api/account/last-billing', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.billing) {
+          setBilling((prev) => ({ ...prev, ...data.billing }));
+          if (data.billing.judet && data.billing.localitate && data.billing.strada_nr) {
+            setSameAsDelivery(false);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [session?.user]);
 
   // Helper: normalize cart items to the shape expected by server (name, unitAmount, totalAmount, artworkUrl, textDesign, metadata)
   function normalizeCart(cart: any[]) {
@@ -178,6 +210,7 @@ export default function CheckoutPage() {
           : {}),
       },
       marketing,
+      createAccount: createAccount && !session?.user,
     };
 
     try {
@@ -330,6 +363,9 @@ export default function CheckoutPage() {
                 county={address.judet}
                 showEmbed={showEmbed}
                 setShowEmbed={setShowEmbed}
+                createAccount={createAccount}
+                setCreateAccount={setCreateAccount}
+                isLoggedIn={!!session?.user}
               />
             </aside>
 
@@ -345,6 +381,7 @@ export default function CheckoutPage() {
                   Generează ofertă în PDF
                 </button>
               </div>
+              <ReturningCustomerLogin />
               <CartItems items={items} onRemove={removeItem} />
 
               <CheckoutForm
@@ -392,6 +429,9 @@ function SummaryCard({
   county,
   showEmbed,
   setShowEmbed,
+  createAccount,
+  setCreateAccount,
+  isLoggedIn,
 }: {
   subtotal: number;
   shipping: number;
@@ -403,6 +443,9 @@ function SummaryCard({
   county?: string;
   showEmbed: boolean;
   setShowEmbed: (v: boolean) => void;
+  createAccount: boolean;
+  setCreateAccount: (v: boolean) => void;
+  isLoggedIn: boolean;
 }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
@@ -430,6 +473,18 @@ function SummaryCard({
       </div>
 
       <div className="mt-5">
+        {!isLoggedIn && (
+          <label className="flex items-start gap-2 mb-4 text-xs cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={createAccount}
+              onChange={(e) => setCreateAccount(e.target.checked)}
+            />
+            <span className="text-ui leading-snug">
+              Creează un cont cu acest email și parolă generată automat (trimisă pe email). O vei putea schimba ulterior.
+            </span>
+          </label>
+        )}
         <div className="mb-3 flex gap-3">
           <button
             onClick={() => setPaymentMethod("ramburs")}

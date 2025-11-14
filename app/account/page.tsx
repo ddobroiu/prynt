@@ -1,5 +1,6 @@
 import { getAuthSession } from "@/lib/auth";
 import SignOutButton from "@/components/SignOutButton";
+import ChangePasswordForm from "@/components/ChangePasswordForm";
 
 export default async function AccountPage() {
   const session = await getAuthSession();
@@ -33,6 +34,7 @@ export default async function AccountPage() {
       </div>
 
       <SignOutButton />
+      <ChangePasswordForm />
     </div>
   );
 }
