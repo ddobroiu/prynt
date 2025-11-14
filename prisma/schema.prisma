@@ -76,6 +76,9 @@ model Order {
   // AWB / tracking info
   awbNumber   String?
   awbCarrier  String?
+  // Status lifecycle
+  status      String       @default("active") // active | canceled | fulfilled (future)
+  canceledAt  DateTime?
   marketing   Json?
   createdAt   DateTime     @default(now())
 }

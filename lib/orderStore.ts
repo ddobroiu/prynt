@@ -47,6 +47,8 @@ export type StoredOrder = {
   invoiceLink?: string | null;
   marketing?: MarketingInfo;
   userId?: string | null;
+  status?: 'active' | 'canceled';
+  canceledAt?: string | null;
 };
 
 export type NewOrder = Omit<StoredOrder, 'id' | 'createdAt' | 'orderNo'>;
@@ -55,6 +57,7 @@ const DATA_DIR = path.join(process.cwd(), '.data');
 const FILE_PATH = path.join(DATA_DIR, 'orders.jsonl');
 const SEQ_PATH = path.join(DATA_DIR, 'order-seq.txt');
 const SESSION_MAP_PATH = path.join(DATA_DIR, 'session-map.json');
+const CANCEL_MAP_PATH = path.join(DATA_DIR, 'canceled-orders.json');
 
 function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -194,10 +197,21 @@ export async function listOrders(limit = 200): Promise<StoredOrder[]> {
   ensureDir();
   const content = await fs.promises.readFile(FILE_PATH, 'utf8').catch(() => '');
   const lines = content.split(/\r?\n/).filter(Boolean);
+  // Load cancel map for overlay in file fallback
+  let cancelMap: Record<string, string> = {};
+  try {
+    const raw = await fs.promises.readFile(CANCEL_MAP_PATH, 'utf8').catch(() => '{}');
+    cancelMap = JSON.parse(raw || '{}');
+  } catch {}
   const orders: StoredOrder[] = [];
   for (let i = Math.max(0, lines.length - limit); i < lines.length; i++) {
     try {
-      orders.push(JSON.parse(lines[i]));
+      const obj = JSON.parse(lines[i]);
+      if (cancelMap[obj.id]) {
+        obj.status = 'canceled';
+        obj.canceledAt = cancelMap[obj.id];
+      }
+      orders.push(obj);
     } catch {}
   }
   // newest first
