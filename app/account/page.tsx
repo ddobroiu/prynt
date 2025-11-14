@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import SignOutButton from "@/components/SignOutButton";
 import ChangePasswordForm from "@/components/ChangePasswordForm";
 import RequestPasswordReset from "@/components/RequestPasswordReset";
+import AddressesManager from "@/components/AddressesManager";
 
 // Forțează randare dinamică ca să nu fie folosită o versiune cache care ar pierde sesiunea
 export const dynamic = 'force-dynamic';
@@ -46,11 +47,7 @@ export default async function AccountPage({
     itemsCount: o.items.length,
   }));
 
-  // Load addresses (saved)
-  const addresses = await prisma.address.findMany({
-    where: { userId },
-    orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }],
-  });
+  // Adresele sunt gestionate de componenta client `AddressesManager`
 
   // Load last billing info from latest order
   const lastBillingOrder = await prisma.order.findFirst({
@@ -119,42 +116,8 @@ export default async function AccountPage({
         )}
       </div>
 
-      {/* Adrese salvate */}
-      <div className="panel">
-        <div className="flex items-center justify-between p-4">
-          <div className="font-semibold">Adrese</div>
-        </div>
-        {addresses.length === 0 ? (
-          <div className="p-4 text-sm text-muted">Nu ai adrese salvate încă.</div>
-        ) : (
-          <ul className="divide-y divide-white/10">
-            {addresses.map((a: any) => (
-              <li key={a.id} className="p-4 hover:bg-surface/40 transition">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="font-medium">
-                      {a.label || (a.type === 'billing' ? 'Facturare' : 'Livrare')}
-                      {a.isDefault && <span className="ml-2 inline-block rounded bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 align-middle">Implicit</span>}
-                    </div>
-                    <div className="text-xs text-muted">{a.nume || ''}{a.telefon ? ` • ${a.telefon}` : ''}</div>
-                    <div className="text-sm">
-                      {a.strada_nr}, {a.localitate}, {a.judet}{a.postCode ? `, ${a.postCode}` : ''}
-                    </div>
-                    {a.bloc || a.scara || a.etaj || a.ap || a.interfon ? (
-                      <div className="text-xs text-muted">
-                        {[a.bloc ? `Bloc ${a.bloc}` : '', a.scara ? `Sc. ${a.scara}` : '', a.etaj ? `Et. ${a.etaj}` : '', a.ap ? `Ap. ${a.ap}` : '', a.interfon ? `Interfon ${a.interfon}` : '']
-                          .filter(Boolean)
-                          .join(', ')}
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="text-xs text-muted capitalize">{a.type || 'shipping'}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {/* Adrese: manager complet add/edit/delete */}
+      <AddressesManager />
 
       {/* Date facturare (ultimele folosite) */}
       <div className="panel p-4 space-y-1">
