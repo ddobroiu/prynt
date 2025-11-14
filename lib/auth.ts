@@ -12,7 +12,8 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "database" },
+  // Folosim JWT pentru a evita probleme de cookie/sesiune în producție
+  session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET,
   pages: {
     signIn: "/login",
@@ -60,8 +61,18 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      if (session?.user) (session.user as any).id = (user as any)?.id;
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = (user as any).id;
+        token.email = user.email;
+        token.name = user.name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session?.user) {
+        (session.user as any).id = (token as any).id;
+      }
       return session;
     },
     async redirect({ url, baseUrl }) {
