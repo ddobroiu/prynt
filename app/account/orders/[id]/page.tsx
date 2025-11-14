@@ -20,15 +20,6 @@ export default async function OrderDetailPage({ params }: { params: { id: string
     );
   }
 
-  if (!process.env.DATABASE_URL) {
-    return (
-      <div className="mx-auto max-w-3xl px-6 py-16">
-        <h1 className="text-2xl font-bold mb-4">Detalii comandă</h1>
-        <p className="text-muted">Baza de date nu este configurată.</p>
-      </div>
-    );
-  }
-
   const userId = (session.user as any).id as string;
   const order = await prisma.order.findFirst({
     where: { id: params.id, userId },

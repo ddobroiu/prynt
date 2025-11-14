@@ -19,15 +19,6 @@ export default async function OrdersPage() {
     );
   }
 
-  if (!process.env.DATABASE_URL) {
-    return (
-      <div className="mx-auto max-w-3xl px-6 py-16">
-        <h1 className="text-2xl font-bold mb-4">Comenzile mele</h1>
-        <p className="text-muted">Baza de date nu este configurată. Conectează `DATABASE_URL` pentru a vedea comenzile.</p>
-      </div>
-    );
-  }
-
   const userId = (session.user as any).id as string;
   const orders = await prisma.order.findMany({
     where: { userId },
