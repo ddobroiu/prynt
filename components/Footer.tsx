@@ -6,9 +6,9 @@
 export default function Footer() {
   return (
   <footer className="mt-16 bg-ui text-ui border-t border-indigo-700/40">
-    <div className="mx-auto max-w-7xl px-4 py-14 grid gap-12 md:grid-cols-3">
+    <div className="w-full px-6 py-14 grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         {/* Col 1 – Brand & Descriere */}
-        <div className="md:col-span-1 flex flex-col items-start">
+        <div className="flex flex-col items-start min-w-0">
           <a href="/" className="inline-flex items-center group">
             <img
               src="/logo.png"
@@ -60,7 +60,7 @@ export default function Footer() {
         </div>
 
         {/* Col 2 – Contact */}
-        <div>
+        <div className="hidden md:block min-w-0">
           <h3 className="font-bold mb-5 text-xl text-indigo-300 flex items-center gap-2">
             <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><circle cx="11" cy="11" r="10"/><path d="M7 11h6M11 7v6"/></svg>
             Contact
@@ -80,7 +80,7 @@ export default function Footer() {
         </div>
 
         {/* Col 3 – Newsletter */}
-        <div>
+        <div className="min-w-0">
           <h3 className="font-bold mb-5 text-xl text-indigo-300 flex items-center gap-2">
             <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><path d="M3 8l8 5 8-5"/><path d="M21 8v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8m18-3a2 2 0 00-2-2H5a2 2 0 00-2 2v0"/></svg>
             Newsletter
@@ -123,7 +123,7 @@ export default function Footer() {
         </div>
 
         {/* Col 4 – Informații Legale */}
-        <div>
+        <div className="hidden md:block min-w-0">
           <h3 className="font-bold mb-5 text-xl text-indigo-300 flex items-center gap-2">
             <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><rect x="4" y="4" width="14" height="14" rx="2"/><path d="M8 8h8M8 12h8"/></svg>
             Info
