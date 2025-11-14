@@ -3,6 +3,7 @@ import Script from "next/script";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Providers from "../components/Providers";
+import CookieConsentBanner from "../components/CookieConsentBanner";
 import ContactButton from "../components/ContactButton";
 import AssistantWidget from "../components/AssistantWidget";
 
@@ -115,15 +116,16 @@ var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n
       </head>
 
   <body className="bg-ui text-ui antialiased">
-        <Providers>
-          <Header />
-          <main>{children}</main>
-          <CartWidget />
-          <Footer />
-          <AssistantWidget />
-          <ContactButton />
-        </Providers>
-      </body>
+    <Providers>
+      <Header />
+      <main>{children}</main>
+      <CartWidget />
+      <Footer />
+      <AssistantWidget />
+      <ContactButton />
+      <CookieConsentBanner />
+    </Providers>
+  </body>
     </html>
   );
 }
