@@ -19,7 +19,7 @@ export default async function OrdersPage() {
     orderBy: { createdAt: "desc" },
     include: { items: { select: { id: true } } },
   });
-  const orders = found.map((o) => ({
+  const orders = found.map((o: any) => ({
     id: o.id,
     orderNo: o.orderNo,
     createdAt: o.createdAt,
@@ -35,7 +35,7 @@ export default async function OrdersPage() {
         <div className="rounded-md border border-[--border] p-6 text-muted">Nu ai comenzi încă.</div>
       ) : (
         <ul className="divide-y divide-white/10 rounded-md border border-[--border]">
-          {orders.map((o) => (
+          {orders.map((o: any) => (
             <li key={o.id} className="p-4 flex items-center justify-between">
               <div>
                 <div className="font-semibold">Comanda #{o.orderNo}</div>
