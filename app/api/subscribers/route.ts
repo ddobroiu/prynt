@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
-import { Prisma } from "@prisma/client";
 
 export async function POST(req: Request) {
   try {
@@ -15,7 +14,8 @@ export async function POST(req: Request) {
     const existing = await prisma.subscriber
       .findUnique({ where: { email: em } })
       .catch((e: any) => {
-        if ((e as any)?.code === "P1001" || e instanceof Prisma.PrismaClientInitializationError) {
+        const isDbInitError = (e as any)?.name === "PrismaClientInitializationError";
+        if ((e as any)?.code === "P1001" || isDbInitError) {
           return NextResponse.json(
             { ok: false, message: "Baza de date este indisponibilă. Te rugăm încearcă mai târziu." },
             { status: 503 }
@@ -36,7 +36,8 @@ export async function POST(req: Request) {
         ? await prisma.subscriber.update({ where: { email: em }, data: { token, source: (existing as any)?.source || source || undefined } })
         : await prisma.subscriber.create({ data: { email: em, token, source: source || undefined } });
     } catch (e) {
-      if ((e as any)?.code === "P1001" || e instanceof Prisma.PrismaClientInitializationError) {
+      const isDbInitError = (e as any)?.name === "PrismaClientInitializationError";
+      if ((e as any)?.code === "P1001" || isDbInitError) {
         return NextResponse.json(
           { ok: false, message: "Baza de date este indisponibilă. Te rugăm încearcă mai târziu." },
           { status: 503 }
