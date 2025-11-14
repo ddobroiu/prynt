@@ -19,6 +19,19 @@ export default async function AccountPage() {
         <div className="text-sm text-muted">Email</div>
         <div className="font-medium">{session.user.email}</div>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <a href="/account/orders" className="rounded-md border border-[--border] p-4 hover:bg-white/5 transition">
+          <div className="font-semibold">Comenzile mele</div>
+          <div className="text-sm text-muted">Vezi istoricul comenzilor</div>
+        </a>
+        {/* Placeholder pentru adrese / setări cont */}
+        <a href="/checkout" className="rounded-md border border-[--border] p-4 hover:bg-white/5 transition">
+          <div className="font-semibold">Cumpără din nou</div>
+          <div className="text-sm text-muted">Revino la coș și finalizează</div>
+        </a>
+      </div>
+
       <SignOutButton />
     </div>
   );

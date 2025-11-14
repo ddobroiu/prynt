@@ -46,6 +46,7 @@ export type StoredOrder = {
   total: number;
   invoiceLink?: string | null;
   marketing?: MarketingInfo;
+  userId?: string | null;
 };
 
 export type NewOrder = Omit<StoredOrder, 'id' | 'createdAt' | 'orderNo'>;
@@ -103,6 +104,7 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
         total: new Prisma.Decimal(input.total ?? 0),
         invoiceLink: input.invoiceLink || null,
         marketing: (input.marketing as any) || undefined,
+        userId: input.userId || undefined,
         items: {
           create: (input.items || []).map((it) => ({
             name: it.name,
@@ -113,6 +115,30 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
         },
       },
     });
+    // Best-effort: update user's default shipping address with latest order address
+    try {
+      if (created.userId) {
+        const a = input.address as any;
+        // Clear previous default
+        await prisma.address.updateMany({ where: { userId: created.userId, isDefault: true, type: 'shipping' }, data: { isDefault: false } });
+        await prisma.address.create({
+          data: {
+            userId: created.userId,
+            type: 'shipping',
+            isDefault: true,
+            nume: a.nume_prenume || null,
+            telefon: a.telefon || null,
+            judet: a.judet || '',
+            localitate: a.localitate || '',
+            strada_nr: a.strada_nr || '',
+            postCode: a.postCode || null,
+            label: 'Implicit',
+          },
+        });
+      }
+    } catch (e) {
+      console.warn('[orderStore] address save skipped:', (e as any)?.message || e);
+    }
     return {
       id: created.id,
       orderNo: created.orderNo,
@@ -125,6 +151,7 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
       total: Number(created.total),
       invoiceLink: created.invoiceLink,
       marketing: created.marketing as any,
+      userId: created.userId,
     };
   }
 
