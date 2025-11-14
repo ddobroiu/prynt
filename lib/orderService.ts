@@ -468,7 +468,7 @@ async function sendEmails(
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Confirmare comandă${orderNo ? ` #${orderNo}` : ''}</title>
+    <title>Confirmare comandă${orderNoSuffix}</title>
     <style>
       @media (max-width: 600px){
         .container{padding:16px !important}
