@@ -135,6 +135,28 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
             label: 'Implicit',
           },
         });
+        // Persist billing address if company/juridica and has fields
+        const b: any = input.billing;
+        if (b && b.tip_factura && b.tip_factura !== 'persoana_fizica') {
+          const existingBilling = await prisma.address.findFirst({ where: { userId: created.userId, type: 'billing' } });
+          const billingData = {
+            userId: created.userId,
+            type: 'billing',
+            isDefault: false,
+            nume: b.name || a.nume_prenume || null,
+            telefon: a.telefon || null,
+            judet: b.judet || a.judet || '',
+            localitate: b.localitate || a.localitate || '',
+            strada_nr: b.strada_nr || a.strada_nr || '',
+            postCode: a.postCode || null,
+            label: 'Facturare',
+          };
+          if (existingBilling) {
+            await prisma.address.update({ where: { id: existingBilling.id }, data: billingData });
+          } else {
+            await prisma.address.create({ data: billingData });
+          }
+        }
       }
     } catch (e) {
       console.warn('[orderStore] address save skipped:', (e as any)?.message || e);

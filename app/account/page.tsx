@@ -26,8 +26,11 @@ export default async function AccountPage({
     );
   }
 
-  // Load latest orders (preview)
+  // Stats & latest orders
   const userId = (session.user as any).id as string;
+  const ordersAll = await prisma.order.findMany({ where: { userId }, select: { id: true, total: true } });
+  const totalOrders = ordersAll.length;
+  const totalSpent = ordersAll.reduce((acc, o) => acc + Number(o.total || 0), 0);
   const recent = await prisma.order.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -58,22 +61,42 @@ export default async function AccountPage({
   const billing = (lastBillingOrder?.billing as any) || null;
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16 space-y-6">
-      <h1 className="text-2xl font-bold">Bun venit, {session.user.name || session.user.email}</h1>
+    <div className="mx-auto max-w-5xl px-6 py-12 space-y-10">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight">Salut, {session.user.name || session.user.email}</h1>
+        <p className="text-sm text-muted">Panou de control al contului tău.</p>
+      </div>
       {showWelcome && (
         <div className="rounded-md border border-emerald-500/40 bg-emerald-500/10 p-3 text-emerald-300 text-sm">
           Cont creat cu succes. Te-ai autentificat automat.
         </div>
       )}
-      <div className="rounded-md border border-[--border] p-4">
-        <div className="text-sm text-muted">Email</div>
-        <div className="font-medium">{session.user.email}</div>
+      {/* Stats */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="panel p-5 flex flex-col gap-2">
+          <div className="text-xs uppercase tracking-wide text-muted">Comenzi</div>
+          <div className="text-3xl font-bold">{totalOrders}</div>
+          <div className="text-[11px] text-muted">Total plasate</div>
+        </div>
+        <div className="panel p-5 flex flex-col gap-2">
+          <div className="text-xs uppercase tracking-wide text-muted">Total cheltuit</div>
+          <div className="text-3xl font-bold">{new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(totalSpent)}</div>
+          <div className="text-[11px] text-muted">Include transport</div>
+        </div>
+        <div className="panel p-5 flex flex-col gap-2">
+          <div className="text-xs uppercase tracking-wide text-muted">Email</div>
+          <div className="text-sm font-medium truncate" title={String(session.user.email)}>{session.user.email}</div>
+          <div className="text-[11px] text-muted">Autentificat</div>
+        </div>
       </div>
 
       {/* Istoric comenzi (ultimele 5) */}
-      <div className="rounded-md border border-[--border]">
+      <div className="panel overflow-hidden">
         <div className="flex items-center justify-between p-4">
-          <div className="font-semibold">Istoric comenzi</div>
+          <div className="font-semibold flex items-center gap-2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-80"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Ultimele comenzi
+          </div>
           <a href="/account/orders" className="text-sm text-indigo-400 underline">Vezi toate</a>
         </div>
         {orders.length === 0 ? (
@@ -81,7 +104,7 @@ export default async function AccountPage({
         ) : (
           <ul className="divide-y divide-white/10">
             {orders.map((o: any) => (
-              <li key={o.id} className="p-4 flex items-center justify-between">
+              <li key={o.id} className="p-4 flex items-center justify-between hover:bg-surface/40 transition">
                 <div>
                   <div className="font-medium">Comanda #{o.orderNo}</div>
                   <div className="text-xs text-muted">{new Date(o.createdAt).toLocaleString("ro-RO")}</div>
@@ -97,7 +120,7 @@ export default async function AccountPage({
       </div>
 
       {/* Adrese salvate */}
-      <div className="rounded-md border border-[--border]">
+      <div className="panel">
         <div className="flex items-center justify-between p-4">
           <div className="font-semibold">Adrese</div>
         </div>
@@ -106,7 +129,7 @@ export default async function AccountPage({
         ) : (
           <ul className="divide-y divide-white/10">
             {addresses.map((a: any) => (
-              <li key={a.id} className="p-4">
+              <li key={a.id} className="p-4 hover:bg-surface/40 transition">
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="font-medium">
@@ -127,7 +150,7 @@ export default async function AccountPage({
       </div>
 
       {/* Date facturare (ultimele folosite) */}
-      <div className="rounded-md border border-[--border] p-4 space-y-1">
+      <div className="panel p-4 space-y-1">
         <div className="font-semibold">Facturare</div>
         {!billing ? (
           <div className="text-sm text-muted">Nu există date de facturare încă.</div>
@@ -156,9 +179,13 @@ export default async function AccountPage({
         )}
       </div>
 
-      <SignOutButton />
-      <ChangePasswordForm />
-      <RequestPasswordReset email={String(session.user.email || "")} />
+      <div className="grid gap-6 md:grid-cols-2">
+        <ChangePasswordForm />
+        <RequestPasswordReset email={String(session.user.email || "")} />
+      </div>
+      <div>
+        <SignOutButton />
+      </div>
     </div>
   );
 }
