@@ -1,6 +1,7 @@
-import { prisma } from "@/lib/prisma";
 
-export async function POST(request, { params }) {
+import type { Request } from "next/server";
+
+export async function POST(request: Request, { params }: { params: { id: string } }) {
   const orderId = params.id;
   const result = await prisma.order.update({
     where: { id: orderId },
