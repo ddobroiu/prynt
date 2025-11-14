@@ -17,6 +17,58 @@ export type LandingCatalog = Record<string, Record<string, LandingInfo>>;
 
 export const LANDING_CATALOG: LandingCatalog = {
   pliante: {
+      materiale_rigide: {
+        plexiglass: {
+          key: "plexiglass",
+          title: "Configurator Plexiglass — print și debitare la comandă",
+          shortDescription: "Configurează plexiglass alb, grosimi variate, print UV și debitare la dimensiuni personalizate.",
+          seoTitle: "Plexiglass alb | print UV & debitare | Prynt",
+          seoDescription: "Comandă plexiglass alb, grosimi 2–5 mm, print UV, debitare la dimensiuni personalizate. Preț instant în configurator.",
+          images: ["/images/landing/plexiglass-1.jpg"],
+          productRouteSlug: "plexiglass",
+          contentHtml: `<h2>Plexiglass alb — configurare rapidă</h2><p>Alege grosimea, dimensiunea și opțiunile de print/debitare direct din configurator. Livrare rapidă, preț instant.</p>`
+        },
+        alucobond: {
+          key: "alucobond",
+          title: "Configurator Alucobond — panouri compozite la comandă",
+          shortDescription: "Configurează panouri Alucobond (Visual Bond PE/PVDF), grosimi și dimensiuni personalizate, prelucrare la cerere.",
+          seoTitle: "Alucobond | panouri compozite | Prynt",
+          seoDescription: "Comandă panouri Alucobond, grosimi 3–4 mm, prelucrare la cerere, print UV. Preț instant în configurator.",
+          images: ["/images/landing/alucobond-1.jpg"],
+          productRouteSlug: "alucobond",
+          contentHtml: `<h2>Alucobond — configurare și prelucrare</h2><p>Panouri compozite pentru exterior/interior, prelucrare la cerere (găurire, decupare). Configurează rapid și vezi prețul instant.</p>`
+        },
+        pvc_forex: {
+          key: "pvc_forex",
+          title: "Configurator PVC Forex — print și debitare la comandă",
+          shortDescription: "Configurează PVC Forex alb, grosimi variate, print UV și debitare la dimensiuni personalizate.",
+          seoTitle: "PVC Forex alb | print UV & debitare | Prynt",
+          seoDescription: "Comandă PVC Forex alb, grosimi 2–10 mm, print UV, debitare la dimensiuni personalizate. Preț instant în configurator.",
+          images: ["/images/landing/pvc-forex-1.jpg"],
+          productRouteSlug: "pvc-forex",
+          contentHtml: `<h2>PVC Forex alb — configurare rapidă</h2><p>Alege grosimea, dimensiunea și opțiunile de print/debitare direct din configurator. Livrare rapidă, preț instant.</p>`
+        },
+        polipropilena: {
+          key: "polipropilena",
+          title: "Configurator Polipropilenă — print și debitare la comandă",
+          shortDescription: "Configurează polipropilenă albă, grosimi variate, print UV și debitare la dimensiuni personalizate.",
+          seoTitle: "Polipropilenă albă | print UV & debitare | Prynt",
+          seoDescription: "Comandă polipropilenă albă, grosimi 2–5 mm, print UV, debitare la dimensiuni personalizate. Preț instant în configurator.",
+          images: ["/images/landing/polipropilena-1.jpg"],
+          productRouteSlug: "polipropilena",
+          contentHtml: `<h2>Polipropilenă albă — configurare rapidă</h2><p>Alege grosimea, dimensiunea și opțiunile de print/debitare direct din configurator. Livrare rapidă, preț instant.</p>`
+        },
+        carton: {
+          key: "carton",
+          title: "Configurator Carton — print și debitare la comandă",
+          shortDescription: "Configurează carton alb, grosimi variate, print UV și debitare la dimensiuni personalizate.",
+          seoTitle: "Carton alb | print UV & debitare | Prynt",
+          seoDescription: "Comandă carton alb, grosimi 1–3 mm, print UV, debitare la dimensiuni personalizate. Preț instant în configurator.",
+          images: ["/images/landing/carton-1.jpg"],
+          productRouteSlug: "carton",
+          contentHtml: `<h2>Carton alb — configurare rapidă</h2><p>Alege grosimea, dimensiunea și opțiunile de print/debitare direct din configurator. Livrare rapidă, preț instant.</p>`
+        },
+      },
     frizerie: {
       key: "frizerie",
       title: "Pliante pentru frizerii — modele, prețuri și configurator",
