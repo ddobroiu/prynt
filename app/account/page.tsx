@@ -1,22 +1,17 @@
 import { getAuthSession } from "@/lib/auth";
 import SignOutButton from "@/components/SignOutButton";
-import { headers } from "next/headers";
 import ChangePasswordForm from "@/components/ChangePasswordForm";
 
-export default async function AccountPage() {
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const session = await getAuthSession();
   // Citește query param welcome=1 pentru banner succes
-  let showWelcome = false;
-  try {
-    const h = headers();
-    const url = h.get('x-url') || h.get('referer');
-    // fallback: try request url via NEXT_URL (some deployments)
-    const u = url || process.env.NEXT_PUBLIC_SITE_URL;
-    if (u) {
-      const parsed = new URL(u);
-      if (parsed.searchParams.get('welcome') === '1') showWelcome = true;
-    }
-  } catch {}
+  const showWelcome =
+    (typeof searchParams?.welcome === "string" && searchParams?.welcome === "1") ||
+    (Array.isArray(searchParams?.welcome) && searchParams?.welcome?.includes("1"));
   if (!session?.user) {
     return (
       <div className="mx-auto max-w-3xl px-6 py-16">
