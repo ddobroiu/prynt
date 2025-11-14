@@ -194,6 +194,38 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
 }
 
 export async function listOrders(limit = 200): Promise<StoredOrder[]> {
+  // If DATABASE_URL is present, read from PostgreSQL via Prisma
+  if (process.env.DATABASE_URL) {
+    try {
+      const recs = await prisma.order.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        include: { items: true },
+      });
+      const mapped: StoredOrder[] = recs.map((r) => ({
+        orderNo: r.orderNo,
+        id: r.id,
+        createdAt: r.createdAt.toISOString(),
+        paymentType: r.paymentType as any,
+        address: (r.address || {}) as any,
+        billing: (r.billing || {}) as any,
+        items: (r.items || []).map((it: any) => ({ name: it.name, qty: it.qty, unit: Number(it.unit), total: Number(it.total) })),
+        shippingFee: Number(r.shippingFee ?? 0),
+        total: Number(r.total ?? 0),
+        invoiceLink: r.invoiceLink || null,
+        marketing: (r.marketing || undefined) as any,
+        userId: r.userId || null,
+        status: (r.status as any) || undefined,
+        canceledAt: r.canceledAt ? r.canceledAt.toISOString() : null,
+      }));
+      return mapped;
+    } catch (e) {
+      console.warn('[orderStore] DB listOrders failed:', (e as any)?.message || e);
+      // Fallthrough to file fallback
+    }
+  }
+
+  // File fallback (development without DB)
   ensureDir();
   const content = await fs.promises.readFile(FILE_PATH, 'utf8').catch(() => '');
   const lines = content.split(/\r?\n/).filter(Boolean);
@@ -220,6 +252,33 @@ export async function listOrders(limit = 200): Promise<StoredOrder[]> {
 }
 
 export async function getOrder(id: string): Promise<StoredOrder | null> {
+  // DB-backed lookup when available
+  if (process.env.DATABASE_URL) {
+    try {
+      const r = await prisma.order.findUnique({ where: { id }, include: { items: true } });
+      if (!r) return null;
+      return {
+        orderNo: r.orderNo,
+        id: r.id,
+        createdAt: r.createdAt.toISOString(),
+        paymentType: r.paymentType as any,
+        address: (r.address || {}) as any,
+        billing: (r.billing || {}) as any,
+        items: (r.items || []).map((it: any) => ({ name: it.name, qty: it.qty, unit: Number(it.unit), total: Number(it.total) })),
+        shippingFee: Number(r.shippingFee ?? 0),
+        total: Number(r.total ?? 0),
+        invoiceLink: r.invoiceLink || null,
+        marketing: (r.marketing || undefined) as any,
+        userId: r.userId || null,
+        status: (r.status as any) || undefined,
+        canceledAt: r.canceledAt ? r.canceledAt.toISOString() : null,
+      } as StoredOrder;
+    } catch (e) {
+      console.warn('[orderStore] DB getOrder failed:', (e as any)?.message || e);
+      // continue to file fallback
+    }
+  }
+
   ensureDir();
   const content = await fs.promises.readFile(FILE_PATH, 'utf8').catch(() => '');
   const lines = content.split(/\r?\n/).filter(Boolean);
