@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // File fallback cancel map
 const DATA_DIR = path.join(process.cwd(), '.data');
@@ -27,16 +28,16 @@ async function fileCancel(id: string) {
   } catch {}
 }
 
-export async function POST(_req: Request, ctx: { params: { id: string } }) {
+export async function POST(_req: Request, ctx: any) {
   try {
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     const token = cookieStore.get('admin_auth')?.value;
     const session = verifyAdminSession(token);
     if (!session) {
       return NextResponse.json({ ok: false, message: 'Unauthorized' }, { status: 401 });
     }
 
-    const id = ctx.params.id;
+    const id = ctx?.params?.id as string;
     if (!id) return NextResponse.json({ ok: false, message: 'Missing id' }, { status: 400 });
 
     if (process.env.DATABASE_URL) {
