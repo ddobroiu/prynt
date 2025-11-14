@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { prisma } from './prisma';
-import { Prisma } from '@prisma/client';
+// Avoid direct Prisma.Decimal construction to keep build portable
 
 export type Address = {
   nume_prenume: string;
@@ -100,8 +100,8 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
         paymentType: input.paymentType,
         address: input.address as any,
         billing: input.billing as any,
-        shippingFee: new Prisma.Decimal(input.shippingFee ?? 0),
-        total: new Prisma.Decimal(input.total ?? 0),
+        shippingFee: (input.shippingFee ?? 0) as any,
+        total: (input.total ?? 0) as any,
         invoiceLink: input.invoiceLink || null,
         marketing: (input.marketing as any) || undefined,
         userId: input.userId || undefined,
@@ -109,8 +109,8 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
           create: (input.items || []).map((it) => ({
             name: it.name,
             qty: it.qty,
-            unit: new Prisma.Decimal(it.unit ?? 0),
-            total: new Prisma.Decimal(it.total ?? 0),
+            unit: (it.unit ?? 0) as any,
+            total: (it.total ?? 0) as any,
           })),
         },
       },
