@@ -25,10 +25,18 @@ function ensureDir() {
 }
 
 function uploadBufferToCloudinary(buffer: Buffer, filename?: string) {
-  return new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
+  return new Promise<{ secure_url: string; public_id: string }>(async (resolve, reject) => {
+    // Detect PDF by filename or buffer header
+    let resourceType: 'image' | 'auto' | 'raw' | 'video' | undefined = 'auto';
+    if (filename && filename.toLowerCase().endsWith('.pdf')) {
+      resourceType = 'raw';
+    } else {
+      // Optionally, check buffer header for PDF magic number
+      if (buffer.slice(0, 4).toString() === '%PDF') resourceType = 'raw';
+    }
     const stream = cloudinary.uploader.upload_stream(
       {
-        resource_type: 'auto',
+        resource_type: resourceType,
         folder: 'invoices',
         use_filename: true,
         unique_filename: true,
