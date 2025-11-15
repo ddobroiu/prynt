@@ -73,12 +73,11 @@ export default async function AccountPage({
   const billing = (lastBillingOrder?.billing as any) || null;
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen">
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         <header className="mb-8">
           <h1 className="text-3xl font-bold">Contul Meu</h1>
           {showWelcome && (
-            <div className="mt-4 bg-green-500/10 border border-green-400/40 text-green-200 px-4 py-3 rounded-lg">
+            <div className="mt-4 bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
               Bun venit! Contul tău a fost creat cu succes.
             </div>
           )}
@@ -86,6 +85,5 @@ export default async function AccountPage({
         
         <AccountClientPage orders={orders} billing={billing} session={session as any} />
       </div>
-    </div>
   );
 }
