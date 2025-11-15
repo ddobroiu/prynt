@@ -65,7 +65,7 @@ const getAwbTrackingUrl = (awb?: string | null, carrier?: string | null) => {
   if (!awb || !carrier) return null;
   const carrierLower = carrier.toLowerCase();
   const awbClean = encodeURIComponent(awb);
-  if (carrierLower.includes("dpd")) return `https://tracking.dpd.ro/awb?awb=${awbClean}`;
+  if (carrierLower.includes("dpd")) return `https://tracking.dpd.ro/?shipmentNumber=${awbClean}`;
   if (carrierLower.includes("fan")) return `https://www.fancourier.ro/awb-tracking/?awb=${awbClean}`;
   if (carrierLower.includes("sameday")) return `https://sameday.ro/awb-tracking/?awb=${awbClean}`;
   return null;
