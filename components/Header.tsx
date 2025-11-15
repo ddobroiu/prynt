@@ -139,6 +139,14 @@ export default function Header() {
               >
                 <User size={22} />
               </Link>
+            ) : (
+              <Link
+                href="/login"
+                aria-label="Contul meu"
+                className="inline-flex items-center justify-center rounded-xl p-2 border border-transparent text-slate-700 hover:bg-gray-100 transition dark:text-slate-100 dark:hover:bg-slate-800"
+              >
+                <User size={22} />
+              </Link>
             )}
 
             <Link
