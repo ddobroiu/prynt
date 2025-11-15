@@ -76,8 +76,8 @@ export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
   const slug = String(p.slug ?? p.routeSlug ?? p.id ?? "");
   const categoryRaw = String(p.metadata?.category ?? "bannere");
   const category = categoryRaw.toLowerCase();
-  // Map category to public images directory name (bannere -> banner; others keep same)
-  const dir = category === "bannere" ? "banner" : category;
+  // Map category to public images directory name (bannere -> banner; others keep same, but ensure lowercase)
+  const dir = (category === "bannere" ? "banner" : category).toLowerCase();
   return {
     id: p.id ?? `item-${slug}`,
     slug: p.slug ?? slug,
