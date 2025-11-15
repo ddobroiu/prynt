@@ -23,9 +23,22 @@ model User {
   accounts     Account[]
   sessions     Session[]
   passwordResetTokens PasswordResetToken[]
+  graphics     UserGraphic[]
 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+
+model UserGraphic {
+  id           String   @id @default(cuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  originalName String
+  storagePath  String   @unique // The secure_url from Cloudinary
+  publicId     String   @unique // The public_id from Cloudinary, for deletion
+  size         Int // in bytes
+  mimeType     String
+  createdAt    DateTime @default(now())
 }
 
 model Address {

@@ -7,6 +7,7 @@ import RequestPasswordReset from "@/components/RequestPasswordReset";
 import SignOutButton from "@/components/SignOutButton";
 import OrderDetails from "@/components/OrderDetails";
 import UserDetailsForm from "@/components/UserDetailsForm";
+import UserGraphicsManager from "@/components/UserGraphicsManager";
 
 // Tipuri de date primite ca props
 type Order = {
@@ -72,7 +73,7 @@ const getAwbTrackingUrl = (awb?: string | null, carrier?: string | null) => {
   return null;
 };
 
-const tabs = ["Comenzi", "Adrese", "Detalii Cont", "Securitate"];
+const tabs = ["Comenzi", "Grafica Mea", "Adrese", "Detalii Cont", "Securitate"];
 
   // Funcție placeholder pentru "Comandă din nou"
   const handleReorder = (orderId: string) => {
@@ -101,6 +102,13 @@ const tabs = ["Comenzi", "Adrese", "Detalii Cont", "Securitate"];
                 ))}
               </ul>
             )}
+          </section>
+        )}
+
+        {activeTab === "Grafica Mea" && (
+          <section>
+            <h2 className="text-xl font-semibold mb-4">Grafica Mea</h2>
+            <UserGraphicsManager />
           </section>
         )}
 
