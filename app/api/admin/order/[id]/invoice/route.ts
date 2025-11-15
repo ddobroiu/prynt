@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { verifyAdminSession } from '../../../../../../../lib/adminSession';
-import { prisma } from '../../../../../../../lib/prisma';
+import { verifyAdminSession } from '../../../../../../lib/adminSession';
+import { prisma } from '../../../../../../lib/prisma';
 import fs from 'fs';
 import path from 'path';
 import { Resend } from 'resend';
-import { getOblioAccessToken, createOblioInvoice } from '../../../../../../../lib/orderService';
+import { getOblioAccessToken, createOblioInvoice } from '../../../../../../lib/orderService';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
