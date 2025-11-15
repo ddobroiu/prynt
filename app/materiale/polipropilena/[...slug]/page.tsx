@@ -1,5 +1,5 @@
 import React from "react";
-import ConfiguratorPVCForex from "../../../components/ConfiguratorPVCForex"; // reutilizăm configuratorul pentru materiale rigide
+import ConfiguratorPVCForex from "../../../../components/ConfiguratorPVCForex"; // reutilizăm configuratorul pentru materiale rigide
 
 type Props = { params: { slug?: string[] | string } };
 

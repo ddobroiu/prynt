@@ -1,5 +1,5 @@
 import React from "react";
-import ConfiguratorCarton from "../../../components/ConfiguratorCarton";
+import ConfiguratorCarton from "../../../../components/ConfiguratorCarton";
 
 type Props = { params: { slug?: string[] | string } };
 

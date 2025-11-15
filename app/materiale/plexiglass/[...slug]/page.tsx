@@ -1,5 +1,5 @@
 import React from "react";
-import ConfiguratorPlexiglass from "../../../components/ConfiguratorPlexiglass";
+import ConfiguratorPlexiglass from "../../../../components/ConfiguratorPlexiglass";
 
 type Props = { params: { slug?: string[] } };
 

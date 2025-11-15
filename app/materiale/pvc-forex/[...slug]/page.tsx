@@ -1,5 +1,5 @@
 import React from "react";
-import ConfiguratorPVCForex from "../../../components/ConfiguratorPVCForex";
+import ConfiguratorPVCForex from "../../../../components/ConfiguratorPVCForex";
 
 type Props = { params: { slug?: string[] } };
 
