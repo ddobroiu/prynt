@@ -11,37 +11,46 @@ const nextConfig = {
       },
     ],
   },
-  // Rewrites for generic category images to ensure paths always resolve
+  // Rewrites for generic category images and landing routes.
+  // Generate rewrites programmatically from `lib/landingData` so we cover
+  // lowercase, TitleCase and nested variants automatically.
   async rewrites() {
-    // Keep existing image rewrites and add landing rewrites so nested landing
-    // routes under /pliante map to top-level material pages (avoid 404s).
-    return [
+    const staticRewrites = [
       { source: "/products/flayere/1.jpg", destination: "/placeholder.png" },
       { source: "/products/tapet/1.jpg", destination: "/placeholder.png" },
-      // Landing rewrites: /pliante/<slug> -> /<slug> (for materials like plexiglass, alucobond)
-      { source: "/pliante/plexiglass", destination: "/plexiglass" },
-      { source: "/pliante/alucobond", destination: "/alucobond" },
-      { source: "/pliante/pvc-forex", destination: "/pvc-forex" },
-      { source: "/pliante/polipropilena", destination: "/polipropilena" },
-      { source: "/pliante/carton", destination: "/carton" },
-      // Also map top-level material routes to the nested landing (in case deploy lacks top-level pages)
-      { source: "/plexiglass", destination: "/pliante/plexiglass" },
-      { source: "/alucobond", destination: "/pliante/alucobond" },
-      { source: "/pvc-forex", destination: "/pliante/pvc-forex" },
-      { source: "/polipropilena", destination: "/pliante/polipropilena" },
-      { source: "/carton", destination: "/pliante/carton" },
-      // Explicit uppercase/titlecase mappings to handle case-sensitive prod filesystems
-      { source: "/Plexiglass", destination: "/pliante/plexiglass" },
-      { source: "/Plexiglass/:path*", destination: "/pliante/plexiglass/:path*" },
-      { source: "/Alucobond", destination: "/pliante/alucobond" },
-      { source: "/Alucobond/:path*", destination: "/pliante/alucobond/:path*" },
-      { source: "/Pvc-forex", destination: "/pliante/pvc-forex" },
-      { source: "/Pvc-forex/:path*", destination: "/pliante/pvc-forex/:path*" },
-      { source: "/Polipropilena", destination: "/pliante/polipropilena" },
-      { source: "/Polipropilena/:path*", destination: "/pliante/polipropilena/:path*" },
-      { source: "/Carton", destination: "/pliante/carton" },
-      { source: "/Carton/:path*", destination: "/pliante/carton/:path*" },
     ];
+
+    // Dynamically import the landing routes (avoid top-level import issues)
+    let landingRoutes: Array<{ category: string; slug: string }> = [];
+    try {
+      // Importing TS module at build-time in next.config.ts is acceptable
+      // because Next will run this file in a Node environment during build.
+      const ld = await import('./lib/landingData');
+      if (ld && typeof ld.listAllLandingRoutes === 'function') {
+        landingRoutes = ld.listAllLandingRoutes();
+      }
+    } catch (e) {
+      // If dynamic import fails, fall back to an empty list and rely on manual rewrites above
+      console.warn('next.config: failed to import landingData for rewrites', e);
+      landingRoutes = [];
+    }
+
+    const dynamicRewrites: Array<{ source: string; destination: string }> = [];
+    for (const r of landingRoutes) {
+      const slug = String(r.slug);
+      // nested -> top-level
+      dynamicRewrites.push({ source: `/${r.category}/${slug}`, destination: `/${slug}` });
+      // top-level -> nested (fallback)
+      dynamicRewrites.push({ source: `/${slug}`, destination: `/${r.category}/${slug}` });
+      // TitleCase variant for first segment (e.g. /Alucobond)
+      const title = slug.charAt(0).toUpperCase() + slug.slice(1);
+      dynamicRewrites.push({ source: `/${title}`, destination: `/${r.category}/${slug}` });
+      dynamicRewrites.push({ source: `/${title}/:path*`, destination: `/${r.category}/${slug}/:path*` });
+      // Also map TitleCase nested variant
+      dynamicRewrites.push({ source: `/${r.category}/${title}`, destination: `/${r.category}/${slug}` });
+    }
+
+    return [...staticRewrites, ...dynamicRewrites];
   },
 };
 
