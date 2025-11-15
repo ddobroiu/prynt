@@ -26,7 +26,7 @@ export default function OrderDetails({ order }: { order: Order }) {
       if (!carrier) return null;
       const awbClean = encodeURIComponent(awb);
       const carrierLower = carrier.toLowerCase();
-      if (carrierLower.includes('dpd')) return `https://www.dpd.com/ro/ro/awb-tracking/?awb=${awbClean}`;
+      if (carrierLower.includes('dpd')) return `https://tracking.dpd.ro/awb?awb=${awbClean}`;
       if (carrierLower.includes('fan')) return `https://www.fancourier.ro/awb-tracking/?awb=${awbClean}`;
       if (carrierLower.includes('sameday')) return `https://sameday.ro/awb-tracking/?awb=${awbClean}`;
       // Add more carriers as needed

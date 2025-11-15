@@ -187,7 +187,7 @@ export default async function AccountPage({
                                   const awbClean = encodeURIComponent(o.awbNumber);
                                   const carrierLower = o.awbCarrier.toLowerCase();
                                   let url = null;
-                                  if (carrierLower.includes('dpd')) url = `https://www.dpd.com/ro/ro/awb-tracking/?awb=${awbClean}`;
+                                  if (carrierLower.includes('dpd')) url = `https://tracking.dpd.ro/awb?awb=${awbClean}`;
                                   if (carrierLower.includes('fan')) url = `https://www.fancourier.ro/awb-tracking/?awb=${awbClean}`;
                                   if (carrierLower.includes('sameday')) url = `https://sameday.ro/awb-tracking/?awb=${awbClean}`;
                                   return url ? <a href={url} target="_blank" rel="noreferrer" className="ml-2 text-indigo-500 underline text-xs rounded px-2 py-1 bg-indigo-50 hover:bg-indigo-100 transition">Verifică AWB</a> : null;
