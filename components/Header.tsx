@@ -306,20 +306,24 @@ export default function Header() {
                     role="menu"
                     className={`
                       absolute left-1/2 -translate-x-1/2 mt-2 w-72 rounded-2xl
-                      border border-gray-300/80 dark:border-slate-800/80
-                      bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl p-3 shadow-2xl ring-1 ring-black/10
-                      z-120 transition-all origin-top pointer-events-auto
+                      border border-gray-200/70 dark:border-slate-800/70
+                      bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl p-4 shadow-2xl ring-1 ring-black/10
+                      z-120 transition-all origin-top pointer-events-auto flex flex-col gap-2
                       ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}
                     `}
                   >
-                    {l.children.map((c) => (
+                    {l.children.map((c, idx) => (
                       <Link
                         key={c.href}
                         href={c.href}
                         role="menuitem"
-                        className="block rounded-full px-5 py-2 text-base font-semibold text-slate-900 dark:text-slate-100 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200"
+                        className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-base font-bold shadow-sm border border-gray-100 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                         onClick={() => setOpenDropdown(null)}
                       >
+                        {/* Iconiță generică pentru submeniu, se poate personaliza pe fiecare categorie */}
+                        <span className="inline-block w-5 h-5 bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full flex items-center justify-center text-white/80 mr-1">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                        </span>
                         {c.label}
                       </Link>
                     ))}
