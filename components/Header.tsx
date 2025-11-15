@@ -125,7 +125,7 @@ export default function Header() {
   return (
     <header
       className="
-        sticky top-0 z-[80] w-full border-b
+        sticky top-0 z-80 w-full border-b
         bg-white/70 dark:bg-slate-950/60
         border-gray-200/70 dark:border-slate-800/70
         backdrop-blur-md supports-backdrop-filter:backdrop-blur
@@ -339,7 +339,7 @@ export default function Header() {
           <div />
 
           {/* Centered menu with modern effects */}
-          <nav className="justify-self-center flex items-center gap-1">
+          <nav className="justify-self-center flex items-center gap-3">
             {LINKS.map((l) =>
               l.children ? (
                 <div
@@ -354,12 +354,7 @@ export default function Header() {
                     type="button"
                     aria-haspopup="menu"
                     aria-expanded={openDropdown === l.label}
-                    className="
-                      group inline-flex items-center gap-1 rounded-xl px-4 py-2 font-semibold
-                      text-slate-800 dark:text-slate-100
-                      hover:bg-gray-100/60 dark:hover:bg-slate-800/60 transition
-                      focus:outline-none focus:ring-2 focus:ring-indigo-500/30
-                    "
+                    className="group inline-flex items-center gap-1 rounded-lg px-5 py-3 text-[15px] font-semibold text-slate-800 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-slate-800/60 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                     onClick={() => setOpenDropdown((cur) => (cur === l.label ? null : l.label))}
                   >
                     <span className="relative">
@@ -385,8 +380,8 @@ export default function Header() {
                       absolute left-1/2 -translate-x-1/2 mt-2 w-64 rounded-2xl
                       border border-gray-200/80 dark:border-slate-800/80
                       bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-2
-                      shadow-2xl shadow-black/5 ring-1 ring-black/5
-                      z-[120] transition-all origin-top pointer-events-auto
+                      shadow-lg ring-1 ring-black/5
+                      z-120 transition-all origin-top pointer-events-auto
                       ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}
                     `}
                   >
