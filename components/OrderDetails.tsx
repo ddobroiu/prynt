@@ -63,13 +63,26 @@ export default function OrderDetails({ order }: { order: Order }) {
               <div>
                 <h4 className="font-semibold">Detalii livrare & facturare</h4>
                 <div className="mt-2 text-sm text-muted">
-                  <div><strong>Nume:</strong> {order.address?.nume_prenume || order.address?.name}</div>
-                  <div><strong>Email:</strong> {order.address?.email}</div>
-                  <div><strong>Telefon:</strong> {order.address?.telefon}</div>
-                  <div className="mt-2"><strong>Adresă:</strong> {order.address?.strada_nr}, {order.address?.localitate} ({order.address?.judet})</div>
-                  {order.billing ? (
-                    <div className="mt-2"><strong>Facturare:</strong> {order.billing.name || order.billing.cui || '—'}</div>
-                  ) : null}
+                  {/* Prefer billing data (importată via CUI) when available for juridical companies */}
+                  {((order.billing as any)?.tip_factura && (order.billing as any).tip_factura !== 'persoana_fizica' && ((order.billing as any).cui || (order.billing as any).name)) ? (
+                    <div>
+                      <div><strong>Nume / Firmă:</strong> {(order.billing as any).name || (order.billing as any).cui}</div>
+                      <div><strong>Email:</strong> {(order.billing as any).email || order.address?.email}</div>
+                      <div><strong>Telefon:</strong> {(order.billing as any).telefon || (order.billing as any).phone || order.address?.telefon}</div>
+                      <div className="mt-2"><strong>Adresă:</strong> {(order.billing as any).strada_nr || order.address?.strada_nr}, {(order.billing as any).localitate || order.address?.localitate} ({(order.billing as any).judet || order.address?.judet})</div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div><strong>Nume:</strong> {order.address?.nume_prenume || order.address?.name}</div>
+                      <div><strong>Email:</strong> {order.address?.email}</div>
+                      <div><strong>Telefon:</strong> {order.address?.telefon}</div>
+                      <div className="mt-2"><strong>Adresă:</strong> {order.address?.strada_nr}, {order.address?.localitate} ({order.address?.judet})</div>
+                      {order.billing ? (
+                        <div className="mt-2"><strong>Facturare:</strong> {order.billing.name || order.billing.cui || '—'}</div>
+                      ) : null}
+                    </div>
+                  )}
+
                   {order.awbNumber ? (
                     <div className="mt-2"><strong>AWB:</strong> {order.awbNumber} {order.awbCarrier ? `(${order.awbCarrier})` : ''}</div>
                   ) : null}
