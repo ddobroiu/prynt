@@ -293,58 +293,7 @@ export default async function AccountPage({
             </div>
           </div>
 
-          {/* Orders */}
-          <section id="orders" className="panel rounded-3xl border border-white/10 bg-white/5">
-            <div className="p-4 flex items-center justify-between">
-              <div className="font-semibold flex items-center gap-2">Comenzi</div>
-              <div className="text-sm text-muted">Total: {totalOrders}</div>
-            </div>
-            {orders.length === 0 ? (
-              <div className="p-4 text-sm text-muted">Nu ai comenzi încă.</div>
-            ) : (
-              <ul className="divide-y divide-white/10">
-                {orders.map((o: any) => (
-                  <li key={o.id} className="p-4 hover:bg-surface/40 transition">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-medium">Comanda #{o.orderNo}</div>
-                            <div className="text-xs text-muted">{new Date(o.createdAt).toLocaleString('ro-RO')}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-semibold">{new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(o.total)}</div>
-                            <div className="text-xs mt-1">{o.itemsCount} produse • {o.paymentType}</div>
-                          </div>
-                        </div>
-
-                        <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                                  const carrierLower = o.awbCarrier.toLowerCase();
-                                  let url = null;
-                                  if (carrierLower.includes('dpd')) url = `https://tracking.dpd.ro/awb?awb=${awbClean}`;
-                                  if (carrierLower.includes('fan')) url = `https://www.fancourier.ro/awb-tracking/?awb=${awbClean}`;
-                                  if (carrierLower.includes('sameday')) url = `https://sameday.ro/awb-tracking/?awb=${awbClean}`;
-                                  return url ? <a href={url} target="_blank" rel="noreferrer" className="ml-2 text-indigo-500 underline text-xs rounded px-2 py-1 bg-indigo-50 hover:bg-indigo-100 transition">Verifică AWB</a> : null;
-                                })()}
-                              </div>
-                            ) : null}
-                          </div>
-                        </div>
-
-                        <div className="mt-3">
-                          {/* @ts-ignore Server->Client import allowed */}
-                          <OrderDetails order={o} />
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          {/* Invoices (aggregate from orders) */}
+test          {/* Invoices (aggregate from orders) */}
           <section id="invoices" className="panel rounded-3xl border border-white/10 bg-white/5">
             <div className="p-4 flex items-center justify-between">
               <div className="font-semibold">Facturi</div>
