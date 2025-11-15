@@ -5,7 +5,8 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useCart } from "./CartContext";
 import { ChevronDown, ChevronRight, Menu, ShoppingCart, X, User } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 type NavItem = {
   href: string;
@@ -67,6 +68,27 @@ export default function Header() {
   const [openMobileSub, setOpenMobileSub] = useState<string | null>(null);
   const { count, isLoaded } = useCart();
   const { data: session } = useSession();
+  const router = useRouter();
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [lastBilling, setLastBilling] = useState<any>(null);
+  const [lastAddress, setLastAddress] = useState<any>(null);
+
+  useEffect(() => {
+    if (!session?.user) return;
+    // Fetch last billing and address for quick menu preview
+    (async () => {
+      try {
+        const [bResp, aResp] = await Promise.all([
+          fetch('/api/account/last-billing').then((r) => r.json()).catch(() => null),
+          fetch('/api/account/last-address').then((r) => r.json()).catch(() => null),
+        ]);
+        if (bResp && bResp.billing) setLastBilling(bResp.billing);
+        if (aResp && aResp.address) setLastAddress(aResp.address);
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }, [session]);
 
   // Desktop dropdown control
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -143,13 +165,76 @@ export default function Header() {
 
             <ThemeToggle />
 
-            <Link
-              href={session?.user ? "/account" : "/login"}
-              aria-label="Contul meu"
-              className="inline-flex items-center justify-center rounded-xl p-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
-            >
-              <User size={22} />
-            </Link>
+            {session?.user ? (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setAccountOpen((v) => !v)}
+                  aria-expanded={accountOpen}
+                  aria-label="Meniu cont"
+                  className="inline-flex items-center justify-center rounded-xl p-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
+                >
+                  <User size={22} />
+                </button>
+                {accountOpen ? (
+                  <div className="absolute right-0 mt-2 w-72 rounded-lg border bg-white/95 dark:bg-slate-900/95 p-3 shadow-lg z-50">
+                    <div className="mb-2">
+                      <div className="font-semibold">{(session.user as any)?.name || (session.user as any)?.email}</div>
+                      <div className="text-xs text-muted">{(session.user as any)?.email}</div>
+                    </div>
+                    <div className="divide-y divide-white/6">
+                      <div className="py-2">
+                        <a href="/account/orders" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Comenzi</a>
+                        <a href="/account" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Contul meu</a>
+                        <a href="/account/addresses" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Adrese</a>
+                        <a href="/account/invoices" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Facturi</a>
+                      </div>
+                      <div className="py-2">
+                        <div className="text-xs text-muted px-2">Facturare recentă</div>
+                        {lastBilling ? (
+                          <div className="px-2 py-1">
+                            <div className="font-medium">{lastBilling.name || lastBilling.cui || '—'}</div>
+                            <div className="text-xs text-muted">{lastBilling.localitate ? `${lastBilling.localitate}, ${lastBilling.judet}` : '—'}</div>
+                          </div>
+                        ) : (
+                          <div className="px-2 py-1 text-xs text-muted">Nu sunt date de facturare</div>
+                        )}
+                      </div>
+                      <div className="py-2">
+                        <div className="text-xs text-muted px-2">Ultima adresă</div>
+                        {lastAddress ? (
+                          <div className="px-2 py-1 text-sm">{lastAddress.nume_prenume}<div className="text-xs text-muted">{lastAddress.strada_nr}, {lastAddress.localitate}</div></div>
+                        ) : (
+                          <div className="px-2 py-1 text-xs text-muted">Nu există adresă</div>
+                        )}
+                      </div>
+                      <div className="py-2 flex gap-2">
+                        <button
+                          onClick={() => { setAccountOpen(false); signOut({ callbackUrl: '/' }); }}
+                          className="w-full text-left px-2 py-2 rounded bg-red-50 text-red-700 hover:bg-red-100"
+                        >
+                          Deconectare
+                        </button>
+                        <button
+                          onClick={() => { setAccountOpen(false); router.push('/account'); }}
+                          className="w-full text-left px-2 py-2 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                        >
+                          Setări cont
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                aria-label="Contul meu"
+                className="inline-flex items-center justify-center rounded-xl p-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
+              >
+                <User size={22} />
+              </Link>
+            )}
 
             <Link
               href="/checkout"
@@ -378,17 +463,54 @@ export default function Header() {
 
             <ThemeToggle />
 
-            <Link
-              href={session?.user ? "/account" : "/login"}
-              className="
-                relative inline-flex items-center justify-center rounded-xl px-4 py-2
-                border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition
-                dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800
-              "
-              aria-label="Contul meu"
-            >
-              <User size={20} />
-            </Link>
+            {session?.user ? (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setAccountOpen((v) => !v)}
+                  aria-expanded={accountOpen}
+                  aria-label="Meniu cont"
+                  className="relative inline-flex items-center justify-center rounded-xl px-4 py-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
+                >
+                  <User size={20} />
+                  <span className="ml-2 hidden md:inline text-sm">Cont</span>
+                </button>
+                {accountOpen ? (
+                  <div className="absolute right-0 mt-2 w-80 rounded-lg border bg-white/95 dark:bg-slate-900/95 p-4 shadow-lg z-50">
+                    <div className="mb-3">
+                      <div className="font-semibold">{(session.user as any)?.name || (session.user as any)?.email}</div>
+                      <div className="text-xs text-muted">{(session.user as any)?.email}</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <a href="/account/orders" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Comenzi</a>
+                      <a href="/account/invoices" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Facturi</a>
+                      <a href="/account/addresses" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Adrese</a>
+                      <a href="/account" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Setări cont</a>
+                    </div>
+                    <div className="mt-3 border-t pt-3">
+                      <div className="text-xs text-muted">Facturare recentă</div>
+                      {lastBilling ? (
+                        <div className="mt-1 text-sm">{lastBilling.name || lastBilling.cui || '—'}<div className="text-xs text-muted">{lastBilling.localitate ? `${lastBilling.localitate}, ${lastBilling.judet}` : '—'}</div></div>
+                      ) : (
+                        <div className="mt-1 text-xs text-muted">Nu sunt date de facturare</div>
+                      )}
+                      <div className="mt-3 flex gap-2">
+                        <button onClick={() => signOut({ callbackUrl: '/' })} className="flex-1 rounded px-3 py-2 bg-red-50 text-red-700">Deconectare</button>
+                        <button onClick={() => router.push('/account')} className="flex-1 rounded px-3 py-2 bg-indigo-50 text-indigo-700">Cont</button>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="relative inline-flex items-center justify-center rounded-xl px-4 py-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
+                aria-label="Contul meu"
+              >
+                <User size={20} />
+              </Link>
+            )}
 
             <Link
               href="/checkout"
