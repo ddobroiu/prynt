@@ -210,7 +210,7 @@ export default function AccountClientPage({ orders, billing, session }: AccountC
                           <div className="font-medium">Comanda #{o.orderNo}</div>
                           <div className="text-xs text-muted">{new Date(o.createdAt).toLocaleString('ro-RO')}</div>
                         </div>
-                        <a href={o.invoiceLink ?? ''} target="_blank" rel="noreferrer" className="text-indigo-400 underline">
+                        <a href={o.invoiceLink ?? ''} target="_blank" rel="noreferrer" className="text-indigo-600 underline">
                           Descarcă
                         </a>
                       </li>
