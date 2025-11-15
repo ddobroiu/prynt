@@ -1,7 +1,13 @@
 import React from "react";
 import type { QA } from "./FaqJsonLd";
 
-export default function FaqAccordion({
+export default function FaqAccordion() {
+  return null;
+}
+
+/*
+
+{
   qa,
   title = "Întrebări frecvente",
   fullWidth = false,
@@ -30,3 +36,5 @@ export default function FaqAccordion({
     </section>
   );
 }
+
+*/
