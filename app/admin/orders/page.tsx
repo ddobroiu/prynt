@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { verifyAdminSession } from '../../../lib/adminSession';
 import { listOrders } from '../../../lib/orderStore';
 import { signAdminAction } from '../../../lib/adminAction';
+import AdminOrderStatusControl from '@/components/AdminOrderStatusControl';
 
 function fmtRON(n: number) {
   return new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON', maximumFractionDigits: 2 }).format(n);
@@ -90,12 +91,12 @@ export default async function OrdersPage() {
                         {o.invoiceLink ? (
                           <a href={o.invoiceLink} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1">Factura</a>
                         ) : null}
-                        <form method="POST" action={`/api/order/${o.id}/cancel`} style={{ display: 'inline' }}>
-                          <button type="submit" className="inline-block rounded-md bg-red-600 hover:bg-red-500 text-white px-2 py-1">Anulează</button>
-                        </form>
-                        <form method="POST" action={`/api/order/${o.id}/fulfill`} style={{ display: 'inline' }}>
-                          <button type="submit" className="inline-block rounded-md bg-green-700 hover:bg-green-600 text-white px-2 py-1">Finalizează</button>
-                        </form>
+                        {/* Inline status control: dropdown to set status without navigation */}
+                        <div>
+                          {/* Client component handles fetch to /api/order/[id]/status */}
+                          {/* @ts-ignore Server->Client import allowed */}
+                          <AdminOrderStatusControl id={o.id} status={o.status} />
+                        </div>
                       </div>
                     </td>
                   </tr>
