@@ -38,20 +38,39 @@ export default async function AccountPage({
 
   // Stats & orders (consolidated view)
   const userId = (session.user as any).id as string;
-    createdAt: o.createdAt,
-    status: o.status,
-    canceledAt: o.canceledAt || null,
-    total: Number(o.total),
-    paymentType: o.paymentType,
-    items: (o.items || []).map((it: any) => ({ name: it.name, qty: it.qty, unit: Number(it.unit), total: Number(it.total) })),
-    itemsCount: o.items.length,
-    awbNumber: o.awbNumber,
-    awbCarrier: o.awbCarrier,
-    invoiceLink: o.invoiceLink,
-    address: o.address,
-    billing: o.billing,
-    shippingFee: Number(o.shippingFee ?? 0),
-  }));
+  const orderRecords = await prisma.order.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: { items: true },
+    take: 50,
+  });
+  const orders = orderRecords.map((o) => {
+    const items = (o.items || []).map((it: any) => ({
+      name: it.name,
+      qty: it.qty,
+      unit: Number(it.unit),
+      total: Number(it.total),
+    }));
+    return {
+      id: o.id,
+      orderNo: o.orderNo,
+      createdAt: o.createdAt,
+      status: o.status,
+      canceledAt: o.canceledAt || null,
+      total: Number(o.total),
+      paymentType: o.paymentType,
+      items,
+      itemsCount: items.length,
+      awbNumber: o.awbNumber,
+      awbCarrier: o.awbCarrier,
+      invoiceLink: o.invoiceLink,
+      address: o.address,
+      billing: o.billing,
+      shippingFee: Number(o.shippingFee ?? 0),
+    };
+  });
+  const totalOrders = orders.length;
+  const totalSpent = orders.reduce((sum, order) => sum + Number(order.total || 0), 0);
 
   // Adresele sunt gestionate de componenta client `AddressesManager`
 
