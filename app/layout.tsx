@@ -46,6 +46,11 @@ export const metadata = {
   },
 };
 
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="ro" data-theme="light">
       <head>
