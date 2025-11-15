@@ -125,6 +125,26 @@ export default async function AccountPage({
     },
   ];
 
+  const resolveStatusMeta = (status?: string | null) => {
+    if (status === "fulfilled") {
+      return { label: "Finalizat��", badge: "bg-emerald-500/10 text-emerald-200 border border-emerald-400/40" };
+    }
+    if (status === "canceled") {
+      return { label: "Anulat��", badge: "bg-rose-500/10 text-rose-200 border border-rose-400/40" };
+    }
+    return { label: "AZn lucru", badge: "bg-amber-500/15 text-amber-100 border border-amber-400/40" };
+  };
+
+  const getAwbTrackingUrl = (awb?: string | null, carrier?: string | null) => {
+    if (!awb || !carrier) return null;
+    const carrierLower = carrier.toLowerCase();
+    const awbClean = encodeURIComponent(awb);
+    if (carrierLower.includes("dpd")) return `https://tracking.dpd.ro/awb?awb=${awbClean}`;
+    if (carrierLower.includes("fan")) return `https://www.fancourier.ro/awb-tracking/?awb=${awbClean}`;
+    if (carrierLower.includes("sameday")) return `https://sameday.ro/awb-tracking/?awb=${awbClean}`;
+    return null;
+  };
+
   return (
     <div className="relative isolate overflow-hidden bg-slate-950 text-white">
       <div
