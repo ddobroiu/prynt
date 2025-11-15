@@ -42,9 +42,11 @@ function uploadBufferToCloudinary(buffer: Buffer, filename?: string) {
         unique_filename: true,
         overwrite: false,
         filename_override: filename,
+        type: 'upload', // asigură acces public
       },
       (err, result) => {
         if (err || !result) return reject(err || new Error('Upload failed'));
+        // Folosește secure_url, care e public
         resolve({ secure_url: result.secure_url!, public_id: result.public_id! });
       }
     );
