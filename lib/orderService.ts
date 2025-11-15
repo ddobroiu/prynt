@@ -578,18 +578,32 @@ export async function fulfillOrder(
     };
   });
 
-  // Emitem automat doar pentru persoană fizică; pentru juridică lăsăm manual
-  if (billing.tip_factura === 'persoana_fizica') {
+  // Emitere automată Oblio
+  // - Persoane fizice: se emite automat ca până acum
+  // - Persoane juridice: încercăm emiterea automat dacă avem CUI (sau date suficiente)
+  const billingTip = (billing as any)?.tip_factura;
+  const hasCUI = Boolean((billing as any)?.cui);
+  const shouldTryOblio = billingTip === 'persoana_fizica' || (billingTip !== 'persoana_fizica' && hasCUI);
+
+  if (shouldTryOblio) {
     try {
       const token = await getOblioAccessToken();
-      const client = {
-        name: billing.name || address.nume_prenume,
+      const clientName = (billing as any)?.name || address.nume_prenume;
+      // Normalize CUI if present
+      const cuiRaw = (billing as any)?.cui;
+      const cuiNormalized = normalizeCUI(cuiRaw);
+      let clientCif: string | undefined = cuiNormalized.primary || cuiNormalized.alternate;
+      if (clientCif && !clientCif.toUpperCase().startsWith('RO')) clientCif = `RO${clientCif}`;
+
+      const client: any = {
+        name: clientName,
         address: billingAddressLine,
         email: address.email,
         phone: address.telefon,
-      } as any;
+      };
+      if (clientCif) client.cif = clientCif;
 
-      const basePayload = {
+      const basePayload: any = {
         cif: process.env.OBLIO_CIF_FIRMA,
         client,
         issueDate: new Date().toISOString().slice(0, 10),
@@ -601,15 +615,15 @@ export async function fulfillOrder(
       const link = (data && (data.data?.link || data.link || data.data?.url || data.url)) as string | undefined;
       if (link) {
         invoiceLink = link;
-        console.log('[OrderService] Factura Oblio PF generată:', invoiceLink);
+        console.log('[OrderService] Factura Oblio generată automat:', invoiceLink);
       } else if (data) {
-        console.warn('[OrderService] Oblio (PF) nu a emis factura:', data?.statusMessage || data?.message || data);
+        console.warn('[OrderService] Oblio nu a emis factura automat:', data?.statusMessage || data?.message || data);
       }
     } catch (e: any) {
-      console.warn('[OrderService] Oblio PF a eșuat (comanda continuă):', e?.message || e);
+      console.warn('[OrderService] Oblio a eșuat (comanda continuă):', e?.message || e);
     }
   } else {
-    invoiceLink = null; // juridică – emisă manual ulterior
+    invoiceLink = null; // nu avem date suficiente pentru emitere automat
   }
 
   // Emailuri – întotdeauna; sendEmails este tolerant la forma cart-ului
