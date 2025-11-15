@@ -2,6 +2,9 @@ import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AddressesManager from "@/components/AddressesManager";
 import OrderDetails from "@/components/OrderDetails";
+import ChangePasswordForm from "@/components/ChangePasswordForm";
+import RequestPasswordReset from "@/components/RequestPasswordReset";
+import SignOutButton from "@/components/SignOutButton";
 
 // Forțează randare dinamică ca să nu fie folosită o versiune cache care ar pierde sesiunea
 export const dynamic = 'force-dynamic';
