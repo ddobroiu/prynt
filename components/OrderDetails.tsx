@@ -33,8 +33,8 @@ export default function OrderDetails({ order }: { order: Order }) {
 
       {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/60 z-50" onClick={() => setOpen(false)} />
-          <div className="relative max-w-3xl w-full mx-4 bg-card rounded-xl shadow-xl p-6" style={{ zIndex: 9999 }}>
+          <div className="absolute inset-0 bg-black/80 z-50" onClick={() => setOpen(false)} />
+          <div className="relative max-w-3xl w-full mx-4 rounded-xl shadow-xl p-6 overflow-auto" style={{ zIndex: 9999, maxHeight: '80vh', background: 'rgba(255,255,255,0.98)', color: '#0b1220' }}>
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-bold">Comanda #{order.orderNo ?? '—'}</h3>
