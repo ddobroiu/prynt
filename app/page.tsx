@@ -126,7 +126,7 @@ export default function HomePage() {
   
   return (
     <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white dark:bg-grid-zinc-800/[0.2]">
-      <div className="mx-auto max-w-7xl px-4 md:px-8">
+      <div>
         {/* --- HERO --- */}
         <section className="relative flex flex-col items-center justify-center pt-24 pb-20 text-center overflow-hidden">
             <div className="absolute inset-0 top-1/4 bg-[radial-gradient(ellipse_at_center,rgba(12,74,220,0.1),transparent_60%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(12,74,220,0.2),transparent_60%)] -z-10 animate-pulse-slow" />

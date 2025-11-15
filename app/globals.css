@@ -72,11 +72,6 @@ html, body {
 }
 
 @layer components {
-  /* Layout */
-  .page {
-    @apply mx-auto max-w-7xl px-4;
-  }
-
   /* Carduri */
   .card {
     @apply rounded-2xl;
