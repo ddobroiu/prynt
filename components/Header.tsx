@@ -135,15 +135,6 @@ export default function Header() {
             {session?.user ? (
               <Link
                 href="/account"
-                aria-label="Contul meu"
-                className="inline-flex items-center justify-center rounded-full p-2 text-slate-700 hover:bg-gray-100 transition dark:text-slate-100 dark:hover:bg-slate-800"
-              >
-                <User size={20} />
-              </Link>
-            ) : (
-              <Link
-                href="/login"
-                aria-label="Contul meu"
                 className="inline-flex items-center justify-center rounded-xl p-2 border border-transparent text-slate-700 hover:bg-gray-100 transition dark:text-slate-100 dark:hover:bg-slate-800"
               >
                 <User size={22} />
@@ -164,13 +155,6 @@ export default function Header() {
             </Link>
           </div>
         </div>
-
-        {/* MOBILE OVERLAY */}
-        {openMobile && (
-          <div className="fixed inset-0 z-40 bg-black/30 dark:bg-black/50 lg:hidden" aria-hidden="true" />
-        )}
-
-        {/* MOBILE NAV (card frosted) */}
         <div
           className={`lg:hidden overflow-hidden transition-[max-height,opacity] duration-300 relative z-50 ${
             openMobile ? "opacity-100 max-h-[78vh]" : "opacity-0 max-h-0"
@@ -182,13 +166,6 @@ export default function Header() {
                 className="
                   rounded-2xl border border-gray-200/80 dark:border-slate-800/80
                   bg-white/80 dark:bg-slate-950/70 backdrop-blur-xl p-3 shadow-2xl
-                "
-              >
-                <ul className="space-y-2">
-                  <li key="shop-mobile">
-                    <Link
-                      href="/shop"
-                      className="block rounded-xl border border-gray-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-950/60 px-3 py-2.5 text-slate-800 dark:text-slate-100 hover:bg-gray-100/80 dark:hover:bg-slate-800/80 transition"
                       onClick={() => setOpenMobile(false)}
                     >
                       Shop
