@@ -44,7 +44,7 @@ export async function POST(req: Request, ctx: any) {
 
     if (process.env.DATABASE_URL) {
       // Load order
-      const order = await prisma.order.findUnique({ where: { id } });
+      const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
       if (!order) return NextResponse.json({ ok: false, message: 'Order not found' }, { status: 404 });
 
       let linkToSave: string | null = null;
