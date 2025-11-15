@@ -97,9 +97,9 @@ export default function OrderDetails({ order }: { order: Order }) {
                   {order.awbNumber ? (
                     <div className="mt-2 flex items-center gap-2">
                       <strong>AWB:</strong> {order.awbNumber} {order.awbCarrier ? `(${order.awbCarrier})` : ''}
-                      {getAwbTrackingUrl(order.awbNumber, order.awbCarrier) ? (
+                      {getAwbTrackingUrl(order.awbNumber, order.awbCarrier ?? null) ? (
                         <a
-                          href={getAwbTrackingUrl(order.awbNumber, order.awbCarrier)!}
+                          href={getAwbTrackingUrl(order.awbNumber, order.awbCarrier ?? null)!}
                           target="_blank"
                           rel="noreferrer"
                           className="ml-2 text-indigo-500 underline text-xs rounded px-2 py-1 bg-indigo-50 hover:bg-indigo-100 transition"
