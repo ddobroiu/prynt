@@ -4,6 +4,7 @@ import SignOutButton from "@/components/SignOutButton";
 import ChangePasswordForm from "@/components/ChangePasswordForm";
 import RequestPasswordReset from "@/components/RequestPasswordReset";
 import AddressesManager from "@/components/AddressesManager";
+import OrderDetails from '@/components/OrderDetails';
 
 // Forțează randare dinamică ca să nu fie folosită o versiune cache care ar pierde sesiunea
 export const dynamic = 'force-dynamic';
@@ -36,7 +37,7 @@ export default async function AccountPage({
     where: { userId },
     orderBy: { createdAt: "desc" },
     take: 5,
-    include: { items: { select: { id: true } } },
+    include: { items: true },
   });
   const orders = recent.map((o: any) => ({
     id: o.id,
@@ -46,10 +47,14 @@ export default async function AccountPage({
     canceledAt: o.canceledAt || null,
     total: Number(o.total),
     paymentType: o.paymentType,
+    items: (o.items || []).map((it: any) => ({ name: it.name, qty: it.qty, unit: Number(it.unit), total: Number(it.total) })),
     itemsCount: o.items.length,
     awbNumber: o.awbNumber,
     awbCarrier: o.awbCarrier,
     invoiceLink: o.invoiceLink,
+    address: o.address,
+    billing: o.billing,
+    shippingFee: Number(o.shippingFee ?? 0),
   }));
 
   // Adresele sunt gestionate de componenta client `AddressesManager`
@@ -107,27 +112,39 @@ export default async function AccountPage({
           <ul className="divide-y divide-white/10">
             {orders.map((o: any) => (
               <li key={o.id} className="p-4 flex items-center justify-between hover:bg-surface/40 transition">
-                <div>
-                  <div className="font-medium">Comanda #{o.orderNo}</div>
-                                    <div className="text-xs mt-1">
-                                      Status: <span className={`font-semibold ${o.status === 'canceled' ? 'text-red-500' : o.status === 'fulfilled' ? 'text-green-500' : 'text-yellow-500'}`}>{o.status === 'canceled' ? 'Anulată' : o.status === 'fulfilled' ? 'Finalizată' : 'În lucru'}</span>
-                                    </div>
-                  <div className="text-xs text-muted">{new Date(o.createdAt).toLocaleString("ro-RO")}</div>
-                  <div className="text-xs text-muted">{o.itemsCount} produse • {o.paymentType}</div>
-                  {o.awbNumber ? (
+                <div className="flex items-center gap-4">
+                  <div>
+                    <div className="font-medium">Comanda #{o.orderNo}</div>
                     <div className="text-xs mt-1">
-                      AWB: <span className="font-semibold">{o.awbNumber}</span> {o.awbCarrier ? <span className="text-muted">({o.awbCarrier})</span> : null}
-                      <a href={`https://tracking.dpd.ro/`} target="_blank" rel="noopener noreferrer" className="ml-2 text-indigo-400 underline">Urmărește coletul</a>
+                      Status: <span className={`font-semibold ${o.status === 'canceled' ? 'text-red-500' : o.status === 'fulfilled' ? 'text-green-500' : 'text-yellow-500'}`}>{o.status === 'canceled' ? 'Anulată' : o.status === 'fulfilled' ? 'Finalizată' : 'În lucru'}</span>
                     </div>
-                  ) : null}
-                  {o.invoiceLink ? (
-                    <div className="text-xs mt-1">
-                      <a href={o.invoiceLink} target="_blank" rel="noopener noreferrer" className="text-indigo-400 underline">Descarcă factura</a>
-                    </div>
-                  ) : null}
+                    <div className="text-xs text-muted">{new Date(o.createdAt).toLocaleString("ro-RO")}</div>
+                    <div className="text-xs text-muted">{o.itemsCount} produse • {o.paymentType}</div>
+                    {o.awbNumber ? (
+                      <div className="text-xs mt-1">
+                        AWB: <span className="font-semibold">{o.awbNumber}</span> {o.awbCarrier ? <span className="text-muted">({o.awbCarrier})</span> : null}
+                        <a href={`https://tracking.dpd.ro/`} target="_blank" rel="noopener noreferrer" className="ml-2 text-indigo-400 underline">Urmărește coletul</a>
+                      </div>
+                    ) : null}
+                    {o.invoiceLink ? (
+                      <div className="text-xs mt-1">
+                        <a href={o.invoiceLink} target="_blank" rel="noopener noreferrer" className="text-indigo-400 underline">Descarcă factura</a>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="hidden sm:block">
+                    {/* @ts-ignore Server->Client import allowed */}
+                    <OrderDetails order={o} />
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="font-semibold">{new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(o.total)}</div>
+                  <div className="mt-2 sm:hidden">
+                    {/* Mobile: show details below amount */}
+                    {/* @ts-ignore Server->Client import allowed */}
+                    <OrderDetails order={o} />
+                  </div>
                 </div>
               </li>
             ))}
