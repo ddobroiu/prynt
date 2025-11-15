@@ -62,7 +62,18 @@ export async function POST(req: Request, ctx: any) {
     const session = verifyAdminSession(token);
     if (!session) return NextResponse.json({ ok: false, message: 'Unauthorized' }, { status: 401 });
 
-    const id = ctx?.params?.id as string;
+    let id = ctx?.params?.id as string;
+    // Fallback: some runtimes may not populate ctx.params for app routes when
+    // invoked in certain dev/proxy setups. Try to extract the id from the URL.
+    if (!id) {
+      try {
+        const u = new URL(req.url);
+        const m = u.pathname.match(/\/api\/admin\/order\/([^\/]+)\/upload-invoice/);
+        if (m) id = m[1];
+      } catch (e) {
+        // ignore
+      }
+    }
     if (!id) return NextResponse.json({ ok: false, message: 'Missing id' }, { status: 400 });
 
     const form = await req.formData();
@@ -83,7 +94,9 @@ export async function POST(req: Request, ctx: any) {
       console.log('[admin/upload-invoice] debug:', { id, fileType: t, fileSize: s, billingProvided: !!billing });
       if (t && t !== 'application/pdf') return NextResponse.json({ ok: false, message: 'Acceptăm doar PDF', fileType: t }, { status: 400 });
       if (s && s > maxBytes) return NextResponse.json({ ok: false, message: 'Fișier prea mare (max 10MB)', fileSize: s }, { status: 413 });
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[admin/upload-invoice] validation error', e);
+    }
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
