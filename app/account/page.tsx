@@ -40,6 +40,12 @@ export default async function AccountPage({
       unit: Number(it.unit),
       total: Number(it.total),
     }));
+
+    const address: { localitate?: string; judet?: string } =
+      typeof o.address === "object" && o.address !== null && !Array.isArray(o.address)
+        ? (o.address as { localitate?: string; judet?: string })
+        : {};
+
     return {
       id: o.id,
       orderNo: o.orderNo,
@@ -53,7 +59,7 @@ export default async function AccountPage({
       awbNumber: o.awbNumber,
       awbCarrier: o.awbCarrier,
       invoiceLink: o.invoiceLink,
-      address: o.address,
+      address,
       billing: o.billing,
       shippingFee: Number(o.shippingFee ?? 0),
     };
