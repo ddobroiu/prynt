@@ -46,13 +46,8 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
   return (
-    <html lang="ro">
+    <html lang="ro" data-theme="light">
       <head>
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Prynt Blog" />
         {/* Organization & WebSite JSON-LD */}
@@ -115,7 +110,7 @@ var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n
         />
       </head>
 
-  <body className="bg-white dark:bg-black text-black dark:text-white antialiased">
+  <body className="bg-white text-black antialiased">
     <Providers>
       <Header />
       <main className="mx-auto max-w-7xl px-4 md:px-8">{children}</main>
