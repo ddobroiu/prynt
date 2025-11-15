@@ -22,9 +22,10 @@ const DesktopNav = () => {
     <nav className="hidden lg:flex items-center gap-6">
       {siteConfig.headerNav.map((item) =>
         item.children ? (
-          <div key={item.label} className="relative" onMouseLeave={() => setOpenDropdown(null)}>
+          <div key={item.label} className="relative" 
+            onMouseEnter={() => setOpenDropdown(item.label)}
+            onMouseLeave={() => setOpenDropdown(null)}>
             <button
-              onMouseEnter={() => setOpenDropdown(item.label)}
               className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
             >
               {item.label}
