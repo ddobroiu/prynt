@@ -346,21 +346,17 @@ export default function Header() {
           </nav>
 
           {/* Right actions: Shop special + Theme + Cart */}
-          <div className="justify-self-end flex items-center gap-3">
+          <div className="justify-self-end flex items-center gap-5">
             <Link
               href="/shop"
-              className="
-                inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold
-                bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white
-                shadow-lg shadow-indigo-600/20 ring-1 ring-white/10
-                hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600
-                active:scale-[0.98] transition
-                focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500
-                dark:focus-visible:ring-offset-slate-950
-              "
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-base font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-xl ring-2 ring-indigo-400/30 border-2 border-white/20 dark:border-slate-900/40 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 active:scale-[0.98] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-offset-slate-950"
+              style={{ marginRight: '12px' }}
             >
               Shop
             </Link>
+
+            {/* Separare vizuală */}
+            <div className="w-0.5 h-8 bg-gradient-to-b from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full mx-2 opacity-70" />
 
             <ThemeToggle />
 
@@ -368,14 +364,14 @@ export default function Header() {
               <Link
                 href="/account"
                 aria-label="Contul meu"
-                className="relative inline-flex items-center justify-center rounded-full p-2 text-slate-700 hover:bg-gray-100 transition dark:text-slate-100 dark:hover:bg-slate-800"
+                className="relative inline-flex items-center justify-center rounded-full p-2 text-slate-700 hover:bg-gray-100 transition dark:text-slate-100 dark:hover:bg-slate-800 border border-gray-300/60 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 shadow"
               >
                 <User size={20} />
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="relative inline-flex items-center justify-center rounded-xl px-4 py-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
+                className="relative inline-flex items-center justify-center rounded-full px-4 py-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800 bg-white/70 dark:bg-slate-900/70 shadow"
                 aria-label="Contul meu"
               >
                 <User size={20} />
@@ -384,11 +380,7 @@ export default function Header() {
 
             <Link
               href="/checkout"
-              className="
-                relative inline-flex items-center justify-center rounded-xl px-4 py-2
-                border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition
-                dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800
-              "
+              className="relative inline-flex items-center justify-center rounded-full px-4 py-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800 bg-white/70 dark:bg-slate-900/70 shadow"
               aria-label="Coșul meu"
             >
               <ShoppingCart size={20} />
