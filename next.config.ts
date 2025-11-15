@@ -23,15 +23,21 @@ const nextConfig = {
     // Dynamically import the landing routes (avoid top-level import issues)
     let landingRoutes: Array<{ category: string; slug: string }> = [];
     try {
-      // Importing TS module at build-time in next.config.ts is acceptable
-      // because Next will run this file in a Node environment during build.
-      const ld = await import('./lib/landingData');
+      // Try a small ESM shim first (lib/landingData.mjs) to avoid importing
+      // the TypeScript app code from next.config at build-time in some envs.
+      let ld: any;
+      try {
+        ld = await import('./lib/landingData.mjs');
+      } catch (inner) {
+        // fallback to the TS module (may fail in some Node setups)
+        ld = await import('./lib/landingData');
+      }
       if (ld && typeof ld.listAllLandingRoutes === 'function') {
         landingRoutes = ld.listAllLandingRoutes();
       }
     } catch (e) {
       // If dynamic import fails, fall back to an empty list and rely on manual rewrites above
-      console.warn('next.config: failed to import landingData for rewrites', e);
+      // keep silent (non-fatal) to avoid noisy warnings during dev.
       landingRoutes = [];
     }
 
