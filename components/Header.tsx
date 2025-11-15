@@ -174,11 +174,7 @@ export default function Header() {
                 className="
                   rounded-2xl border border-gray-200/80 dark:border-slate-800/80
                   bg-white/80 dark:bg-slate-950/70 backdrop-blur-xl p-3 shadow-2xl
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      Shop
-                    </Link>
-                  </li>
+                "
                   {LINKS.map((l) =>
                     l.children ? (
                       <li key={l.label}>
