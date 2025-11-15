@@ -175,6 +175,8 @@ export default function Header() {
                   rounded-2xl border border-gray-200/80 dark:border-slate-800/80
                   bg-white/80 dark:bg-slate-950/70 backdrop-blur-xl p-3 shadow-2xl
                 "
+              >
+                <ul className="space-y-2">
                   {LINKS.map((l) =>
                     l.children ? (
                       <li key={l.label}>
@@ -262,7 +264,7 @@ export default function Header() {
             >
               Shop
             </Link>
-            {LINKS.map((l) =>
+            {LINKS.filter(l => l.label !== "Shop").map((l) =>
               l.children ? (
                 <div
                   key={l.label}
