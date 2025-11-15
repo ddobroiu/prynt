@@ -44,7 +44,7 @@ const TabButton = ({ label, activeTab, setActiveTab }: { label: string; activeTa
   <button
     onClick={() => setActiveTab(label)}
     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-      activeTab === label ? "bg-indigo-600 text-white" : "text-gray-300 hover:bg-white/10"
+      activeTab === label ? "bg-indigo-600 text-white" : "text-gray-500 hover:bg-gray-100"
     }`}
   >
     {label}

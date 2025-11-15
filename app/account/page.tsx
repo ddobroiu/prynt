@@ -19,7 +19,7 @@ export default async function AccountPage({
     return (
       <div className="mx-auto max-w-3xl px-6 py-16">
         <h1 className="text-2xl font-bold mb-4">Cont</h1>
-        <p className="text-muted">Nu ești autentificat(ă). Este posibil ca sesiunea să nu fie încă încărcată sau cookie-ul să fi expirat. <a className="text-indigo-400 underline" href="/login">Mergi la login</a>.</p>
+        <p className="text-muted">Nu ești autentificat(ă). Este posibil ca sesiunea să nu fie încă încărcată sau cookie-ul să fi expirat. <a className="text-indigo-600 underline" href="/login">Mergi la login</a>.</p>
       </div>
     );
   }
