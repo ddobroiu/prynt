@@ -1,13 +1,8 @@
 import React from "react";
 import BannerConfigurator from "@/components/BannerConfigurator";
-import FaqJsonLd from "@/components/FaqJsonLd";
-import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 import ServiceJsonLd from "@/components/ServiceJsonLd";
 import HowToJsonLd from "@/components/HowToJsonLd";
-import HowToSection from "@/components/HowToSection";
-import RevealBlock from "@/components/RevealBlock";
-import CategorySeoContent from "@/components/CategorySeoContent";
 
 export const metadata = {
   title: "Banner — Configurează online | Prynt",
@@ -16,59 +11,24 @@ export const metadata = {
 };
 
 export default function Page() {
-  // Server page that reuses the client BannerConfigurator.
-  // We intentionally DO NOT render any visible header here to avoid duplication
-  // — the BannerConfigurator component is responsible for showing the page title/UI.
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
-  const qa = [
-    { question: "Ce rezoluție este recomandată pentru bannere?", answer: "Recomandăm 100–150 dpi la scara 1:1 pentru vizualizare de la distanță. Acceptăm PDF/AI/PSD/JPG/PNG." },
-  { question: "Care este termenul de producție?", answer: "Termen total (producție + livrare): 24–48 ore. Urgențele se pot prioritiza la cerere." },
-    { question: "Faceți capse și tiv?", answer: "Da, oferim tiv și capse la distanțe standard sau la cerere. Alege opțiunile în configurator." },
-    { question: "Pot primi BAT înainte de print?", answer: "Da, la cerere trimitem BAT digital. Corecții minore sunt gratuite; DTP complex la cerere." },
-    { question: "Metode de plată?", answer: "Ramburs la curier sau card online securizat. Factura este emisă electronic." },
-  ];
+  const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro").replace(/\/$/, "");
+  
   return (
-    <main className="page py-10">
+    <>
       <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Banner", url: `${base}/banner` }]} />
       <ServiceJsonLd name="Bannere publicitare" url={`${base}/banner`} />
       <HowToJsonLd
         name="Cum comanzi un banner la Prynt"
         steps={[
-          { name: "Alege dimensiunea și materialul", text: "Completează lățimea/înălțimea și selectează Frontlit sau Blockout în funcție de aplicație." },
-          { name: "Configurează finisajele", text: "Alege tiv, capse sau buzunare pentru montaj sigur." },
-          { name: "Încarcă fișierele", text: "Încarcă PDF/AI/PSD/JPG/PNG sau lasă un link de descărcare. Verificare gratuită." },
-          { name: "Preț instant și adaugă în coș", text: "Vezi prețul în timp real și finalizează comanda." },
-          { name: "Livrare 24–48h", text: "Produsele sunt livrate rapid, conform stocurilor și opțiunilor alese." },
+          { name: "Alege dimensiunea și materialul", text: "Completează lățimea/înălțimea și selectează materialul." },
+          { name: "Configurează finisajele", text: "Alege tiv, capse sau alte opțiuni." },
+          { name: "Încarcă fișierele", text: "Încarcă grafica sau lasă un link de descărcare." },
+          { name: "Adaugă în coș", text: "Vezi prețul în timp real și finalizează comanda." },
         ]}
       />
-      <section>
-        <BannerConfigurator />
-      </section>
-      <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
-        <div className="md:col-span-2">
-          {/* Optional SEO/extra content can go here, but not the visual H1 to avoid duplication */}
-          <FaqAccordion qa={qa} fullWidth />
-          <FaqJsonLd qa={qa} />
-        </div>
-        <aside className="mt-4 md:mt-0 space-y-4">
-          <RevealBlock buttonLabel="Cum comand?">
-            <HowToSection
-              title="Cum comanzi bannere publicitare"
-              steps={[
-                "Alege dimensiunea exactă în cm și materialul potrivit (Frontlit/Blockout)",
-                "Selectează finisajele: tiv, capse, buzunare",
-                "Încarcă grafica sau lasă un link (WeTransfer/Drive)",
-                "Vezi prețul instant și adaugă în coș",
-                "Finalizează comanda – livrare 24–48h",
-              ]}
-            />
-          </RevealBlock>
-          <RevealBlock buttonLabel="Citește mai mult">
-            <CategorySeoContent kind="banner" />
-          </RevealBlock>
-        </aside>
-      </section>
-      {/* Produse similare section removed as requested */}
-    </main>
+      
+      {/* Componenta BannerConfigurator gestionează acum întreaga pagină vizuală */}
+      <BannerConfigurator />
+    </>
   );
 }
