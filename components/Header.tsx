@@ -145,24 +145,7 @@ export default function Header() {
 
           {/* Fără logo (la cerere) */}
 
-          <div className="flex items-center gap-2">
-            {/* SHOP evidențiat, în dreapta */}
-            <Link
-              href="/shop"
-              aria-label="Shop"
-              className="
-                inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold
-                bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white
-                shadow-lg shadow-indigo-600/20 ring-1 ring-white/10
-                hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600
-                active:scale-[0.98] transition
-                focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500
-                dark:focus-visible:ring-offset-slate-950
-              "
-            >
-              Shop
-            </Link>
-
+          <div className="flex items-center gap-3">
             <ThemeToggle />
 
             {session?.user ? (
@@ -172,7 +155,7 @@ export default function Header() {
                   onClick={() => setAccountOpen((v) => !v)}
                   aria-expanded={accountOpen}
                   aria-label="Meniu cont"
-                  className="inline-flex items-center justify-center rounded-xl p-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
+                  className="inline-flex items-center justify-center rounded-xl p-2 border border-transparent text-slate-700 hover:bg-gray-100 transition dark:text-slate-100 dark:hover:bg-slate-800"
                 >
                   <User size={22} />
                 </button>
@@ -227,7 +210,7 @@ export default function Header() {
               <Link
                 href="/login"
                 aria-label="Contul meu"
-                className="inline-flex items-center justify-center rounded-xl p-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
+                className="inline-flex items-center justify-center rounded-xl p-2 border border-transparent text-slate-700 hover:bg-gray-100 transition dark:text-slate-100 dark:hover:bg-slate-800"
               >
                 <User size={22} />
               </Link>
@@ -235,12 +218,12 @@ export default function Header() {
 
             <Link
               href="/checkout"
-              className="relative inline-flex items-center justify-center rounded-xl p-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800"
+              className="relative inline-flex items-center justify-center rounded-xl p-2 border border-transparent text-slate-700 hover:bg-gray-100 transition dark:text-slate-100 dark:hover:bg-slate-800"
               aria-label="Coșul meu"
             >
               <ShoppingCart size={22} />
               {isLoaded && count > 0 && (
-                <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white shadow-lg">
+                <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
                   {count}
                 </span>
               )}
@@ -268,6 +251,15 @@ export default function Header() {
                 "
               >
                 <ul className="space-y-2">
+                  <li key="shop-mobile">
+                    <Link
+                      href="/shop"
+                      className="block rounded-xl border border-gray-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-950/60 px-3 py-2.5 text-slate-800 dark:text-slate-100 hover:bg-gray-100/80 dark:hover:bg-slate-800/80 transition"
+                      onClick={() => setOpenMobile(false)}
+                    >
+                      Shop
+                    </Link>
+                  </li>
                   {LINKS.map((l) =>
                     l.children ? (
                       <li key={l.label}>
