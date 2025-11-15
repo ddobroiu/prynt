@@ -159,7 +159,7 @@ export default function Header() {
   }, [isMobileMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-30 w-full bg-bg/80 backdrop-blur-lg border-b border-border">
+    <header className="sticky top-0 z-30 w-full bg-bg border-b border-border">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Left: Mobile Toggle & Logo */}
         <div className="flex items-center gap-4">
