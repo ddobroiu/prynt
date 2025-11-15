@@ -15,45 +15,8 @@ export default function AdminInvoiceControl({ id, invoiceLink: initialLink, bill
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  async function saveLink() {
-    setLoading(true);
-    setMessage(null);
-    try {
-      const res = await fetch(`/api/admin/order/${encodeURIComponent(id)}/invoice`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invoiceLink: link, billing: { cui, name } }),
-      });
-      const txt = await res.text();
-      if (!res.ok) throw new Error(txt || res.statusText);
-      setMessage("Link salvat și client anunțat.");
-    } catch (err: any) {
-      setMessage("Eroare: " + (err?.message || err));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function generateInvoice() {
-    setLoading(true);
-    setMessage(null);
-    try {
-      const res = await fetch(`/api/admin/order/${encodeURIComponent(id)}/invoice`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ generate: true, billing: { cui, name } }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || res.statusText);
-      const newLink = data.invoiceLink || '';
-      setLink(newLink);
-      setMessage("Factura generată și trimisă clientului.");
-    } catch (err: any) {
-      setMessage("Eroare generare: " + (err?.message || err));
-    } finally {
-      setLoading(false);
-    }
-  }
+  // Note: Removed "saveLink" and "generateInvoice" actions per UX request.
+  // Admin now only uploads PDF or views existing invoice link.
 
   async function uploadInvoice(file?: File) {
     setLoading(true);
@@ -87,12 +50,16 @@ export default function AdminInvoiceControl({ id, invoiceLink: initialLink, bill
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Denumire firmă" className="rounded-md border px-2 py-1 bg-white/5" />
       </div>
       <div className="flex items-center gap-2">
-        <button onClick={saveLink} disabled={loading} className="inline-block rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1">Salvează link</button>
-        <button onClick={generateInvoice} disabled={loading || !cui} className="inline-block rounded-md bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1">Generează Oblio (dacă CUI)</button>
-        <label className="inline-block rounded-md bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 cursor-pointer">
+        <label className="inline-flex items-center gap-2 rounded-md bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M12 3v9" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M8 7l4-4 4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           Încarcă PDF
           <input type="file" accept="application/pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadInvoice(f); }} style={{ display: 'none' }} />
         </label>
+        {link ? (
+          <a href={link} target="_blank" rel="noreferrer" className="text-indigo-400 underline text-sm">Descarcă</a>
+        ) : (
+          <div className="text-xs text-muted">Fără factură</div>
+        )}
         {loading ? <span className="text-xs text-muted">Se procesează…</span> : null}
       </div>
       {message ? <div className="text-sm text-muted">{message}</div> : null}
