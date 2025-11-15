@@ -53,12 +53,12 @@ const TabButton = ({ label, activeTab, setActiveTab }: { label: string; activeTa
 
 const resolveStatusMeta = (status?: string | null) => {
   if (status === "fulfilled") {
-    return { label: "Finalizată", badge: "bg-emerald-500/10 text-emerald-200 border border-emerald-400/40" };
+    return { label: "Finalizată", badge: "bg-emerald-100 text-emerald-800 border border-emerald-200" };
   }
   if (status === "canceled") {
-    return { label: "Anulată", badge: "bg-rose-500/10 text-rose-200 border border-rose-400/40" };
+    return { label: "Anulată", badge: "bg-rose-100 text-rose-800 border border-rose-200" };
   }
-  return { label: "În lucru", badge: "bg-amber-500/15 text-amber-100 border border-amber-400/40" };
+  return { label: "În lucru", badge: "bg-amber-100 text-amber-800 border border-amber-200" };
 };
 
 const getAwbTrackingUrl = (awb?: string | null, carrier?: string | null) => {
@@ -77,13 +77,13 @@ export default function AccountClientPage({ orders, billing, session }: AccountC
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-center md:justify-start space-x-2 border-b border-white/10 pb-4">
+      <div className="flex items-center justify-center md:justify-start space-x-2 border-b border-gray-200 pb-4">
         {tabs.map((tab) => (
           <TabButton key={tab} label={tab} activeTab={activeTab} setActiveTab={setActiveTab} />
         ))}
       </div>
 
-      <div className="panel rounded-3xl border border-white/10 bg-white/5 p-6">
+      <div className="panel rounded-3xl p-6">
         {activeTab === "Comenzi" && (
           <section>
             <h2 className="text-xl font-semibold mb-4">Comenzile Mele</h2>
@@ -97,7 +97,7 @@ export default function AccountClientPage({ orders, billing, session }: AccountC
                   const previewItems = o.items.slice(0, 4).map((it) => it.name);
 
                   return (
-                    <li key={o.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <li key={o.id} className="card p-4">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
                           <div className="font-semibold">Comanda #{o.orderNo}</div>
@@ -110,7 +110,7 @@ export default function AccountClientPage({ orders, billing, session }: AccountC
                       </div>
                       <div className="mt-3 space-y-2 text-xs text-muted">
                         {previewItems.length > 0 ? (
-                          <div className="text-white/70">
+                          <div className="text-gray-700">
                             {previewItems.join(" | ")}
                             {o.itemsCount > previewItems.length ? ` +${o.itemsCount - previewItems.length} produse` : ""}
                           </div>
