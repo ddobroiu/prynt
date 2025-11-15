@@ -584,11 +584,10 @@ export async function fulfillOrder(
   });
 
   // Emitere automată Oblio
-  // - Persoane fizice: se emite automat ca până acum
-  // - Persoane juridice: încercăm emiterea automat dacă avem CUI (sau date suficiente)
+  // - Persoane fizice: se emite automat
+  // - Persoane juridice/companii: nu emitem automat; admin va încărca factura manual
   const billingTip = (billing as any)?.tip_factura;
-  const hasCUI = Boolean((billing as any)?.cui);
-  const shouldTryOblio = billingTip === 'persoana_fizica' || (billingTip !== 'persoana_fizica' && hasCUI);
+  const shouldTryOblio = billingTip === 'persoana_fizica';
 
   if (shouldTryOblio) {
     try {
