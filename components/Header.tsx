@@ -177,7 +177,7 @@ export default function Header() {
                 "
               >
                 <ul className="space-y-2">
-                  {LINKS.map((l) =>
+                  {LINKS.filter(l => l.label !== "Shop").map((l) =>
                     l.children ? (
                       <li key={l.label}>
                         <button
