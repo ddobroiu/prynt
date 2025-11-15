@@ -101,7 +101,8 @@ export async function POST(req: Request, ctx: any) {
         try {
           if (process.env.RESEND_API_KEY) {
             const resend = new Resend(process.env.RESEND_API_KEY);
-            const to = (orderBilling && orderBilling.email) || orderAddress?.email;
+            const billingToNotify = billing || orderBillingBase || {};
+            const to = (billingToNotify && billingToNotify.email) || orderAddress?.email;
             if (to) {
               await resend.emails.send({
                 from: process.env.EMAIL_FROM || 'contact@prynt.ro',
