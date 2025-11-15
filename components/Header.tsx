@@ -135,9 +135,10 @@ export default function Header() {
             {session?.user ? (
               <Link
                 href="/account"
-                className="inline-flex items-center justify-center rounded-xl p-2 border border-transparent text-slate-700 hover:bg-gray-100 transition dark:text-slate-100 dark:hover:bg-slate-800"
+                aria-label="Contul meu"
+                className="inline-flex items-center justify-center rounded-full p-2 text-slate-700 hover:bg-gray-100 transition dark:text-slate-100 dark:hover:bg-slate-800"
               >
-                <User size={22} />
+                <User size={20} />
               </Link>
             ) : (
               <Link
@@ -163,130 +164,150 @@ export default function Header() {
             </Link>
           </div>
         </div>
+
+        {/* MOBILE OVERLAY */}
+        {openMobile && (
+          <div className="fixed inset-0 z-40 bg-black/30 dark:bg-black/50 lg:hidden" aria-hidden="true" />
+        )}
+
+        {/* MOBILE NAV (card frosted) */}
         <div
           className={`lg:hidden overflow-hidden transition-[max-height,opacity] duration-300 relative z-50 ${
             openMobile ? "opacity-100 max-h-[78vh]" : "opacity-0 max-h-0"
           }`}
         >
           <nav className="pb-3">
-            <div className="hidden lg:flex items-center justify-between py-3 w-full">
-              {/* Stânga: Shop */}
-              <Link
-                href="/shop"
-                className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-base font-bold bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-xl ring-2 ring-indigo-400/30 border-2 border-white/20 dark:border-slate-900/40 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 active:scale-[0.98] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-offset-slate-950"
-                style={{ marginRight: '12px' }}
+            <div className="mx-auto max-w-sm">
+              <div
+                className="
+                  rounded-2xl border border-gray-200/80 dark:border-slate-800/80
+                  bg-white/80 dark:bg-slate-950/70 backdrop-blur-xl p-3 shadow-2xl
+                "
               >
-                Shop
-              </Link>
-
-              {/* Mijloc: categoriile */}
-              <nav className="flex items-center gap-3">
-                {LINKS.map((l) =>
-                  l.children ? (
-                    <div
-                      key={l.label}
-                      className="relative"
-                      onMouseEnter={() => openNow(l.label)}
-                      onMouseLeave={() => closeSoon(l.label)}
-                      onFocus={() => openNow(l.label)}
-                      onBlur={() => closeSoon(l.label)}
-                    >
-                      <button
-                        type="button"
-                        aria-haspopup="menu"
-                        aria-expanded={openDropdown === l.label}
-                        className={`group inline-flex items-center gap-2 rounded-xl px-4 py-2 text-base font-bold shadow-md backdrop-blur-md border border-gray-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 relative overflow-hidden`}
-                        onClick={() => setOpenDropdown((cur) => (cur === l.label ? null : l.label))}
-                      >
-                        {l.icon}
-                        <span className="relative drop-shadow-sm">
-                          {l.label}
-                          <span className={`absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-300 ${openDropdown === l.label ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"}`}></span>
-                        </span>
-                        <ChevronDown
-                          size={18}
-                          className={`ml-2 opacity-80 transition-transform ${openDropdown === l.label ? "rotate-180 opacity-100" : ""}`}
-                        />
-                      </button>
-
-                      <div
-                        role="menu"
-                        className={`
-                          absolute left-1/2 -translate-x-1/2 mt-2 w-72 rounded-2xl
-                          border border-gray-200/70 dark:border-slate-800/70
-                          bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl p-4 shadow-2xl ring-1 ring-black/10
-                          z-120 transition-all origin-top pointer-events-auto flex flex-col gap-2
-                          ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}
-                        `}
-                      >
-                        {l.children.map((c, idx) => (
-                          <Link
-                            key={c.href}
-                            href={c.href}
-                            role="menuitem"
-                            className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-base font-bold shadow-sm border border-gray-100 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-                            onClick={() => setOpenDropdown(null)}
-                          >
-                            {/* Iconiță generică pentru submeniu, se poate personaliza pe fiecare categorie */}
-                            <span className="w-5 h-5 bg-linear-to-r from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full flex items-center justify-center text-white/80 mr-1">
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                            </span>
-                            {c.label}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
+                <ul className="space-y-2">
+                  <li key="shop-mobile">
                     <Link
-                      key={l.href}
-                      href={l.href}
-                      className="group rounded-xl px-4 py-2 text-base font-bold shadow-md backdrop-blur-md border border-gray-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 relative overflow-hidden flex items-center gap-2"
+                      href="/shop"
+                      className="block rounded-xl border border-gray-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-950/60 px-3 py-2.5 text-slate-800 dark:text-slate-100 hover:bg-gray-100/80 dark:hover:bg-slate-800/80 transition"
+                      onClick={() => setOpenMobile(false)}
                     >
-                      {l.icon}
-                      <span className="relative drop-shadow-sm">
-                        {l.label}
-                        <span className="absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-300 scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"></span>
-                      </span>
+                      Shop
                     </Link>
-                  )
-                )}
-              </nav>
-
-              {/* Dreapta: ThemeToggle, cont, coș */}
-              <div className="flex items-center gap-5">
-                <ThemeToggle />
-
-                {session?.user ? (
-                  <Link
-                    href="/account"
-                    aria-label="Contul meu"
-                    className="relative inline-flex items-center justify-center rounded-full p-2 text-slate-700 hover:bg-gray-100 transition dark:text-slate-100 dark:hover:bg-slate-800 border border-gray-300/60 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 shadow"
-                  >
-                    <User size={20} />
-                  </Link>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="relative inline-flex items-center justify-center rounded-full px-4 py-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800 bg-white/70 dark:bg-slate-900/70 shadow"
-                    aria-label="Contul meu"
-                  >
-                    <User size={20} />
-                  </Link>
-                )}
-
-                <Link
-                  href="/checkout"
-                  className="relative inline-flex items-center justify-center rounded-full px-4 py-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800 bg-white/70 dark:bg-slate-900/70 shadow"
-                  aria-label="Coșul meu"
-                >
-                  <ShoppingCart size={20} />
-                  {isLoaded && count > 0 && (
-                    <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white shadow-lg">
-                      {count}
-                    </span>
+                  </li>
+                  {LINKS.map((l) =>
+                    l.children ? (
+                      <li key={l.label}>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpenMobileSub((cur) => (cur === l.label ? null : l.label))
+                          }
+                          className="
+                            w-full inline-flex items-center justify-between rounded-xl
+                            border border-gray-200/80 dark:border-slate-800/80
+                            bg-white/70 dark:bg-slate-950/60
+                            px-3 py-2.5 text-slate-800 dark:text-slate-100
+                            hover:bg-gray-100/80 dark:hover:bg-slate-800/80 transition
+                          "
+                          aria-expanded={openMobileSub === l.label}
+                          aria-controls={`mobile-sub-${l.label.replace(/\s+/g, "-").toLowerCase()}`}
+                        >
+                          <span className="font-medium">{l.label}</span>
+                          {openMobileSub === l.label ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        </button>
+                        <div
+                          id={`mobile-sub-${l.label.replace(/\s+/g, "-").toLowerCase()}`}
+                          className={`
+                            grid transition-[grid-template-rows,opacity] duration-300
+                            ${openMobileSub === l.label ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0"}
+                          `}
+                        >
+                          <div className="overflow-hidden">
+                            <ul className="pl-2.5 space-y-2">
+                              {l.children.map((c) => (
+                                <li key={c.href}>
+                                  <Link
+                                    href={c.href}
+                                    className="
+                                      block rounded-lg border border-gray-200/80 dark:border-slate-800/80
+                                      bg-white/70 dark:bg-slate-950/60
+                                      px-3 py-2 text-sm text-slate-800 dark:text-slate-100
+                                      hover:bg-gray-100/80 dark:hover:bg-slate-800/80 transition
+                                    "
+                                    onClick={() => setOpenMobile(false)}
+                                  >
+                                    {c.label}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </li>
+                    ) : (
+                      <li key={l.href} className="text-center">
+                        <Link
+                          href={l.href}
+                          className="
+                            block rounded-xl border border-gray-200/80 dark:border-slate-800/80
+                            bg-white/70 dark:bg-slate-950/60
+                            px-3 py-2.5 text-slate-800 dark:text-slate-100
+                            hover:bg-gray-100/80 dark:hover:bg-slate-800/80 transition
+                          "
+                          onClick={() => setOpenMobile(false)}
+                        >
+                          {l.label}
+                        </Link>
+                      </li>
+                    )
                   )}
-                </Link>
+                </ul>
               </div>
+            </div>
+          </nav>
+        </div>
+
+        {/* DESKTOP: 3-col grid — left (spacer), center (menu), right (actions) */}
+        <div className="hidden lg:grid grid-cols-3 items-center py-3">
+          {/* Left spacer (no logo) */}
+          <div />
+
+          {/* Centered menu with modern effects */}
+          <nav className="justify-self-center flex items-center gap-3">
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-base font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-xl ring-2 ring-indigo-400/30 border-2 border-white/20 dark:border-slate-900/40 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 active:scale-[0.98] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-offset-slate-950"
+              style={{ marginRight: '12px' }}
+            >
+              Shop
+            </Link>
+            {LINKS.map((l) =>
+              l.children ? (
+                <div
+                  key={l.label}
+                  className="relative"
+                  onMouseEnter={() => openNow(l.label)}
+                  onMouseLeave={() => closeSoon(l.label)}
+                  onFocus={() => openNow(l.label)}
+                  onBlur={() => closeSoon(l.label)}
+                >
+                  <button
+                    type="button"
+                    aria-haspopup="menu"
+                    aria-expanded={openDropdown === l.label}
+                    className={`group inline-flex items-center gap-2 rounded-xl px-4 py-2 text-base font-bold shadow-md backdrop-blur-md border border-gray-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 relative overflow-hidden`}
+                    onClick={() => setOpenDropdown((cur) => (cur === l.label ? null : l.label))}
+                  >
+                    {l.icon}
+                    <span className="relative drop-shadow-sm">
+                      {l.label}
+                      <span className={`absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-300 ${openDropdown === l.label ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"}`}></span>
+                    </span>
+                    <ChevronDown
+                      size={18}
+                      className={`ml-2 opacity-80 transition-transform ${openDropdown === l.label ? "rotate-180 opacity-100" : ""}`}
+                    />
+                  </button>
 
                   <div
                     role="menu"
@@ -303,11 +324,11 @@ export default function Header() {
                         key={c.href}
                         href={c.href}
                         role="menuitem"
-                        className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-base font-bold shadow-sm border border-gray-100 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                        className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-base font-bold shadow-sm border border-gray-100 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                         onClick={() => setOpenDropdown(null)}
                       >
                         {/* Iconiță generică pentru submeniu, se poate personaliza pe fiecare categorie */}
-                        <span className="w-5 h-5 bg-linear-to-r from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full flex items-center justify-center text-white/80 mr-1">
+                        <span className="inline-block w-5 h-5 bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full flex items-center justify-center text-white/80 mr-1">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                         </span>
                         {c.label}
@@ -319,21 +340,33 @@ export default function Header() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="group rounded-xl px-4 py-2 text-base font-bold shadow-md backdrop-blur-md border border-gray-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 relative overflow-hidden flex items-center gap-2"
+                  className="group rounded-xl px-4 py-2 text-base font-bold shadow-md backdrop-blur-md border border-gray-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 relative overflow-hidden flex items-center gap-2"
                 >
                   {l.icon}
                   <span className="relative drop-shadow-sm">
                     {l.label}
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-300 scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"></span>
+                    <span className="absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-300 scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"></span>
                   </span>
                 </Link>
               )
             )}
           </nav>
 
-          {/* Right actions: Theme + Account + Cart */}
-          <div className="flex items-center gap-5">
+          {/* Right actions: Shop special + Theme + Cart */}
+          <div className="justify-self-end flex items-center gap-5">
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-base font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-xl ring-2 ring-indigo-400/30 border-2 border-white/20 dark:border-slate-900/40 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 active:scale-[0.98] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-offset-slate-950"
+              style={{ marginRight: '12px' }}
+            >
+              Shop
+            </Link>
+
+            {/* Separare vizuală */}
+            <div className="w-0.5 h-8 bg-gradient-to-b from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full mx-2 opacity-70" />
+
             <ThemeToggle />
+
             {session?.user ? (
               <Link
                 href="/account"
@@ -351,6 +384,7 @@ export default function Header() {
                 <User size={20} />
               </Link>
             )}
+
             <Link
               href="/checkout"
               className="relative inline-flex items-center justify-center rounded-full px-4 py-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800 bg-white/70 dark:bg-slate-900/70 shadow"
