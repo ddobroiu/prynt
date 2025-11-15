@@ -73,6 +73,12 @@ export const siteConfig = {
         { href: "/materiale/pvc-forex", label: "PVC Forex" },
       ],
     },
+    {
+      href: "/shop",
+      label: "Shop",
+      icon: LayoutGrid,
+      highlight: true,
+    },
   ],
   footerNav: [
     {

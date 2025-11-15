@@ -22,7 +22,15 @@ const DesktopNav = () => {
   return (
     <nav className="hidden lg:flex items-center gap-10">
       {siteConfig.headerNav.map((item) =>
-        item.children ? (
+        item.highlight ? (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            {item.label}
+          </Link>
+        ) : item.children ? (
           <div key={item.label} className="relative group focus-within:z-50">
             <button
               className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-gray-900 focus:text-blue-600 transition-colors outline-none"
@@ -33,23 +41,24 @@ const DesktopNav = () => {
               {item.label}
               <ChevronDown size={14} className="transition-transform duration-300 ease-out group-hover:rotate-180" />
             </button>
-            {/* Dropdown */}
+            {/* Dropdown Wrapper for positioning and hover bridge */}
             <div
-              className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 rounded-xl bg-white shadow-lg border border-gray-100 p-2 z-50 
-                           opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100 
-                           transition-all duration-300 ease-out transform-gpu origin-top pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto"
+              className="absolute top-full left-1/2 -translate-x-1/2 w-64 pt-4 opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100 transition-all duration-300 ease-out transform-gpu origin-top pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto"
             >
-              <div className="flex flex-col gap-1">
-                {item.children.map((child) => (
-                  <Link
-                    key={child.href}
-                    href={child.href}
-                    className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-blue-600 focus:bg-blue-50 focus:text-blue-700 transition-colors block outline-none"
-                    tabIndex={0}
-                  >
-                    {child.label}
-                  </Link>
-                ))}
+              {/* Visual Dropdown */}
+              <div className="rounded-xl bg-white shadow-lg border border-gray-100 p-2">
+                <div className="flex flex-col gap-1">
+                  {item.children.map((child) => (
+                    <Link
+                      key={child.href}
+                      href={child.href}
+                      className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-blue-600 focus:bg-blue-50 focus:text-blue-700 transition-colors block outline-none"
+                      tabIndex={0}
+                    >
+                      {child.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

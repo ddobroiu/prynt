@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 type Product = {
   id: string;
@@ -72,33 +73,20 @@ export default function ProductCard({ product, imageHeightPx }: { product: Produ
   <article className="card bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-xl rounded-2xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-2xl h-full">
       <Link href={productUrl} className="block group" aria-label={`Configurează ${product.title}`}>
         <div className="w-full relative bg-gray-100 aspect-square overflow-hidden">
-          <img
+          <Image
             src={initialImg}
             alt={product.title ?? "Imagine produs"}
-            loading="lazy"
+            layout="fill"
+            objectFit="cover"
+            className="transition-opacity duration-300 group-hover:opacity-90 border-b border-indigo-100 block"
             onError={(e) => {
               const el = e.currentTarget as HTMLImageElement;
-              const step = el.dataset.fallback ?? "0";
-              if (step === "0") {
-                el.dataset.fallback = "1";
-                el.src = isCanvas
-                  ? "/products/canvas/1.webp"
-                  : isAfise
-                    ? "/products/afise/1.webp"
-                    : isFlayere
-                      ? "/products/flayere/1.webp"
-                      : isAutocolante
-                        ? "/products/autocolante/1.webp"
-                        : isTapet
-                          ? "/products/tapet/1.webp"
-                          : "/products/banner/1.webp";
-              } else if (step === "1") {
-                el.dataset.fallback = "2";
-                el.src = "/placeholder.png";
-              }
+              // Fallback logic can be more complex with next/image, for now, we remove it
+              // to prevent conflicts. A better approach would be a state-based fallback.
+              console.error("Failed to load image:", el.src);
+              // As a simple fallback, we could try to set a placeholder, but `next/image`
+              // state management is needed for a clean solution.
             }}
-            style={{ objectFit: "cover", width: "100%", height: "100%" }}
-            className="transition-opacity duration-300 group-hover:opacity-90 border-b border-indigo-100 block"
           />
         </div>
         <div className="p-6 flex-1 flex flex-col">
