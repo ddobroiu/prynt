@@ -5,6 +5,7 @@ import { useCart } from "@/components/CartContext";
 import { ShoppingCart, Plus, Minus, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
 import DeliveryInfo from "@/components/DeliveryInfo";
+import DeliveryEstimation from "./DeliveryEstimation";
 
 type SizeKey = "A3" | "A2" | "A1" | "A0" | "S5" | "S7";
 type MaterialKey =
@@ -562,6 +563,9 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
                   <span className="text-2xl font-extrabold text-ui">{total.toFixed(2)} RON</span>
                   <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
                 </p>
+                <div className="my-2">
+                  <DeliveryEstimation />
+                </div>
                 <p className="text-sm text-white/60">Preț per bucată: {pricePerUnitDisplayed.toFixed(2)} RON</p>
               </div>
 

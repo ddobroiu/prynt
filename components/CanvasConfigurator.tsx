@@ -5,6 +5,7 @@ import { useCart } from "@/components/CartContext";
 import { Ruler, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
 import DeliveryInfo from "@/components/DeliveryInfo";
+import DeliveryEstimation from "./DeliveryEstimation";
 
 /* GALLERY */
 const GALLERY = [
@@ -564,6 +565,9 @@ export default function CanvasConfigurator({ productSlug, initialWidth, initialH
                     <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(serverPrice ?? totalPrice)} RON</span>
                     <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
                   </p>
+                  <div className="my-2">
+                    <DeliveryEstimation />
+                  </div>
                   {addTextOption && textDesign.trim() !== "" && <div className="text-sm text-muted">Text pe comandă: "{textDesign.trim()}"</div>}
                   {/* show uploaded file info only in summary (thumb + label) */}
                   {artworkUrl && (

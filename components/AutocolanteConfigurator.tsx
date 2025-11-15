@@ -5,6 +5,7 @@ import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
 import DeliveryInfo from "@/components/DeliveryInfo";
+import DeliveryEstimation from "./DeliveryEstimation";
 import { usePathname, useRouter } from "next/navigation";
 
 /* GALLERY (exemplu) — păstrăm același pattern ca la bannere */
@@ -497,6 +498,9 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                     <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span>
                     <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
                   </p>
+                  <div className="my-2">
+                    <DeliveryEstimation />
+                  </div>
                   <p className="text-sm text-muted">Preț per bucată: {pricePerUnitLocal} RON</p>
                 </div>
 

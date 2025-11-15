@@ -4,6 +4,7 @@ import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
 import DeliveryInfo from "@/components/DeliveryInfo";
+import DeliveryEstimation from "./DeliveryEstimation";
 import { usePathname, useRouter } from "next/navigation";
 
 /* GALLERY (exemplu pentru verso) */
@@ -531,6 +532,9 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                     <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span>
                     <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
                   </p>
+                  <div className="my-2">
+                    <DeliveryEstimation />
+                  </div>
                 </div>
 
                 <div className="mt-4">

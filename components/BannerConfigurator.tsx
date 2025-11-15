@@ -3,6 +3,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, ChevronDown } from "lucide-react";
 import DeliveryInfo from "@/components/DeliveryInfo";
+import DeliveryEstimation from "./DeliveryEstimation";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import FaqAccordion from "./FaqAccordion";
@@ -255,10 +256,11 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               </AccordionStep>
             </div>
             <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border-t-0 border-gray-200 py-4 lg:py-0 lg:mt-8">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center mb-2">
                 <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(totalShown)}</p>
                 <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
               </div>
+              <DeliveryEstimation />
             </div>
           </div>
           <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'banner'} /></div>
