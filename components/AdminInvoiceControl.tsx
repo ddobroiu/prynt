@@ -9,9 +9,8 @@ type Props = {
 };
 
 export default function AdminInvoiceControl({ id, invoiceLink: initialLink, billing: initialBilling }: Props) {
-  const [link, setLink] = useState<string>(initialLink || "");
-  const [cui, setCui] = useState<string>(initialBilling?.cui || "");
-  const [name, setName] = useState<string>(initialBilling?.name || "");
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(initialLink || null);
+  const [uploadedName, setUploadedName] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -24,16 +23,26 @@ export default function AdminInvoiceControl({ id, invoiceLink: initialLink, bill
     try {
       const fd = new FormData();
       if (file) fd.append('file', file, file.name);
-      fd.append('billing', JSON.stringify({ cui, name }));
+      // ensure cookies are sent so server can verify admin session
       const res = await fetch(`/api/admin/order/${encodeURIComponent(id)}/upload-invoice`, {
         method: 'POST',
         body: fd,
+        credentials: 'same-origin',
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || res.statusText);
-      const url = data.url || '';
-      setLink(url);
-      setMessage('Factura încărcată și salvată. Clientul a fost anunțat.');
+
+      const ct = (res.headers.get('content-type') || '').toLowerCase();
+      let data: any = null;
+      if (ct.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        try { data = JSON.parse(text); } catch { data = { message: text }; }
+      }
+      if (!res.ok) throw new Error(data?.message || res.statusText || 'Upload failed');
+      const url = data.url || data.url || null;
+      setUploadedUrl(url);
+      setUploadedName(file?.name || null);
+      setMessage('Factura încărcată cu succes. Clientul a fost anunțat.');
     } catch (err: any) {
       setMessage('Eroare upload: ' + (err?.message || err));
     } finally {
@@ -42,25 +51,23 @@ export default function AdminInvoiceControl({ id, invoiceLink: initialLink, bill
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="text-xs text-muted">Factură</div>
-      <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="Link factură (paste)" className="rounded-md border px-2 py-1 bg-white/5" />
-      <div className="flex gap-2">
-        <input value={cui} onChange={(e) => setCui(e.target.value)} placeholder="CUI (opțional)" className="rounded-md border px-2 py-1 bg-white/5" />
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Denumire firmă" className="rounded-md border px-2 py-1 bg-white/5" />
+    <div className="flex flex-col gap-2 max-w-[260px]">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 bg-indigo-50 rounded flex items-center justify-center text-indigo-600">📄</div>
+        <div>
+          <div className="text-sm font-medium">Factură</div>
+          <div className="text-xs text-muted">Încarcă PDF — va fi salvat și trimis clientului</div>
+        </div>
       </div>
       <div className="flex items-center gap-2">
-        <label className="inline-flex items-center gap-2 rounded-md bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 cursor-pointer">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M12 3v9" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M8 7l4-4 4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        <label className="inline-flex items-center gap-2 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 cursor-pointer">
           Încarcă PDF
           <input type="file" accept="application/pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadInvoice(f); }} style={{ display: 'none' }} />
         </label>
-        {link ? (
-          <a href={link} target="_blank" rel="noreferrer" className="text-indigo-400 underline text-sm">Descarcă</a>
-        ) : (
-          <div className="text-xs text-muted">Fără factură</div>
-        )}
-        {loading ? <span className="text-xs text-muted">Se procesează…</span> : null}
+        <div className="flex-1 text-sm">
+          {uploadedName ? <div className="text-sm font-medium">{uploadedName}</div> : <div className="text-xs text-muted">Niciun fișier încă</div>}
+        </div>
+        {loading ? <div className="text-xs text-muted">Se încarcă…</div> : null}
       </div>
       {message ? <div className="text-sm text-muted">{message}</div> : null}
     </div>
