@@ -318,6 +318,15 @@ async function sendEmails(
     })
     .join('');
 
+  // Decide which contact info to show: prefer billing data for juridical/company
+  const isCompanyBilling = (billing && (billing as any).tip_factura && (billing as any).tip_factura !== 'persoana_fizica' && ((billing as any).cui || (billing as any).name));
+  const contactName = isCompanyBilling ? ((billing as any).name || (billing as any).cui || address.nume_prenume) : (address.nume_prenume || (billing as any).name || '');
+  const contactEmail = isCompanyBilling ? ((billing as any).email || address.email) : (address.email || (billing as any).email || '');
+  const contactPhone = isCompanyBilling ? ((billing as any).telefon || (billing as any).phone || address.telefon) : (address.telefon || (billing as any).telefon || '');
+  const contactAddressLine = isCompanyBilling
+    ? buildAddressLine({ judet: (billing as any).judet, localitate: (billing as any).localitate, strada_nr: (billing as any).strada_nr }, { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr })
+    : buildAddressLine({ judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr }, { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr });
+
   // Build admin email HTML (includes artwork links / text)
   // Build quick action buttons if config allows
   let actionButtons = '';
@@ -399,13 +408,13 @@ async function sendEmails(
         <h1 style="color: #333; margin: 0 0 12px;">Comandă Nouă (${paymentType})</h1>
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Date Client</h2>
-        <p><strong>Nume:</strong> ${escapeHtml(address.nume_prenume)}</p>
-        <p><strong>Email:</strong> ${escapeHtml(address.email)}</p>
-        <p><strong>Telefon:</strong> ${escapeHtml(address.telefon)}</p>
+        <p><strong>Nume:</strong> ${escapeHtml(contactName)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(contactEmail)}</p>
+        <p><strong>Telefon:</strong> ${escapeHtml(contactPhone)}</p>
 
-        <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Adresă Livrare</h2>
-        <p>${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}${address.postCode ? ', ' + escapeHtml(address.postCode) : ''}</p>
-        ${deliveryAptHtml}
+        <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Adresă Livrare / Facturare</h2>
+        <p>${escapeHtml(contactAddressLine)}${address.postCode ? ', ' + escapeHtml(address.postCode) : ''}</p>
+        ${isCompanyBilling ? '' : deliveryAptHtml}
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Detalii Facturare</h2>
         ${billingBlockAdmin}
@@ -497,17 +506,13 @@ async function sendEmails(
         ${orderNo ? '<p style="margin:0 0 12px;color:#111;"><strong>Nr. comandă:</strong> #' + orderNo + '</p>' : ''}
         ${accountBlock}
         <div class="grid" style="display:flex;gap:16px;margin-top:12px;">
-          <div class="col" style="flex:1;min-width:0;">
-            <h3 style="margin:0 0 8px;color:#0f172a;font-size:14px;text-transform:uppercase;letter-spacing:.04em;">Livrare</h3>
-            <p style="margin:0;color:#111;font-weight:600;">${escapeHtml(address.nume_prenume)}</p>
-            <p class="muted" style="margin:2px 0 0;color:#64748b;font-size:13px">${escapeHtml(address.email)} • ${escapeHtml(address.telefon)}</p>
-            <p style="margin:6px 0 0;color:#111">${escapeHtml(address.strada_nr)}, ${escapeHtml(address.localitate)}, ${escapeHtml(address.judet)}${address.postCode ? ', ' + escapeHtml(address.postCode) : ''}</p>
-            ${clientAptHtml}
-          </div>
-          <div class="col" style="flex:1;min-width:0;">
-            <h3 style="margin:0 0 8px;color:#0f172a;font-size:14px;text-transform:uppercase;letter-spacing:.04em;">Facturare</h3>
-            ${billingBlockClient}
-          </div>
+            <div class="col" style="flex:1;min-width:0;">
+              <h3 style="margin:0 0 8px;color:#0f172a;font-size:14px;text-transform:uppercase;letter-spacing:.04em;">Livrare / Facturare</h3>
+              <p style="margin:0;color:#111;font-weight:600;">${escapeHtml(contactName)}</p>
+              <p class="muted" style="margin:2px 0 0;color:#64748b;font-size:13px">${escapeHtml(contactEmail)} • ${escapeHtml(contactPhone)}</p>
+              <p style="margin:6px 0 0;color:#111">${escapeHtml(contactAddressLine)}${address.postCode ? ', ' + escapeHtml(address.postCode) : ''}</p>
+              ${isCompanyBilling ? '' : clientAptHtml}
+            </div>
         </div>
         <h3 style="margin:16px 0 8px;color:#0f172a;font-size:14px;text-transform:uppercase;letter-spacing:.04em;">Produse</h3>
         <ul style="margin:0;padding:0;list-style:none;">
@@ -598,8 +603,8 @@ export async function fulfillOrder(
       const client: any = {
         name: clientName,
         address: billingAddressLine,
-        email: address.email,
-        phone: address.telefon,
+        email: (billing as any)?.email || address.email,
+        phone: (billing as any)?.telefon || address.telefon,
       };
       if (clientCif) client.cif = clientCif;
 

@@ -67,10 +67,10 @@ export async function POST(req: Request, ctx: any) {
           }));
 
           const client = {
-            name: orderBilling.name || orderAddress?.nume_prenume || orderAddress?.name || 'Client',
+            name: orderBilling.name || orderBilling.cui || orderAddress?.nume_prenume || orderAddress?.name || 'Client',
             address: orderBilling.strada_nr || orderAddress?.strada_nr || '',
-            email: orderAddress?.email,
-            phone: orderAddress?.telefon,
+            email: orderBilling.email || orderAddress?.email,
+            phone: orderBilling.telefon || orderBilling.phone || orderAddress?.telefon,
           };
 
           const payload = {
@@ -101,7 +101,7 @@ export async function POST(req: Request, ctx: any) {
         try {
           if (process.env.RESEND_API_KEY) {
             const resend = new Resend(process.env.RESEND_API_KEY);
-            const to = orderAddress?.email;
+            const to = (orderBilling && orderBilling.email) || orderAddress?.email;
             if (to) {
               await resend.emails.send({
                 from: process.env.EMAIL_FROM || 'contact@prynt.ro',
