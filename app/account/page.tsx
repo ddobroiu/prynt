@@ -180,7 +180,20 @@ export default async function AccountPage({
                           <div>
                             <div className="text-xs text-muted">Factură / AWB</div>
                             {o.invoiceLink ? <a href={o.invoiceLink} target="_blank" rel="noreferrer" className="text-indigo-400 underline text-sm block">Descarcă factura</a> : <div className="text-xs text-muted">Factura nu este emisă</div>}
-                            {o.awbNumber ? <div className="text-sm mt-1">AWB: <span className="font-medium">{o.awbNumber}</span></div> : null}
+                            {o.awbNumber ? (
+                              <div className="text-sm mt-1 flex items-center gap-2">
+                                AWB: <span className="font-medium">{o.awbNumber}</span>
+                                {o.awbCarrier && o.awbNumber && (() => {
+                                  const awbClean = encodeURIComponent(o.awbNumber);
+                                  const carrierLower = o.awbCarrier.toLowerCase();
+                                  let url = null;
+                                  if (carrierLower.includes('dpd')) url = `https://www.dpd.com/ro/ro/awb-tracking/?awb=${awbClean}`;
+                                  if (carrierLower.includes('fan')) url = `https://www.fancourier.ro/awb-tracking/?awb=${awbClean}`;
+                                  if (carrierLower.includes('sameday')) url = `https://sameday.ro/awb-tracking/?awb=${awbClean}`;
+                                  return url ? <a href={url} target="_blank" rel="noreferrer" className="ml-2 text-indigo-500 underline text-xs rounded px-2 py-1 bg-indigo-50 hover:bg-indigo-100 transition">Verifică AWB</a> : null;
+                                })()}
+                              </div>
+                            ) : null}
                           </div>
                         </div>
 

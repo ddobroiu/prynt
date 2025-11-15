@@ -21,6 +21,17 @@ type Order = {
 };
 
 export default function OrderDetails({ order }: { order: Order }) {
+    function getAwbTrackingUrl(awb: string | null, carrier: string | null): string | null {
+      if (!awb) return null;
+      if (!carrier) return null;
+      const awbClean = encodeURIComponent(awb);
+      const carrierLower = carrier.toLowerCase();
+      if (carrierLower.includes('dpd')) return `https://www.dpd.com/ro/ro/awb-tracking/?awb=${awbClean}`;
+      if (carrierLower.includes('fan')) return `https://www.fancourier.ro/awb-tracking/?awb=${awbClean}`;
+      if (carrierLower.includes('sameday')) return `https://sameday.ro/awb-tracking/?awb=${awbClean}`;
+      // Add more carriers as needed
+      return null;
+    }
   const [open, setOpen] = useState(false);
 
   function formatMoney(n?: number) {
@@ -84,7 +95,19 @@ export default function OrderDetails({ order }: { order: Order }) {
                   )}
 
                   {order.awbNumber ? (
-                    <div className="mt-2"><strong>AWB:</strong> {order.awbNumber} {order.awbCarrier ? `(${order.awbCarrier})` : ''}</div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <strong>AWB:</strong> {order.awbNumber} {order.awbCarrier ? `(${order.awbCarrier})` : ''}
+                      {getAwbTrackingUrl(order.awbNumber, order.awbCarrier) ? (
+                        <a
+                          href={getAwbTrackingUrl(order.awbNumber, order.awbCarrier)!}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="ml-2 text-indigo-500 underline text-xs rounded px-2 py-1 bg-indigo-50 hover:bg-indigo-100 transition"
+                        >
+                          Verifică AWB
+                        </a>
+                      ) : null}
+                    </div>
                   ) : null}
                   {order.invoiceLink ? (
                     <div className="mt-2"><a href={order.invoiceLink} target="_blank" rel="noreferrer" className="text-indigo-400 underline">Descarcă factura</a></div>
