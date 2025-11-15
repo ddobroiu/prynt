@@ -115,7 +115,7 @@ var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n
         />
       </head>
 
-  <body className="bg-ui text-ui antialiased">
+  <body className="bg-white dark:bg-black text-black dark:text-white antialiased">
     <Providers>
       <Header />
       <main>{children}</main>

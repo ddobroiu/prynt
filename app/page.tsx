@@ -1,7 +1,15 @@
 'use client'; // Necesar pentru a folosi 'useState'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PRODUCTS } from '@/lib/products';
+
+// --- Hooks ---
+function useMounted() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return mounted;
+}
+
 
 // --- Components ---
 const ArrowRightIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -11,7 +19,7 @@ const ArrowRightIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 const TestimonialCard: React.FC<{ name: string; text: string; }> = ({ name, text }) => (
-  <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6 shadow-lg">
+  <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6 shadow-lg transition-all duration-300 hover:border-indigo-500/50 hover:shadow-indigo-500/20 hover:-translate-y-1">
     <p className="text-lg italic text-zinc-300">“{text}”</p>
     <p className="mt-4 font-semibold text-zinc-400">— {name}</p>
   </div>
@@ -51,6 +59,7 @@ const ConfiguratorCard: React.FC<ConfiguratorItem> = ({ title, href, image }) =>
 // --- Page ---
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState('Publicitar');
+  const isMounted = useMounted();
 
   const shopItems = PRODUCTS.slice(0, 8).map((p) => {
     const category = String(p.metadata?.category ?? '').toLowerCase();
@@ -119,22 +128,22 @@ export default function HomePage() {
     <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white dark:bg-grid-zinc-800/[0.2]">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         {/* --- HERO --- */}
-        <section className="relative flex flex-col items-center justify-center pt-24 pb-20 text-center">
-            <div className="absolute inset-0 top-1/4 bg-[radial-gradient(ellipse_at_center,rgba(12,74,220,0.1),transparent_60%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(12,74,220,0.2),transparent_60%)] -z-10" />
+        <section className="relative flex flex-col items-center justify-center pt-24 pb-20 text-center overflow-hidden">
+            <div className="absolute inset-0 top-1/4 bg-[radial-gradient(ellipse_at_center,rgba(12,74,220,0.1),transparent_60%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(12,74,220,0.2),transparent_60%)] -z-10 animate-pulse-slow" />
             <img
               src="/logo.png"
               alt="Prynt.ro Logo"
               width={120}
               height={120}
-              className="mb-6 rounded-full border-2 border-zinc-200 dark:border-white/10 shadow-lg dark:shadow-2xl dark:shadow-black/50 transition-transform duration-300 hover:scale-105"
+              className={`mb-6 rounded-full border-2 border-zinc-200 dark:border-white/10 shadow-lg dark:shadow-2xl dark:shadow-black/50 transition-all duration-700 hover:scale-105 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
             />
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-linear-to-b from-black to-zinc-700 dark:from-white dark:to-zinc-400">
+            <h1 className={`text-5xl md:text-7xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-linear-to-b from-black to-zinc-700 dark:from-white dark:to-zinc-400 transition-all duration-700 delay-200 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               Tipar digital de impact
             </h1>
-            <p className="mt-4 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
+            <p className={`mt-4 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400 transition-all duration-700 delay-300 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               Transformăm ideile tale în realitate. Configurează online, vezi prețul instant și primești produsele ultra-rapid.
             </p>
-            <div className="mt-8 flex gap-4">
+            <div className={`mt-8 flex gap-4 transition-all duration-700 delay-[400ms] ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                 <a href="#configuratoare" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-lg transition-transform hover:scale-105 hover:bg-indigo-500">
                     Vezi produsele
                     <ArrowRightIcon className="h-5 w-5" />
@@ -168,12 +177,12 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div>
+          <div className="relative">
             {CONFIG_GROUPS.map((group) => (
               <div
                 key={group.title}
-                className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 transition-opacity duration-500 ${
-                    activeTab === group.title ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'
+                className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 transition-opacity duration-300 ${
+                    activeTab === group.title ? 'opacity-100' : 'opacity-0 absolute inset-0 pointer-events-none'
                 }`}
               >
                 {group.items.map((item) => (
