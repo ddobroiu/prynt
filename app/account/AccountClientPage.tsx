@@ -6,6 +6,7 @@ import ChangePasswordForm from "@/components/ChangePasswordForm";
 import RequestPasswordReset from "@/components/RequestPasswordReset";
 import SignOutButton from "@/components/SignOutButton";
 import OrderDetails from "@/components/OrderDetails";
+import UserDetailsForm from "@/components/UserDetailsForm";
 
 // Tipuri de date primite ca props
 type Order = {
@@ -113,8 +114,7 @@ const tabs = ["Comenzi", "Adrese", "Detalii Cont", "Securitate"];
         {activeTab === "Detalii Cont" && (
           <section>
             <h2 className="text-xl font-semibold mb-4">Detalii Cont</h2>
-            <p className="text-muted">Aici vei putea să îți actualizezi detaliile contului. (Funcționalitate în lucru)</p>
-            {/* Aici va veni componenta pentru actualizarea detaliilor */}
+            <UserDetailsForm session={session} />
           </section>
         )}
 
