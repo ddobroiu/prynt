@@ -253,7 +253,7 @@ export default function Header() {
           <nav className="justify-self-center flex items-center gap-3">
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-base font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-xl ring-2 ring-indigo-400/30 border-2 border-white/20 dark:border-slate-900/40 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 active:scale-[0.98] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-offset-slate-950"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-base font-bold bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-xl ring-2 ring-indigo-400/30 border-2 border-white/20 dark:border-slate-900/40 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 active:scale-[0.98] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-offset-slate-950"
               style={{ marginRight: '12px' }}
             >
               Shop
@@ -272,13 +272,13 @@ export default function Header() {
                     type="button"
                     aria-haspopup="menu"
                     aria-expanded={openDropdown === l.label}
-                    className={`group inline-flex items-center gap-2 rounded-xl px-4 py-2 text-base font-bold shadow-md backdrop-blur-md border border-gray-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 relative overflow-hidden`}
+                    className={`group inline-flex items-center gap-2 rounded-xl px-4 py-2 text-base font-bold shadow-md backdrop-blur-md border border-gray-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 relative overflow-hidden`}
                     onClick={() => setOpenDropdown((cur) => (cur === l.label ? null : l.label))}
                   >
                     {l.icon}
                     <span className="relative drop-shadow-sm">
                       {l.label}
-                      <span className={`absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-300 ${openDropdown === l.label ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"}`}></span>
+                      <span className={`absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-300 ${openDropdown === l.label ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"}`}></span>
                     </span>
                     <ChevronDown
                       size={18}
@@ -301,11 +301,11 @@ export default function Header() {
                         key={c.href}
                         href={c.href}
                         role="menuitem"
-                        className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-base font-bold shadow-sm border border-gray-100 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                        className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-base font-bold shadow-sm border border-gray-100 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                         onClick={() => setOpenDropdown(null)}
                       >
                         {/* Iconiță generică pentru submeniu, se poate personaliza pe fiecare categorie */}
-                        <span className="inline-block w-5 h-5 bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full flex items-center justify-center text-white/80 mr-1">
+                        <span className="inline-block w-5 h-5 bg-linear-to-r from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full flex items-center justify-center text-white/80 mr-1">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                         </span>
                         {c.label}
@@ -317,12 +317,12 @@ export default function Header() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="group rounded-xl px-4 py-2 text-base font-bold shadow-md backdrop-blur-md border border-gray-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 relative overflow-hidden flex items-center gap-2"
+                  className="group rounded-xl px-4 py-2 text-base font-bold shadow-md backdrop-blur-md border border-gray-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 relative overflow-hidden flex items-center gap-2"
                 >
                   {l.icon}
                   <span className="relative drop-shadow-sm">
                     {l.label}
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-300 scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"></span>
+                    <span className="absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-300 scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"></span>
                   </span>
                 </Link>
               )
@@ -333,14 +333,14 @@ export default function Header() {
           <div className="justify-self-end flex items-center gap-5">
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-base font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-xl ring-2 ring-indigo-400/30 border-2 border-white/20 dark:border-slate-900/40 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 active:scale-[0.98] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-offset-slate-950"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-base font-bold bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-xl ring-2 ring-indigo-400/30 border-2 border-white/20 dark:border-slate-900/40 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 active:scale-[0.98] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-offset-slate-950"
               style={{ marginRight: '12px' }}
             >
               Shop
             </Link>
 
             {/* Separare vizuală */}
-            <div className="w-0.5 h-8 bg-gradient-to-b from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full mx-2 opacity-70" />
+            <div className="w-0.5 h-8 bg-linear-to-b from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full mx-2 opacity-70" />
 
             <ThemeToggle />
 
