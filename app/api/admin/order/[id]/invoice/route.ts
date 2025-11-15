@@ -48,6 +48,8 @@ export async function POST(req: Request, ctx: any) {
       if (!order) return NextResponse.json({ ok: false, message: 'Order not found' }, { status: 404 });
 
       let linkToSave: string | null = null;
+      const orderAddress = typeof order.address === 'object' ? (order.address as any) : {};
+      const orderBillingBase = typeof order.billing === 'object' ? (order.billing as any) : {};
 
       if (generate) {
         // Try to create invoice via Oblio using provided billing or order.billing
@@ -99,7 +101,7 @@ export async function POST(req: Request, ctx: any) {
         try {
           if (process.env.RESEND_API_KEY) {
             const resend = new Resend(process.env.RESEND_API_KEY);
-            const to = order.address?.email;
+            const to = orderAddress?.email;
             if (to) {
               await resend.emails.send({
                 from: process.env.EMAIL_FROM || 'contact@prynt.ro',
