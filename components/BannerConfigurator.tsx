@@ -112,7 +112,7 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
 
   const bannerFaqs: QA[] = [
     { question: "Ce materiale sunt disponibile pentru bannere?", answer: "Oferim două tipuri principale: Frontlit 440g (Standard), ideal pentru majoritatea aplicațiilor, și Frontlit 510g (Premium), pentru o durabilitate sporită." },
-    { question: "Ce înseamnă finisajele 'Tiv și Capse'?", answer: "Acesta este finisajul nostru standard, inclus în preț. Tivul este o margine întărită, iar capsele sunt inele metalice aplicate la ~50 cm distanță, pentru o prindere sigură." },
+    { question: "Ce înseamnă finisajele 'Tiv și Capse'?", answer: "Acesta este finisajul nostru standard, incluse în preț. Tivul este o margine întărită, iar capsele sunt inele metalice aplicate la ~50 cm distanță, pentru o prindere sigură." },
     { question: "Când am nevoie de 'Găuri pentru vânt'?", answer: "Opțiunea este recomandată pentru bannerele de mari dimensiuni expuse în zone cu vânt puternic. Perforațiile reduc presiunea asupra materialului." },
     { question: "Cum pot trimite grafica pentru imprimare?", answer: "Puteți încărca fișierul direct în configurator, adăuga un link de descărcare, sau puteți plasa comanda acum și încărca fișierul mai târziu din contul de client." }
   ];
@@ -147,6 +147,16 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
               premium, sunt selectate pentru a rezista la condiții meteo variate, de la ploaie la raze UV, asigurând o viață
               lungă produsului tău publicitar.
             </p>
+            <h3>Structură Preț pe Metru Pătrat</h3>
+            <p>Prețul pe metru pătrat este calculat în funcție de suprafața totală a comenzii, oferindu-vă un preț mai bun pentru cantități mai mari:</p>
+            <ul>
+              <li>Sub 1 m²: <strong>100 RON / m²</strong></li>
+              <li>Între 1 și 5 m²: <strong>75 RON / m²</strong></li>
+              <li>Între 5 și 20 m²: <strong>60 RON / m²</strong></li>
+              <li>Între 20 și 50 m²: <strong>45 RON / m²</strong></li>
+              <li>Peste 50 m²: <strong>35 RON / m²</strong></li>
+            </ul>
+            <p>Costurile pentru materialul premium (+10%) și finisaje opționale (găuri pentru vânt, +10%) se adaugă la acest preț de bază.</p>
           </div>
         )}
         {activeTab === "recenzii" && (
@@ -190,9 +200,7 @@ export default function BannerConfigurator({
 
   const [lengthText, setLengthText] = useState(initW ? String(initW) : "");
   const [heightText, setHeightText] = useState(initH ? String(initH) : "");
-  const galleryImages = productImage
-    ? [productImage, "/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"]
-    : ["/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"];
+  const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"] : ["/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp", "/products/banner/4.webp"], [productImage]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeImage, setActiveImage] = useState<string>(galleryImages[0]);
   const [designOption, setDesignOption] = useState<DesignOption>("upload");
@@ -315,39 +323,31 @@ export default function BannerConfigurator({
     <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* COL-STÂNGA: Galerie Imagini (Sticky) */}
-          <div className="lg:sticky top-24 h-max">
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-              <div className="aspect-square">
-                <img
-                  src={activeImage}
-                  alt="Banner preview"
-                  className="h-full w-full object-cover transition-all duration-300"
-                />
+          {/* COL-STÂNGA: Galerie Imagini & Tab-uri SEO */}
+          <div className="lg:col-span-1 space-y-8">
+            <div className="lg:sticky top-24">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                <div className="aspect-square">
+                  <img src={activeImage} alt="Banner preview" className="h-full w-full object-cover transition-all duration-300" />
+                </div>
+                <div className="p-2 grid grid-cols-4 gap-2">
+                  {galleryImages.map((src, i) => (
+                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-lg transition aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}>
+                      <img src={src} alt="Thumb" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="p-2 grid grid-cols-4 gap-2">
-                {galleryImages.map((src, i) => (
-                  <button
-                    key={src}
-                    onClick={() => {
-                      setActiveImage(src);
-                      setActiveIndex(i);
-                    }}
-                    className={`relative overflow-hidden rounded-lg transition aspect-square ${
-                      activeIndex === i
-                        ? "ring-2 ring-offset-2 ring-indigo-500"
-                        : "hover:opacity-80"
-                    }`}
-                  >
-                    <img src={src} alt="Thumb" className="w-full h-full object-cover" />
-                  </button>
-                ))}
+              
+              {/* Tab-urile SEO mutate aici */}
+              <div className="hidden lg:block">
+                 <ProductTabs productSlug={productSlug || 'banner'} />
               </div>
             </div>
           </div>
 
           {/* COL-DREAPTA: Header & Configurator */}
-          <div>
+          <div className="lg:col-span-1">
             <header className="mb-6">
               <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
                 <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900">Configurator Banner</h1>
@@ -475,36 +475,28 @@ export default function BannerConfigurator({
                   {designOption === "upload" && (
                     <div className="space-y-4">
                       <div>
-                        <label className="field-label">Încarcă fișier</label>
-                        <input
-                          type="file"
-                          accept=".pdf,.ai,.psd,.jpg,.jpeg,.png"
-                          onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)}
-                          className="input-file"
-                        />
+                        <label className="field-label">Încarcă fișierul tău</label>
+                        <div className="mt-1 flex items-center gap-4">
+                           <label htmlFor="file-upload" className="cursor-pointer bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+                               <span>Alege fișier</span>
+                               <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".pdf,.ai,.psd,.jpg,.jpeg,.png" onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)} />
+                           </label>
+                           {artworkUrl && <p className="text-sm font-medium text-green-600">Fișier selectat.</p>}
+                           {uploading && <p className="text-sm font-medium text-indigo-600">Se încarcă...</p>}
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="w-full border-t border-gray-300" /></div>
+                        <div className="relative flex justify-center"><span className="px-2 bg-white text-sm text-gray-500">sau</span></div>
                       </div>
                       <div>
-                        <label className="field-label">Sau adaugă un link</label>
-                        <input
-                          type="url"
-                          value={artworkLink}
-                          onChange={(e) => setArtworkLink(e.target.value)}
-                          placeholder="https://..."
-                          className="input"
-                        />
+                        <label className="field-label">Adaugă un link de descărcare</label>
+                        <input type="url" value={artworkLink} onChange={(e) => setArtworkLink(e.target.value)} placeholder="https://..." className="input" />
                       </div>
                       <div className="text-xs text-gray-500 pt-2 border-t border-gray-200">
                         Nu ai grafica la îndemână? Poți plasa comanda și o încarci mai târziu din{" "}
-                        <Link
-                          href="/account"
-                          className="font-semibold text-indigo-600 hover:underline"
-                        >
-                          contul tău
-                        </Link>
-                        .
+                        <Link href="/account" className="font-semibold text-indigo-600 hover:underline">contul tău</Link>.
                       </div>
-                      {uploading && <p className="text-sm font-medium text-indigo-600">Se încarcă...</p>}
-                      {artworkUrl && <p className="text-sm font-medium text-green-600">Fișier încărcat.</p>}
                       {uploadError && <p className="text-sm font-medium text-red-600">{uploadError}</p>}
                     </div>
                   )}
@@ -532,85 +524,11 @@ export default function BannerConfigurator({
           </div>
         </div>
 
-        {/* NOU: Secțiunea de Tab-uri SEO, sub configurator */}
-        <div className="mt-16">
-          <ProductTabs productSlug={productSlug || 'banner'} />
+        {/* Afișare Tab-uri pe mobil, sub configurator */}
+        <div className="lg:hidden col-span-1">
+           <ProductTabs productSlug={productSlug || 'banner'} />
         </div>
       </div>
-
-      {/* Footer pentru mobil */}
-      <div className="sticky bottom-0 bg-white/80 backdrop-blur-sm border-t-2 border-gray-200 py-4 lg:hidden">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-2xl font-extrabold text-gray-900">{formatMoneyDisplay(totalShown)}</p>
-            </div>
-            <button
-              onClick={handleAddToCart}
-              disabled={!canAdd}
-              className="btn-primary w-1/2 py-3 text-base font-bold"
-            >
-              <ShoppingCart size={20} />
-              <span className="ml-2">Adaugă</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Modal Detalii */}
-      {detailsOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          onClick={() => setDetailsOpen(false)}
-        >
-          <div
-            className="relative bg-white rounded-xl shadow-xl w-full max-w-lg p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Detalii Produs & Comandă</h3>
-            <div className="text-sm text-gray-600 space-y-3">
-              <p>
-                <b>Materiale:</b> Folosim materiale durabile, rezistente la condiții meteo. Opțiunea Premium (510g) oferă o
-                rezistență sporită.
-              </p>
-              <p>
-                <b>Finisaje Standard:</b> Toate bannerele vin cu tiv pentru extra-rezistență și capse metalice pentru
-                prindere ușoară, incluse în preț.
-              </p>
-              <p>
-                <b>Găuri pentru vânt:</b> Această opțiune este recomandată pentru bannerele de mari dimensiuni expuse în
-                zone cu vânt puternic. Adaugă un cost de 10%.
-              </p>
-              <p>
-                <b>Grafică Profesională:</b> Dacă alegi această opțiune (+{PRO_DESIGN_FEE} RON), un designer grafic te va
-                contacta pentru a crea un design personalizat conform indicațiilor tale.
-              </p>
-            </div>
-            <div className="mt-6 text-right">
-              <button onClick={() => setDetailsOpen(false)} className="btn-primary">
-                Am înțeles
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toasts */}
-      <div
-        id="added-toast"
-        className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`}
-        aria-live="polite"
-      >
-        Produs adăugat în coș
-      </div>
-      {errorToast && (
-        <div
-          className={`toast-error ${errorToast ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`}
-          aria-live="assertive"
-        >
-          {errorToast}
-        </div>
-      )}
     </main>
   );
 }
