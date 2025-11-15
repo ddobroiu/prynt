@@ -6,6 +6,7 @@ import DeliveryInfo from "@/components/DeliveryInfo";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import FaqAccordion from "./FaqAccordion";
+import Reviews from "./Reviews";
 
 /* GALLERY (exemplu) */
 const GALLERY = [
@@ -55,12 +56,24 @@ type LocalPriceOutput = {
 const PRO_DESIGN_FEE = 50; // Exemplu de taxă pentru design profesional
 
 const localCalculatePrice = (input: PriceInput): LocalPriceOutput => {
-  const basePrice = 100; // Preț de bază pentru calcul
-  const sqm = (input.width_cm * input.height_cm) / 10000; // Conversie la metri pătrați
-  const materialCost = input.material === "frontlit_510" ? 10 : 0; // Cost suplimentar pentru materialul premium
-  const windHoleCost = input.want_wind_holes ? 10 : 0;
-  const hemAndGrommetsCost = input.want_hem_and_grommets ? 5 : 0;
-  const totalPrice = basePrice + materialCost + windHoleCost + hemAndGrommetsCost;
+  if (input.width_cm <= 0 || input.height_cm <= 0 || input.quantity <= 0) {
+    return { finalPrice: 0, total_sqm: 0, pricePerSqmAfterSurcharges: 0 };
+  }
+
+  const sqm_per_unit = (input.width_cm / 100) * (input.height_cm / 100);
+  const total_sqm = sqm_per_unit * input.quantity;
+
+  let pricePerSqmBand = 35;
+  if (total_sqm < 1) pricePerSqmBand = 100;
+  else if (total_sqm <= 5) pricePerSqmBand = 75;
+  else if (total_sqm <= 20) pricePerSqmBand = 60;
+  else if (total_sqm <= 50) pricePerSqmBand = 45;
+  else pricePerSqmBand = 35;
+
+  let multiplier = 1;
+  if (input.material === "frontlit_510") multiplier *= 1.10;
+  if (input.want_hem_and_grommets) multiplier *= 1.10;
+  if (input.want_wind_holes) multiplier *= 1.10;
 
   const pricePerSqmAfterSurcharges = roundMoney(pricePerSqmBand * multiplier);
   const final = roundMoney(total_sqm * pricePerSqmAfterSurcharges);
@@ -94,8 +107,15 @@ const ConfigStep = ({
 );
 
 /* NOU: Componenta pentru Tab-uri SEO */
-const ProductTabs = () => {
+const ProductTabs = ({ productSlug }: { productSlug: string }) => {
   const [activeTab, setActiveTab] = useState("descriere");
+
+  const bannerFaqs: QA[] = [
+    { question: "Ce materiale sunt disponibile pentru bannere?", answer: "Oferim două tipuri principale: Frontlit 440g (Standard), ideal pentru majoritatea aplicațiilor, și Frontlit 510g (Premium), pentru o durabilitate sporită." },
+    { question: "Ce înseamnă finisajele 'Tiv și Capse'?", answer: "Acesta este finisajul nostru standard, inclus în preț. Tivul este o margine întărită, iar capsele sunt inele metalice aplicate la ~50 cm distanță, pentru o prindere sigură." },
+    { question: "Când am nevoie de 'Găuri pentru vânt'?", answer: "Opțiunea este recomandată pentru bannerele de mari dimensiuni expuse în zone cu vânt puternic. Perforațiile reduc presiunea asupra materialului." },
+    { question: "Cum pot trimite grafica pentru imprimare?", answer: "Puteți încărca fișierul direct în configurator, adăuga un link de descărcare, sau puteți plasa comanda acum și încărca fișierul mai târziu din contul de client." }
+  ];
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-200 mt-12">
@@ -121,35 +141,18 @@ const ProductTabs = () => {
               noastre personalizate sunt soluția ideală. Imprimate la o calitate fotografică excepțională pe materiale
               rezistente, acestea garantează un impact vizual maxim și o durabilitate îndelungată.
             </p>
-
-            <h3>Cum Comand?</h3>
-            <ol>
-              <li>
-                <strong>Introdu Dimensiunile:</strong> Specifică lungimea și înălțimea în centimetri. Sistemul va calcula
-                automat suprafața și prețul.
-              </li>
-              <li>
-                <strong>Alege Materialul:</strong> Optează pentru materialul standard (Frontlit 440g) pentru uz general sau
-                premium (Frontlit 510g) pentru o rezistență superioară.
-              </li>
-              <li>
-                <strong>Selectează Finisajele:</strong> Toate bannerele vin cu tiv și capse incluse. Poți adăuga opțional
-                găuri pentru vânt, recomandate pentru suprafețe mari.
-              </li>
-              <li>
-                <strong>Trimite Grafica:</strong> Încarcă designul tău, trimite un link sau alege să lucrăm noi la grafică
-                pentru tine. Poți finaliza comanda și fără grafică, încărcând-o ulterior din contul tău.
-              </li>
-            </ol>
+            <p>
+              Utilizăm tehnologie de print de ultimă generație pentru a ne asigura că fiecare detaliu al graficii tale este
+              redat cu acuratețe, de la culori vibrante la texte clare. Materialele, fie că alegi varianta standard sau cea
+              premium, sunt selectate pentru a rezista la condiții meteo variate, de la ploaie la raze UV, asigurând o viață
+              lungă produsului tău publicitar.
+            </p>
           </div>
         )}
         {activeTab === "recenzii" && (
-          <div>
-            <h3 className="text-lg font-semibold">Recenzii de la clienți</h3>
-            <p className="text-sm text-gray-500 mt-2">Funcționalitatea de recenzii va fi disponibilă în curând.</p>
-          </div>
+          <Reviews productSlug={productSlug} />
         )}
-        {activeTab === "faq" && <FaqAccordion />}
+        {activeTab === "faq" && <FaqAccordion qa={bannerFaqs} />}
       </div>
     </div>
   );
@@ -525,9 +528,13 @@ export default function BannerConfigurator({
               </section>
 
               {/* NOU: Tab-uri SEO */}
-              <ProductTabs />
             </div>
           </div>
+        </div>
+
+        {/* NOU: Secțiunea de Tab-uri SEO, sub configurator */}
+        <div className="mt-16">
+          <ProductTabs productSlug={productSlug || 'banner'} />
         </div>
       </div>
 
