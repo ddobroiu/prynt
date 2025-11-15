@@ -24,6 +24,7 @@ model User {
   sessions     Session[]
   passwordResetTokens PasswordResetToken[]
   graphics     UserGraphic[]
+  reviews      Review[]
 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -149,4 +150,19 @@ model PasswordResetToken {
   token     String   @unique
   expires   DateTime
   createdAt DateTime @default(now())
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int      // Rating de la 1 la 5
+  title       String?
+  content     String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+
+  productSlug String   // ex: "banner", "pliante"
+  
+  @@index([productSlug])
 }
