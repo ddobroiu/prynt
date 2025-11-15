@@ -268,7 +268,7 @@ export default function Header() {
           <div />
 
           {/* Centered menu with modern effects */}
-          <nav className="justify-self-center flex items-center gap-3">
+          <nav className="justify-self-center flex items-center gap-4">
             {LINKS.map((l) =>
               l.children ? (
                 <div
@@ -283,23 +283,18 @@ export default function Header() {
                     type="button"
                     aria-haspopup="menu"
                     aria-expanded={openDropdown === l.label}
-                    className="group inline-flex items-center gap-1 rounded-lg px-5 py-3 text-[15px] font-semibold text-slate-800 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-slate-800/60 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                    className={`group inline-flex items-center gap-2 rounded-full px-6 py-3 text-base font-semibold tracking-wide shadow-sm
+                      ${openDropdown === l.label ? "bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white" : "bg-white/90 dark:bg-slate-900/80 text-slate-800 dark:text-slate-100"}
+                      hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white
+                      transition focus:outline-none focus:ring-2 focus:ring-indigo-500/30 border border-gray-200 dark:border-slate-800`}
                     onClick={() => setOpenDropdown((cur) => (cur === l.label ? null : l.label))}
                   >
                     <span className="relative">
                       {l.label}
-                      <span
-                        className={`
-                          pointer-events-none absolute left-0 -bottom-1 h-0.5 w-full origin-left scale-x-0
-                          bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600
-                          transition-transform duration-300 group-hover:scale-x-100
-                          ${openDropdown === l.label ? "scale-x-100" : ""}
-                        `}
-                      />
                     </span>
                     <ChevronDown
-                      size={16}
-                      className={`opacity-70 transition-transform ${openDropdown === l.label ? "rotate-180 opacity-100" : ""}`}
+                      size={18}
+                      className={`ml-1 opacity-70 transition-transform ${openDropdown === l.label ? "rotate-180 opacity-100" : ""}`}
                     />
                   </button>
 
@@ -308,8 +303,8 @@ export default function Header() {
                     className={`
                       absolute left-1/2 -translate-x-1/2 mt-2 w-64 rounded-2xl
                       border border-gray-200/80 dark:border-slate-800/80
-                      bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-2
-                      shadow-lg ring-1 ring-black/5
+                      bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl p-2
+                      shadow-xl ring-1 ring-black/5
                       z-120 transition-all origin-top pointer-events-auto
                       ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}
                     `}
@@ -319,11 +314,7 @@ export default function Header() {
                         key={c.href}
                         href={c.href}
                         role="menuitem"
-                        className="
-                          block rounded-xl px-4 py-2 text-[15px] font-medium
-                          text-slate-800 dark:text-slate-100
-                          hover:bg-gray-100/70 dark:hover:bg-slate-800/70 transition
-                        "
+                        className="block rounded-full px-4 py-2 text-base font-medium text-slate-800 dark:text-slate-100 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition"
                         onClick={() => setOpenDropdown(null)}
                       >
                         {c.label}
@@ -335,23 +326,9 @@ export default function Header() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="
-                    group rounded-xl px-4 py-2 font-semibold
-                    text-slate-800 dark:text-slate-100
-                    hover:bg-gray-100/60 dark:hover:bg-slate-800/60 transition
-                    focus:outline-none focus:ring-2 focus:ring-indigo-500/30
-                  "
+                  className="group rounded-full px-6 py-3 text-base font-semibold tracking-wide shadow-sm bg-white/90 dark:bg-slate-900/80 text-slate-800 dark:text-slate-100 border border-gray-200 dark:border-slate-800 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                 >
-                  <span className="relative">
-                    {l.label}
-                    <span
-                      className="
-                        pointer-events-none absolute left-0 -bottom-1 h-0.5 w-full origin-left scale-x-0
-                        bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600
-                        transition-transform duration-300 group-hover:scale-x-100
-                      "
-                    />
-                  </span>
+                  <span className="relative">{l.label}</span>
                 </Link>
               )
             )}
