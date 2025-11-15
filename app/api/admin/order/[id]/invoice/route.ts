@@ -53,7 +53,8 @@ export async function POST(req: Request, ctx: any) {
         // Try to create invoice via Oblio using provided billing or order.billing
         try {
           const tokenOblio = await getOblioAccessToken();
-          const orderBilling = billing || order.billing || {};
+          const orderBilling = billing || (typeof order.billing === 'object' ? (order.billing as any) : {}) || {};
+          const orderAddress = typeof order.address === 'object' ? (order.address as any) : {};
           const orderItems = (order.items as any[]) || [];
           const products = orderItems.map((it: any) => ({
             name: it.name || 'Produs',
@@ -64,10 +65,10 @@ export async function POST(req: Request, ctx: any) {
           }));
 
           const client = {
-            name: orderBilling.name || order.address?.nume_prenume || order.address?.name || 'Client',
-            address: orderBilling.strada_nr || order.address?.strada_nr || '',
-            email: order.address?.email,
-            phone: order.address?.telefon,
+            name: orderBilling.name || orderAddress?.nume_prenume || orderAddress?.name || 'Client',
+            address: orderBilling.strada_nr || orderAddress?.strada_nr || '',
+            email: orderAddress?.email,
+            phone: orderAddress?.telefon,
           };
 
           const payload = {
