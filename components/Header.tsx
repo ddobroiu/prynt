@@ -10,36 +10,41 @@ import { ChevronDown, Menu, ShoppingCart, X, User } from "lucide-react";
 // --- Sub-components for better structure ---
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <Link href={href} className="text-sm font-medium text-muted hover:text-text transition-colors">
+  <Link
+    href={href}
+    className="relative text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors after:absolute after:-bottom-0.5 after:left-0 after:w-full after:h-0.5 after:bg-blue-600 after:scale-x-0 after:origin-left after:transition-transform after:duration-300 hover:after:scale-x-100"
+  >
     {children}
   </Link>
 );
 
 const DesktopNav = () => {
   return (
-    <nav className="hidden lg:flex items-center gap-8">
+    <nav className="hidden lg:flex items-center gap-10">
       {siteConfig.headerNav.map((item) =>
         item.children ? (
           <div key={item.label} className="relative group focus-within:z-50">
             <button
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 hover:text-blue-600 focus:text-blue-600 transition-colors outline-none"
+              className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-gray-900 focus:text-blue-600 transition-colors outline-none"
               tabIndex={0}
               aria-haspopup="true"
               aria-expanded="false"
             >
               {item.label}
-              <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />
+              <ChevronDown size={14} className="transition-transform duration-300 ease-out group-hover:rotate-180" />
             </button>
             {/* Dropdown */}
-            <div className="absolute top-full left-0 mt-3 w-56 rounded-xl bg-white shadow-xl border border-gray-200 p-2 z-50 
-                           opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100 transition-all duration-200 ease-in-out
-                           transform-gpu origin-top-left pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto">
+            <div
+              className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 rounded-xl bg-white shadow-lg border border-gray-100 p-2 z-50 
+                           opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100 
+                           transition-all duration-300 ease-out transform-gpu origin-top pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto"
+            >
               <div className="flex flex-col gap-1">
                 {item.children.map((child) => (
                   <Link
                     key={child.href}
                     href={child.href}
-                    className="px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 focus:bg-blue-100 focus:text-blue-700 transition-colors block outline-none"
+                    className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-blue-600 focus:bg-blue-50 focus:text-blue-700 transition-colors block outline-none"
                     tabIndex={0}
                   >
                     {child.label}
