@@ -23,6 +23,8 @@ export default async function OrdersPage() {
     id: o.id,
     orderNo: o.orderNo,
     createdAt: o.createdAt,
+    status: o.status,
+    canceledAt: o.canceledAt || null,
     total: Number(o.total),
     paymentType: o.paymentType,
     itemsCount: o.items.length,
