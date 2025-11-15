@@ -274,6 +274,13 @@ export default function Header() {
 
           {/* Centered menu with modern effects */}
           <nav className="justify-self-center flex items-center gap-3">
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-base font-bold bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-xl ring-2 ring-indigo-400/30 border-2 border-white/20 dark:border-slate-900/40 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 active:scale-[0.98] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-offset-slate-950"
+              style={{ marginRight: '12px' }}
+            >
+              Shop
+            </Link>
             {LINKS.map((l) =>
               l.children ? (
                 <div
