@@ -1,20 +1,28 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  // 2. Theme: Permite personalizarea culorilor, fonturilor, spațierii, etc.
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  darkMode: ['class', '[data-theme="dark"]'],
   theme: {
-    // Am inclus 'extend' pentru a nu suprascrie toate setările implicite ale Tailwind.
     extend: {
-      // Puteți adăuga aici orice culori, fonturi sau alte utilitare personalizate.
-      // De exemplu: 'backgroundColor: { 'custom-dark': '#1e293b' }'
+      colors: {
+        bg: 'var(--bg)',
+        surface: 'var(--surface)',
+        'card-bg': 'var(--card-bg)',
+        text: 'var(--text)',
+        muted: 'var(--muted)',
+        accent: 'var(--accent)',
+        'accent-600': 'var(--accent-600)',
+        border: 'var(--border)',
+        success: 'var(--success)',
+      },
     },
   },
-  
-  // 3. Plugin-uri: Adaugă funcționalități suplimentare (opțional).
   plugins: [],
-  
-  // 4. Modul întunecat (Dark Mode): Next.js implicit
-  darkMode: 'media',
 };
 
 export default config;
