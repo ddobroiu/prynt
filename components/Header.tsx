@@ -287,9 +287,6 @@ export default function Header() {
                   )}
                 </Link>
               </div>
-                      className={`ml-2 opacity-80 transition-transform ${openDropdown === l.label ? "rotate-180 opacity-100" : ""}`}
-                    ></ChevronDown>
-                  </button>
 
                   <div
                     role="menu"
