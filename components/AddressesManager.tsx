@@ -103,8 +103,18 @@ export default function AddressesManager() {
           <input className="input" placeholder="Etichetă (ex: Acasă)" value={form.label || ""} onChange={(e) => onForm("label", e.target.value)} />
           <input className="input" placeholder="Nume" value={form.nume || ""} onChange={(e) => onForm("nume", e.target.value)} />
           <input className="input" placeholder="Telefon" value={form.telefon || ""} onChange={(e) => onForm("telefon", e.target.value)} />
-          <input className="input" placeholder="Județ" value={form.judet} onChange={(e) => onForm("judet", e.target.value)} />
-          <input className="input" placeholder="Localitate" value={form.localitate} onChange={(e) => onForm("localitate", e.target.value)} />
+          <JudetSelector
+            value={form.judet}
+            onChange={v => onForm("judet", v)}
+            disabled={saving}
+          />
+          <LocalitateSelector
+            judet={form.judet}
+            value={form.localitate}
+            onChange={v => onForm("localitate", v)}
+            onPostCodeChange={v => onForm("postCode", v)}
+            disabled={saving || !form.judet}
+          />
           <input className="input md:col-span-2" placeholder="Adresă (Stradă, număr, bloc, sc., etaj, ap.)" value={form.strada_nr} onChange={(e) => onForm("strada_nr", e.target.value)} />
           <input className="input" placeholder="Cod poștal" value={form.postCode || ""} onChange={(e) => onForm("postCode", e.target.value)} />
           <label className="flex items-center gap-2 text-sm">
