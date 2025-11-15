@@ -3,6 +3,7 @@ import { verifyAdminSession } from '../../../lib/adminSession';
 import { listOrders } from '../../../lib/orderStore';
 import { signAdminAction } from '../../../lib/adminAction';
 import AdminOrderStatusControl from '@/components/AdminOrderStatusControl';
+import AdminInvoiceControl from '@/components/AdminInvoiceControl';
 
 function fmtRON(n: number) {
   return new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON', maximumFractionDigits: 2 }).format(n);
@@ -92,10 +93,15 @@ export default async function OrdersPage() {
                           <a href={o.invoiceLink} target="_blank" rel="noreferrer" className="inline-block rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1">Factura</a>
                         ) : null}
                         {/* Inline status control: dropdown to set status without navigation */}
-                        <div>
-                          {/* Client component handles fetch to /api/order/[id]/status */}
-                          {/* @ts-ignore Server->Client import allowed */}
-                          <AdminOrderStatusControl id={o.id} status={o.status} />
+                        <div className="flex items-center gap-2">
+                          <div>
+                            {/* @ts-ignore Server->Client import allowed */}
+                            <AdminOrderStatusControl id={o.id} status={o.status} />
+                          </div>
+                          <div>
+                            {/* @ts-ignore Server->Client import allowed */}
+                            <AdminInvoiceControl id={o.id} invoiceLink={o.invoiceLink} billing={o.billing} />
+                          </div>
                         </div>
                       </div>
                     </td>

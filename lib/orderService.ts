@@ -699,3 +699,6 @@ function generateRandomPassword(): string {
   }
   return out;
 }
+
+// Export helpers so other server handlers can reuse Oblio flow (admin invoice creation)
+export { getOblioAccessToken, createOblioInvoice };
