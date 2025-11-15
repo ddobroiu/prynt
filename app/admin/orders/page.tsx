@@ -4,6 +4,7 @@ import { listOrders } from '../../../lib/orderStore';
 import { signAdminAction } from '../../../lib/adminAction';
 import AdminOrderStatusControl from '@/components/AdminOrderStatusControl';
 import AdminInvoiceControl from '@/components/AdminInvoiceControl';
+import OrderDetails from '@/components/OrderDetails';
 
 function fmtRON(n: number) {
   return new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON', maximumFractionDigits: 2 }).format(n);
@@ -101,6 +102,10 @@ export default async function OrdersPage() {
                           <div>
                             {/* @ts-ignore Server->Client import allowed */}
                             <AdminInvoiceControl id={o.id} invoiceLink={o.invoiceLink} billing={o.billing} />
+                          </div>
+                          <div>
+                            {/* @ts-ignore Server->Client import allowed */}
+                            <OrderDetails order={o} />
                           </div>
                         </div>
                       </div>
