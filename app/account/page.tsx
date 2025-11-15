@@ -38,7 +38,6 @@ export default async function AccountPage({
 
   // Stats & orders (consolidated view)
   const userId = (session.user as any).id as string;
-@@ -39,133 +47,243 @@ export default async function AccountPage({
     createdAt: o.createdAt,
     status: o.status,
     canceledAt: o.canceledAt || null,
@@ -282,7 +281,6 @@ export default async function AccountPage({
 
                         <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-@@ -188,102 +306,103 @@ export default async function AccountPage({
                                   const carrierLower = o.awbCarrier.toLowerCase();
                                   let url = null;
                                   if (carrierLower.includes('dpd')) url = `https://tracking.dpd.ro/awb?awb=${awbClean}`;
