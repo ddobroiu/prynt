@@ -190,14 +190,16 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       quantity: input.quantity,
       currency: "RON",
       metadata: {
+        "Material": "Blockout 610g",
+        "Finisaje": `Tiv și capse, ${input.want_wind_holes ? "cu găuri de vânt" : "fără găuri de vânt"}`,
+        "Grafică": designOption === 'pro' ? 'Vreau grafică' : designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
+        "Laturi": sameGraphic ? "Grafică identică față-verso" : "Grafică diferită față-verso",
+        ...(designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(PRO_DESIGN_FEE) }),
+        ...(!sameGraphic && designOption !== 'pro' && { "Taxă grafică diferită": formatMoneyDisplay(DIFFERENT_GRAPHICS_FEE) }),
+        ...(designOption === 'text_only' && { "Text Față": textDesignFront }),
+        ...(!sameGraphic && designOption === 'text_only' && { "Text Spate": textDesignBack }),
         artworkUrlFront,
-        artworkUrlBack: sameGraphic ? artworkUrlFront : artworkUrlBack,
-        designOption,
-        textDesignFront,
-        textDesignBack: sameGraphic ? textDesignFront : textDesignBack,
-        proDesignFee: designOption === "pro" ? PRO_DESIGN_FEE : 0,
-        differentGraphicsFee: !sameGraphic ? DIFFERENT_GRAPHICS_FEE : 0,
-        totalSqm: priceDetailsLocal.total_sqm,
+        ...(!sameGraphic && { artworkUrlBack }),
       },
     });
     setToastVisible(true);

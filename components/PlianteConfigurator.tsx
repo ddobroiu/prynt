@@ -148,7 +148,13 @@ export default function PlianteConfigurator({ productSlug }: { productSlug?: str
       title: `Pliante - ${FOLDS[fold].label} - ${weight}g`,
       price: roundMoney(displayedTotal / quantity),
       quantity,
-      metadata: { weight, fold, designOption, proDesignFee: proFee, artworkUrl },
+      metadata: {
+        "Grosime hârtie": `${weight} g/mp`,
+        "Tip împăturire": FOLDS[fold].label,
+        "Grafică": designOption === 'pro' ? "Vreau grafică" : "Grafică proprie",
+        ...(designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(proFee) }),
+        artworkUrl
+      },
     });
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 1600);

@@ -135,7 +135,14 @@ export default function FlyerConfigurator({ productSlug }: { productSlug?: strin
       title: `Flyere ${sizeKey}`,
       price: roundMoney(displayedTotal / quantity),
       quantity,
-      metadata: { size: sizeKey, twoSided, paperWeight: paperWeightKey, designOption, proFee, artworkUrl },
+      metadata: {
+        "Dimensiune": SIZES.find(s => s.key === sizeKey)?.label || sizeKey,
+        "Print": twoSided ? "Față-Verso" : "O față",
+        "Hârtie": `${paperWeightKey} g/mp`,
+        "Grafică": designOption === 'pro' ? "Vreau grafică" : "Grafică proprie",
+        ...(designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(proFee) }),
+        artworkUrl
+      },
     });
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 1600);

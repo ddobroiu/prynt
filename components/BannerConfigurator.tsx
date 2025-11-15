@@ -190,13 +190,12 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       quantity: input.quantity,
       currency: "RON",
       metadata: {
+        "Material": input.material === 'frontlit_510' ? "Frontlit 510g (Premium)" : "Frontlit 440g (Standard)",
+        "Finisaje": `Tiv și capse, ${input.want_wind_holes ? "cu găuri de vânt" : "fără găuri de vânt"}`,
+        "Grafică": designOption === 'pro' ? 'Vreau grafică' : designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
+        ...(designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(PRO_DESIGN_FEE) }),
+        ...(designOption === 'text_only' && { "Text": textDesign }),
         artworkUrl,
-        artworkLink,
-        designOption,
-        textDesign,
-        proDesignFee: designOption === "pro" ? PRO_DESIGN_FEE : 0,
-        totalSqm: priceDetailsLocal.total_sqm,
-        pricePerSqm: priceDetailsLocal.pricePerSqmAfterSurcharges,
       },
     });
     setToastVisible(true);
