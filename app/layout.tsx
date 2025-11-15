@@ -119,6 +119,7 @@ var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n
     <Providers>
       <Header />
       <main>{children}</main>
+      <main className="mx-auto max-w-7xl px-4 md:px-8">{children}</main>
       <CartWidget />
       <Footer />
       <AssistantWidget />
