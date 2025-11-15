@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useCart } from "./CartContext";
-import { ChevronDown, ChevronRight, Menu, ShoppingCart, X, User } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, ShoppingCart, X, User, Layers, Star, Image, Tag, LayoutGrid } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 type NavItem = {
@@ -13,10 +13,11 @@ type NavItem = {
   children?: { href: string; label: string }[];
 };
 
-const LINKS: NavItem[] = [
+const LINKS: (NavItem & { icon?: any })[] = [
   {
     href: "/publicitar",
     label: "Publicitar",
+    icon: <Tag size={18} className="mr-2" />,
     children: [
       { href: "/pliante", label: "Pliante" },
       { href: "/flayere", label: "Flayere" },
@@ -27,6 +28,7 @@ const LINKS: NavItem[] = [
   {
     href: "#",
     label: "Fonduri UE",
+    icon: <Star size={18} className="mr-2" />,
     children: [
       { href: "/fonduri-pnrr", label: "Fonduri PNRR" },
       { href: "/fonduri-regio", label: "Fonduri REGIO" },
@@ -36,6 +38,7 @@ const LINKS: NavItem[] = [
   {
     href: "/banner",
     label: "Banner",
+    icon: <Layers size={18} className="mr-2" />,
     children: [
       { href: "/banner", label: "O față" },
       { href: "/banner-verso", label: "Față-verso" },
@@ -44,6 +47,7 @@ const LINKS: NavItem[] = [
   {
     href: "/decor",
     label: "Decor",
+    icon: <Image size={18} className="mr-2" />,
     children: [
       { href: "/canvas", label: "Canvas" },
       { href: "/tapet", label: "Tapet" },
@@ -52,6 +56,7 @@ const LINKS: NavItem[] = [
   {
     href: "/materiale-rigide",
     label: "Materiale rigide",
+    icon: <LayoutGrid size={18} className="mr-2" />,
     children: [
       { href: "/plexiglass", label: "Plexiglas" },
       { href: "/alucobond", label: "Alucobond" },
@@ -268,7 +273,7 @@ export default function Header() {
           <div />
 
           {/* Centered menu with modern effects */}
-          <nav className="justify-self-center flex items-center gap-6">
+          <nav className="justify-self-center flex items-center gap-7">
             {LINKS.map((l) =>
               l.children ? (
                 <div
@@ -283,14 +288,16 @@ export default function Header() {
                     type="button"
                     aria-haspopup="menu"
                     aria-expanded={openDropdown === l.label}
-                    className={`group inline-flex items-center gap-2 rounded-full px-7 py-3 text-lg font-bold tracking-wide shadow-lg backdrop-blur-md
-                      ${openDropdown === l.label ? "bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white" : "bg-white/80 dark:bg-slate-900/70 text-slate-900 dark:text-slate-100 border border-gray-300 dark:border-slate-800"}
-                      hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white
-                      transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40`}
+                    className={`group inline-flex items-center gap-2 rounded-full px-8 py-3 text-lg font-bold tracking-wide shadow-lg backdrop-blur-md
+                      ${openDropdown === l.label ? "bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white" : "bg-white/70 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100 border border-gray-300 dark:border-slate-800"}
+                      hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white
+                      transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 relative overflow-hidden`}
                     onClick={() => setOpenDropdown((cur) => (cur === l.label ? null : l.label))}
                   >
+                    {l.icon}
                     <span className="relative drop-shadow-sm">
                       {l.label}
+                      <span className={`absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-300 ${openDropdown === l.label ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"}`}></span>
                     </span>
                     <ChevronDown
                       size={20}
@@ -325,9 +332,13 @@ export default function Header() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="group rounded-full px-7 py-3 text-lg font-bold tracking-wide shadow-lg backdrop-blur-md bg-white/80 dark:bg-slate-900/70 text-slate-900 dark:text-slate-100 border border-gray-300 dark:border-slate-800 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                  className="group rounded-full px-8 py-3 text-lg font-bold tracking-wide shadow-lg backdrop-blur-md bg-white/70 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100 border border-gray-300 dark:border-slate-800 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 relative overflow-hidden"
                 >
-                  <span className="relative drop-shadow-sm">{l.label}</span>
+                  <span className="relative drop-shadow-sm">
+                    {l.icon}
+                    {l.label}
+                    <span className="absolute left-0 -bottom-1 h-0.5 w-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-300 scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"></span>
+                  </span>
                 </Link>
               )
             )}
