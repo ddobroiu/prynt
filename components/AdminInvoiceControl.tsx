@@ -57,43 +57,21 @@ export default function AdminInvoiceControl({ id, invoiceLink: initialLink, bill
   }
 
   return (
-    <div className="max-w-[320px] w-full rounded-lg border border-gray-200/70 dark:border-slate-800/70 bg-white/60 dark:bg-slate-950/60 p-3">
-      <div className="flex items-start gap-3">
-        <div className="w-9 h-9 bg-indigo-50 rounded-md flex items-center justify-center text-indigo-600 text-lg">📄</div>
-        <div className="flex-1">
-          <div className="text-sm font-semibold">Factură</div>
-          <div className="text-xs text-muted">Încarcă PDF — fișierul va fi salvat și notifică clientul</div>
-        </div>
-      </div>
-
-      <div className="mt-3 flex items-center gap-3">
-        <label className="inline-flex items-center gap-2 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 cursor-pointer text-sm">
-          Încarcă PDF
-          <input type="file" accept="application/pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadInvoice(f); }} style={{ display: 'none' }} />
-        </label>
-
-        <div className="flex-1">
-          {uploadedName ? <div className="text-sm font-medium">{uploadedName}</div> : <div className="text-xs text-muted">Niciun fișier încă</div>}
-          {uploadedUrl && showLink ? (
-            <div className="mt-1 text-xs break-all"><a href={uploadedUrl} target="_blank" rel="noreferrer" className="text-indigo-600 underline">Descarcă factura</a></div>
-          ) : null}
-        </div>
-
-        {loading ? <div className="text-xs text-muted">Se încarcă…</div> : null}
-      </div>
-
-      <div className="mt-3 flex items-center justify-between">
-        <div>
-          {uploadedUrl ? (
-            <button onClick={() => setShowLink((s) => !s)} className="text-sm text-indigo-600 underline">{showLink ? 'Ascunde link' : 'Arată link'}</button>
-          ) : null}
-        </div>
-        <div>
-          {message ? (
-            <div className={`text-sm ${message.startsWith('Eroare') ? 'text-red-600' : 'text-green-600'}`}>{message}</div>
-          ) : null}
-        </div>
-      </div>
+    <div className="max-w-[320px] w-full rounded-lg border border-gray-200/70 dark:border-slate-800/70 bg-white/60 dark:bg-slate-950/60 p-3 flex flex-col gap-3">
+      <label className="inline-flex items-center gap-2 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 cursor-pointer text-sm">
+        Încarcă PDF
+        <input type="file" accept="application/pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadInvoice(f); }} style={{ display: 'none' }} />
+      </label>
+      {uploadedUrl ? (
+        <button onClick={() => setShowLink((s) => !s)} className="text-sm text-indigo-600 underline self-start">{showLink ? 'Ascunde link' : 'Arată link'}</button>
+      ) : null}
+      {uploadedUrl && showLink ? (
+        <div className="mt-1 text-xs break-all"><a href={uploadedUrl} target="_blank" rel="noreferrer" className="text-indigo-600 underline">Descarcă factura</a></div>
+      ) : null}
+      {loading ? <div className="text-xs text-muted">Se încarcă…</div> : null}
+      {message ? (
+        <div className={`text-sm ${message.startsWith('Eroare') ? 'text-red-600' : 'text-green-600'}`}>{message}</div>
+      ) : null}
     </div>
   );
 }
