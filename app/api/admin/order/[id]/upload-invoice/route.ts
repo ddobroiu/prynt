@@ -71,14 +71,18 @@ export async function POST(req: Request, ctx: any) {
     let billing = null;
     try { if (billingRaw) billing = JSON.parse(billingRaw); } catch {}
 
-    if (!file) return NextResponse.json({ ok: false, message: 'Lipsește fișierul' }, { status: 400 });
+    if (!file) {
+      console.warn('[admin/upload-invoice] missing file for id', id);
+      return NextResponse.json({ ok: false, message: 'Lipsește fișierul' }, { status: 400 });
+    }
     // Server-side validation: accept only PDF and limit size
     const maxBytes = 10 * 1024 * 1024; // 10MB
     try {
       const t = (file as any).type || '';
       const s = (file as any).size || 0;
-      if (t && t !== 'application/pdf') return NextResponse.json({ ok: false, message: 'Acceptăm doar PDF' }, { status: 400 });
-      if (s && s > maxBytes) return NextResponse.json({ ok: false, message: 'Fișier prea mare (max 10MB)' }, { status: 413 });
+      console.log('[admin/upload-invoice] debug:', { id, fileType: t, fileSize: s, billingProvided: !!billing });
+      if (t && t !== 'application/pdf') return NextResponse.json({ ok: false, message: 'Acceptăm doar PDF', fileType: t }, { status: 400 });
+      if (s && s > maxBytes) return NextResponse.json({ ok: false, message: 'Fișier prea mare (max 10MB)', fileSize: s }, { status: 413 });
     } catch (e) {}
 
     const arrayBuffer = await file.arrayBuffer();
