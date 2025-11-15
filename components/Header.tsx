@@ -268,7 +268,7 @@ export default function Header() {
           <div />
 
           {/* Centered menu with modern effects */}
-          <nav className="justify-self-center flex items-center gap-4">
+          <nav className="justify-self-center flex items-center gap-6">
             {LINKS.map((l) =>
               l.children ? (
                 <div
@@ -283,28 +283,27 @@ export default function Header() {
                     type="button"
                     aria-haspopup="menu"
                     aria-expanded={openDropdown === l.label}
-                    className={`group inline-flex items-center gap-2 rounded-full px-6 py-3 text-base font-semibold tracking-wide shadow-sm
-                      ${openDropdown === l.label ? "bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white" : "bg-white/90 dark:bg-slate-900/80 text-slate-800 dark:text-slate-100"}
+                    className={`group inline-flex items-center gap-2 rounded-full px-7 py-3 text-lg font-bold tracking-wide shadow-lg backdrop-blur-md
+                      ${openDropdown === l.label ? "bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white" : "bg-white/80 dark:bg-slate-900/70 text-slate-900 dark:text-slate-100 border border-gray-300 dark:border-slate-800"}
                       hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white
-                      transition focus:outline-none focus:ring-2 focus:ring-indigo-500/30 border border-gray-200 dark:border-slate-800`}
+                      transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40`}
                     onClick={() => setOpenDropdown((cur) => (cur === l.label ? null : l.label))}
                   >
-                    <span className="relative">
+                    <span className="relative drop-shadow-sm">
                       {l.label}
                     </span>
                     <ChevronDown
-                      size={18}
-                      className={`ml-1 opacity-70 transition-transform ${openDropdown === l.label ? "rotate-180 opacity-100" : ""}`}
+                      size={20}
+                      className={`ml-2 opacity-80 transition-transform ${openDropdown === l.label ? "rotate-180 opacity-100" : ""}`}
                     />
                   </button>
 
                   <div
                     role="menu"
                     className={`
-                      absolute left-1/2 -translate-x-1/2 mt-2 w-64 rounded-2xl
-                      border border-gray-200/80 dark:border-slate-800/80
-                      bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl p-2
-                      shadow-xl ring-1 ring-black/5
+                      absolute left-1/2 -translate-x-1/2 mt-2 w-72 rounded-2xl
+                      border border-gray-300/80 dark:border-slate-800/80
+                      bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl p-3 shadow-2xl ring-1 ring-black/10
                       z-120 transition-all origin-top pointer-events-auto
                       ${openDropdown === l.label ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"}
                     `}
@@ -314,7 +313,7 @@ export default function Header() {
                         key={c.href}
                         href={c.href}
                         role="menuitem"
-                        className="block rounded-full px-4 py-2 text-base font-medium text-slate-800 dark:text-slate-100 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition"
+                        className="block rounded-full px-5 py-2 text-base font-semibold text-slate-900 dark:text-slate-100 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200"
                         onClick={() => setOpenDropdown(null)}
                       >
                         {c.label}
@@ -326,9 +325,9 @@ export default function Header() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="group rounded-full px-6 py-3 text-base font-semibold tracking-wide shadow-sm bg-white/90 dark:bg-slate-900/80 text-slate-800 dark:text-slate-100 border border-gray-200 dark:border-slate-800 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                  className="group rounded-full px-7 py-3 text-lg font-bold tracking-wide shadow-lg backdrop-blur-md bg-white/80 dark:bg-slate-900/70 text-slate-900 dark:text-slate-100 border border-gray-300 dark:border-slate-800 hover:bg-linear-to-r hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                 >
-                  <span className="relative">{l.label}</span>
+                  <span className="relative drop-shadow-sm">{l.label}</span>
                 </Link>
               )
             )}
