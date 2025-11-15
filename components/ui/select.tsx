@@ -7,8 +7,7 @@ type SelectContextType = {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   selectedValue: string;
-  setSelectedValue: React.Dispatch<React.SetStateAction<string>>;
-  onValueChange?: (value: string) => void;
+  changeValue: (value: string) => void;
   placeholder?: string;
 };
 
@@ -55,7 +54,7 @@ export const Select = ({
   };
 
   return (
-    <SelectContext.Provider value={{ isOpen, setIsOpen, selectedValue, setSelectedValue: handleValueChange, onValueChange: handleValueChange, placeholder }}>
+    <SelectContext.Provider value={{ isOpen, setIsOpen, selectedValue, changeValue: handleValueChange, placeholder }}>
       <div className="relative">{children}</div>
     </SelectContext.Provider>
   );
@@ -111,10 +110,10 @@ export const SelectContent = ({ children, className }: { children: React.ReactNo
 };
 
 export const SelectItem = ({ value, children, className }: { value: string; children: React.ReactNode; className?: string }) => {
-  const { setSelectedValue } = useSelect();
+  const { changeValue } = useSelect();
   return (
     <div
-      onClick={() => setSelectedValue(value)}
+      onClick={() => changeValue(value)}
       className={`px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${className}`}
     >
       {children}
