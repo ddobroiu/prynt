@@ -5,13 +5,12 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useCart } from "./CartContext";
 import { siteConfig } from "@/lib/siteConfig";
-import ThemeToggle from "@/components/ThemeToggle";
 import { ChevronDown, Menu, ShoppingCart, X, User } from "lucide-react";
 
 // --- Sub-components for better structure ---
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <Link href={href} className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-50 transition-colors">
+  <Link href={href} className="text-sm font-medium text-muted hover:text-text transition-colors">
     {children}
   </Link>
 );
@@ -130,7 +129,6 @@ const HeaderActions = () => {
 
   return (
     <div className="flex items-center gap-4">
-      <ThemeToggle />
       <Link href={session?.user ? "/account" : "/login"} className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-50">
         <User size={20} />
       </Link>
