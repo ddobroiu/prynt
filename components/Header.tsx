@@ -313,7 +313,7 @@ export default function Header() {
                         onClick={() => setOpenDropdown(null)}
                       >
                         {/* Iconiță generică pentru submeniu, se poate personaliza pe fiecare categorie */}
-                        <span className="inline-block w-5 h-5 bg-linear-to-r from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full flex items-center justify-center text-white/80 mr-1">
+                        <span className="w-5 h-5 bg-linear-to-r from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full flex items-center justify-center text-white/80 mr-1">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                         </span>
                         {c.label}
