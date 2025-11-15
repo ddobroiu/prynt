@@ -47,7 +47,7 @@ export default async function AccountPage({
 
     return {
       id: o.id,
-      orderNo: o.orderNo,
+      orderNo: String(o.orderNo),
       createdAt: o.createdAt,
       status: o.status,
       canceledAt: o.canceledAt || null,
