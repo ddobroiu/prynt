@@ -75,14 +75,26 @@ export default async function OrdersPage() {
                   <tr key={o.id} className="border-t border-white/10">
                     <td className="px-3 py-2 align-top whitespace-nowrap font-semibold">#{o.orderNo ?? '—'}</td>
                     <td className="px-3 py-2 align-top whitespace-nowrap">{new Date(o.createdAt).toLocaleString('ro-RO')}</td>
-                    <td className="px-3 py-2 align-top">
-                      <div className="font-semibold">{o.address.nume_prenume}</div>
-                      <div className="text-muted">{o.address.judet}, {o.address.localitate}</div>
-                    </td>
-                    <td className="px-3 py-2 align-top">
-                      <div>{o.address.email}</div>
-                      <div className="text-muted">{o.address.telefon}</div>
-                    </td>
+                        {(() => {
+                          const billing = (o.billing || {}) as any;
+                          const useBilling = billing && billing.tip_factura && billing.tip_factura !== 'persoana_fizica' && (billing.cui || billing.name);
+                          const name = useBilling ? (billing.name || billing.cui) : (o.address?.nume_prenume || '—');
+                          const place = useBilling ? `${billing.judet || o.address?.judet || ''}, ${billing.localitate || o.address?.localitate || ''}` : `${o.address?.judet || ''}, ${o.address?.localitate || ''}`;
+                          const email = useBilling ? (billing.email || o.address?.email) : o.address?.email;
+                          const phone = useBilling ? (billing.telefon || billing.phone || o.address?.telefon) : o.address?.telefon;
+                          return (
+                            <>
+                              <td className="px-3 py-2 align-top">
+                                <div className="font-semibold">{name}</div>
+                                <div className="text-muted">{place}</div>
+                              </td>
+                              <td className="px-3 py-2 align-top">
+                                <div>{email}</div>
+                                <div className="text-muted">{phone}</div>
+                              </td>
+                            </>
+                          );
+                        })()}
                     <td className="px-3 py-2 align-top whitespace-nowrap">{fmtRON(o.total)}</td>
                     <td className="px-3 py-2 align-top">{o.paymentType}</td>
                     <td className="px-3 py-2 align-top">{sourceLabel(o.marketing)}</td>

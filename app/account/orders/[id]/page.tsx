@@ -30,6 +30,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
 
   const address = order.address as any;
   const billing = order.billing as any;
+  const useBilling = billing && billing.tip_factura && billing.tip_factura !== 'persoana_fizica' && (billing.cui || billing.name);
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16 space-y-6">
@@ -59,10 +60,20 @@ export default async function OrderDetailPage({ params }: { params: { id: string
         </div>
 
         <div className="rounded-md border border-[--border] p-4">
-          <div className="text-sm text-muted">Livrare</div>
-          <div className="font-medium">{address?.nume_prenume}</div>
-          <div className="text-sm text-muted">{address?.telefon} · {address?.email}</div>
-          <div className="mt-2 text-sm">{address?.strada_nr}, {address?.localitate}, {address?.judet}{address?.postCode ? `, ${address.postCode}` : ''}</div>
+          <div className="text-sm text-muted">{useBilling ? 'Facturare (importată)' : 'Livrare'}</div>
+          {useBilling ? (
+            <>
+              <div className="font-medium">{billing?.name || billing?.cui}</div>
+              <div className="text-sm text-muted">{billing?.telefon || billing?.phone || address?.telefon} · {billing?.email || address?.email}</div>
+              <div className="mt-2 text-sm">{billing?.strada_nr || address?.strada_nr}, {billing?.localitate || address?.localitate}, {billing?.judet || address?.judet}{billing?.postCode ? `, ${billing.postCode}` : ''}</div>
+            </>
+          ) : (
+            <>
+              <div className="font-medium">{address?.nume_prenume}</div>
+              <div className="text-sm text-muted">{address?.telefon} · {address?.email}</div>
+              <div className="mt-2 text-sm">{address?.strada_nr}, {address?.localitate}, {address?.judet}{address?.postCode ? `, ${address.postCode}` : ''}</div>
+            </>
+          )}
         </div>
       </div>
 
