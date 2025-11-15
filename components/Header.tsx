@@ -184,10 +184,7 @@ export default function Header() {
                     </div>
                     <div className="divide-y divide-white/6">
                       <div className="py-2">
-                        <a href="/account/orders" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Comenzi</a>
                         <a href="/account" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Contul meu</a>
-                        <a href="/account/addresses" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Adrese</a>
-                        <a href="/account/invoices" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Facturi</a>
                       </div>
                       <div className="py-2">
                         <div className="text-xs text-muted px-2">Facturare recentă</div>
@@ -481,11 +478,8 @@ export default function Header() {
                       <div className="font-semibold">{(session.user as any)?.name || (session.user as any)?.email}</div>
                       <div className="text-xs text-muted">{(session.user as any)?.email}</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <a href="/account/orders" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Comenzi</a>
-                      <a href="/account/invoices" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Facturi</a>
-                      <a href="/account/addresses" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Adrese</a>
-                      <a href="/account" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Setări cont</a>
+                    <div className="grid grid-cols-1 gap-2 text-sm">
+                      <a href="/account" className="block px-2 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">Contul meu</a>
                     </div>
                     <div className="mt-3 border-t pt-3">
                       <div className="text-xs text-muted">Facturare recentă</div>

@@ -72,6 +72,14 @@ export async function POST(req: Request, ctx: any) {
     try { if (billingRaw) billing = JSON.parse(billingRaw); } catch {}
 
     if (!file) return NextResponse.json({ ok: false, message: 'Lipsește fișierul' }, { status: 400 });
+    // Server-side validation: accept only PDF and limit size
+    const maxBytes = 10 * 1024 * 1024; // 10MB
+    try {
+      const t = (file as any).type || '';
+      const s = (file as any).size || 0;
+      if (t && t !== 'application/pdf') return NextResponse.json({ ok: false, message: 'Acceptăm doar PDF' }, { status: 400 });
+      if (s && s > maxBytes) return NextResponse.json({ ok: false, message: 'Fișier prea mare (max 10MB)' }, { status: 413 });
+    } catch (e) {}
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);

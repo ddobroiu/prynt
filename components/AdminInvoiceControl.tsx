@@ -11,6 +11,8 @@ type Props = {
 export default function AdminInvoiceControl({ id, invoiceLink: initialLink, billing: initialBilling }: Props) {
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(initialLink || null);
   const [uploadedName, setUploadedName] = useState<string | null>(null);
+  const [showLink, setShowLink] = useState(false);
+  const MAX_BYTES = 10 * 1024 * 1024; // 10MB
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -22,7 +24,11 @@ export default function AdminInvoiceControl({ id, invoiceLink: initialLink, bill
     setMessage(null);
     try {
       const fd = new FormData();
-      if (file) fd.append('file', file, file.name);
+      if (file) {
+        if (file.size && file.size > MAX_BYTES) throw new Error('Fișier prea mare (max 10MB)');
+        if (file.type && file.type !== 'application/pdf') throw new Error('Acceptăm doar PDF');
+        fd.append('file', file, file.name);
+      }
       // ensure cookies are sent so server can verify admin session
       const res = await fetch(`/api/admin/order/${encodeURIComponent(id)}/upload-invoice`, {
         method: 'POST',
@@ -67,8 +73,14 @@ export default function AdminInvoiceControl({ id, invoiceLink: initialLink, bill
         <div className="flex-1 text-sm">
           {uploadedName ? <div className="text-sm font-medium">{uploadedName}</div> : <div className="text-xs text-muted">Niciun fișier încă</div>}
         </div>
+        {uploadedUrl ? (
+          <button onClick={() => setShowLink((s) => !s)} className="text-sm text-indigo-600 underline">{showLink ? 'Ascunde link' : 'Arată link'}</button>
+        ) : null}
         {loading ? <div className="text-xs text-muted">Se încarcă…</div> : null}
       </div>
+      {showLink && uploadedUrl ? (
+        <div className="text-xs break-all"><a href={uploadedUrl} target="_blank" rel="noreferrer" className="text-indigo-400 underline">{uploadedUrl}</a></div>
+      ) : null}
       {message ? <div className="text-sm text-muted">{message}</div> : null}
     </div>
   );
