@@ -48,7 +48,11 @@ export async function DELETE(req: Request, ctx: any) {
   try {
     const existing = await prisma.address.findFirst({ where: { id, userId } });
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    await prisma.address.delete({ where: { id } });
+
+    // Folosim deleteMany pentru a putea pune condiție compusă (id ȘI userId)
+    // Asigură ownership și respectă RLS-ul.
+    await prisma.address.deleteMany({ where: { id, userId } });
+
     return NextResponse.json({ success: true });
   } catch (e: any) {
     console.error('[DELETE /api/account/addresses/[id]] error', e?.message || e);
