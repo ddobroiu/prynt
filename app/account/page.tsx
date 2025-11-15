@@ -293,7 +293,89 @@ export default async function AccountPage({
             </div>
           </div>
 
-test          {/* Invoices (aggregate from orders) */}
+          {/* Orders */}
+          <section id="orders" className="panel rounded-3xl border border-white/10 bg-white/5">
+            <div className="p-4 flex items-center justify-between">
+              <div className="font-semibold flex items-center gap-2">Comenzi</div>
+              <div className="text-sm text-muted">Total: {totalOrders}</div>
+            </div>
+            {orders.length === 0 ? (
+              <div className="p-4 text-sm text-muted">Nu ai comenzi inca.</div>
+            ) : (
+              <ul className="divide-y divide-white/10">
+                {orders.map((o: any) => {
+                  const statusMeta = resolveStatusMeta(o.status);
+                  const awbUrl = getAwbTrackingUrl(o.awbNumber, o.awbCarrier);
+                  const previewItems = o.items.slice(0, 3).map((item: any) => `${item.qty}x ${item.name}`);
+                  return (
+                    <li key={o.id} className="p-4 hover:bg-surface/40 transition">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium">Comanda #{o.orderNo}</div>
+                              <div className="text-xs text-muted">{new Date(o.createdAt).toLocaleString("ro-RO")}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-semibold">
+                                {new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(o.total)}
+                              </div>
+                              <div className="text-xs mt-1">
+                                {o.itemsCount} produse • {o.paymentType}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-3 space-y-2 text-xs text-muted">
+                            {previewItems.length > 0 ? (
+                              <div className="text-white/70">
+                                {previewItems.join(" | ")}
+                                {o.itemsCount > previewItems.length ? ` +${o.itemsCount - previewItems.length} produse` : ""}
+                              </div>
+                            ) : (
+                              <div>Detalii disponibile in sectiunea "Detalii".</div>
+                            )}
+                            <div>
+                              Livrare: {o.address?.localitate || "-"}, {o.address?.judet || "RO"}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold ${statusMeta.badge}`}>
+                                {statusMeta.label}
+                              </span>
+                              {o.awbNumber ? (
+                                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-1 text-[11px] text-white/80">
+                                  <span>AWB: {o.awbNumber}</span>
+                                  {awbUrl ? (
+                                    <a href={awbUrl} target="_blank" rel="noreferrer" className="text-indigo-300 underline">
+                                      Tracking
+                                    </a>
+                                  ) : null}
+                                </span>
+                              ) : null}
+                              {o.invoiceLink ? (
+                                <a
+                                  href={o.invoiceLink}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center rounded-full border border-white/10 px-3 py-1 text-[11px] text-indigo-300 underline"
+                                >
+                                  Factura
+                                </a>
+                              ) : null}
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            {/* @ts-ignore Server->Client import allowed */}
+                            <OrderDetails order={o} />
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+          {/* Invoices (aggregate from orders) */}
           <section id="invoices" className="panel rounded-3xl border border-white/10 bg-white/5">
             <div className="p-4 flex items-center justify-between">
               <div className="font-semibold">Facturi</div>
