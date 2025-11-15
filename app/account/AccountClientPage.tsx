@@ -125,10 +125,10 @@ export default function AccountClientPage({ orders, billing, session }: AccountC
                             {statusMeta.label}
                           </span>
                           {o.awbNumber && (
-                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-1 text-[11px] text-white/80">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1 text-[11px] text-gray-800">
                               <span>AWB: {o.awbNumber}</span>
                               {awbUrl && (
-                                <a href={awbUrl} target="_blank" rel="noreferrer" className="text-indigo-300 underline">
+                                <a href={awbUrl} target="_blank" rel="noreferrer" className="text-indigo-600 underline">
                                   Tracking
                                 </a>
                               )}
@@ -139,7 +139,7 @@ export default function AccountClientPage({ orders, billing, session }: AccountC
                               href={o.invoiceLink}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center rounded-full border border-white/10 px-3 py-1 text-[11px] text-indigo-300 underline"
+                              className="inline-flex items-center rounded-full border border-gray-200 px-3 py-1 text-[11px] text-indigo-600 underline"
                             >
                               Factura
                             </a>
