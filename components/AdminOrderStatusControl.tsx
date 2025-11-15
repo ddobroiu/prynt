@@ -32,19 +32,24 @@ export default function AdminOrderStatusControl({ id, status: initialStatus }: P
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <select
-        value={status}
-        onChange={(e) => update(e.target.value)}
-        disabled={loading}
-        className="rounded-md border px-2 py-1 bg-white/5"
-      >
-        <option value="in_progress">În lucru</option>
-        <option value="fulfilled">Finalizată</option>
-        <option value="canceled">Anulată</option>
-      </select>
-      {loading ? <span className="text-xs text-muted">Se actualizează…</span> : null}
-      {error ? <div className="text-xs text-red-400">Eroare</div> : null}
+    <div className="flex flex-col gap-1 text-left text-white">
+      <div className="text-[10px] uppercase tracking-[0.4em] text-white/50">Status</div>
+      <div className="relative">
+        <select
+          value={status}
+          onChange={(e) => update(e.target.value)}
+          disabled={loading}
+          className="w-full appearance-none rounded-2xl border border-white/15 bg-black/30 px-4 py-2 text-sm font-semibold text-white shadow-inner shadow-black/30 focus:border-indigo-400 focus:outline-none disabled:opacity-70"
+        >
+          <option value="in_progress">În lucru</option>
+          <option value="fulfilled">Finalizată</option>
+          <option value="canceled">Anulată</option>
+        </select>
+        <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-xs text-white/60">⌄</span>
+      </div>
+      <div className="text-xs text-muted min-h-[1rem]">
+        {loading ? 'Se actualizează…' : error ? 'Eroare la salvare' : ''}
+      </div>
     </div>
   );
 }

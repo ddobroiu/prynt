@@ -5,13 +5,13 @@ import { useState } from "react";
 type Props = {
   id: string;
   invoiceLink?: string | null;
-  billing?: any;
 };
 
-export default function AdminInvoiceControl({ id, invoiceLink: initialLink, billing: initialBilling }: Props) {
+export default function AdminInvoiceControl({ id, invoiceLink: initialLink }: Props) {
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(initialLink || null);
   const [uploadedName, setUploadedName] = useState<string | null>(null);
   const [showLink, setShowLink] = useState(false);
+  const [copied, setCopied] = useState(false);
   const MAX_BYTES = 10 * 1024 * 1024; // 10MB
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export default function AdminInvoiceControl({ id, invoiceLink: initialLink, bill
         try { data = JSON.parse(text); } catch { data = { message: text }; }
       }
       if (!res.ok) throw new Error(data?.message || res.statusText || 'Upload failed');
-      const url = data.url || data.url || null;
+      const url = data.url || data.link || data.invoiceLink || null;
       setUploadedUrl(url);
       setUploadedName(file?.name || null);
       setMessage('Factura încărcată cu succes. Clientul a fost anunțat.');
@@ -56,22 +56,62 @@ export default function AdminInvoiceControl({ id, invoiceLink: initialLink, bill
     }
   }
 
+  async function copyLink() {
+    if (!uploadedUrl || copied) return;
+    try {
+      await navigator.clipboard.writeText(uploadedUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err: any) {
+      setMessage('Nu am putut copia linkul: ' + (err?.message || err));
+    }
+  }
+
   return (
-    <div className="max-w-[320px] w-full rounded-lg border border-gray-200/70 dark:border-slate-800/70 bg-white/60 dark:bg-slate-950/60 p-3 flex flex-col gap-3">
-      <label className="inline-flex items-center gap-2 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 cursor-pointer text-sm">
-        Încarcă PDF
-        <input type="file" accept="application/pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadInvoice(f); }} style={{ display: 'none' }} />
-      </label>
-      {uploadedUrl ? (
-        <button onClick={() => setShowLink((s) => !s)} className="text-sm text-indigo-600 underline self-start">{showLink ? 'Ascunde link' : 'Arată link'}</button>
-      ) : null}
+    <div className="w-full rounded-3xl border border-white/10 bg-black/30 p-4 text-sm text-white shadow-inner shadow-black/40">
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-indigo-400 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:scale-[1.01]">
+          Încarcă PDF
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) uploadInvoice(f);
+            }}
+            style={{ display: 'none' }}
+          />
+        </label>
+        {uploadedUrl ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowLink((s) => !s)}
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-2 text-xs font-semibold text-white/80 transition hover:bg-white/5"
+            >
+              {showLink ? 'Ascunde link' : 'Vizualizează'}
+            </button>
+            <button
+              type="button"
+              onClick={copyLink}
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-2 text-xs font-semibold text-white/80 transition hover:bg-white/5"
+            >
+              {copied ? 'Copiat' : 'Copiază link'}
+            </button>
+          </div>
+        ) : null}
+      </div>
       {uploadedUrl && showLink ? (
-        <div className="mt-1 text-xs break-all"><a href={uploadedUrl} target="_blank" rel="noreferrer" className="text-indigo-600 underline">Descarcă factura</a></div>
+        <div className="mt-3 text-xs">
+          <a href={uploadedUrl} target="_blank" rel="noreferrer" className="text-indigo-200 underline">
+            Descarcă factura
+          </a>
+        </div>
       ) : null}
-      {loading ? <div className="text-xs text-muted">Se încarcă…</div> : null}
-      {message ? (
-        <div className={`text-sm ${message.startsWith('Eroare') ? 'text-red-600' : 'text-green-600'}`}>{message}</div>
-      ) : null}
+      {uploadedName ? <div className="mt-2 text-xs text-muted">Ultimul fișier: {uploadedName}</div> : null}
+      <div className="mt-2 min-h-[1.25rem] text-xs text-muted">
+        {loading ? 'Se încarcă…' : message}
+      </div>
     </div>
   );
 }
