@@ -30,6 +30,17 @@ const nextConfig = {
       { source: "/pvc-forex", destination: "/pliante/pvc-forex" },
       { source: "/polipropilena", destination: "/pliante/polipropilena" },
       { source: "/carton", destination: "/pliante/carton" },
+      // Explicit uppercase/titlecase mappings to handle case-sensitive prod filesystems
+      { source: "/Plexiglass", destination: "/pliante/plexiglass" },
+      { source: "/Plexiglass/:path*", destination: "/pliante/plexiglass/:path*" },
+      { source: "/Alucobond", destination: "/pliante/alucobond" },
+      { source: "/Alucobond/:path*", destination: "/pliante/alucobond/:path*" },
+      { source: "/Pvc-forex", destination: "/pliante/pvc-forex" },
+      { source: "/Pvc-forex/:path*", destination: "/pliante/pvc-forex/:path*" },
+      { source: "/Polipropilena", destination: "/pliante/polipropilena" },
+      { source: "/Polipropilena/:path*", destination: "/pliante/polipropilena/:path*" },
+      { source: "/Carton", destination: "/pliante/carton" },
+      { source: "/Carton/:path*", destination: "/pliante/carton/:path*" },
     ];
   },
 };
