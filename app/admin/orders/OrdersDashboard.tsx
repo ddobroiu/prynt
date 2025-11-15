@@ -37,6 +37,15 @@ const STATUS_META = {
   canceled: { label: "Anulată", badge: "bg-rose-500/15 text-rose-200 border-rose-400/30" },
 };
 
+type StatusKey = keyof typeof STATUS_META;
+
+function normalizeStatus(status?: string | null): StatusKey {
+  if (status === 'fulfilled' || status === 'canceled' || status === 'active') {
+    return status;
+  }
+  return 'active'; // Default status
+}
+
 export default function OrdersDashboard() {
   const [orders, setOrders] = useState([]);
   const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalOrders: 0 });
@@ -75,7 +84,7 @@ export default function OrdersDashboard() {
   }, [page, status, debouncedSearchTerm]);
 
   const tableRows = useMemo(() => orders.map((o: any) => {
-    const statusKey = o.status || 'active';
+    const statusKey = normalizeStatus(o.status);
     return (
       <tr key={o.id} className="transition hover:bg-white/5">
         <td className="px-4 py-3 font-semibold text-white">#{o.orderNo ?? '—'}</td>
