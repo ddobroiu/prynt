@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
-import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, ChevronDown } from "lucide-react";
+import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
 import DeliveryInfo from "@/components/DeliveryInfo";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { usePathname, useRouter } from "next/navigation";
@@ -60,8 +60,11 @@ const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, 
 const ProductTabs = ({ productSlug }: { productSlug: string }) => {
     const [activeTab, setActiveTab] = useState("descriere");
     const bannerFaqs: QA[] = [
-        { question: "Ce materiale sunt disponibile?", answer: "Oferim Frontlit 440g (Standard) și Frontlit 510g (Premium)." },
-        { question: "Ce finisaje sunt incluse?", answer: "Toate bannerele vin cu tiv de rezistență și capse metalice pentru prindere." },
+        { question: "Ce materiale sunt disponibile?", answer: "Oferim Frontlit 440g (Standard) și Frontlit 510g (Premium), ambele fiind materiale PVC durabile, special concepute pentru uz exterior." },
+        { question: "Ce finisaje sunt incluse?", answer: "Toate bannerele vin cu tiv de rezistență pe tot perimetrul și capse metalice de prindere, aplicate de obicei la o distanță de 50 cm una de cealaltă." },
+        { question: "Cum trimit grafica pentru imprimare?", answer: "Puteți încărca fișierul grafic direct în configurator, în pasul 3. Acceptăm formate precum PDF, AI, CDR, TIFF sau JPG la o rezoluție bună." },
+        { question: "Cât durează producția și livrarea?", answer: "Producția durează în mod normal 1-2 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile, în funcție de localitatea de destinație." },
+        { question: "Bannerele sunt rezistente la exterior?", answer: "Da, absolut. Materialele folosite sunt special tratate pentru a rezista la apă, vânt și radiații UV, asigurând o durată de viață îndelungată." },
     ];
     return (
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
@@ -85,8 +88,8 @@ function BannerModeSwitchInline() {
   const isDouble = usePathname()?.startsWith("/banner-verso");
   return (
     <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
-      <button type="button" onClick={() => !isDouble && router.push("/banner")} className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${!isDouble ? "bg-indigo-600 text-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>O față</button>
-      <button type="button" onClick={() => isDouble && router.push("/banner-verso")} className={`ml-1 px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${isDouble ? "bg-indigo-600 text-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>Față-verso</button>
+      <button type="button" onClick={() => router.push("/banner")} className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${!isDouble ? "bg-indigo-600 text-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>O față</button>
+      <button type="button" onClick={() => router.push("/banner-verso")} className={`ml-1 px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${isDouble ? "bg-indigo-600 text-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>Față-verso</button>
     </div>
   );
 }
@@ -219,6 +222,9 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
   return (
     <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
+      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
+        Produs adăugat în coș
+      </div>
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div className="lg:sticky top-24 h-max space-y-8">
@@ -233,7 +239,13 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
           <div>
             <header className="mb-6">
               <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Banner</h1><BannerModeSwitchInline /></div>
-              <p className="text-gray-600">Personalizează opțiunile în 3 pași simpli.</p>
+              <div className="flex justify-between items-center">
+                <p className="text-gray-600">Personalizează opțiunile în 3 pași simpli.</p>
+                <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5">
+                  <Info size={16} />
+                  <span className="ml-2">Detalii</span>
+                </button>
+              </div>
             </header>
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4">
               <AccordionStep stepNumber={1} title="Dimensiuni & Cantitate" summary={summaryStep1} isOpen={activeStep === 1} onClick={() => setActiveStep(1)}>
@@ -252,10 +264,48 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                 <label className="flex items-center gap-3 py-2 cursor-pointer"><input type="checkbox" className="checkbox" checked={input.want_wind_holes} onChange={(e) => updateInput("want_wind_holes", e.target.checked)} /><span className="text-sm font-medium text-gray-700">Adaugă găuri pentru vânt</span></label>
               </AccordionStep>
               <AccordionStep stepNumber={3} title="Grafică" summary={summaryStep3} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
-                 {/* ... content for graphics step ... */}
+                <div>
+                  <div className="mb-4 border-b border-gray-200">
+                    <div className="flex -mb-px">
+                      <TabButton active={designOption === 'upload'} onClick={() => setDesignOption('upload')}>Am Grafică</TabButton>
+                      <TabButton active={designOption === 'text_only'} onClick={() => setDesignOption('text_only')}>Doar Text</TabButton>
+                      <TabButton active={designOption === 'pro'} onClick={() => setDesignOption('pro')}>Vreau Grafică</TabButton>
+                    </div>
+                  </div>
+
+                  {designOption === 'upload' && (
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-600">Încarcă fișierul tău (PDF, JPG, TIFF, etc.).</p>
+                      <label className="flex flex-col items-center justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
+                        <span className="flex items-center space-x-2">
+                          <UploadCloud className="w-6 h-6 text-gray-600" />
+                          <span className="font-medium text-gray-600">Apasă pentru a încărca</span>
+                        </span>
+                        <input type="file" name="file_upload" className="hidden" onChange={e => handleArtworkFileInput(e.target.files?.[0] ?? null)} />
+                      </label>
+                      {uploading && <p className="text-sm text-indigo-600">Se încarcă...</p>}
+                      {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
+                      {artworkUrl && !uploadError && <p className="text-sm text-green-600 font-semibold">Grafică încărcată cu succes!</p>}
+                    </div>
+                  )}
+
+                  {designOption === 'text_only' && (
+                    <div className="space-y-3">
+                      <label className="field-label">Introdu textul dorit</label>
+                      <textarea className="input" rows={3} value={textDesign} onChange={e => setTextDesign(e.target.value)} placeholder="ex: PROMOTIE, REDUCERI, etc."></textarea>
+                    </div>
+                  )}
+
+                  {designOption === 'pro' && (
+                    <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-sm text-indigo-800">
+                      <p className="font-semibold">Serviciu de Grafică Profesională</p>
+                      <p>O echipă de designeri va crea o propunere grafică pentru tine. Vei primi pe email o simulare pentru confirmare. Cost: <strong>{formatMoneyDisplay(PRO_DESIGN_FEE)}</strong>.</p>
+                    </div>
+                  )}
+                </div>
               </AccordionStep>
             </div>
-            <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border-t-0 border-gray-200 py-4 lg:py-0 lg:mt-8">
+            <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
               <div className="flex justify-between items-center mb-2">
                 <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(totalShown)}</p>
                 <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
@@ -266,6 +316,37 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
           <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'banner'} /></div>
         </div>
       </div>
+
+      {detailsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetailsOpen(false)}>
+          <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8" onClick={e => e.stopPropagation()}>
+            <button className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100" onClick={() => setDetailsOpen(false)} aria-label="Închide">
+              <X size={20} className="text-gray-600" />
+            </button>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Detalii Produs: Banner</h3>
+            <div className="prose prose-sm max-w-none">
+              <h4>Materiale & Durabilitate</h4>
+              <ul>
+                <li><strong>Frontlit 440g (Standard):</strong> Material PVC flexibil și rezistent, ideal pentru o gamă largă de aplicații outdoor. Imprimare la calitate foto.</li>
+                <li><strong>Frontlit 510g (Premium):</strong> O versiune mai groasă și mai durabilă, perfectă pentru utilizare pe termen lung sau în condiții meteo mai aspre.</li>
+              </ul>
+              <h4>Finisaje Incluse</h4>
+              <ul>
+                <li><strong>Tiv de Rezistență:</strong> Toate bannerele sunt tivite pe margine pentru a preveni ruperea și a crește durabilitatea.</li>
+                <li><strong>Capse Metalice:</strong> Inele metalice aplicate la aproximativ 50 cm distanță, pentru o instalare ușoară și sigură.</li>
+                <li><strong>Găuri pentru Vânt (Opțional):</strong> Perforații speciale care permit vântului să treacă, reducând presiunea asupra bannerului și prelungind durata de viață în zonele expuse.</li>
+              </ul>
+              <h4>Specificații Grafică</h4>
+              <ul>
+                <li>Formate acceptate: PDF, AI, CDR, TIFF, JPG.</li>
+                <li>Rezoluție recomandată: Minimum 150 dpi la scara 1:1.</li>
+                <li>Mod de culoare: CMYK.</li>
+                <li>Vă rugăm să nu includeți semne de tăiere sau bleed.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

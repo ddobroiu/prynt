@@ -1,66 +1,19 @@
 import React from "react";
 import BannerVersoConfigurator from "@/components/BannerVersoConfigurator";
-import FaqJsonLd from "@/components/FaqJsonLd";
-import FaqAccordion from "@/components/FaqAccordion";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
-import ServiceJsonLd from "@/components/ServiceJsonLd";
-import HowToJsonLd from "@/components/HowToJsonLd";
-import HowToSection from "@/components/HowToSection";
-import RevealBlock from "@/components/RevealBlock";
-import CategorySeoContent from "@/components/CategorySeoContent";
 
 export const metadata = {
-  title: "Banner Verso — Configurator",
-  description: "Configurează un banner verso personalizat",
+  title: "Banner Față-Verso Personalizat | Printare Calitate Superioară",
+  description: "Creează și comandă bannere față-verso durabile. Folosim material blockout pentru opacitate perfectă. Prețuri avantajoase și livrare rapidă.",
   alternates: { canonical: "/banner-verso" },
 };
 
 export default function BannerVersoPage() {
-  // server component wrapping client configurator
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
-  const qa = [
-    { question: "Ce este bannerul față-verso?", answer: "Banner printat pe material opac (blockout) vizibil pe ambele fețe, ideal pentru suspendare." },
-  { question: "Termen de livrare?", answer: "Termen total (producție + livrare): 24–48 ore. Urgențe posibile la cerere." },
-    { question: "Ce finisări oferim?", answer: "Tiv și capse, buzunare pentru bară, personalizabile în configurator sau la cerere." },
-  ];
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro";
   return (
-    <main className="page py-10">
-      <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Banner Verso", url: `${base}/banner-verso` }]} />
-      <ServiceJsonLd name="Banner față–verso (blockout)" url={`${base}/banner-verso`} />
-      <HowToJsonLd
-        name="Cum comanzi banner față–verso"
-        steps={[
-          { name: "Alege dimensiunea", text: "Introdu dimensiunile exacte pentru bannerul suspendat." },
-          { name: "Finisaje", text: "Alege tiv/capse sau buzunare pentru structură." },
-          { name: "Încarcă fișierul", text: "PDF/AI/PSD/JPG/PNG acceptate." },
-          { name: "Preț & comandă", text: "Vezi prețul instant și finalizează." },
-          { name: "Livrare 24–48h", text: "Producție și livrare rapidă." },
-        ]}
-      />
+    <>
+      <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Banner Față-Verso", url: `${base}/banner-verso` }]} />
       <BannerVersoConfigurator productSlug="banner-verso" />
-      <section className="mt-6 md:grid md:grid-cols-3 md:gap-6">
-        <div className="md:col-span-2">
-          <FaqAccordion qa={qa} fullWidth />
-          <FaqJsonLd qa={qa} />
-        </div>
-        <aside className="mt-4 md:mt-0 space-y-4">
-          <RevealBlock buttonLabel="Cum comand?">
-            <HowToSection
-              title="Cum comanzi banner față–verso"
-              steps={[
-                "Alege dimensiunea corectă",
-                "Setează finisajele (tiv/capse/buzunare)",
-                "Încarcă fișierele",
-                "Preț instant și adaugă în coș",
-                "Finalizează – livrare 24–48h",
-              ]}
-            />
-          </RevealBlock>
-          <RevealBlock buttonLabel="Citește mai mult">
-            <CategorySeoContent kind="banner-verso" />
-          </RevealBlock>
-        </aside>
-      </section>
-    </main>
+    </>
   );
 }
