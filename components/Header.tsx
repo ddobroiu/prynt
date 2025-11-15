@@ -331,21 +331,9 @@ export default function Header() {
             )}
           </nav>
 
-          {/* Right actions: Shop special + Theme + Cart */}
-          <div className="justify-self-end flex items-center gap-5">
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-base font-bold bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-xl ring-2 ring-indigo-400/30 border-2 border-white/20 dark:border-slate-900/40 hover:from-indigo-500 hover:via-violet-600 hover:to-fuchsia-600 active:scale-[0.98] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-offset-slate-950"
-              style={{ marginRight: '12px' }}
-            >
-              Shop
-            </Link>
-
-            {/* Separare vizuală */}
-            <div className="w-0.5 h-8 bg-linear-to-b from-indigo-400 via-violet-400 to-fuchsia-400 rounded-full mx-2 opacity-70" />
-
+          {/* Right actions: Theme + Account + Cart */}
+          <div className="flex items-center gap-5">
             <ThemeToggle />
-
             {session?.user ? (
               <Link
                 href="/account"
@@ -363,7 +351,6 @@ export default function Header() {
                 <User size={20} />
               </Link>
             )}
-
             <Link
               href="/checkout"
               className="relative inline-flex items-center justify-center rounded-full px-4 py-2 border border-gray-300/80 text-slate-700 hover:bg-gray-100 transition dark:border-slate-700/80 dark:text-slate-100 dark:hover:bg-slate-800 bg-white/70 dark:bg-slate-900/70 shadow"
