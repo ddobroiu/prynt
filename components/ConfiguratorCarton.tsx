@@ -177,6 +177,8 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  const [serverData, setServerData] = useState<any>(null);
+
   useEffect(() => {
     if (usePreset) {
       const p = PRESETS[presetIndex];
@@ -187,13 +189,8 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
   }, [usePreset, presetIndex]);
 
   useEffect(() => {
-    const onDoc = (e: MouseEvent) => {
-      if (materialRef.current && !materialRef.current.contains(e.target as Node)) setMaterialOpen(false);
-      if (variantRef.current && !variantRef.current.contains(e.target as Node)) setVariantOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
+    calculateServer();
+  }, [input]);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -252,10 +249,36 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
   async function calculateServer() {
     setCalcLoading(true);
     setServerPrice(null);
+    setServerData(null);
     try {
-      // Placeholder for server calculation. For now use local calc.
-      const result = localCalculatePrice(input);
-      setServerPrice(result.finalPrice);
+      const materialId = input.material === "ondulat" 
+        ? `ondulat_${input.ondula}` 
+        : `reciclat_${input.reciclatBoard}`;
+
+      const res = await fetch("/api/calc-price", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          widthCm: input.width_cm,
+          heightCm: input.height_cm,
+          quantity: input.quantity,
+          materialId,
+          designOption: input.designOption,
+          printDouble: input.printDouble,
+          edgePerimeter_m: input.edgePerimeter_m,
+          edgeType: input.edgeType,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Eroare la calcul preț");
+
+      const data = await res.json();
+      if (data.ok) {
+        setServerPrice(data.price);
+        setServerData(data);
+      } else {
+        throw new Error(data.message || "Eroare necunoscută");
+      }
     } catch (err) {
       console.error("calc error", err);
       setErrorToast("Eroare la calcul preț");
@@ -278,12 +301,6 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
     }
 
     const totalForOrder = serverPrice ?? priceDetailsLocal.finalPrice;
-    if (!totalForOrder || totalForOrder <= 0) {
-      setErrorToast("Calculează prețul înainte de a adăuga în coș.");
-      setTimeout(() => setErrorToast(null), 1600);
-      return;
-    }
-
     const unitPrice = roundMoney(totalForOrder / input.quantity);
 
     const uniqueId = [
@@ -312,13 +329,13 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
       quantity: input.quantity,
       currency: "RON",
       metadata: {
-        totalSqm: priceDetailsLocal.total_sqm,
-        pricePerSqm: priceDetailsLocal.pricePerSqm,
+        totalSqm: serverData?.totalSqm ?? priceDetailsLocal.total_sqm,
+        pricePerSqm: serverData?.pricePerSqm ?? priceDetailsLocal.pricePerSqm,
         material: input.material,
         ondula: input.ondula,
         reciclatBoard: input.reciclatBoard,
         printDouble: input.printDouble,
-        accessoryCost: priceDetailsLocal.accessoryCost,
+        accessoryCost: serverData?.accessoryCost ?? priceDetailsLocal.accessoryCost,
         edgePerimeter_m: input.edgePerimeter_m ?? 0,
         edgeType: input.edgeType ?? null,
         designOption: input.designOption ?? "upload",
@@ -526,7 +543,7 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
               <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
                 <div className="space-y-2 text-muted text-sm">
-                  <p>Suprafață: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
+                  <p>Suprafață: <span className="text-ui font-semibold">{serverData ? formatAreaDisplay(serverData.totalSqm) : formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
                   <p className="flex items-center gap-2 flex-wrap">
                     <span>Total:</span>
                     <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span>
@@ -535,8 +552,8 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
                   <div className="my-2">
                     <DeliveryEstimation />
                   </div>
-                  <p className="text-xs text-muted">Preț / m²: <strong>{priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—"}</strong></p>
-                  {priceDetailsLocal.accessoryCost > 0 && <p className="text-xs text-muted">Cost accesorii (cant): <strong>{priceDetailsLocal.accessoryCost} RON</strong></p>}
+                  <p className="text-xs text-muted">Preț / m²: <strong>{serverData ? `${serverData.pricePerSqm} RON` : (priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—")}</strong></p>
+                  {(serverData?.accessoryCost > 0 || priceDetailsLocal.accessoryCost > 0) && <p className="text-xs text-muted">Cost accesorii (cant): <strong>{serverData ? serverData.accessoryCost : priceDetailsLocal.accessoryCost} RON</strong></p>}
                   <p className="text-xs text-muted">Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong></p>
                 </div>
 

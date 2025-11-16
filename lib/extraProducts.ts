@@ -1440,5 +1440,32 @@ const EXTRA_AUTOCO_PRODUCTS: any[] = (() => {
   return items;
 })();
 
-// extend export with autocolante
-export const EXTRA_PRODUCTS_RAW: any[] = EXTRA_PRODUCTS_RAW_BASE.concat(EXTRA_AUTOCO_PRODUCTS);
+// Carton products
+const EXTRA_CARTON_LABELS: string[] = [
+  "Carton personalizat",
+];
+
+const EXTRA_CARTON_PRODUCTS: any[] = (() => {
+  const seen = new Set<string>();
+  const items: any[] = [];
+  for (const label of EXTRA_CARTON_LABELS) {
+    const clean = label.replace(/^Carton\s*[–-]?\s*/i, "");
+    const slug = slugify(clean);
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    items.push({
+      id: `carton-${slug}`,
+      slug,
+      routeSlug: slug,
+      title: label,
+      description: `Carton personalizat – ${clean}.`,
+      currency: "RON",
+      tags: ["carton"],
+      metadata: { category: "carton" },
+    });
+  }
+  return items;
+})();
+
+// extend export with autocolante and carton
+export const EXTRA_PRODUCTS_RAW: any[] = EXTRA_PRODUCTS_RAW_BASE.concat(EXTRA_AUTOCO_PRODUCTS, EXTRA_CARTON_PRODUCTS);

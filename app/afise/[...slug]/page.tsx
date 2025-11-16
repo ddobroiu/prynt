@@ -47,7 +47,7 @@ export default async function Page({ params }: Props) {
           <p style={{ marginTop: 8, color: "#9ca3af", textAlign: "center", marginBottom: 0 }}>{product.description}</p>
         </header>
         {/* Configuratorul corect pentru Afișe */}
-        <AfiseConfigurator productSlug={product.slug ?? product.routeSlug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
+        <AfiseConfigurator productSlug={product.slug ?? product.routeSlug} />
       </section>
     </main>
   );

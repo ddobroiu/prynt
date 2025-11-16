@@ -48,11 +48,7 @@ export default function Page({ params }: Props) {
 
   return (
     <main style={{ padding: 24 }}>
-      <ConfiguratorPlexiglass
-        productSlug={productSlug}
-        initialWidth={parsed.width ?? undefined}
-        initialHeight={parsed.height ?? undefined}
-      />
+      <ConfiguratorPlexiglass productSlug={productSlug} />
     </main>
   );
 }

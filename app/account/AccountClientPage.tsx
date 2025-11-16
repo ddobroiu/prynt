@@ -75,6 +75,9 @@ const getAwbTrackingUrl = (awb?: string | null, carrier?: string | null) => {
 
 const tabs = ["Comenzi", "Grafica Mea", "Adrese", "Detalii Cont", "Securitate"];
 
+export default function AccountClientPage({ orders, billing, session }: AccountClientPageProps) {
+  const [activeTab, setActiveTab] = useState("Comenzi");
+
   // Funcție placeholder pentru "Comandă din nou"
   const handleReorder = (orderId: string) => {
     alert(`Funcționalitatea "Comandă din nou" pentru comanda ${orderId} nu este încă implementată.`);

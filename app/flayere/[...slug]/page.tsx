@@ -44,7 +44,7 @@ export default async function Page({ params }: Props) {
           <h1 style={{ fontSize: 28, fontWeight: 700, textAlign: "center", margin: 0 }}>{product.title}</h1>
           <p style={{ marginTop: 8, color: "#9ca3af", textAlign: "center", marginBottom: 0 }}>{product.description}</p>
         </header>
-        <FlyerConfigurator productSlug={product.slug ?? product.routeSlug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
+        <FlyerConfigurator productSlug={product.slug ?? product.routeSlug} />
       </section>
     </main>
   );
