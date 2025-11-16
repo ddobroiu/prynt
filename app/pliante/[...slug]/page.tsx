@@ -61,7 +61,7 @@ export default async function Page({ params }: Props) {
       <section className="mb-10">
         <h1 className="text-3xl font-extrabold mb-4">{product.title}</h1>
         <div className="card p-6">
-          <PlianteConfigurator productSlug={product.slug ?? product.routeSlug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
+          <PlianteConfigurator productSlug={product.slug ?? product.routeSlug} />
         </div>
       </section>
 

@@ -12,8 +12,8 @@ import UserGraphicsManager from "@/components/UserGraphicsManager";
 // Tipuri de date primite ca props
 type Order = {
   id: string;
-  orderNo: string;
-  createdAt: Date;
+  orderNo: number;
+  createdAt: string;
   status: string | null;
   total: number;
   paymentType: string | null;
@@ -34,6 +34,7 @@ type Session = {
   user: {
     email?: string | null;
   };
+  expires: string;
 };
 
 type AccountClientPageProps = {

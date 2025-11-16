@@ -51,7 +51,7 @@ export default async function Page({ params }: Props) {
           <p style={{ marginTop: 8, color: "#9ca3af", textAlign: "center", marginBottom: 0 }}>{product.description}</p>
         </header>
 
-        <TapetConfigurator productSlug={product.slug ?? product.routeSlug} initialWidth={initialWidth ?? undefined} initialHeight={initialHeight ?? undefined} />
+        <TapetConfigurator productSlug={product.slug ?? product.routeSlug} />
       </section>
     </main>
   );

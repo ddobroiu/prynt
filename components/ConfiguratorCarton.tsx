@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/components/CartContext";
-import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
+import { Ruler, Plus, Minus, ShoppingCart, Info, X, ChevronDown, UploadCloud } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
 import DeliveryInfo from "@/components/DeliveryInfo";
 import DeliveryEstimation from "./DeliveryEstimation";
@@ -23,7 +23,7 @@ const formatAreaDisplay = (n: number) => (n && n > 0 ? String(n) : "0");
 type MaterialType = "ondulat" | "reciclat";
 type OndulaOption = "E" | "3B" | "3C" | "5BC";
 type ReciclatOption = "board16" | "board10";
-type DesignOption = "upload" | "pro";
+type DesignOption = "upload" | "text_only" | "pro";
 
 type PriceInput = {
   width_cm: number;
@@ -168,14 +168,13 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
   const [errorToast, setErrorToast] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const [materialOpen, setMaterialOpen] = useState(false);
-  const [variantOpen, setVariantOpen] = useState(false);
-  const materialRef = useRef<HTMLDivElement | null>(null);
-  const variantRef = useRef<HTMLDivElement | null>(null);
-
   /* Artwork upload state */
+  const [activeStep, setActiveStep] = useState(1);
+
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const [textDesign, setTextDesign] = useState<string>("");
 
   const [serverData, setServerData] = useState<any>(null);
 
@@ -341,6 +340,7 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
         designOption: input.designOption ?? "upload",
         artworkUrl: input.artworkUrl ?? null,
         artworkLink: input.artworkLink ?? "",
+        ...(input.designOption === 'text_only' && { "Text": textDesign }),
       },
     });
 
@@ -351,8 +351,13 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
   const totalShown = displayedTotal;
   const canAdd = totalShown > 0 && input.width_cm > 0 && input.height_cm > 0 && input.width_cm <= MAX_WIDTH_CM && input.height_cm <= MAX_HEIGHT_CM;
 
+  const summaryStep1 = input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}x${input.height_cm}cm, ${input.quantity} buc.` : "Alege";
+  const summaryStep2 = input.material === "ondulat" ? "Carton ondulat" : "Carton reciclat";
+  const summaryStep3 = input.material === "ondulat" ? `${input.ondula}, ${input.printDouble ? "față-verso" : "față"}` : `${input.reciclatBoard}, ${input.edgePerimeter_m ? `cant ${input.edgePerimeter_m}ml` : "fără cant"}`;
+  const summaryStep4 = input.designOption === "upload" ? "Grafică proprie" : input.designOption === "text_only" ? "Doar text" : "Design Pro";
+
   return (
-    <main className="min-h-screen">
+    <main className="bg-gray-50 min-h-screen">
       <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
         Produs adăugat în coș
       </div>
@@ -360,76 +365,70 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
         <div className={`toast-success opacity-100 translate-y-0`} aria-live="assertive">{errorToast}</div>
       )}
 
-      <div className="page py-10 pb-24 lg:pb-10">
-        <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Carton</h1>
-            <p className="mt-2 text-muted">Alege tipul de carton, dimensiuni, print și încarcă grafică. Opțiunea "Pro" pentru grafică se stabilește după comandă.</p>
+      <div className="container mx-auto px-4 py-10 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="lg:sticky top-24 h-max space-y-8">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="aspect-square"><img src={activeImage} alt="Carton preview" className="h-full w-full object-cover" loading="eager" /></div>
+              <div className="p-2 grid grid-cols-4 gap-2">
+                {GALLERY.map((src, i) => (
+                  <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-lg border transition aspect-square ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-gray-300 hover:border-gray-400"}`} aria-label="Previzualizare">
+                    <img src={src} alt="Thumb" className="w-full h-full object-cover" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="hidden lg:block">
+              {/* Placeholder for tabs or additional content */}
+            </div>
           </div>
-          <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline text-sm self-start">
-            <Info size={18} />
-            <span className="ml-2">Detalii</span>
-          </button>
-        </header>
+          <div>
+            <header className="mb-6">
+              <h1 className="text-3xl font-extrabold text-gray-900">Configurator Carton</h1>
+              <p className="mt-2 text-gray-600">Alege tipul de carton, dimensiuni, print și încarcă grafică. Opțiunea "Pro" pentru grafică se stabilește după comandă.</p>
+              <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5 mt-3">
+                <Info size={16} />
+                <span className="ml-2">Detalii</span>
+              </button>
+            </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="order-2 lg:order-1 lg:col-span-3 space-y-6">
-            {/* 1. Dimensiuni */}
-            <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-ui">1. Dimensiuni & cantitate</h2></div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="field-label">Lățime (cm)</label>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="ex: 300" className="input text-lg font-semibold" />
-                </div>
-                <div>
-                  <label className="field-label">Înălțime (cm)</label>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="ex: 150" className="input text-lg font-semibold" />
-                </div>
-                <div>
-                  <label className="field-label">Cantitate</label>
-                  <div className="flex items-center">
-                    <button onClick={() => updateInput("quantity", Math.max(1, input.quantity - 1))} className="p-2 bg-white/10 rounded-l-md hover:bg-white/15"><Minus size={14} /></button>
-                    <input type="number" value={input.quantity} onChange={(e) => updateInput("quantity", Math.max(1, parseInt(e.target.value || "1")))} className="input text-lg font-semibold text-center" />
-                    <button onClick={() => updateInput("quantity", input.quantity + 1)} className="p-2 bg-white/10 rounded-r-md hover:bg-white/15"><Plus size={14} /></button>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4">
+              <AccordionStep stepNumber={1} title="Dimensiuni & cantitate" summary={summaryStep1} isOpen={activeStep === 1} onClick={() => setActiveStep(1)}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="field-label">Lățime (cm)</label>
+                    <input type="text" inputMode="numeric" pattern="[0-9]*" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="ex: 300" className="input" />
+                  </div>
+                  <div>
+                    <label className="field-label">Înălțime (cm)</label>
+                    <input type="text" inputMode="numeric" pattern="[0-9]*" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="ex: 150" className="input" />
+                  </div>
+                  <div>
+                    <label className="field-label">Cantitate</label>
+                    <div className="flex items-center">
+                      <button onClick={() => updateInput("quantity", Math.max(1, input.quantity - 1))} className="p-2 bg-gray-100 rounded-l-md hover:bg-gray-200"><Minus size={14} /></button>
+                      <input type="number" value={input.quantity} onChange={(e) => updateInput("quantity", Math.max(1, parseInt(e.target.value || "1")))} className="input text-lg font-semibold text-center" />
+                      <button onClick={() => updateInput("quantity", input.quantity + 1)} className="p-2 bg-gray-100 rounded-r-md hover:bg-gray-200"><Plus size={14} /></button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="mt-2 text-xs text-white/60">Preseturi: {PRESETS.map(p => `${p.w}x${p.h} cm`).join(" • ")}</div>
-            </div>
-
-            {/* 2. Material */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="card p-4" ref={materialRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-ui">2. Tip material</h2></div>
-
-                <div className="relative">
-                  <button type="button" onClick={() => setMaterialOpen((s) => !s)} className="w-full flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5" aria-expanded={materialOpen}>
-                    <div className="text-sm text-white/80">{input.material === "ondulat" ? "Carton ondulat" : "Carton reciclat"}</div>
-                    <div className="text-xs text-white/60">{materialOpen ? "Închide" : "Schimbă"}</div>
-                  </button>
-
-                  {materialOpen && (
-                    <div className="mt-2 p-2 bg-black/60 rounded-md border border-white/10 space-y-2">
-                      <button onClick={() => { setInput({ ...input, material: "ondulat", ondula: "E", reciclatBoard: undefined, edgeType: null }); setMaterialOpen(false); }} className="w-full text-left p-2 rounded-md hover:bg-white/5">Carton ondulat</button>
-                      <button onClick={() => { setInput({ ...input, material: "reciclat", reciclatBoard: "board16", ondula: undefined, edgeType: "board16" }); setMaterialOpen(false); }} className="w-full text-left p-2 rounded-md hover:bg-white/5">Carton reciclat</button>
-                    </div>
-                  )}
+                <div className="mt-2 text-xs text-gray-500">Preseturi: {PRESETS.map(p => `${p.w}x${p.h} cm`).join(" • ")}</div>
+              </AccordionStep>
+              <AccordionStep stepNumber={2} title="Tip material" summary={summaryStep2} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>
+                <div className="grid grid-cols-2 gap-2">
+                  <OptionButton active={input.material === "ondulat"} onClick={() => setInput({ ...input, material: "ondulat", ondula: "E", reciclatBoard: undefined, edgeType: null })} title="Carton ondulat" />
+                  <OptionButton active={input.material === "reciclat"} onClick={() => setInput({ ...input, material: "reciclat", reciclatBoard: "board16", ondula: undefined, edgeType: "board16" })} title="Carton reciclat" />
                 </div>
-              </div>
-
-              {/* 3. Variant (thickness / board type / print) */}
-              <div className="card p-4" ref={variantRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">3. Variantă & print</h2></div>
-
+              </AccordionStep>
+              <AccordionStep stepNumber={3} title="Variantă & print" summary={summaryStep3} isOpen={activeStep === 3} onClick={() => setActiveStep(3)}>
                 {input.material === "ondulat" ? (
                   <div className="space-y-2">
-                    <div className="text-xs text-white/60">Grosime material (mm)</div>
+                    <div className="text-xs text-gray-500">Grosime material (mm)</div>
                     <div className="grid grid-cols-1 gap-2">
-                      <button className={`p-2 text-left rounded-md ${input.ondula === "E" ? "border border-indigo-500 bg-indigo-900/10" : "border border-white/10 hover:bg-white/5"}`} onClick={() => updateInput("ondula", "E")}>Micro Ondula E - 1 mm</button>
-                      <button className={`p-2 text-left rounded-md ${input.ondula === "3B" ? "border border-indigo-500 bg-indigo-900/10" : "border border-white/10 hover:bg-white/5"}`} onClick={() => updateInput("ondula", "3B")}>Tip 3 Ondula B - 2 mm</button>
-                      <button className={`p-2 text-left rounded-md ${input.ondula === "3C" ? "border border-indigo-500 bg-indigo-900/10" : "border border-white/10 hover:bg-white/5"}`} onClick={() => updateInput("ondula", "3C")}>Tip 3 Ondula C - 3 mm</button>
-                      <button className={`p-2 text-left rounded-md ${input.ondula === "5BC" ? "border border-indigo-500 bg-indigo-900/10" : "border border-white/10 hover:bg-white/5"}`} onClick={() => updateInput("ondula", "5BC")}>Tip 5 Ondula B+C - 5 mm</button>
+                      <OptionButton active={input.ondula === "E"} onClick={() => updateInput("ondula", "E")} title="Micro Ondula E - 1 mm" />
+                      <OptionButton active={input.ondula === "3B"} onClick={() => updateInput("ondula", "3B")} title="Tip 3 Ondula B - 2 mm" />
+                      <OptionButton active={input.ondula === "3C"} onClick={() => updateInput("ondula", "3C")} title="Tip 3 Ondula C - 3 mm" />
+                      <OptionButton active={input.ondula === "5BC"} onClick={() => updateInput("ondula", "5BC")} title="Tip 5 Ondula B+C - 5 mm" />
                     </div>
 
                     <div className="mt-3">
@@ -441,17 +440,13 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <div className="text-xs text-white/60">Tip Board (dimensiuni/gramaj)</div>
+                    <div className="text-xs text-gray-500">Tip Board (dimensiuni/gramaj)</div>
                     <div className="grid grid-cols-1 gap-2">
-                      <button className={`p-2 text-left rounded-md ${input.reciclatBoard === "board16" ? "border border-indigo-500 bg-indigo-900/10" : "border border-white/10 hover:bg-white/5"}`} onClick={() => updateInput("reciclatBoard", "board16")}>
-                        Board 16 mm — Gramaj (g/mp): 450
-                      </button>
-                      <button className={`p-2 text-left rounded-md ${input.reciclatBoard === "board10" ? "border border-indigo-500 bg-indigo-900/10" : "border border-white/10 hover:bg-white/5"}`} onClick={() => updateInput("reciclatBoard", "board10")}>
-                        Eco Board 10 mm — Gramaj (g/mp): 1050
-                      </button>
+                      <OptionButton active={input.reciclatBoard === "board16"} onClick={() => updateInput("reciclatBoard", "board16")} title="Board 16 mm — Gramaj (g/mp): 450" />
+                      <OptionButton active={input.reciclatBoard === "board10"} onClick={() => updateInput("reciclatBoard", "board10")} title="Eco Board 10 mm — Gramaj (g/mp): 1050" />
                     </div>
 
-                    <div className="mt-3 text-xs text-white/60">Accesorii: protejare margini (cant) — selectează tip bandă și introdu lungimea perimetrală (ml) pentru calcul.</div>
+                    <div className="mt-3 text-xs text-gray-500">Accesorii: protejare margini (cant) — selectează tip bandă și introdu lungimea perimetrală (ml) pentru calcul.</div>
 
                     <div className="mt-3 grid grid-cols-2 gap-2">
                       <label className="text-xs">
@@ -468,109 +463,74 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
                     </div>
                   </div>
                 )}
-              </div>
+              </AccordionStep>
+              <AccordionStep stepNumber={4} title="Grafică" summary={summaryStep4} isOpen={activeStep === 4} onClick={() => setActiveStep(4)} isLast={true}>
+                <div>
+                  <div className="mb-4 border-b border-gray-200">
+                    <div className="flex -mb-px">
+                      <TabButton active={input.designOption === 'upload'} onClick={() => updateInput("designOption", "upload")}>Am Grafică</TabButton>
+                      <TabButton active={input.designOption === 'text_only'} onClick={() => updateInput("designOption", "text_only")}>Doar Text</TabButton>
+                      <TabButton active={input.designOption === 'pro'} onClick={() => updateInput("designOption", "pro")}>Vreau Grafică</TabButton>
+                    </div>
+                  </div>
+
+                  {input.designOption === 'upload' && (
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-600">Încarcă fișierul tău (PDF, JPG, TIFF, etc.).</p>
+                      <label className="flex flex-col items-center justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
+                        <span className="flex items-center space-x-2">
+                          <UploadCloud className="w-6 h-6 text-gray-600" />
+                          <span className="font-medium text-gray-600">Apasă pentru a încărca</span>
+                        </span>
+                        <input type="file" name="file_upload" className="hidden" onChange={e => handleArtworkFileInput(e.target.files?.[0] ?? null)} />
+                      </label>
+                      <div className="text-xs text-gray-500">sau</div>
+                      <div>
+                        <label className="field-label">Link descărcare (opțional)</label>
+                        <input
+                          type="url"
+                          value={input.artworkLink ?? ""}
+                          onChange={(e) => updateInput("artworkLink", e.target.value)}
+                          placeholder="Ex: https://.../fisier.pdf"
+                          className="input"
+                        />
+                        <div className="text-xs text-gray-500 mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
+                      </div>
+                      {uploading && <p className="text-sm text-indigo-600">Se încarcă...</p>}
+                      {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
+                      {input.artworkUrl && !uploadError && <p className="text-sm text-green-600 font-semibold">Fișier încărcat</p>}
+                      {!input.artworkUrl && input.artworkLink && <p className="text-sm text-green-600 font-semibold">Link salvat</p>}
+                    </div>
+                  )}
+
+                  {input.designOption === 'text_only' && (
+                    <div className="space-y-3">
+                      <label className="field-label">Introdu textul dorit</label>
+                      <textarea className="input" rows={3} value={textDesign} onChange={e => setTextDesign(e.target.value)} placeholder="ex: PROMOTIE, REDUCERI, etc."></textarea>
+                    </div>
+                  )}
+
+                  {input.designOption === 'pro' && (
+                    <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-sm text-indigo-800">
+                      <p className="font-semibold">Serviciu de Grafică Profesională</p>
+                      <p>O echipă de designeri va crea o propunere grafică pentru tine. Vei primi pe email o simulare pentru confirmare. Cost: <strong>{formatMoneyDisplay(50)}</strong>.</p>
+                    </div>
+                  )}
+                </div>
+              </AccordionStep>
             </div>
 
-            {/* 4. Grafică */}
-            <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Info /></div><h2 className="text-lg font-bold text-ui">4. Grafică</h2></div>
-
-              <div className="relative">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <button onClick={() => updateInput("designOption", "upload")} className={`p-3 rounded-lg border ${input.designOption === "upload" ? "border-indigo-500 bg-indigo-900/10" : "border-white/10 hover:bg-white/5"}`}>Încarcă grafică</button>
-                  <button onClick={() => updateInput("designOption", "pro")} className={`p-3 rounded-lg border ${input.designOption === "pro" ? "border-indigo-500 bg-indigo-900/10" : "border-white/10 hover:bg-white/5"}`}>Pro (preț stabilit după comandă)</button>
-                </div>
+            <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(totalShown)}</p>
+                <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă</span></button>
               </div>
-
-              {input.designOption === "upload" && (
-                <div className="panel p-3 mt-3 space-y-2 border-t border-white/5">
-                  <div>
-                    <label className="field-label">Încarcă fișier</label>
-                    <input
-                      type="file"
-                      accept=".pdf,.ai,.psd,.jpg,.jpeg,.png"
-                      onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)}
-                      className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500"
-                    />
-                    <div className="text-xs text-white/60 mt-1">sau</div>
-                  </div>
-
-                  <div>
-                    <label className="field-label">Link descărcare (opțional)</label>
-                    <input
-                      type="url"
-                      value={input.artworkLink ?? ""}
-                      onChange={(e) => updateInput("artworkLink", e.target.value)}
-                      placeholder="Ex: https://.../fisier.pdf"
-                      className="input"
-                    />
-                    <div className="text-xs text-white/60 mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
-                  </div>
-
-                  <div className="text-xs text-white/60">
-                    {uploading && "Se încarcă…"}
-                    {uploadError && "Eroare upload"}
-                    {input.artworkUrl && "Fișier încărcat"}
-                    {!input.artworkUrl && input.artworkLink && "Link salvat"}
-                  </div>
-                </div>
-              )}
-
-              {input.designOption === "pro" && (
-                <div className="panel p-3 mt-3 border-t border-white/5">
-                  <div className="text-sm text-white/80">Serviciu grafic profesional — prețul se stabilește după comandă. Vom discuta cerințele și livrăm oferta.</div>
-                </div>
-              )}
+              <DeliveryEstimation />
             </div>
           </div>
-
-          {/* RIGHT - summary */}
-          <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
-            <div className="space-y-6 lg:sticky lg:top-6">
-              <div className="card p-4">
-                <div className="aspect-square overflow-hidden rounded-xl border border-white/10 bg-black">
-                  <img src={activeImage} alt="Carton preview" className="h-full w-full object-cover" loading="eager" />
-                </div>
-                <div className="mt-3 grid grid-cols-4 gap-3">
-                  {GALLERY.map((src, i) => (
-                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition aspect-square ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
-                      <img src={src} alt="Thumb" className="w-full h-full object-cover" loading="lazy" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="card p-4">
-                <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-                <div className="space-y-2 text-muted text-sm">
-                  <p>Suprafață: <span className="text-ui font-semibold">{serverData ? formatAreaDisplay(serverData.totalSqm) : formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
-                  <p className="flex items-center gap-2 flex-wrap">
-                    <span>Total:</span>
-                    <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span>
-                    <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
-                  </p>
-                  <div className="my-2">
-                    <DeliveryEstimation />
-                  </div>
-                  <p className="text-xs text-muted">Preț / m²: <strong>{serverData ? `${serverData.pricePerSqm} RON` : (priceDetailsLocal.pricePerSqm > 0 ? `${priceDetailsLocal.pricePerSqm} RON` : "—")}</strong></p>
-                  {(serverData?.accessoryCost > 0 || priceDetailsLocal.accessoryCost > 0) && <p className="text-xs text-muted">Cost accesorii (cant): <strong>{serverData ? serverData.accessoryCost : priceDetailsLocal.accessoryCost} RON</strong></p>}
-                  <p className="text-xs text-muted">Grafică: <strong>{input.designOption === "pro" ? "Pro (preț la comandă)" : input.artworkUrl ? "Fișier încărcat" : input.artworkLink ? "Link salvat" : "Nedefinit"}</strong></p>
-                </div>
-
-                <div className="mt-3">
-                  <DeliveryInfo className="hidden lg:block" variant="minimal" icon="📦" showCod={false} showShippingFrom={false} />
-                </div>
-
-                <div className="hidden lg:block mt-4">
-                  <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-full py-2">
-                    <ShoppingCart size={18} /><span className="ml-2">Adaugă</span>
-                  </button>
-                </div>
-              </div>
-
-              
-            </div>
-          </aside>
+          <div className="lg:hidden col-span-1">
+            {/* Placeholder for mobile tabs */}
+          </div>
         </div>
       </div>
 
@@ -580,12 +540,12 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
       {detailsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/60" onClick={() => setDetailsOpen(false)} />
-          <div className="relative z-10 w-full max-w-2xl bg-[#0b0b0b] rounded-md border border-white/10 p-6">
+          <div className="relative z-10 w-full max-w-2xl bg-white rounded-md border border-gray-200 p-6">
             <button className="absolute right-3 top-3 p-1" onClick={() => setDetailsOpen(false)} aria-label="Închide">
-              <X size={18} className="text-white/80" />
+              <X size={18} className="text-gray-600" />
             </button>
-            <h3 className="text-xl font-bold text-white mb-3">Detalii Carton</h3>
-            <div className="text-sm text-white/70 space-y-3">
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Detalii Carton</h3>
+            <div className="text-sm text-gray-700 space-y-3">
               <div>
                 <strong>Carton ondulat</strong>
                 <p>Grosimi disponibile:</p>
@@ -636,6 +596,38 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
 }
 
 /* small UI helpers */
+
+const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
+  <div className="relative pl-12">
+    <div className="absolute top-5 left-0 flex flex-col items-center h-full">
+      <span className={`flex items-center justify-center w-8 h-8 rounded-full text-md font-bold transition-colors ${isOpen ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}>{stepNumber}</span>
+      {!isLast && <div className="w-px grow bg-gray-200 mt-2"></div>}
+    </div>
+    <div className="flex-1">
+      <button type="button" className="w-full flex items-center justify-between py-5 text-left" onClick={onClick}>
+        <div>
+          <h2 className="text-lg font-bold text-gray-800">{title}</h2>
+          {!isOpen && <p className="text-sm text-gray-500 truncate">{summary}</p>}
+        </div>
+        <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+      <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? "grid-rows-[1fr] opacity-100 pb-5" : "grid-rows-[0fr] opacity-0"}`}>
+        <div className="overflow-hidden">{children}</div>
+      </div>
+    </div>
+  </div>
+);
+
+const OptionButton = ({ active, onClick, title, subtitle }: { active: boolean; onClick: () => void; title: string; subtitle?: string; }) => (
+  <button type="button" onClick={onClick} className={`w-full text-left p-3 rounded-lg border-2 transition-all text-sm ${active ? "border-indigo-600 bg-indigo-50" : "border-gray-300 bg-white hover:border-gray-400"}`}>
+    <div className="font-bold text-gray-800">{title}</div>
+    {subtitle && <div className="text-xs text-gray-600 mt-1">{subtitle}</div>}
+  </button>
+);
+
+const TabButton = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
+  <button type="button" onClick={onClick} className={`px-4 py-2 text-sm font-semibold transition-colors rounded-t-lg ${active ? "border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50" : "text-gray-500 hover:text-gray-800"}`}>{children}</button>
+);
 
 function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   const inc = (d: number) => onChange(Math.max(1, value + d));
