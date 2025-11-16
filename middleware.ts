@@ -13,6 +13,29 @@ const canonicalSlugs = new Set(listAllLandingRoutes().map((r) => String(r.slug).
 export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const pathname = url.pathname;
+  // CORS handling for API routes: allow requests from local dev clients (e.g. localhost:8081)
+  // - Respond to preflight OPTIONS with the appropriate headers
+  // - For other API requests, append Access-Control-Allow-Origin header
+  if (pathname.startsWith('/api')) {
+    const origin = req.headers.get('origin') || '';
+    const allowedOrigin = origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1') ? origin : process.env.NEXT_PUBLIC_ALLOWED_ORIGIN || '';
+
+    // Preflight
+    if (req.method === 'OPTIONS') {
+      const headers = new Headers();
+      if (allowedOrigin) headers.set('Access-Control-Allow-Origin', allowedOrigin);
+      else headers.set('Access-Control-Allow-Origin', '*');
+      headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+      headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      return new NextResponse(null, { status: 204, headers });
+    }
+
+    // For actual API responses, continue but attach CORS header
+    const res = NextResponse.next();
+    if (allowedOrigin) res.headers.set('Access-Control-Allow-Origin', allowedOrigin);
+    else res.headers.set('Access-Control-Allow-Origin', '*');
+    return res;
+  }
 
   // Exclude paths we should not rewrite
   if (
