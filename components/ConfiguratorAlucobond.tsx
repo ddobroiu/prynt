@@ -28,9 +28,9 @@ type LocalPriceOutput = {
   pricePerSqm: number;
 };
 
-type DesignOption = "upload" | "pro" | "text_only";
+type DesignOption = "upload" | "pro";
 type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string; renderOnlyConfigurator?: boolean; };
-const PRO_DESIGN_FEE = 50;
+const PRO_DESIGN_FEE = 100;
 
 
 const MATERIAL_INFO: Record<MaterialType, { thickness_mm: number; label: string }> = {
@@ -134,8 +134,19 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
   const [serverPrice, setServerPrice] = useState<number | null>(null);
   const [calcLoading, setCalcLoading] = useState(false);
 
+  const availableColors = useMemo(() => {
+    return input.material === "PE" ? ["Alb", "Argintiu", "Negru"] : ["Alb"];
+  }, [input.material]);
+
+  useEffect(() => {
+    if (!availableColors.includes(input.color)) {
+      setInput((s) => ({ ...s, color: availableColors[0] }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input.material]);
+
   const priceDetailsLocal = useMemo(() => localCalculatePrice(input), [input]);
-  const displayedTotal = useMemo(() => { const base = serverPrice ?? priceDetailsLocal.finalPrice || 0; return designOption === "pro" ? roundMoney(base + PRO_DESIGN_FEE) : base; }, [priceDetailsLocal, designOption, serverPrice]);
+  const displayedTotal = useMemo(() => { const base = (serverPrice ?? priceDetailsLocal.finalPrice) || 0; return designOption === "pro" ? roundMoney(base + PRO_DESIGN_FEE) : base; }, [priceDetailsLocal, designOption, serverPrice]);
 
   const updateInput = <K extends keyof PriceInput>(k: K, v: PriceInput[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
@@ -226,9 +237,8 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
       metadata: {
         "Material": input.material,
         "Culoare": input.color,
-        "Grafică": designOption === 'pro' ? 'Vreau grafică' : designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
+        "Grafică": designOption === 'pro' ? 'Vreau grafică' : 'Grafică proprie',
         ...(designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(PRO_DESIGN_FEE) }),
-        ...(designOption === 'text_only' && { "Text": textDesign }),
         artworkUrl,
       },
     });
@@ -251,7 +261,7 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
   const canAdd = totalShown > 0 && input.width_cm > 0 && input.height_cm > 0;
   const summaryStep1 = input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}x${input.height_cm}cm, ${input.quantity} buc.` : "Alege";
   const summaryStep2 = `${input.material}, ${input.color}`;
-  const summaryStep3 = designOption === 'upload' ? 'Grafică proprie' : designOption === 'text_only' ? 'Doar text' : 'Design Pro';
+  const summaryStep3 = designOption === 'upload' ? 'Grafică proprie' : 'Design Pro';
 
   return (
     <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
@@ -296,9 +306,15 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                 </div>
                 <label className="field-label mb-2">Culoare</label>
                 <div className="grid grid-cols-2 gap-2 mb-4">
-                    <OptionButton active={input.color === "Alb"} onClick={() => updateInput("color", "Alb")} title="Alb" subtitle="" />
-                    <OptionButton active={input.color === "Argintiu"} onClick={() => updateInput("color", "Argintiu")} title="Argintiu" subtitle="" />
-                    <OptionButton active={input.color === "Negru"} onClick={() => updateInput("color", "Negru")} title="Negru" subtitle="" />
+                    {availableColors.map((color) => (
+                        <OptionButton
+                            key={color}
+                            active={input.color === color}
+                            onClick={() => updateInput("color", color)}
+                            title={color}
+                            subtitle=""
+                        />
+                    ))}
                 </div>
               </AccordionStep>
               <AccordionStep stepNumber={3} title="Grafică" summary={summaryStep3} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
@@ -306,7 +322,6 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                   <div className="mb-4 border-b border-gray-200">
                     <div className="flex -mb-px">
                       <TabButton active={designOption === 'upload'} onClick={() => setDesignOption('upload')}>Am Grafică</TabButton>
-                      <TabButton active={designOption === 'text_only'} onClick={() => setDesignOption('text_only')}>Doar Text</TabButton>
                       <TabButton active={designOption === 'pro'} onClick={() => setDesignOption('pro')}>Vreau Grafică</TabButton>
                     </div>
                   </div>
@@ -327,12 +342,7 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
                     </div>
                   )}
 
-                  {designOption === 'text_only' && (
-                    <div className="space-y-3">
-                      <label className="field-label">Introdu textul dorit</label>
-                      <textarea className="input" rows={3} value={textDesign} onChange={e => setTextDesign(e.target.value)} placeholder="ex: PROMOTIE, REDUCERI, etc."></textarea>
-                    </div>
-                  )}
+
 
                   {designOption === 'pro' && (
                     <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-sm text-indigo-800">
