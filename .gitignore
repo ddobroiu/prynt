@@ -1,3 +1,17 @@
+node_modules/
+.env
+.env.*
+.env.local
+.next/
+.vercel/
+dist/
+build/
+/.parcel-cache
+/.turbo
+/.turbo/**
+/*.log
+/.DS_Store
+node_modules/.prisma/client
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
