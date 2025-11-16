@@ -7,11 +7,11 @@ type Order = {
   id: string;
   orderNo?: number;
   createdAt?: string;
-  status?: string;
+  status?: string | null;
   canceledAt?: string | null;
   total?: number;
   shippingFee?: number;
-  paymentType?: string;
+  paymentType?: string | null;
   items?: Item[];
   address?: any;
   billing?: any;

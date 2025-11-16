@@ -7,8 +7,9 @@ export async function generateStaticParams() {
   return getAllBlogSlugs().map((slug) => ({ slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const post = getPostBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = getPostBySlug(slug);
   if (!post) return {} as any;
   return {
     title: `${post.title} | Blog Prynt`,
@@ -17,8 +18,9 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
   };
 }
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = getPostBySlug(params.slug);
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = getPostBySlug(slug);
   if (!post) return null;
   const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
   const url = `${base}/blog/${post.slug}`;
@@ -46,7 +48,14 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             <a className="btn-primary" href="/banner">Bannere</a>
             <a className="btn-primary" href="/autocolante">Autocolante</a>
             <a className="btn-primary" href="/pliante">Pliante</a>
+            <a className="btn-primary" href="/flayere">Flyere</a>
             <a className="btn-primary" href="/afise">Afișe</a>
+            <a className="btn-primary" href="/canvas">Canvas</a>
+            <a className="btn-primary" href="/carton">Carton</a>
+            <a className="btn-primary" href="/alucobond">Alucobond</a>
+            <a className="btn-primary" href="/materiale">PVC Forex</a>
+            <a className="btn-primary" href="/materiale">Polipropilena</a>
+            <a className="btn-primary" href="/tapet">Tapet</a>
           </div>
         </div>
       </article>

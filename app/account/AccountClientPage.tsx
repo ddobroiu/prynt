@@ -17,7 +17,7 @@ type Order = {
   status: string | null;
   total: number;
   paymentType: string | null;
-  items: { name: string }[];
+  items: { name: string; qty: number; unit: number; total: number }[];
   itemsCount: number;
   awbNumber: string | null;
   awbCarrier: string | null;

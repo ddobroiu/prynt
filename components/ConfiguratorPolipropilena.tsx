@@ -4,6 +4,9 @@ import { useCart } from "@/components/CartContext";
 import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
 import DeliveryInfo from "@/components/DeliveryInfo";
+import FaqAccordion from "./FaqAccordion";
+import Reviews from "./Reviews";
+import { QA } from "@/types";
 
 /* GALLERY (adjust images if needed) */
 const GALLERY = [
@@ -14,7 +17,7 @@ const GALLERY = [
 
 /* HELPERS */
 const roundMoney = (n: number) => Math.round(n * 100) / 100;
-const formatMoneyDisplay = (n: number) => (n && n > 0 ? n.toFixed(2) : "0");
+const formatMoneyDisplay = (amount: number) => new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(amount);
 const formatAreaDisplay = (n: number) => (n && n > 0 ? String(n) : "0");
 
 /* TYPES */
@@ -383,6 +386,10 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
                 </div>
               </div>
 
+              <div className="hidden lg:block">
+                <ProductTabs productSlug={productSlug || 'polipropilena'} />
+              </div>
+
               <div className="card p-4">
                 <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
                 <div className="space-y-2 text-muted text-sm">
@@ -411,6 +418,10 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
               
             </div>
           </aside>
+        </div>
+
+        <div className="lg:hidden mt-8">
+          <ProductTabs productSlug={productSlug || 'polipropilena'} />
         </div>
       </div>
 
@@ -448,20 +459,29 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
 
 /* small UI helpers */
 
-function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
-  const inc = (d: number) => onChange(Math.max(1, value + d));
-  return (
-    <div>
-      <label className="field-label">{label}</label>
-      <div className="flex items-center">
-        <button onClick={() => inc(-1)} className="p-2 bg-white/10 rounded-l-md hover:bg-white/15" aria-label="Decrement">
-          <Minus size={14} />
-        </button>
-        <input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value || "1")))} className="input text-lg font-semibold text-center" />
-        <button onClick={() => inc(1)} className="p-2 bg-white/10 rounded-r-md hover:bg-white/15" aria-label="Increment">
-          <Plus size={14} />
-        </button>
-      </div>
-    </div>
-  );
-}
+const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
+
+const ProductTabs = ({ productSlug }: { productSlug: string }) => {
+    const [activeTab, setActiveTab] = useState("descriere");
+    const polipropilenaFaqs: QA[] = [
+        { question: "Ce este Akyplac Alb?", answer: "Akyplac Alb este un material din polipropilenă, cu suprafețe albe, potrivit pentru aplicații ușoare, imprimare digitală și elemente expuse la manipulare." },
+        { question: "Ce grosimi sunt disponibile?", answer: "Grosimi disponibile: 3.0 mm (gramaj 450 g/mp, preț 160 RON/m²) și 5.0 mm (gramaj 1050 g/mp, preț 200 RON/m²)." },
+        { question: "Cum trimit grafica pentru imprimare?", answer: "Puteți încărca fișierul grafic direct în configurator sau trimiteți link. Acceptăm formate precum PDF, JPG, PNG." },
+        { question: "Cât durează producția și livrarea?", answer: "Producția durează în mod normal 2-3 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile." },
+        { question: "Este rezistent la umiditate?", answer: "Da, polipropilena este rezistentă la umiditate și manipulare, ideală pentru aplicații interioare și exterioare ușoare." },
+    ];
+    return (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
+            <nav className="border-b border-gray-200 flex">
+                <TabButtonSEO active={activeTab === "descriere"} onClick={() => setActiveTab("descriere")}>Descriere</TabButtonSEO>
+                <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
+                <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
+            </nav>
+            <div className="p-6">
+                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Plăci Polipropilenă Akyplac Alb</h3><p>Material versatil din polipropilenă cu suprafețe albe, ideal pentru imprimare digitală și aplicații ușoare.</p><h4>Prețuri</h4><ul><li>3.0 mm: <strong>160 RON/m²</strong> (gramaj 450 g/mp)</li><li>5.0 mm: <strong>200 RON/m²</strong> (gramaj 1050 g/mp)</li></ul></div>}
+                {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
+                {activeTab === 'faq' && <FaqAccordion qa={polipropilenaFaqs} />}
+            </div>
+        </div>
+    );
+};

@@ -1,10 +1,13 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/components/CartContext";
 import { Ruler, Plus, Minus, ShoppingCart, Info, X, ChevronDown, UploadCloud } from "lucide-react";
 import MobilePriceBar from "./MobilePriceBar";
 import DeliveryInfo from "@/components/DeliveryInfo";
 import DeliveryEstimation from "./DeliveryEstimation";
+import FaqAccordion from "./FaqAccordion";
+import Reviews from "./Reviews";
+import { QA } from "@/types";
 
 /* GALLERY (example images - adjust paths) */
 const GALLERY = [
@@ -16,14 +19,14 @@ const GALLERY = [
 
 /* HELPERS */
 const roundMoney = (n: number) => Math.round(n * 100) / 100;
-const formatMoneyDisplay = (n: number) => (n && n > 0 ? n.toFixed(2) : "0");
+const formatMoneyDisplay = (amount: number) => new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(amount);
 const formatAreaDisplay = (n: number) => (n && n > 0 ? String(n) : "0");
 
 /* TYPES */
 type MaterialType = "ondulat" | "reciclat";
 type OndulaOption = "E" | "3B" | "3C" | "5BC";
 type ReciclatOption = "board16" | "board10";
-type DesignOption = "upload" | "text_only" | "pro";
+type DesignOption = "upload" | "pro";
 
 type PriceInput = {
   width_cm: number;
@@ -163,6 +166,7 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
   const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
 
   const [serverPrice, setServerPrice] = useState<number | null>(null);
+  const [serverData, setServerData] = useState<any>(null);
   const [calcLoading, setCalcLoading] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
@@ -173,10 +177,6 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
 
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-
-  const [textDesign, setTextDesign] = useState<string>("");
-
-  const [serverData, setServerData] = useState<any>(null);
 
   useEffect(() => {
     if (usePreset) {
@@ -340,7 +340,6 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
         designOption: input.designOption ?? "upload",
         artworkUrl: input.artworkUrl ?? null,
         artworkLink: input.artworkLink ?? "",
-        ...(input.designOption === 'text_only' && { "Text": textDesign }),
       },
     });
 
@@ -354,7 +353,7 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
   const summaryStep1 = input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}x${input.height_cm}cm, ${input.quantity} buc.` : "Alege";
   const summaryStep2 = input.material === "ondulat" ? "Carton ondulat" : "Carton reciclat";
   const summaryStep3 = input.material === "ondulat" ? `${input.ondula}, ${input.printDouble ? "față-verso" : "față"}` : `${input.reciclatBoard}, ${input.edgePerimeter_m ? `cant ${input.edgePerimeter_m}ml` : "fără cant"}`;
-  const summaryStep4 = input.designOption === "upload" ? "Grafică proprie" : input.designOption === "text_only" ? "Doar text" : "Design Pro";
+  const summaryStep4 = input.designOption === "upload" ? "Grafică proprie" : "Design Pro";
 
   return (
     <main className="bg-gray-50 min-h-screen">
@@ -379,17 +378,19 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
               </div>
             </div>
             <div className="hidden lg:block">
-              {/* Placeholder for tabs or additional content */}
+              <ProductTabs productSlug={productSlug || 'carton'} />
             </div>
           </div>
           <div>
             <header className="mb-6">
               <h1 className="text-3xl font-extrabold text-gray-900">Configurator Carton</h1>
-              <p className="mt-2 text-gray-600">Alege tipul de carton, dimensiuni, print și încarcă grafică. Opțiunea "Pro" pentru grafică se stabilește după comandă.</p>
-              <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5 mt-3">
-                <Info size={16} />
-                <span className="ml-2">Detalii</span>
-              </button>
+              <div className="flex justify-between items-center">
+                <p className="text-gray-600">Alege tipul de carton, dimensiuni, print și încarcă grafică. Opțiunea "Pro" pentru grafică se stabilește după comandă.</p>
+                <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5">
+                  <Info size={16} />
+                  <span className="ml-2">Detalii</span>
+                </button>
+              </div>
             </header>
 
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4">
@@ -469,7 +470,6 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
                   <div className="mb-4 border-b border-gray-200">
                     <div className="flex -mb-px">
                       <TabButton active={input.designOption === 'upload'} onClick={() => updateInput("designOption", "upload")}>Am Grafică</TabButton>
-                      <TabButton active={input.designOption === 'text_only'} onClick={() => updateInput("designOption", "text_only")}>Doar Text</TabButton>
                       <TabButton active={input.designOption === 'pro'} onClick={() => updateInput("designOption", "pro")}>Vreau Grafică</TabButton>
                     </div>
                   </div>
@@ -503,17 +503,10 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
                     </div>
                   )}
 
-                  {input.designOption === 'text_only' && (
-                    <div className="space-y-3">
-                      <label className="field-label">Introdu textul dorit</label>
-                      <textarea className="input" rows={3} value={textDesign} onChange={e => setTextDesign(e.target.value)} placeholder="ex: PROMOTIE, REDUCERI, etc."></textarea>
-                    </div>
-                  )}
-
                   {input.designOption === 'pro' && (
                     <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-sm text-indigo-800">
                       <p className="font-semibold">Serviciu de Grafică Profesională</p>
-                      <p>O echipă de designeri va crea o propunere grafică pentru tine. Vei primi pe email o simulare pentru confirmare. Cost: <strong>{formatMoneyDisplay(50)}</strong>.</p>
+                      <p>O echipă de designeri va crea o propunere grafică pentru tine. Vei primi pe email o simulare pentru confirmare. Prețul se stabilește după evaluarea comenzii.</p>
                     </div>
                   )}
                 </div>
@@ -529,7 +522,7 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
             </div>
           </div>
           <div className="lg:hidden col-span-1">
-            {/* Placeholder for mobile tabs */}
+            <ProductTabs productSlug={productSlug || 'carton'} />
           </div>
         </div>
       </div>
@@ -624,6 +617,33 @@ const OptionButton = ({ active, onClick, title, subtitle }: { active: boolean; o
     {subtitle && <div className="text-xs text-gray-600 mt-1">{subtitle}</div>}
   </button>
 );
+
+const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
+
+const ProductTabs = ({ productSlug }: { productSlug: string }) => {
+    const [activeTab, setActiveTab] = useState("descriere");
+    const cartonFaqs: QA[] = [
+        { question: "Ce tipuri de carton sunt disponibile?", answer: "Oferim carton ondulat (E, 3B, 3C, 5BC) și carton reciclat (Board 16 mm și Eco Board 10 mm), fiecare cu grosimi și gramaje diferite pentru diverse aplicații." },
+        { question: "Ce finisaje sunt incluse?", answer: "Cartonul ondulat vine cu opțiune de print față sau față-verso. Cartonul reciclat include protejarea marginilor cu bandă adezivă specială." },
+        { question: "Cum trimit grafica pentru imprimare?", answer: "Puteți încărca fișierul grafic direct în configurator, în pasul 4. Acceptăm formate precum PDF, JPG, TIFF sau link de descărcare." },
+        { question: "Cât durează producția și livrarea?", answer: "Producția durează în mod normal 2-3 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile, în funcție de localitatea de destinație." },
+        { question: "Cartonul este rezistent la umiditate?", answer: "Da, cartonul ondulat este rezistent la umiditate și poate fi folosit în medii umede. Cartonul reciclat este potrivit pentru aplicații interioare, dar poate fi protejat suplimentar." },
+    ];
+    return (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
+            <nav className="border-b border-gray-200 flex">
+                <TabButtonSEO active={activeTab === "descriere"} onClick={() => setActiveTab("descriere")}>Descriere</TabButtonSEO>
+                <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
+                <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
+            </nav>
+            <div className="p-6">
+                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Carton Personalizat de Calitate</h3><p>Fie că ai nevoie de ambalaje, display-uri sau cutii personalizate, cartonul nostru este soluția ideală pentru proiectele tale, imprimate la calitate înaltă.</p><h4>Structură Preț</h4><p>Prețurile variază în funcție de material, grosime și cantitate. Calculul se face automat în configurator.</p></div>}
+                {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
+                {activeTab === 'faq' && <FaqAccordion qa={cartonFaqs} />}
+            </div>
+        </div>
+    );
+};
 
 const TabButton = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
   <button type="button" onClick={onClick} className={`px-4 py-2 text-sm font-semibold transition-colors rounded-t-lg ${active ? "border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50" : "text-gray-500 hover:text-gray-800"}`}>{children}</button>
