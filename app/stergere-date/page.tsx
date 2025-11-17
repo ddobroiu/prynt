@@ -28,7 +28,7 @@ export default function StergereDatePage() {
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Pașii pentru a solicita ștergerea</h2>
         <ol className="list-decimal list-inside space-y-2 text-gray-700">
-          <li>Trimite o cerere prin email la <a className="text-blue-600 underline" href="mailto:privacy@prynt.ro">privacy@prynt.ro</a> sau folosește formularul de contact.</li>
+          <li>Trimite o cerere prin email la <a className="text-blue-600 underline" href="mailto:contact@prynt.ro">contact@prynt.ro</a> sau folosește formularul de contact.</li>
           <li>Include în cerere: numele complet, adresa de email folosită la înregistrare (dacă există), numărul comandă (dacă e cazul) și o scurtă mențiune că soliciți "ștergerea datelor".</li>
           <li>Vom verifica identitatea solicitantului — este posibil să solicităm o confirmare suplimentară pentru a evita ștergerea neautorizată.</li>
           <li>După verificare, vom procesa cererea în termen de 30 de zile și te vom notifica prin email cu rezultatul.</li>
@@ -56,7 +56,7 @@ export default function StergereDatePage() {
 
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Contact</h2>
-        <p className="text-gray-700 mb-2">Pentru solicitări, scrie la: <a className="text-blue-600 underline" href="mailto:privacy@prynt.ro">privacy@prynt.ro</a></p>
+        <p className="text-gray-700 mb-2">Pentru solicitări, scrie la: <a className="text-blue-600 underline" href="mailto:contact@prynt.ro">contact@prynt.ro</a></p>
         <p className="text-gray-700">Poți folosi și numărul de telefon pentru suport: <strong>+40 750 473 111</strong></p>
         <p className="text-sm text-gray-500 mt-4">Dacă nu ești mulțumit de răspuns, ai dreptul să depui plângere la autoritatea națională de protecție a datelor (ANSPDCP).</p>
       </section>
