@@ -115,6 +115,12 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} {siteConfig.name}. Toate drepturile rezervate.
           </p>
           <div className="flex items-center gap-4">
+            <Link
+              href="/stergere-date"
+              className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 transition-colors"
+            >
+              Stergere date
+            </Link>
             <a
               href="https://anpc.ro/ce-este-sal/"
               target="_blank"
