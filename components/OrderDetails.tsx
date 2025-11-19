@@ -3,43 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 
-type Item = { name: string; qty: number; unit?: number; total?: number };
-type Order = {
-  id: string;
-  orderNo?: number;
-  createdAt?: string;
-  status?: string | null;
-  canceledAt?: string | null;
-  total?: number;
-  shippingFee?: number;
-  paymentType?: string | null;
-  items?: Item[];
-  address?: any;
-  billing?: any;
-  awbNumber?: string | null;
-  awbCarrier?: string | null;
-  invoiceLink?: string | null;
-};
-
-function getAwbTrackingUrl(awb: string | null | undefined, carrier: string | null | undefined): string | null {
-  if (!awb || !carrier) return null;
-  const awbClean = encodeURIComponent(awb);
-  const carrierLower = carrier.toLowerCase();
-  if (carrierLower.includes('dpd')) return `https://tracking.dpd.ro/awb?awb=${awbClean}`;
-  if (carrierLower.includes('fan')) return `https://www.fancourier.ro/awb-tracking/?awb=${awbClean}`;
-  if (carrierLower.includes('sameday')) return `https://sameday.ro/awb-tracking/?awb=${awbClean}`;
-  return null;
-}
-
 function formatMoney(n?: number) {
   return new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(n || 0);
 }
 
-export default function OrderDetails({ order }: { order: Order }) {
+export default function OrderDetails({ order }: { order: any }) {
   const [open, setOpen] = useState(false);
-  const awbUrl = getAwbTrackingUrl(order.awbNumber, order.awbCarrier);
-  const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleString('ro-RO') : '—';
-  const items = order.items && order.items.length ? order.items : null;
+  const items = order.items || [];
 
   return (
     <div>
@@ -50,136 +20,75 @@ export default function OrderDetails({ order }: { order: Order }) {
         Detalii
       </button>
 
-      {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur" onClick={() => setOpen(false)} />
-          <div className="relative z-10 mx-4 flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#070b17]/95 p-6 text-white shadow-2xl">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setOpen(false)} />
+          <div className="relative z-10 w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-slate-950 p-6 shadow-2xl">
+            
+            <div className="flex items-start justify-between mb-6">
               <div>
-                <p className="text-xs uppercase tracking-[0.4em] text-white/60">Comanda #{order.orderNo ?? '—'}</p>
-                <h3 className="mt-2 text-2xl font-semibold">Detalii comandă</h3>
-                <div className="text-sm text-muted">{createdAt}</div>
+                <div className="text-xs uppercase tracking-widest text-slate-400">Comanda #{order.orderNo}</div>
+                <h2 className="text-2xl font-bold text-white mt-1">Detalii Comandă</h2>
               </div>
-              <div className="flex items-center gap-3">
-                <span
-                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${order.status === 'canceled'
-                    ? 'bg-rose-500/20 text-rose-100'
-                    : order.status === 'fulfilled'
-                    ? 'bg-emerald-500/20 text-emerald-100'
-                    : 'bg-amber-500/30 text-amber-100'
-                  }`}
-                >
-                  {order.status === 'canceled' ? 'Anulată' : order.status === 'fulfilled' ? 'Finalizată' : 'În lucru'}
-                </span>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="inline-flex items-center rounded-full border border-white/15 px-3 py-1 text-xs text-white/80 transition hover:bg-white/10"
-                >
-                  Închide
-                </button>
-              </div>
+              <button onClick={() => setOpen(false)} className="p-2 text-slate-400 hover:text-white">✕</button>
             </div>
 
-            <div className="mt-6 grid flex-1 grid-cols-1 gap-6 overflow-y-auto pb-2 md:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-semibold">Produse</h4>
-                    {/* Buton CĂTRE PAGINA DE UPLOAD */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
+              {/* Lista Produse */}
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-white">Produse</h3>
+                    {/* BUTONUL CĂTRE PAGINA DE UPLOAD */}
                     <Link 
                         href={`/account/orders/${order.id}`}
-                        onClick={() => setOpen(false)} // Închidem modalul când navigăm
-                        className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-colors font-medium flex items-center gap-1 shadow-sm shadow-indigo-500/20"
+                        className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg font-medium flex items-center gap-2 transition-colors"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                        </svg>
                         <span>Gestionare Grafică</span>
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </Link>
                 </div>
                 
-                {items ? (
-                  <ul className="mt-3 divide-y divide-white/5 text-sm">
-                    {items.map((it, idx) => (
-                      <li key={idx} className="flex items-center gap-3 py-3">
-                        <div className="flex-1">
-                          <div className="font-medium text-white">{it.name}</div>
-                          <div className="text-xs text-muted">
-                            {it.qty} × {formatMoney(it.unit)}
-                          </div>
+                <div className="space-y-3">
+                    {items.map((it: any, i: number) => (
+                        <div key={i} className="flex justify-between text-sm border-b border-white/5 pb-2 last:border-0">
+                            <div>
+                                <div className="text-white font-medium">{it.name}</div>
+                                <div className="text-slate-400 text-xs">{it.qty} buc x {formatMoney(Number(it.unit))}</div>
+                            </div>
+                            <div className="text-white font-semibold">{formatMoney(Number(it.total))}</div>
                         </div>
-                        <div className="text-sm font-semibold text-white">{formatMoney(it.total)}</div>
-                      </li>
                     ))}
-                  </ul>
-                ) : (
-                  <p className="mt-4 rounded-2xl bg-black/20 p-3 text-xs text-muted">Comanda nu conține linii de produse.</p>
-                )}
+                </div>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <h4 className="font-semibold">Detalii livrare & facturare</h4>
-                <div className="mt-3 text-sm text-muted">
-                  {/* Detalii Facturare */}
-                  {((order.billing as any)?.tip_factura && (order.billing as any).tip_factura !== 'persoana_fizica' && ((order.billing as any).cui || (order.billing as any).name)) ? (
-                    <div>
-                      <div><strong>Nume / Firmă:</strong> {(order.billing as any).name || (order.billing as any).cui}</div>
-                      <div><strong>Email:</strong> {(order.billing as any).email || order.address?.email}</div>
-                      <div><strong>Telefon:</strong> {(order.billing as any).telefon || (order.billing as any).phone || order.address?.telefon}</div>
-                      <div className="mt-2"><strong>Adresă:</strong> {(order.billing as any).strada_nr || order.address?.strada_nr}, {(order.billing as any).localitate || order.address?.localitate} ({(order.billing as any).judet || order.address?.judet})</div>
+              {/* Sumar */}
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4 h-fit">
+                 <h3 className="font-semibold text-white mb-4">Sumar</h3>
+                 <div className="space-y-2 text-sm text-slate-300">
+                    <div className="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span>{formatMoney(Number(order.total) - Number(order.shippingFee))}</span>
                     </div>
-                  ) : (
-                    <div>
-                      <div><strong>Nume:</strong> {order.address?.nume_prenume || order.address?.name}</div>
-                      <div><strong>Email:</strong> {order.address?.email}</div>
-                      <div><strong>Telefon:</strong> {order.address?.telefon}</div>
-                      <div className="mt-2"><strong>Adresă:</strong> {order.address?.strada_nr}, {order.address?.localitate} ({order.address?.judet})</div>
-                      {order.billing ? (
-                        <div className="mt-2"><strong>Facturare:</strong> {order.billing.name || order.billing.cui || '—'}</div>
-                      ) : null}
+                    <div className="flex justify-between">
+                        <span>Livrare:</span>
+                        <span>{formatMoney(Number(order.shippingFee))}</span>
                     </div>
-                  )}
-
-                  {order.awbNumber ? (
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <strong>AWB:</strong> {order.awbNumber} {order.awbCarrier ? `(${order.awbCarrier})` : ''}
-                      {awbUrl ? (
-                        <a
-                          href={awbUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="ml-2 rounded px-2 py-1 text-xs text-indigo-400 underline transition hover:text-indigo-200"
-                        >
-                          Verifică AWB
-                        </a>
-                      ) : (
-                        <span className="text-xs text-muted">Carrier fără link de tracking</span>
-                      )}
+                    <div className="flex justify-between border-t border-white/10 pt-2 mt-2 text-lg font-bold text-white">
+                        <span>Total:</span>
+                        <span>{formatMoney(Number(order.total))}</span>
                     </div>
-                  ) : null}
-                  {order.invoiceLink ? (
-                    <div className="mt-2"><a href={order.invoiceLink} target="_blank" rel="noreferrer" className="text-indigo-400 underline">Descarcă factura</a></div>
-                  ) : null}
-                </div>
-
-                <div className="mt-6 border-t border-white/5 pt-4 text-sm">
-                  <div className="flex justify-between text-muted">
-                    <div>Subtotal</div>
-                    <div>{formatMoney((order.total || 0) - (order.shippingFee || 0))}</div>
-                  </div>
-                  <div className="mt-2 flex justify-between text-muted">
-                    <div>Livrare</div>
-                    <div>{formatMoney(order.shippingFee)}</div>
-                  </div>
-                  <div className="mt-4 flex justify-between text-lg font-semibold text-white">
-                    <div>Total</div>
-                    <div>{formatMoney(order.total)}</div>
-                  </div>
-                </div>
+                 </div>
+                 {order.invoiceLink && (
+                    <a href={order.invoiceLink} target="_blank" className="mt-4 block text-center w-full rounded-lg border border-white/10 bg-white/5 py-2 text-sm text-indigo-400 hover:bg-white/10">
+                        Descarcă Factura
+                    </a>
+                 )}
               </div>
             </div>
+
           </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
