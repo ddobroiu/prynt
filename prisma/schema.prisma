@@ -10,24 +10,24 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  name         String?
-  image        String?
-  phone        String?
-  passwordHash String?   // hash pentru autentificare cu parolă (Credentials Provider)
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  phone         String?
+  passwordHash  String?   // hash pentru autentificare cu parolă (Credentials Provider)
   emailVerified DateTime?
 
-  addresses    Address[]
-  orders       Order[]
-  accounts     Account[]
-  sessions     Session[]
-  passwordResetTokens PasswordResetToken[]
-  graphics     UserGraphic[]
-  reviews      Review[]
+  addresses            Address[]
+  orders               Order[]
+  accounts             Account[]
+  sessions             Session[]
+  passwordResetTokens  PasswordResetToken[]
+  graphics             UserGraphic[]
+  reviews              Review[]
 
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model UserGraphic {
@@ -37,74 +37,77 @@ model UserGraphic {
   originalName String
   storagePath  String   @unique // The secure_url from Cloudinary
   publicId     String   @unique // The public_id from Cloudinary, for deletion
-  size         Int // in bytes
+  size         Int      // in bytes
   mimeType     String
   createdAt    DateTime @default(now())
 }
 
 model Address {
-  id          String   @id @default(cuid())
-  user        User?    @relation(fields: [userId], references: [id])
-  userId      String?
-  label       String? // ex: "Acasă", "Birou"
-  nume        String?
-  telefon     String?
-  judet       String
-  localitate  String
-  strada_nr   String
-  postCode    String?
+  id           String   @id @default(cuid())
+  user         User?    @relation(fields: [userId], references: [id])
+  userId       String?
+  label        String?  // ex: "Acasă", "Birou"
+  nume         String?
+  telefon      String?
+  judet        String
+  localitate   String
+  strada_nr    String
+  postCode     String?
   // Detalii adresă (bloc, scară etc.)
-  bloc        String?
-  scara       String?
-  etaj        String?
-  ap          String?
-  interfon    String?
-  isDefault   Boolean  @default(false)
-  type        String?  // shipping | billing
+  bloc         String?
+  scara        String?
+  etaj         String?
+  ap           String?
+  interfon     String?
+  isDefault    Boolean  @default(false)
+  type         String?  // shipping | billing
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Subscriber {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  token       String   @unique // double opt-in token
+  id          String    @id @default(cuid())
+  email       String    @unique
+  token       String    @unique // double opt-in token
   confirmedAt DateTime?
-  source      String?  // checkout, footer, account
-  createdAt   DateTime @default(now())
+  source      String?   // checkout, footer, account
+  createdAt   DateTime  @default(now())
 }
 
 model Order {
-  id          String       @id @default(cuid())
-  orderNo     Int          @unique
-  user        User?        @relation(fields: [userId], references: [id])
-  userId      String?
-  paymentType String       // "Ramburs" | "Card"
-  address     Json
-  billing     Json
-  items       OrderItem[]
-  shippingFee Decimal      @default(0)
-  total       Decimal      @default(0)
-  invoiceLink String?
+  id           String    @id @default(cuid())
+  orderNo      Int       @unique
+  user         User?     @relation(fields: [userId], references: [id])
+  userId       String?
+  paymentType  String    // "Ramburs" | "Card"
+  address      Json
+  billing      Json
+  items        OrderItem[]
+  shippingFee  Decimal   @default(0)
+  total        Decimal   @default(0)
+  invoiceLink  String?
   // AWB / tracking info
-  awbNumber   String?
-  awbCarrier  String?
+  awbNumber    String?
+  awbCarrier   String?
   // Status lifecycle
-  status      String       @default("active") // active | canceled | fulfilled (future)
-  canceledAt  DateTime?
-  marketing   Json?
-  createdAt   DateTime     @default(now())
+  status       String    @default("active") // active | canceled | fulfilled (future)
+  canceledAt   DateTime?
+  marketing    Json?
+  createdAt    DateTime  @default(now())
 }
 
 model OrderItem {
-  id       String  @id @default(cuid())
-  order    Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId  String
-  name     String
-  qty      Int
-  unit     Decimal @default(0)
-  total    Decimal @default(0)
+  id          String  @id @default(cuid())
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     String
+  name        String
+  qty         Int
+  unit        Decimal @default(0)
+  total       Decimal @default(0)
+  
+  // Câmp nou pentru upload grafică per produs
+  artworkUrl  String? 
 }
 
 // NextAuth (Auth.js) tables — ready for future login
@@ -114,14 +117,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?  @db.Text
-  access_token      String?  @db.Text
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?  @db.Text
+  id_token          String? @db.Text
   session_state     String?
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -163,6 +166,6 @@ model Review {
   userId      String
 
   productSlug String   // ex: "banner", "pliante"
-  
+   
   @@index([productSlug])
 }

@@ -1,199 +1,120 @@
-'use client';
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import OrdersList from "./orders/page"; 
 import AddressesManager from "@/components/AddressesManager";
 import ChangePasswordForm from "@/components/ChangePasswordForm";
-import RequestPasswordReset from "@/components/RequestPasswordReset";
-import SignOutButton from "@/components/SignOutButton";
-import OrderDetails from "@/components/OrderDetails";
-import UserDetailsForm from "@/components/UserDetailsForm";
-import UserGraphicsManager from "@/components/UserGraphicsManager";
+import { SignOutButton } from "@/components/SignOutButton";
 
-// Tipuri de date primite ca props
-type Order = {
-  id: string;
-  orderNo: number;
-  createdAt: string;
-  status: string | null;
-  total: number;
-  paymentType: string | null;
-  items: { name: string; qty: number; unit: number; total: number }[];
-  itemsCount: number;
-  awbNumber: string | null;
-  awbCarrier: string | null;
-  invoiceLink: string | null;
-  address: {
-    localitate?: string;
-    judet?: string;
-  };
-};
+export default function AccountClientPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Tab-ul implicit este 'orders', dar verificăm URL-ul pentru '?tab=...'
+  const [tab, setTab] = useState<'orders' | 'addresses' | 'security'>('orders');
 
-type BillingInfo = any; // Folosim any pentru flexibilitate cu structura dinamică
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
 
-type Session = {
-  user: {
-    email?: string | null;
-  };
-  expires: string;
-};
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'security') setTab('security');
+    else if (tabParam === 'addresses') setTab('addresses');
+    else if (tabParam === 'orders') setTab('orders');
+    // Dacă parametrul este 'graphics', îl ignorăm sau îl trimitem la orders, 
+    // deoarece funcționalitatea a fost eliminată.
+  }, [searchParams]);
 
-type AccountClientPageProps = {
-  orders: Order[];
-  billing: BillingInfo;
-  session: Session;
-};
-
-const TabButton = ({ label, activeTab, setActiveTab }: { label: string; activeTab: string; setActiveTab: (label: string) => void }) => (
-  <button
-    onClick={() => setActiveTab(label)}
-    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-      activeTab === label ? "bg-indigo-600 text-white" : "text-gray-500 hover:bg-gray-100"
-    }`}
-  >
-    {label}
-  </button>
-);
-
-const resolveStatusMeta = (status?: string | null) => {
-  if (status === "fulfilled") {
-    return { label: "Finalizată", badge: "bg-emerald-100 text-emerald-800 border border-emerald-200" };
+  if (status === "loading") {
+    return <div className="p-8 text-center">Se încarcă...</div>;
   }
-  if (status === "canceled") {
-    return { label: "Anulată", badge: "bg-rose-100 text-rose-800 border border-rose-200" };
+
+  if (!session) {
+    return null; 
   }
-  return { label: "În lucru", badge: "bg-amber-100 text-amber-800 border border-amber-200" };
-};
 
-const getAwbTrackingUrl = (awb?: string | null, carrier?: string | null) => {
-  if (!awb || !carrier) return null;
-  const carrierLower = carrier.toLowerCase();
-  const awbClean = encodeURIComponent(awb);
-  if (carrierLower.includes("dpd")) return `https://tracking.dpd.ro/?shipmentNumber=${awbClean}`;
-  if (carrierLower.includes("fan")) return `https://www.fancourier.ro/awb-tracking/?awb=${awbClean}`;
-  if (carrierLower.includes("sameday")) return `https://sameday.ro/awb-tracking/?awb=${awbClean}`;
-  return null;
-};
-
-const tabs = ["Comenzi", "Grafica Mea", "Adrese", "Detalii Cont", "Securitate"];
-
-export default function AccountClientPage({ orders, billing, session }: AccountClientPageProps) {
-  const [activeTab, setActiveTab] = useState("Comenzi");
-
-  // Funcție placeholder pentru "Comandă din nou"
-  const handleReorder = (orderId: string) => {
-    alert(`Funcționalitatea "Comandă din nou" pentru comanda ${orderId} nu este încă implementată.`);
-    // Aici ar veni logica de adăugare în coș a produselor din comandă
+  const handleTabChange = (newTab: 'orders' | 'addresses' | 'security') => {
+    setTab(newTab);
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', newTab);
+    window.history.pushState({}, '', url);
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-center md:justify-start space-x-2 border-b border-gray-200 pb-4">
-        {tabs.map((tab) => (
-          <TabButton key={tab} label={tab} activeTab={activeTab} setActiveTab={setActiveTab} />
-        ))}
+    <div className="min-h-[60vh]">
+      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Contul meu</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
+            Salut, {session.user?.name || session.user?.email}!
+          </p>
+        </div>
+        <SignOutButton />
       </div>
 
-      <div className="panel rounded-3xl p-6">
-        {activeTab === "Comenzi" && (
-          <section>
-            <h2 className="text-xl font-semibold mb-4">Comenzile Mele</h2>
-            {orders.length === 0 ? (
-              <p className="text-muted">Nu ai plasat nicio comandă încă.</p>
-            ) : (
-              <ul className="space-y-4">
-                {orders.map((o) => (
-                  <OrderRow key={o.id} order={o} onReorder={handleReorder} />
-                ))}
-              </ul>
-            )}
-          </section>
-        )}
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Sidebar / Navigation Tabs */}
+        <aside className="w-full lg:w-64 shrink-0 space-y-2">
+          <button
+            onClick={() => handleTabChange('orders')}
+            className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+              tab === 'orders'
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            Comenzile mele
+          </button>
+          <button
+            onClick={() => handleTabChange('addresses')}
+            className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+              tab === 'addresses'
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            Adrese de livrare
+          </button>
+          <button
+            onClick={() => handleTabChange('security')}
+            className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+              tab === 'security'
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            Securitate
+          </button>
+        </aside>
 
-        {activeTab === "Grafica Mea" && (
-          <section>
-            <h2 className="text-xl font-semibold mb-4">Grafica Mea</h2>
-            <UserGraphicsManager />
-          </section>
-        )}
-
-        {activeTab === "Adrese" && (
-          <section>
-            <h2 className="text-xl font-semibold mb-4">Adresele Mele</h2>
-            <AddressesManager />
-          </section>
-        )}
-
-        {activeTab === "Detalii Cont" && (
-          <section>
-            <h2 className="text-xl font-semibold mb-4">Detalii Cont</h2>
-            <UserDetailsForm session={session} />
-          </section>
-        )}
-
-        {activeTab === "Securitate" && (
-          <section className="space-y-6">
-            <h2 className="text-xl font-semibold">Setări Securitate</h2>
-            <ChangePasswordForm />
-            <RequestPasswordReset email={String(session.user.email || "")} />
-            <SignOutButton />
-          </section>
-        )}
+        {/* Content Area */}
+        <main className="flex-1 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+          {tab === 'orders' && (
+             <div className="animate-fadeIn">
+               <h2 className="text-xl font-semibold mb-6 pb-4 border-b dark:border-gray-700">Istoric comenzi</h2>
+               <OrdersList />
+             </div>
+          )}
+          {tab === 'addresses' && (
+            <div className="animate-fadeIn">
+              <h2 className="text-xl font-semibold mb-6 pb-4 border-b dark:border-gray-700">Adresele mele</h2>
+              <AddressesManager />
+            </div>
+          )}
+          {tab === 'security' && (
+            <div className="animate-fadeIn">
+              <h2 className="text-xl font-semibold mb-6 pb-4 border-b dark:border-gray-700">Securitate cont</h2>
+              <ChangePasswordForm />
+            </div>
+          )}
+        </main>
       </div>
     </div>
-  );
-}
-
-// Componentă nouă pentru un rând de comandă, cu detalii ascunse
-function OrderRow({ order, onReorder }: { order: Order; onReorder: (orderId: string) => void }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const statusMeta = resolveStatusMeta(order.status);
-  const awbUrl = getAwbTrackingUrl(order.awbNumber, order.awbCarrier);
-
-  return (
-    <li className="card p-4 transition-shadow hover:shadow-md">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="font-semibold text-gray-800">Comanda #{order.orderNo}</div>
-          <div className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString("ro-RO")}</div>
-        </div>
-        <div className="shrink-0">
-          <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusMeta.badge}`}>
-            {statusMeta.label}
-          </span>
-        </div>
-        <div className="text-right shrink-0">
-          <div className="font-semibold text-gray-800">{(order.total || 0).toFixed(2)} RON</div>
-          <div className="text-xs text-gray-500">{order.paymentType}</div>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => setIsOpen(!isOpen)} className="btn-outline text-xs">
-            {isOpen ? "Ascunde detalii" : "Vezi detalii"}
-          </button>
-          {order.status === "fulfilled" && (
-            <button onClick={() => onReorder(order.id)} className="btn-primary text-xs">
-              Comandă din nou
-            </button>
-          )}
-        </div>
-      </div>
-      
-      {isOpen && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <OrderDetails order={order} />
-          <div className="mt-4 flex flex-wrap items-center gap-4 text-xs">
-            {awbUrl && (
-              <a href={awbUrl} target="_blank" rel="noreferrer" className="font-semibold text-indigo-600 hover:underline">
-                Urmărește AWB: {order.awbNumber}
-              </a>
-            )}
-            {order.invoiceLink && (
-              <a href={order.invoiceLink} target="_blank" rel="noreferrer" className="font-semibold text-indigo-600 hover:underline">
-                Descarcă Factura
-              </a>
-            )}
-          </div>
-        </div>
-      )}
-    </li>
   );
 }
