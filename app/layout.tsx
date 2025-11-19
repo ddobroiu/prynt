@@ -5,9 +5,7 @@ import Footer from "../components/Footer";
 import Providers from "../components/Providers";
 import CookieConsentBanner from "../components/CookieConsentBanner";
 import ContactButton from "../components/ContactButton";
-import AssistantWidget from "../components/AssistantWidget";
-
-// Cart widget (optional; already inside global Providers which includes CartProvider)
+// Cart widget for floating cart functionality
 import CartWidget from "../components/CartWidget";
 
 export const metadata = {
@@ -55,7 +53,6 @@ export default function RootLayout({
     <html lang="ro" data-theme="light">
       <head>
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Prynt Blog" />
-        {/* Organization & WebSite JSON-LD */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -65,39 +62,16 @@ export default function RootLayout({
               name: "Prynt.ro",
               url: (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, ""),
               logo: new URL("/logo.png", (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro")).toString(),
-              sameAs: [
-                // Adaugă dacă există: Facebook, Instagram, LinkedIn etc.
-              ],
               contactPoint: [{
                 "@type": "ContactPoint",
-                telephone: "+40 734 123 456",
+                telephone: "+40 750 473 111",
                 contactType: "customer service",
                 areaServed: "RO",
-                availableLanguage: ["ro", "en"],
+                availableLanguage: ["ro"],
               }],
             }),
           }}
         />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: "Prynt.ro",
-              url: (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, ""),
-              potentialAction: {
-                "@type": "SearchAction",
-                target: {
-                  "@type": "EntryPoint",
-                  urlTemplate: (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "") + "/shop?q={search_term_string}",
-                },
-                queryInput: "required name=search_term_string",
-              },
-            }),
-          }}
-        />
-        {/* TikTok Pixel: load after the page is interactive */}
         <Script
           id="tiktok-pixel"
           strategy="afterInteractive"
@@ -106,8 +80,6 @@ export default function RootLayout({
   w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(
 var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script")
 ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
-
-
   ttq.load('D4968URC77U6M9K6R1S0');
   ttq.page();
 }(window, document, 'ttq');`,
@@ -118,10 +90,10 @@ var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n
   <body className="bg-white text-black antialiased">
     <Providers>
       <Header />
-      <main className="mx-auto max-w-7xl px-4 md:px-8">{children}</main>
+      <main className="mx-auto max-w-7xl px-0 md:px-0">{children}</main>
       <CartWidget />
       <Footer />
-      <AssistantWidget />
+      {/* AssistantWidget a fost mutat pe Homepage */}
       <ContactButton />
       <CookieConsentBanner />
     </Providers>
