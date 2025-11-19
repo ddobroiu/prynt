@@ -22,7 +22,7 @@ export default async function AccountPage({
 
   const userId = (session.user as any).id as string;
   
-  // 1. Luăm comenzile din baza de date
+  // Luăm comenzile din baza de date
   const orderRecords = await prisma.order.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -30,7 +30,7 @@ export default async function AccountPage({
     take: 50,
   });
 
-  // 2. Convertim datele pentru a fi sigure de trimis la Client (FOARTE IMPORTANT)
+  // Convertim datele
   const orders = orderRecords.map((o) => {
     const items = (o.items || []).map((it: any) => ({
       name: it.name,
@@ -44,15 +44,15 @@ export default async function AccountPage({
     return {
       id: o.id,
       orderNo: Number(o.orderNo),
-      createdAt: o.createdAt.toISOString(), 
+      createdAt: o.createdAt.toISOString(),
       status: o.status,
-      canceledAt: o.canceledAt ? o.canceledAt.toISOString() : null, 
+      canceledAt: o.canceledAt ? o.canceledAt.toISOString() : null,
       total: Number(o.total),
       paymentType: o.paymentType,
       items,
       itemsCount: items.length,
-      // ASIGURĂ-TE CĂ ACESTE CÂMPURI SUNT AICI:
-      awbNumber: o.awbNumber || null,  // Dacă e null, trimitem null explicit
+      // Verificare robustă pentru AWB și Factură
+      awbNumber: o.awbNumber !== undefined && o.awbNumber !== null ? String(o.awbNumber) : null,
       awbCarrier: o.awbCarrier || null,
       invoiceLink: o.invoiceLink || null,
       address,
