@@ -1,11 +1,13 @@
 "use client";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { MessageCircle, Mail, Bot } from "lucide-react";
+import { MessageCircle, Mail } from "lucide-react";
 
 export default function ContactButton() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  
+  // Butonul apare doar pe Homepage (sau poți scoate condiția dacă îl vrei peste tot)
   const isHome = pathname === "/";
 
   return (
@@ -31,20 +33,6 @@ export default function ContactButton() {
             <Mail size={18} />
             <span>Email</span>
           </a>
-
-          <button
-            onClick={() => {
-              // Deschide asistentul AI printr-un eveniment global
-              if (typeof window !== 'undefined') {
-                window.dispatchEvent(new Event('assistant:open'));
-              }
-              setOpen(false);
-            }}
-            className="flex items-center gap-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 shadow-lg transition"
-          >
-            <Bot size={18} />
-            <span>Chat AI</span>
-          </button>
         </div>
       )}
 
@@ -54,9 +42,15 @@ export default function ContactButton() {
         className="relative flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-200 w-14 h-14 shadow-xl transition"
         aria-label="Contact rapid"
       >
-        <MessageCircle size={28} />
-        {/* Mic efect de puls */}
-        <span className="absolute inset-0 rounded-full bg-green-500/20 animate-ping"></span>
+        {open ? (
+            // Icoană X când e deschis (opțional, pentru UX mai bun)
+            <span className="text-xl font-bold">×</span>
+        ) : (
+            <MessageCircle size={28} />
+        )}
+        
+        {/* Mic efect de puls doar când e închis */}
+        {!open && <span className="absolute inset-0 rounded-full bg-green-500/20 animate-ping"></span>}
       </button>
     </div>
   );

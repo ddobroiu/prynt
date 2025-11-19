@@ -5,14 +5,14 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useCart } from "./CartContext";
 import { siteConfig } from "@/lib/siteConfig";
-import { ChevronDown, Menu, ShoppingCart, X, User } from "lucide-react";
+import { ChevronDown, Menu, ShoppingCart, X, User, Search } from "lucide-react";
 
-// --- Sub-components for better structure ---
+// --- SUB-COMPONENTS ---
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
   <Link
     href={href}
-    className="relative text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors after:absolute after:-bottom-0.5 after:left-0 after:w-full after:h-0.5 after:bg-blue-600 after:scale-x-0 after:origin-left after:transition-transform after:duration-300 hover:after:scale-x-100"
+    className="relative font-medium text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
   >
     {children}
   </Link>
@@ -20,45 +20,39 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
 
 const DesktopNav = () => {
   return (
-    <nav className="hidden lg:flex items-center gap-10">
+    <nav className="hidden lg:flex items-center gap-8">
       {siteConfig.headerNav.map((item) =>
         item.highlight ? (
           <Link
             key={item.href}
             href={item.href}
-            className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+            className="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-full hover:bg-indigo-500 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
           >
             {item.label}
           </Link>
         ) : item.children ? (
-          <div key={item.label} className="relative group focus-within:z-50">
+          <div key={item.label} className="relative group">
             <button
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-gray-900 focus:text-blue-600 transition-colors outline-none"
-              tabIndex={0}
+              className="flex items-center gap-1 font-medium text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors outline-none py-4"
               aria-haspopup="true"
               aria-expanded="false"
             >
               {item.label}
-              <ChevronDown size={14} className="transition-transform duration-300 ease-out group-hover:rotate-180" />
+              <ChevronDown size={16} className="transition-transform duration-300 group-hover:rotate-180" />
             </button>
-            {/* Dropdown Wrapper for positioning and hover bridge */}
-            <div
-              className="absolute top-full left-1/2 -translate-x-1/2 w-64 pt-4 opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100 transition-all duration-300 ease-out transform-gpu origin-top pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto"
-            >
-              {/* Visual Dropdown */}
-              <div className="rounded-xl bg-white shadow-lg border border-gray-100 p-2">
-                <div className="flex flex-col gap-1">
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.href}
-                      href={child.href}
-                      className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-blue-600 focus:bg-blue-50 focus:text-blue-700 transition-colors block outline-none"
-                      tabIndex={0}
-                    >
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
+
+            {/* Dropdown Container */}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 w-56 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 ease-out z-50">
+              <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-2 overflow-hidden">
+                {item.children.map((child) => (
+                  <Link
+                    key={child.href}
+                    href={child.href}
+                    className="block px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    {child.label}
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
@@ -76,55 +70,63 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   const [openSub, setOpenSub] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isOpen) {
-      setOpenSub(null);
-    }
+    if (!isOpen) setOpenSub(null);
   }, [isOpen]);
 
   return (
     <>
-      {isOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden" onClick={onClose} />}
+      <div 
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
+        onClick={onClose} 
+      />
       <div
-        className={`fixed top-0 left-0 h-full w-4/5 max-w-xs bg-bg border-r border-border shadow-xl p-6 z-50 
-                   transition-transform duration-300 ease-in-out lg:hidden ${
+        className={`fixed top-0 left-0 h-full w-[85%] max-w-sm bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 z-50 transition-transform duration-300 ease-out lg:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between mb-8">
-          <Link href="/" className="text-lg font-bold text-text" onClick={onClose}>
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-zinc-100 dark:border-zinc-800">
+          <Link href="/" className="text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white" onClick={onClose}>
             {siteConfig.name}
           </Link>
-          <button onClick={onClose} className="p-2 -m-2 text-muted hover:text-text">
-            <X size={22} />
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors">
+            <X size={24} />
           </button>
         </div>
-        <nav>
-          <ul className="space-y-2">
+
+        <nav className="flex-1 overflow-y-auto">
+          <ul className="space-y-1">
             {siteConfig.headerNav.map((item) => (
               <li key={item.label}>
                 {item.children ? (
-                  <>
+                  <div className="rounded-xl overflow-hidden">
                     <button
                       onClick={() => setOpenSub(openSub === item.label ? null : item.label)}
-                      className="w-full flex items-center justify-between text-left font-medium text-text py-2"
+                      className={`w-full flex items-center justify-between p-3 text-left font-semibold transition-colors ${openSub === item.label ? 'bg-zinc-50 dark:bg-zinc-900 text-indigo-600' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
                     >
                       {item.label}
-                      <ChevronDown size={16} className={`transition-transform duration-200 ${openSub === item.label ? "rotate-180" : ""}`} />
+                      <ChevronDown size={18} className={`transition-transform duration-300 ${openSub === item.label ? "rotate-180 text-indigo-600" : "text-zinc-400"}`} />
                     </button>
-                    {openSub === item.label && (
-                      <ul className="pl-4 mt-2 space-y-2 border-l border-border">
+                    <div className={`grid transition-all duration-300 ease-in-out ${openSub === item.label ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                      <div className="overflow-hidden bg-zinc-50 dark:bg-zinc-900/50">
                         {item.children.map((child) => (
-                          <li key={child.href}>
-                            <Link href={child.href} onClick={onClose} className="block text-muted hover:text-text py-1">
-                              {child.label}
-                            </Link>
-                          </li>
+                          <Link 
+                            key={child.href} 
+                            href={child.href} 
+                            onClick={onClose} 
+                            className="block py-2.5 pl-6 pr-4 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 border-l-2 border-transparent hover:border-indigo-500 transition-colors"
+                          >
+                            {child.label}
+                          </Link>
                         ))}
-                      </ul>
-                    )}
-                  </>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
-                  <Link href={item.href} onClick={onClose} className="font-medium text-text block py-2">
+                  <Link 
+                    href={item.href} 
+                    onClick={onClose} 
+                    className={`block p-3 font-semibold rounded-xl transition-colors ${item.highlight ? 'bg-indigo-600 text-white shadow-md mt-4 text-center' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
+                  >
                     {item.label}
                   </Link>
                 )}
@@ -142,14 +144,18 @@ const HeaderActions = () => {
   const { data: session } = useSession();
 
   return (
-    <div className="flex items-center gap-5">
-      <Link href={session?.user ? "/account" : "/login"} className="text-muted hover:text-text transition-colors">
-        <User size={22} />
+    <div className="flex items-center gap-3 sm:gap-5">
+      {/* Search (optional/future) */}
+      {/* <button className="p-2 text-zinc-500 hover:text-indigo-600 transition-colors hidden sm:block"><Search size={22} /></button> */}
+
+      <Link href={session?.user ? "/account" : "/login"} className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Cont">
+        <User size={24} />
       </Link>
-      <Link href="/checkout" className="relative text-muted hover:text-text transition-colors">
-        <ShoppingCart size={22} />
+
+      <Link href="/checkout" className="group relative p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Coș">
+        <ShoppingCart size={24} className="transition-transform group-hover:scale-110" />
         {isLoaded && count > 0 && (
-          <span className="absolute -top-2 -right-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">
+          <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white ring-2 ring-white dark:ring-black animate-in zoom-in duration-300">
             {count}
           </span>
         )}
@@ -158,50 +164,57 @@ const HeaderActions = () => {
   );
 };
 
-// --- Main Header Component ---
-
 export default function Header() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => setMobileMenuOpen(!isMobileMenuOpen);
-  const closeMobileMenu = () => setMobileMenuOpen(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = originalStyle;
-    }
-    return () => {
-      document.body.style.overflow = originalStyle;
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? "hidden" : "auto";
+    return () => { document.body.style.overflow = "auto"; };
   }, [isMobileMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white shadow-md border-b border-border">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <header 
+      className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
+        scrolled 
+          ? "bg-white/90 dark:bg-black/90 backdrop-blur-md border-zinc-200/50 dark:border-white/10 shadow-sm py-2" 
+          : "bg-white dark:bg-black border-transparent py-4"
+      }`}
+    >
+      <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
         {/* Left: Mobile Toggle & Logo */}
-        <div className="flex items-center gap-4">
-           <button onClick={toggleMobileMenu} className="lg:hidden p-2 -ml-2 text-muted hover:text-text">
-            <Menu size={24} />
+        <div className="flex items-center gap-3">
+           <button 
+             onClick={() => setMobileMenuOpen(true)} 
+             className="lg:hidden p-2 -ml-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+             aria-label="Meniu"
+           >
+            <Menu size={26} />
           </button>
-          <Link href="/" className="text-xl font-bold text-text">
-            {siteConfig.name}
+          <Link href="/" className="flex items-center gap-2 group">
+            {/* Logo Text sau Imagine */}
+            <span className="text-2xl font-extrabold tracking-tighter text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+              Prynt<span className="text-indigo-600">.ro</span>
+            </span>
           </Link>
         </div>
 
         {/* Center: Desktop Nav */}
-        <div className="absolute left-1/2 -translate-x-1/2">
+        <div className="hidden lg:block">
           <DesktopNav />
         </div>
 
         {/* Right: Actions */}
-        <div className="flex justify-end">
-          <HeaderActions />
-        </div>
+        <HeaderActions />
       </div>
-      <MobileNav isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
+
+      <MobileNav isOpen={isMobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     </header>
   );
 }
