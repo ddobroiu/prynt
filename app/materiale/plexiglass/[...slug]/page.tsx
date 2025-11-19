@@ -2,20 +2,20 @@ import { notFound } from "next/navigation";
 import ProductJsonLd from "@/components/ProductJsonLd";
 import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
 import type { Product } from "@/lib/products";
-import ConfiguratorCarton from "@/components/ConfiguratorCarton";
+import ConfiguratorPlexiglass from "@/components/ConfiguratorPlexiglass";
 
 type Props = { params?: Promise<{ slug?: string[] }> };
 
 export async function generateStaticParams() {
-  // Verifică dacă categoria în lib/products este 'carton' sau 'materiale'
-  const slugs = getAllProductSlugsByCategory("carton");
+  // Categoria în lib/products.ts trebuie să fie "plexiglass" sau "plexiglas"
+  const slugs = getAllProductSlugsByCategory("plexiglass");
   return slugs.map((slug) => ({ slug: [slug] }));
 }
 
 export async function generateMetadata({ params }: Props) {
   const resolved = await params;
   const raw = (resolved?.slug ?? []).join("/");
-  const { product, isFallback } = await resolveProductForRequestedSlug(String(raw), "carton");
+  const { product, isFallback } = await resolveProductForRequestedSlug(String(raw), "plexiglass");
   if (!product) return {};
 
   const metadata: any = {
@@ -36,16 +36,16 @@ export default async function Page({ params }: Props) {
   const slugParts: string[] = resolved?.slug ?? [];
   const joinedSlug = slugParts.join("/");
 
-  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug), "carton");
+  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug), "plexiglass");
 
   if (!product) return notFound();
 
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/carton/${joinedSlug}`;
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/materiale/plexiglass/${joinedSlug}`;
 
   return (
     <>
       <ProductJsonLd product={(product as Product)} url={url} />
-      <ConfiguratorCarton 
+      <ConfiguratorPlexiglass 
         productSlug={product.slug ?? product.routeSlug} 
         initialWidth={initialWidth}
         initialHeight={initialHeight}

@@ -372,7 +372,7 @@ export const calculateCartonPrice = (input: PriceInputCarton) => {
 };
 
 // ==========================================
-// 8. AUTOCOLANTE
+// 8. AUTOCOLANTE (GENERIC - SQM BASED)
 // ==========================================
 export const AUTOCOLANTE_CONSTANTS = {
   PRICES: {
@@ -505,7 +505,6 @@ export const AFISE_CONSTANTS = {
   ],
   PRO_DESIGN_FEE: 100,
   PRICE_TABLE: {
-    // Simplificat pentru exemplu - in productie trebuie populat complet
     paper_150_lucioasa: { A3: [{ min: 1, price: 3.0 }], A2: [{ min: 1, price: 9.98 }], A1: [{ min: 1, price: 39.96 }], A0: [{ min: 1, price: 80.0 }], S5: [{ min: 1, price: 28.0 }], S7: [{ min: 1, price: 56.0 }] },
     blueback_115: { A0: [{ min: 1, price: 70.0 }], A1: [{ min: 1, price: 17.48 }], A2: [{ min: 1, price: 17.46 }] },
     whiteback_150_material: { A0: [{ min: 1, price: 80.0 }] },
@@ -521,16 +520,13 @@ export const calculatePosterPrice = (input: PriceInputAfise) => {
     matKey = matKey.includes("lucioasa") ? "paper_150_lucioasa" : "paper_150_mata";
     multiplier = 2;
   }
-  // Fallback logic if table is incomplete
-  let basePrice = 0;
+  
+  let basePrice = 10;
   if (AFISE_CONSTANTS.PRICE_TABLE[matKey] && AFISE_CONSTANTS.PRICE_TABLE[matKey][input.size]) {
        const tiers = AFISE_CONSTANTS.PRICE_TABLE[matKey][input.size];
        const sorted = tiers.slice().sort((a:any, b:any) => b.min - a.min);
        basePrice = sorted[sorted.length - 1].price;
        for (const t of sorted) { if (input.quantity >= t.min) { basePrice = t.price; break; } }
-  } else {
-       // Default fallback price logic if missing in table
-       basePrice = 10; 
   }
 
   const unitPrice = roundMoney(basePrice * multiplier);
@@ -593,7 +589,7 @@ export type PriceInputPliante = { weight: PlianteWeightKey; quantity: number; fo
 
 export const calculatePliantePrice = (input: PriceInputPliante) => {
   const tiers = PLIANTE_CONSTANTS.PRICE_TABLE[input.weight];
-  let unitBasePrice = tiers[0].price; // Simplificat
+  let unitBasePrice = tiers[0].price;
   const subtotal = roundMoney(unitBasePrice * input.quantity);
   const proFee = input.designOption === "pro" ? (PLIANTE_CONSTANTS.PRO_FEES[input.fold] ?? 0) : 0;
   const finalPrice = roundMoney(subtotal + proFee);
@@ -618,7 +614,7 @@ export const calculateTapetPrice = (input: PriceInputTapet) => {
   if (input.width_cm <= 0 || input.height_cm <= 0) return { finalPrice: 0, total_sqm: 0, pricePerUnit: 0 };
   const sqmPerUnit = (input.width_cm / 100) * (input.height_cm / 100);
   const totalSqm = roundMoney(sqmPerUnit * input.quantity);
-  let pricePerSqm = 150; // Simplified
+  let pricePerSqm = 150; 
   if (input.want_adhesive) pricePerSqm *= TAPET_CONSTANTS.PRICES.multipliers.adhesive;
   let finalPrice = roundMoney(totalSqm * pricePerSqm);
   if (input.designOption === "pro") finalPrice += TAPET_CONSTANTS.PRO_DESIGN_FEE;
@@ -626,29 +622,92 @@ export const calculateTapetPrice = (input: PriceInputTapet) => {
 };
 
 // ==========================================
-// 14. FONDURI EU
+// 14. FONDURI EU (KIT VIZIBILITATE)
 // ==========================================
 export const FONDURI_EU_CONSTANTS = {
   GROUPS: {
-    comunicat: { title: "Comunicat de presă", options: [{ id: "none", label: "Fără", price: 0 }, { id: "start", label: "Începere", price: 247 }] },
-    bannerSite: { title: "Banner site", options: [{ id: "none", label: "Fără", price: 0 }, { id: "with", label: "Cu Banner", price: 100 }] },
-    afisInformativ: { title: "Afiș", options: [{ id: "none", label: "Fără", price: 0 }, { id: "A3", label: "A3", price: 49 }] },
-    autoMici: { title: "Autocolante Mici", options: [{ id: "none", label: "Nu", price: 0 }, { id: "10x10-20", label: "Set 20", price: 49 }] },
-    autoMari: { title: "Autocolante Mari", options: [{ id: "none", label: "Nu", price: 0 }, { id: "30x30-3", label: "Set 3", price: 49 }] },
-    panouTemporar: { title: "Panou Temporar", options: [{ id: "none", label: "Nu", price: 0 }, { id: "A2", label: "A2", price: 200 }] },
-    placaPermanenta: { title: "Placă Permanentă", options: [{ id: "none", label: "Nu", price: 0 }, { id: "A2", label: "A2", price: 200 }] },
+    comunicat: {
+      title: "Comunicat de presă",
+      options: [
+        { id: "none", label: "Fără comunicat", price: 0 },
+        { id: "start", label: "Începere proiect", price: 247 },
+        { id: "final", label: "Finalizare proiect", price: 247 },
+        { id: "start+final", label: "Începere și finalizare proiect", price: 494 },
+      ],
+    },
+    bannerSite: {
+      title: "Banner site",
+      options: [
+        { id: "none", label: "Fără banner", price: 0 },
+        { id: "with", label: "Banner site (Digital)", price: 100 },
+      ],
+    },
+    afisInformativ: {
+      title: "Afiș informativ",
+      options: [
+        { id: "none", label: "Fără afiș", price: 0 },
+        { id: "A4", label: "Format A4", price: 19 },
+        { id: "A3", label: "Format A3", price: 49 },
+        { id: "A2", label: "Format A2", price: 79 },
+      ],
+    },
+    autoMici: {
+      title: "Autocolante mici",
+      options: [
+        { id: "none", label: "Nu", price: 0 },
+        { id: "10x10-20", label: "10×10 cm (set 20 buc)", price: 49 },
+        { id: "15x15-10", label: "15×15 cm (set 10 buc)", price: 49 },
+        { id: "15x21-5", label: "15×21 cm (set 5 buc)", price: 49 },
+      ],
+    },
+    autoMari: {
+      title: "Autocolante mari",
+      options: [
+        { id: "none", label: "Nu", price: 0 },
+        { id: "30x30-3", label: "30×30 cm (set 3 buc)", price: 49 },
+        { id: "40x40-1", label: "40×40 cm (1 buc)", price: 49 },
+      ],
+    },
+    panouTemporar: {
+      title: "Panou temporar",
+      options: [
+        { id: "none", label: "Nu", price: 0 },
+        { id: "A2", label: "Format A2", price: 200 },
+        { id: "80x50", label: "80×50 cm", price: 290 },
+        { id: "200x150", label: "200×150 cm", price: 700 },
+        { id: "300x200", label: "300×200 cm", price: 1190 },
+      ],
+    },
+    placaPermanenta: {
+      title: "Placă permanentă",
+      options: [
+        { id: "none", label: "Nu", price: 0 },
+        { id: "A2", label: "Format A2", price: 200 },
+        { id: "80x50", label: "80×50 cm", price: 290 },
+        { id: "150x100", label: "150×100 cm", price: 550 },
+      ],
+    },
   },
 };
 
-export type PriceInputFonduriEU = { selections: Record<string, string> };
+export type PriceInputFonduriEU = {
+  selections: Record<string, string>;
+};
 
 export const calculateFonduriEUPrice = (input: PriceInputFonduriEU) => {
   let finalPrice = 0;
-  for (const key in FONDURI_EU_CONSTANTS.GROUPS) {
-      const k = key as keyof typeof FONDURI_EU_CONSTANTS.GROUPS;
-      const sel = input.selections[k];
-      const opt = FONDURI_EU_CONSTANTS.GROUPS[k].options.find(o => o.id === sel);
-      if (opt) finalPrice += opt.price;
+  const groups = FONDURI_EU_CONSTANTS.GROUPS;
+  
+  for (const groupKey in groups) {
+      const key = groupKey as keyof typeof groups;
+      const selectedId = input.selections[key];
+      if (selectedId && selectedId !== "none") {
+          const option = groups[key].options.find(o => o.id === selectedId);
+          if (option) {
+              finalPrice += option.price;
+          }
+      }
   }
+
   return { finalPrice: roundMoney(finalPrice) };
 };

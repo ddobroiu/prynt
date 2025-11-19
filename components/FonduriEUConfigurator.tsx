@@ -14,7 +14,7 @@ import {
 } from "@/lib/pricing";
 
 const GALLERY = [
-  "/products/afise/1.webp", // Placeholder - ideal ar fi imagini specifice kitului
+  "/products/afise/1.webp", 
   "/products/banner/1.webp",
   "/products/autocolante/1.webp",
 ] as const;
