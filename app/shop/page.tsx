@@ -1,155 +1,223 @@
 "use client";
-import { useState } from "react";
+
+import React, { useState, useMemo } from "react";
 import { PRODUCTS } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
+import { Search, Filter, X, SlidersHorizontal } from "lucide-react";
 
-// Extrage categoriile unice din produse
-const categories = Array.from(new Set(PRODUCTS.map(p => p.metadata?.category).filter(Boolean)));
+// --- CONFIGURARE PREȚURI DE PORNIRE ---
+// Acestea sunt prețurile "De la..." afișate în shop pentru sortare/filtrare
+const STARTING_PRICES: Record<string, number> = {
+  bannere: 50,
+  canvas: 79,
+  flayere: 50,
+  afise: 3,
+  autocolante: 5,
+  tapet: 150,
+  "pvc-forex": 45,
+  alucobond: 120,
+  plexiglass: 80,
+  carton: 30,
+  polipropilena: 40,
+};
 
 export default function ShopPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState<string>("Toate");
   const [searchTerm, setSearchTerm] = useState("");
+  const [priceRange, setPriceRange] = useState<{ min: string; max: string }>({ min: "", max: "" });
+  const [showFilters, setShowFilters] = useState(false);
 
-  // Găsește prețul minim și maxim din produse
-  // Pentru bannere afișăm prețul de pornire 50 RON ("de la 50") în listă și în filtre
-  const prices = PRODUCTS.map(p => {
-    const cat = String(p.metadata?.category ?? "").toLowerCase();
-    if (cat === "bannere") return 50;
-    if (cat === "canvas") return 79;
-    if (cat === "flayere") return 50;
-    if (cat === "afise") return 3;
-    if (cat === "autocolante") return 5;
-    if (cat === "tapet") return 45;
-    return p.priceBase ?? 0;
-  });
-  const realMin = Math.min(...prices);
-  const realMax = Math.max(...prices);
+  // 1. Extragem categoriile unice și le formatăm
+  const categories = useMemo(() => {
+    const cats = new Set(PRODUCTS.map((p) => p.metadata?.category).filter(Boolean));
+    return ["Toate", ...Array.from(cats)];
+  }, []);
 
-  // Setează maxPrice default la realMax dacă e 0
-  const effectiveMaxPrice = maxPrice > 0 ? maxPrice : realMax;
+  // 2. Pregătim produsele cu prețuri corecte
+  const allProducts = useMemo(() => {
+    return PRODUCTS.map((p) => {
+      const cat = String(p.metadata?.category ?? "").toLowerCase();
+      // Folosim prețul din map sau fallback la priceBase
+      const price = STARTING_PRICES[cat] ?? p.priceBase ?? 0;
+      
+      return {
+        id: p.id,
+        slug: p.routeSlug || p.slug || p.id,
+        title: p.title,
+        description: p.description,
+        price: price,
+        images: p.images,
+        category: p.metadata?.category ?? "",
+        tags: p.tags ?? [],
+      };
+    });
+  }, []);
 
-  // Adapt products la ProductCard props
-  const products = PRODUCTS.map((p) => {
-    const category = String(p.metadata?.category ?? "").toLowerCase();
-    const startingPrice = category === "bannere" ? 50 : category === "canvas" ? 79 : category === "flayere" ? 50 : category === "afise" ? 3 : category === "autocolante" ? 5 : category === "tapet" ? 45 : p.priceBase ?? 0;
-    return {
-      id: p.id,
-      slug: p.routeSlug || p.slug || p.id,
-      title: p.title,
-      description: p.description,
-      price: startingPrice,
-      stock: 10, // TODO: Replace with real stock if available
-      images: p.images,
-      category: p.metadata?.category ?? "",
-      tags: p.tags ?? [],
-    } as any;
-  });
+  // 3. Logica de Filtrare
+  const filteredProducts = useMemo(() => {
+    return allProducts.filter((p) => {
+      // Filtru Categorie
+      if (selectedCategory !== "Toate" && p.category !== selectedCategory) return false;
 
-  // Normalizare pentru căutare (case/diacritice-insensitive)
-  function normalize(s: string) {
-    return String(s || "")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/ș|ş/g, "s")
-      .replace(/ț|ţ/g, "t");
-  }
+      // Filtru Search
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        const text = `${p.title} ${p.description} ${p.tags.join(" ")}`.toLowerCase();
+        if (!text.includes(term)) return false;
+      }
 
-  // Filtrare după categorie, preț și căutare
-  const filtered = products.filter((p: any) => {
-    const inCategory = selectedCategory ? p.category === selectedCategory : true;
-    const inPrice = p.price >= minPrice && p.price <= effectiveMaxPrice;
-    const term = normalize(searchTerm);
-    const hay = normalize(`${p.title} ${p.description || ""} ${Array.isArray(p.tags) ? p.tags.join(" ") : ""}`);
-    const inSearch = term ? hay.includes(term) : true;
-    return inCategory && inPrice && inSearch;
-  });
+      // Filtru Preț
+      const min = parseFloat(priceRange.min) || 0;
+      const max = parseFloat(priceRange.max) || Infinity;
+      if (p.price < min || p.price > max) return false;
+
+      return true;
+    });
+  }, [allProducts, selectedCategory, searchTerm, priceRange]);
+
+  // Resetare filtre
+  const clearFilters = () => {
+    setSelectedCategory("Toate");
+    setSearchTerm("");
+    setPriceRange({ min: "", max: "" });
+  };
+
+  const hasActiveFilters = selectedCategory !== "Toate" || searchTerm !== "" || priceRange.min !== "" || priceRange.max !== "";
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-4xl font-extrabold mb-6 text-gray-900">Shop</h1>
+    <main className="min-h-screen bg-zinc-50 dark:bg-black py-12 px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* --- HEADER SHOP --- */}
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl font-extrabold text-zinc-900 dark:text-white mb-4">
+            Explorează Produsele
+          </h1>
+          <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+            Alege din gama noastră variată de materiale publicitare și decor. Configurează online și primești prețul instant.
+          </p>
+        </div>
 
-      {/* Toolbar modernă: căutare + filtre */}
-      <div className="mb-8 rounded-2xl border border-indigo-100 bg-white/70 backdrop-blur p-4 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-2">
-            <label className="field-label">Caută produse</label>
-            <input
-              aria-label="Caută produse după nume"
-              type="text"
-              className="input"
-              placeholder="Ex: Tapet, Banner, Canvas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="field-label">Categorie</label>
-            <select
-              aria-label="Filtrează după categorie"
-              className="select"
-              value={selectedCategory}
-              onChange={e => setSelectedCategory(e.target.value)}
-            >
-              <option value="">Toate</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat as string}>{cat as string}</option>
+        {/* --- TOOLBAR FILTRE --- */}
+        <div className="sticky top-20 z-30 mb-10 rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 shadow-xl p-4 transition-all">
+          <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+            
+            {/* 1. Căutare */}
+            <div className="relative w-full lg:w-1/3">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-zinc-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Caută (ex: Banner, Autocolant...)"
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 border-transparent focus:bg-white dark:focus:bg-black focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm outline-none"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button 
+                  onClick={() => setSearchTerm("")}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* 2. Categorii (Desktop Pills) */}
+            <div className="hidden lg:flex flex-wrap gap-2 justify-center flex-1">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    selectedCategory === cat
+                      ? "bg-indigo-600 text-white shadow-md scale-105"
+                      : "bg-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  {cat === "bannere" ? "Bannere" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </button>
               ))}
-            </select>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="field-label">Preț minim</label>
-              <input
-                aria-label="Preț minim"
-                type="number"
-                className="input"
-                min={realMin}
-                max={realMax}
-                value={minPrice}
-                onChange={e => setMinPrice(Number(e.target.value))}
-              />
             </div>
-            <div>
-              <label className="field-label">Preț maxim</label>
-              <input
-                aria-label="Preț maxim"
-                type="number"
-                className="input"
-                min={realMin}
-                max={realMax}
-                value={maxPrice || realMax}
-                onChange={e => setMaxPrice(Number(e.target.value))}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
-          <div className="text-gray-500">Rezultate: <span className="font-semibold text-indigo-700">{filtered.length}</span></div>
-          <div className="flex gap-2">
-            {(selectedCategory || minPrice || maxPrice || searchTerm) && (
-              <button
-                type="button"
-                className="px-4 py-2 rounded-lg border border-indigo-200 text-indigo-700 hover:bg-indigo-50"
-                onClick={() => { setSelectedCategory(""); setMinPrice(0); setMaxPrice(0); setSearchTerm(""); }}
-              >
-                Resetează filtrele
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        {filtered.length === 0 ? (
-          <div className="col-span-full text-center text-gray-500">Niciun produs găsit.</div>
+            {/* 3. Mobile Filter Toggle & Price */}
+            <div className="flex items-center gap-3 w-full lg:w-auto justify-end">
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${showFilters ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50'}`}
+              >
+                <SlidersHorizontal size={18} />
+                <span className="hidden sm:inline">Filtre Preț</span>
+              </button>
+              
+              {/* Mobile Category Dropdown (visible only on small screens) */}
+              <div className="lg:hidden w-full sm:w-auto">
+                <select 
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full appearance-none bg-zinc-100 dark:bg-zinc-800 border-none rounded-xl py-3 px-4 text-sm font-medium outline-none"
+                >
+                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Expandable Filters Area */}
+          {showFilters && (
+             <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-700 grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in slide-in-from-top-2">
+                <div className="sm:col-span-2 flex items-center gap-4">
+                   <div className="flex items-center gap-2 w-full">
+                      <span className="text-sm text-zinc-500 whitespace-nowrap">Preț (RON):</span>
+                      <input 
+                        type="number" 
+                        placeholder="Min" 
+                        className="input-sm w-full bg-zinc-50 dark:bg-zinc-800 border rounded-lg px-3 py-2 text-sm"
+                        value={priceRange.min}
+                        onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                      />
+                      <span className="text-zinc-400">-</span>
+                      <input 
+                        type="number" 
+                        placeholder="Max" 
+                        className="input-sm w-full bg-zinc-50 dark:bg-zinc-800 border rounded-lg px-3 py-2 text-sm"
+                        value={priceRange.max}
+                        onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                      />
+                   </div>
+                </div>
+                <div className="flex justify-end">
+                   {hasActiveFilters && (
+                     <button onClick={clearFilters} className="text-sm text-red-500 hover:text-red-600 font-medium flex items-center gap-1">
+                        <X size={14} /> Resetează tot
+                     </button>
+                   )}
+                </div>
+             </div>
+          )}
+        </div>
+
+        {/* --- GRID PRODUSE --- */}
+        {filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product as any} />
+            ))}
+          </div>
         ) : (
-          filtered.map((product: any) => (
-            <ProductCard key={product.id} product={product} />
-          ))
+          <div className="text-center py-20">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 mb-4">
+              <Search size={32} className="text-zinc-400" />
+            </div>
+            <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Niciun produs găsit</h3>
+            <p className="text-zinc-500 mt-2">Încearcă să schimbi filtrele sau termenul de căutare.</p>
+            <button onClick={clearFilters} className="mt-6 btn-outline px-6 py-2">
+              Șterge filtrele
+            </button>
+          </div>
         )}
+
       </div>
     </main>
   );

@@ -1,103 +1,99 @@
+import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { ArrowRight, ShoppingCart } from "lucide-react";
 
-type Product = {
-  id: string;
-  slug: string;
-  title: string;
-  description?: string;
-  price: number | string;
-  stock: number;
-  images?: string[];
-  attributes?: Record<string, string>;
-  category?: string;
-};
-export default function ProductCard({ product, imageHeightPx }: { product: Product; imageHeightPx?: number }) {
-  const imgCandidates = product.images ?? [];
-  const slugKey = String(product.slug ?? (product as any).routeSlug ?? product.id ?? "").toLowerCase();
-  const genericSet = new Set<string>([
-    "/products/banner/1.webp",
-    "/products/banner/2.webp",
-    "/products/banner/3.webp",
-    "/products/banner/4.webp",
-    "/products/canvas/1.webp",
-    "/products/canvas/2.webp",
-    "/products/canvas/3.webp",
-    "/products/afise/1.webp",
-    "/products/afise/2.webp",
-    "/products/afise/3.webp",
-    "/products/flayere/1.webp",
-    "/products/flayere/2.webp",
-    "/products/flayere/3.webp",
-    "/products/autocolante/1.webp",
-    "/products/autocolante/2.webp",
-    "/products/autocolante/3.webp",
-    "/products/tapet/1.webp",
-    "/products/tapet/2.webp",
-    "/products/tapet/3.webp",
-    "/placeholder.png",
-  ]);
-  // Prefer an image that contains the product slug/id in its path (product-specific).
-  let initialImg = imgCandidates.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
-  if (!initialImg) {
-    // Otherwise prefer the first non-generic image
-    initialImg = imgCandidates.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgCandidates[0] ?? "/products/banner/1.webp";
+interface ProductCardProps {
+  product: {
+    id: string;
+    slug: string;
+    title: string;
+    description?: string;
+    price: number;
+    images?: string[];
+    category?: string;
+    tags?: string[];
+  };
+}
+
+export default function ProductCard({ product }: ProductCardProps) {
+  // LOGICA DE RUTARE: Determinăm link-ul corect bazat pe categorie
+  const category = (product.category || "").toLowerCase();
+  
+  let href = `/product/${product.slug}`; // Fallback
+
+  if (category === "bannere" || category === "banner") {
+    href = `/banner/${product.slug}`;
+  } else if (category === "banner-verso") {
+     href = `/banner-verso/${product.slug}`;
+  } else if (category === "afise") {
+    href = `/afise/${product.slug}`;
+  } else if (category === "autocolante") {
+    href = `/autocolante/${product.slug}`;
+  } else if (category === "flayere" || category === "flyere") {
+    href = `/flayere/${product.slug}`;
+  } else if (category === "pliante") {
+    href = `/pliante/${product.slug}`;
+  } else if (category === "canvas") {
+    href = `/canvas/${product.slug}`;
+  } else if (category === "tapet") {
+    href = `/tapet/${product.slug}`;
+  } else if (category === "carton") {
+    href = `/materiale/carton/${product.slug}`;
+  } else if (category === "plexiglass" || category === "plexiglas") {
+    href = `/materiale/plexiglass/${product.slug}`;
+  } else if (category === "alucobond") {
+    href = `/materiale/alucobond/${product.slug}`;
+  } else if (category === "polipropilena") {
+    href = `/materiale/polipropilena/${product.slug}`;
+  } else if (category === "pvc-forex") {
+    href = `/materiale/pvc-forex/${product.slug}`;
+  } else if (category === "fonduri-eu" || category === "fonduri-pnrr") {
+    href = `/fonduri-eu`; // Link general către configurator
   }
-  const priceNum = typeof product.price === "number" ? product.price : Number(product.price || 0);
-  const categoryLower = String(product.category || "").toLowerCase();
-  const isBanner = categoryLower === "bannere";
-  const isCanvas = categoryLower === "canvas";
-  const isAfise = categoryLower === "afise";
-  const isFlayere = categoryLower === "flayere";
-  const isAutocolante = categoryLower === "autocolante";
-  const isTapet = categoryLower === "tapet";
-  // Special starting prices by category
-  const priceDisplay = isBanner
-    ? `De la ${Number(50).toFixed(0)} RON`
-    : isCanvas
-      ? `De la ${Number(79).toFixed(0)} RON`
-      : isAfise
-        ? `De la ${Number(3).toFixed(0)} RON`
-        : isFlayere
-          ? `De la ${Number(50).toFixed(0)} RON`
-          : isAutocolante
-            ? `De la ${Number(5).toFixed(0)} RON`
-            : isTapet
-              ? `De la ${Number(45).toFixed(0)} RON`
-        : (Number.isFinite(priceNum) ? `De la ${priceNum.toFixed(0)} RON` : "—");
 
-  // Route mapping by category
-  const routeBase = isBanner ? "banner" : isCanvas ? "canvas" : categoryLower || "product";
-  const productUrl = `/${routeBase}/${product.slug}`;
   return (
-  <article className="card bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-xl rounded-2xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-2xl h-full">
-      <Link href={productUrl} className="block group" aria-label={`Configurează ${product.title}`}>
-        <div className="w-full relative bg-gray-100 aspect-square overflow-hidden">
-          <Image
-            src={initialImg}
-            alt={product.title ?? "Imagine produs"}
-            layout="fill"
-            objectFit="cover"
-            className="transition-opacity duration-300 group-hover:opacity-90 border-b border-indigo-100 block"
-            onError={(e) => {
-              const el = e.currentTarget as HTMLImageElement;
-              // Fallback logic can be more complex with next/image, for now, we remove it
-              // to prevent conflicts. A better approach would be a state-based fallback.
-              console.error("Failed to load image:", el.src);
-              // As a simple fallback, we could try to set a placeholder, but `next/image`
-              // state management is needed for a clean solution.
-            }}
-          />
+    <Link 
+      href={href}
+      className="group flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden hover:shadow-xl hover:border-indigo-500/30 transition-all duration-300 hover:-translate-y-1 h-full"
+    >
+      {/* Imagine */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+        <img
+          src={product.images?.[0] || "/products/banner/1.webp"}
+          alt={product.title}
+          className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+        />
+        {/* Badge Preț */}
+        <div className="absolute bottom-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
+            De la {product.price} RON
         </div>
-        <div className="p-6 flex-1 flex flex-col">
-          <h3 className="text-2xl font-bold text-indigo-900 mb-2">{product.title}</h3>
-          <p className="text-base text-muted flex-1 mb-4">{product.description}</p>
-          <div className="flex items-center justify-between mt-auto">
-            <span className="text-xl font-bold text-indigo-600">{priceDisplay}</span>
-            <button type="button" className="px-5 py-2 rounded-lg bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-500 transition">Configurează</button>
-          </div>
+      </div>
+
+      {/* Conținut */}
+      <div className="p-5 flex flex-col flex-1">
+        <div className="mb-auto">
+            <div className="text-xs font-medium text-indigo-600 dark:text-indigo-400 mb-2 uppercase tracking-wider">
+                {product.category || "Produs"}
+            </div>
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-white leading-snug group-hover:text-indigo-600 transition-colors">
+            {product.title}
+            </h3>
+            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2">
+            {product.description || "Materiale publicitare de înaltă calitate."}
+            </p>
         </div>
-      </Link>
-    </article>
+
+        {/* Footer Card */}
+        <div className="mt-5 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-200 group-hover:underline">
+                Configurează
+            </span>
+            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                <ArrowRight size={16} />
+            </div>
+        </div>
+      </div>
+    </Link>
   );
 }

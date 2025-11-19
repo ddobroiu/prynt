@@ -1,127 +1,132 @@
-import { pdfOfferConfig } from './pdfConfig';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-type Item = { title: string; details: string; qty: number; unit: number; total: number };
-
-function esc(s: any) {
-  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-export function renderOfferHTML(params: {
-  items: Item[];
-  subtotal: number;
-  shipping: number;
-  total: number;
+type OfferData = {
+  client: {
+    name: string;
+    company?: string;
+    cui?: string;
+    email?: string;
+    phone?: string;
+  };
+  items: Array<{
+    title: string;
+    quantity: number;
+    price: number;
+    metadata?: any; // Detalii extra (dimensiuni, material)
+  }>;
+  offerNumber: string;
   date: string;
-  logoDataUrl?: string | null;
-}) {
-  const cfg = pdfOfferConfig;
-  const { items, subtotal, shipping, total, date, logoDataUrl } = params;
-  const fmtRON = (n: number) => new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON', maximumFractionDigits: 2 }).format(n);
+};
 
-  const rows = items
-    .map(
-      (it) => `
-        <tr>
-          <td>${esc(it.title)}</td>
-          <td>${esc(it.details || '-')}</td>
-          <td class="num">${esc(it.qty)}</td>
-          <td class="num">${esc(fmtRON(it.unit))}</td>
-          <td class="num">${esc(fmtRON(it.total))}</td>
-        </tr>`
-    )
-    .join('');
+export const generateOfferPDF = async (data: OfferData): Promise<Buffer> => {
+  const doc = new jsPDF();
 
-  return `<!DOCTYPE html>
-  <html lang="ro">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Ofertă</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        --primary: rgb(${cfg.layout.primary[0]}, ${cfg.layout.primary[1]}, ${cfg.layout.primary[2]});
-        --muted: rgb(${cfg.layout.textMuted[0]}, ${cfg.layout.textMuted[1]}, ${cfg.layout.textMuted[2]});
-        --panel: rgb(${cfg.layout.panelBg[0]}, ${cfg.layout.panelBg[1]}, ${cfg.layout.panelBg[2]});
-        --border: rgb(${cfg.layout.border[0]}, ${cfg.layout.border[1]}, ${cfg.layout.border[2]});
-      }
-      * { box-sizing: border-box; }
-      html, body { margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #141414; }
-      .page { padding: 28mm 18mm 24mm 18mm; }
-      header { display: flex; align-items: center; gap: 16px; }
-      header .logo { width: 56px; height: 56px; object-fit: contain; }
-      header .info { line-height: 1.4; }
-      header .name { font-weight: 700; font-size: 14px; }
-      header .muted { color: var(--muted); font-size: 12px; }
+  // --- HEADER ---
+  // Logo (Simulat text, ideal ar fi imagine base64)
+  doc.setFontSize(22);
+  doc.setTextColor(79, 70, 229); // Indigo
+  doc.text("Prynt.ro", 14, 20);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text("Tipar Digital & Producție Publicitară", 14, 26);
+  doc.text("Email: contact@prynt.ro", 14, 31);
+  doc.text("Tel: +40 750 473 111", 14, 36);
 
-      .row { display:flex; justify-content: space-between; align-items: baseline; margin-top: 8px; }
-      .title { font-weight: 700; font-size: 20px; }
-      .date { font-size: 12px; color: var(--muted); }
-      .sep { height: 1px; background: var(--border); margin: 14px 0 12px; }
+  // --- INFO OFERTĂ (Dreapta Sus) ---
+  doc.setFontSize(12);
+  doc.setTextColor(0);
+  const rightX = 140;
+  doc.text(`OFERTĂ PREȚ`, rightX, 20);
+  doc.setFontSize(10);
+  doc.text(`Nr: ${data.offerNumber}`, rightX, 26);
+  doc.text(`Data: ${data.date}`, rightX, 31);
+  doc.text(`Valabilă: 30 zile`, rightX, 36);
 
-      table { width: 100%; border-collapse: collapse; }
-      thead th { text-align: left; padding: 10px 8px; font-weight: 600; background: var(--primary); color: #fff; font-size: 12px; }
-      tbody td { padding: 9px 8px; font-size: 11px; vertical-align: top; border-bottom: 1px solid var(--border); }
-      .num { text-align: right; white-space: nowrap; }
-      tbody tr:nth-child(even) td { background: #fafafa; }
+  // --- BENEFICIAR (Stânga Jos Header) ---
+  doc.setDrawColor(200);
+  doc.line(14, 45, 196, 45); // Linie separatoare
 
-      .totals { margin-top: 16px; display: flex; justify-content: flex-end; }
-      .panel { width: 280px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
-      .panel .label { font-size: 11px; color: var(--muted); }
-      .panel .row { margin: 4px 0; }
-      .panel .value { font-size: 12px; font-weight: 600; }
-      .panel .total { font-weight: 700; }
+  doc.setFontSize(10);
+  doc.setTextColor(120);
+  doc.text("BENEFICIAR:", 14, 55);
+  
+  doc.setTextColor(0);
+  doc.setFontSize(11);
+  doc.text(data.client.company || data.client.name, 14, 62); // Prioritate nume firmă
 
-      footer { margin-top: 18px; font-size: 10px; color: var(--muted); }
-    </style>
-  </head>
-  <body>
-    <div class="page">
-      <header>
-        ${logoDataUrl ? `<img class="logo" src="${logoDataUrl}" />` : ''}
-        <div class="info">
-          <div class="name">${esc(cfg.company.name)}</div>
-          <div class="muted">CUI: ${esc(cfg.company.cui)}</div>
-          <div class="muted">Nr. Reg. Com.: ${esc(cfg.company.regCom)}</div>
-        </div>
-        <div style="margin-left:auto; text-align:right">
-          <div class="title">Ofertă</div>
-          <div class="date">Data: ${esc(date)}</div>
-        </div>
-      </header>
+  doc.setFontSize(10);
+  if (data.client.company && data.client.name) {
+      doc.text(`Pers. contact: ${data.client.name}`, 14, 67);
+  }
+  if (data.client.cui) {
+      doc.text(`CUI/CIF: ${data.client.cui}`, 14, 72);
+  }
+  if (data.client.email) {
+      doc.text(`Email: ${data.client.email}`, 14, data.client.cui ? 77 : 72); // Ajustare poziție
+  }
 
-      <div class="sep"></div>
+  // --- TABEL PRODUSE ---
+  const tableBody = data.items.map((item, index) => {
+    // Construim descrierea din metadata
+    let desc = item.title;
+    if (item.metadata) {
+        const details = [];
+        if (item.metadata.width && item.metadata.height) details.push(`${item.metadata.width}x${item.metadata.height} cm`);
+        if (item.metadata.material) details.push(item.metadata.material);
+        if (details.length) desc += `\n(${details.join(", ")})`;
+    }
 
-      <table>
-        <thead>
-          <tr>
-            <th>Produs</th>
-            <th>Detalii</th>
-            <th class="num">Cant.</th>
-            <th class="num">Preț unitar</th>
-            <th class="num">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-      </table>
+    return [
+      index + 1,
+      desc,
+      `${item.quantity} buc`,
+      `${item.price.toFixed(2)} RON`,
+      `${(item.price * item.quantity).toFixed(2)} RON`
+    ];
+  });
 
-      <div class="totals">
-        <div class="panel">
-          <div class="row"><span class="label">Total produse</span> <span class="value" style="float:right">${esc(fmtRON(subtotal))}</span></div>
-          <div class="row"><span class="label">Livrare (tarif separat)</span>  <span class="value" style="float:right">${esc(fmtRON(shipping))}</span></div>
-        </div>
-      </div>
+  // Calcul Total
+  const totalVal = data.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const tva = totalVal * 0.19;
+  const totalCuTva = totalVal + tva;
 
-      <footer>
-        ${esc(cfg.notes.validity)} Transportul este tarifat separat față de prețul produselor.
-        ${cfg.company.email ? ` · ${esc(cfg.company.email)}` : ''}
-        ${cfg.company.phone ? ` · ${esc(cfg.company.phone)}` : ''}
-        ${cfg.company.website ? ` · ${esc(cfg.company.website)}` : ''}
-      </footer>
-    </div>
-  </body>
-  </html>`;
-}
+  autoTable(doc, {
+    startY: 90,
+    head: [["#", "Produs / Serviciu", "Cant.", "Preț Unitar", "Total"]],
+    body: tableBody,
+    theme: 'grid',
+    headStyles: { fillColor: [79, 70, 229], textColor: 255 }, // Indigo Header
+    styles: { fontSize: 10, cellPadding: 3 },
+    columnStyles: {
+        0: { cellWidth: 10 },
+        1: { cellWidth: 'auto' }, // Descriere flexibilă
+        2: { cellWidth: 25, halign: 'center' },
+        3: { cellWidth: 30, halign: 'right' },
+        4: { cellWidth: 30, halign: 'right' },
+    },
+    foot: [
+        ["", "", "", "Subtotal:", `${totalVal.toFixed(2)} RON`],
+        ["", "", "", "TVA (19%):", `${tva.toFixed(2)} RON`],
+        ["", "", "", "TOTAL:", `${totalCuTva.toFixed(2)} RON`]
+    ],
+    footStyles: { fillColor: [245, 245, 245], textColor: 0, fontStyle: 'bold', halign: 'right' }
+  });
+
+  // --- FOOTER ---
+  const finalY = (doc as any).lastAutoTable.finalY + 20;
+  
+  doc.setFontSize(9);
+  doc.setTextColor(100);
+  doc.text("Aceasta este o ofertă generată automat și nu ține loc de factură fiscală.", 14, finalY);
+  doc.text("Prețurile includ TVA (dacă nu este specificat altfel).", 14, finalY + 5);
+  
+  // Semnătură digitală simplă
+  doc.setFontSize(8);
+  doc.setTextColor(150);
+  doc.text(`Generat de Prynt AI Assistant la ${new Date().toLocaleString('ro-RO')}`, 14, 285);
+
+  // Returnăm buffer-ul (ca ArrayBuffer pentru compatibilitate Next.js App Router)
+  return Buffer.from(doc.output("arraybuffer"));
+};
