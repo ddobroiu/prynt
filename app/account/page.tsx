@@ -8,13 +8,17 @@ export const dynamic = 'force-dynamic';
 export default async function AccountPage({
   searchParams,
 }: {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await getAuthSession();
+  
+  const sp = await searchParams; 
+  
   // Citește query param welcome=1 pentru banner succes
   const showWelcome =
-    (typeof searchParams?.welcome === "string" && searchParams?.welcome === "1") ||
-    (Array.isArray(searchParams?.welcome) && searchParams?.welcome?.includes("1"));
+    (typeof sp?.welcome === "string" && sp?.welcome === "1") ||
+    (Array.isArray(sp?.welcome) && sp?.welcome?.includes("1"));
+
   if (!session?.user) {
     return (
       <div className="mx-auto max-w-3xl px-6 py-16">
@@ -32,6 +36,7 @@ export default async function AccountPage({
     include: { items: true },
     take: 50,
   });
+
   const orders = orderRecords.map((o) => {
     const items = (o.items || []).map((it: any) => ({
       name: it.name,
@@ -50,7 +55,8 @@ export default async function AccountPage({
       orderNo: Number(o.orderNo),
       createdAt: o.createdAt.toISOString(),
       status: o.status,
-      canceledAt: o.canceledAt || null,
+      // CORECTAT: Convertim Date -> string
+      canceledAt: o.canceledAt ? o.canceledAt.toISOString() : null,
       total: Number(o.total),
       paymentType: o.paymentType,
       items,
