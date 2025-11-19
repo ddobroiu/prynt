@@ -3,17 +3,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import OrderItemRow from "@/components/OrderItemRow"; // Importăm componenta creată
+import OrderItemRow from "@/components/OrderItemRow";
 
 export const dynamic = "force-dynamic";
 
-// Definim tipul Params corect pentru Next.js 15+ (unde params este o promisiune)
+// Definim tipul Params corect pentru Next.js 15+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
 export default async function OrderDetailPage(props: PageProps) {
-  // Așteptăm params
   const { id } = await props.params;
   
   const session = await getServerSession(authOptions);
@@ -98,7 +97,7 @@ export default async function OrderDetailPage(props: PageProps) {
         {/* Coloana Principală - Produse */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-            <h2 className="text-xl font-semibold mb-6">Produse Comandate</h2>
+            <h2 className="text-xl font-semibold mb-6">Produse Comandate & Grafică</h2>
             <div className="space-y-4">
               {order.items.map((item) => (
                 <OrderItemRow

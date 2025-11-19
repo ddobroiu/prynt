@@ -8,7 +8,7 @@ type OrderItemProps = {
     id: string;
     name: string;
     qty: number;
-    price: number; // prețul unitar (sau 'unit' din DB, depinde cum le mapezi)
+    price: number;
     total: number;
     artworkUrl: string | null;
   };
@@ -101,7 +101,6 @@ export default function OrderItemRow({ item }: OrderItemProps) {
             >
               Vezi fișierul
             </a>
-            {/* Opțional: Poți permite re-upload dacă vrei */}
           </div>
         ) : (
           <div className="relative">
@@ -109,7 +108,7 @@ export default function OrderItemRow({ item }: OrderItemProps) {
               type="file"
               id={`upload-${item.id}`}
               className="hidden"
-              accept="image/*,application/pdf,.ai,.psd,.zip" // Formate acceptate
+              accept="image/*,application/pdf,.ai,.psd,.zip"
               onChange={handleFileUpload}
               disabled={uploading}
             />
@@ -124,7 +123,7 @@ export default function OrderItemRow({ item }: OrderItemProps) {
               {uploading ? "Se încarcă..." : "⬆ Încarcă Grafica"}
             </label>
             <p className="text-[10px] text-gray-400 mt-1 text-center">
-              PDF, JPG, TIFF, AI (Max 50MB)
+              PDF, JPG, AI (Max 50MB)
             </p>
           </div>
         )}

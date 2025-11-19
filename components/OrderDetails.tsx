@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link"; // Importăm Link
+import Link from "next/link"; // Import necesar
 
 type Item = { name: string; qty: number; unit?: number; total?: number };
 type Order = {
@@ -84,7 +84,7 @@ export default function OrderDetails({ order }: { order: Order }) {
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                 <div className="flex justify-between items-center mb-3">
                     <h4 className="font-semibold">Produse</h4>
-                    {/* BUTONUL NOU CĂTRE PAGINA DE UPLOAD */}
+                    {/* Buton Nou - Duce la pagina completă pentru upload */}
                     <Link 
                         href={`/account/orders/${order.id}`}
                         className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors font-medium flex items-center gap-1"
@@ -118,6 +118,7 @@ export default function OrderDetails({ order }: { order: Order }) {
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                 <h4 className="font-semibold">Detalii livrare & facturare</h4>
                 <div className="mt-3 text-sm text-muted">
+                  {/* Detalii Facturare */}
                   {((order.billing as any)?.tip_factura && (order.billing as any).tip_factura !== 'persoana_fizica' && ((order.billing as any).cui || (order.billing as any).name)) ? (
                     <div>
                       <div><strong>Nume / Firmă:</strong> {(order.billing as any).name || (order.billing as any).cui}</div>
