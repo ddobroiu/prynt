@@ -1,12 +1,7 @@
 import "./globals.css";
 import Script from "next/script";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import Providers from "../components/Providers";
-import CookieConsentBanner from "../components/CookieConsentBanner";
-import ContactButton from "../components/ContactButton";
-// Cart widget for floating cart functionality
-import CartWidget from "../components/CartWidget";
+import ClientLayoutWrapper from "../components/ClientLayoutWrapper"; // Importăm wrapper-ul nou
 
 export const metadata = {
   metadataBase: new URL(
@@ -87,17 +82,13 @@ var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n
         />
       </head>
 
-  <body className="bg-white text-black antialiased">
-    <Providers>
-      <Header />
-      <main className="mx-auto max-w-7xl px-0 md:px-0">{children}</main>
-      <CartWidget />
-      <Footer />
-      {/* AssistantWidget a fost mutat pe Homepage */}
-      <ContactButton />
-      <CookieConsentBanner />
-    </Providers>
-  </body>
+      <body className="bg-white text-black antialiased">
+        <Providers>
+          <ClientLayoutWrapper>
+            {children}
+          </ClientLayoutWrapper>
+        </Providers>
+      </body>
     </html>
   );
 }
