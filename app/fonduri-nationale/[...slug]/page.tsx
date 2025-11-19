@@ -2,23 +2,21 @@ import { notFound } from "next/navigation";
 import ProductJsonLd from "@/components/ProductJsonLd";
 import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
 import type { Product } from "@/lib/products";
-import ConfiguratorAlucobond from "@/components/ConfiguratorAlucobond";
+import FonduriEUConfigurator from "@/components/FonduriEUConfigurator";
 
 type Props = { params?: Promise<{ slug?: string[] }> };
 
 export async function generateStaticParams() {
-  // Asigură-te că 'alucobond' este categoria corectă în fișierul de produse,
-  // altfel schimbă cu 'materiale' sau categoria corespunzătoare.
-  const slugs = getAllProductSlugsByCategory("alucobond");
+  const slugs = getAllProductSlugsByCategory("fonduri-nationale");
   return slugs.map((slug) => ({ slug: [slug] }));
 }
 
 export async function generateMetadata({ params }: Props) {
   const resolved = await params;
   const raw = (resolved?.slug ?? []).join("/");
-  const { product, isFallback } = await resolveProductForRequestedSlug(String(raw), "alucobond");
+  const { product, isFallback } = await resolveProductForRequestedSlug(String(raw), "fonduri-nationale");
   if (!product) return {};
-  
+
   const metadata: any = {
     title: product.seo?.title || `${product.title} | Prynt`,
     description: product.seo?.description || product.description,
@@ -37,20 +35,16 @@ export default async function Page({ params }: Props) {
   const slugParts: string[] = resolved?.slug ?? [];
   const joinedSlug = slugParts.join("/");
 
-  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug), "alucobond");
+  const { product } = await resolveProductForRequestedSlug(String(joinedSlug), "fonduri-nationale");
 
   if (!product) return notFound();
 
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/alucobond/${joinedSlug}`;
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/fonduri-nationale/${joinedSlug}`;
 
   return (
     <>
       <ProductJsonLd product={(product as Product)} url={url} />
-      <ConfiguratorAlucobond 
-        productSlug={product.slug ?? product.routeSlug} 
-        initialWidth={initialWidth}
-        initialHeight={initialHeight}
-      />
+      <FonduriEUConfigurator />
     </>
   );
 }

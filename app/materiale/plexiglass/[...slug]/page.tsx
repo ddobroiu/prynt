@@ -1,54 +1,55 @@
-import React from "react";
-import ConfiguratorPlexiglass from "../../../../components/ConfiguratorPlexiglass";
+import { notFound } from "next/navigation";
+import ProductJsonLd from "@/components/ProductJsonLd";
+import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
+import type { Product } from "@/lib/products";
+import ConfiguratorCarton from "@/components/ConfiguratorCarton";
 
-type Props = { params: { slug?: string[] } };
+type Props = { params?: Promise<{ slug?: string[] }> };
 
-function parseDimsFromSlug(slug?: string[] | string): { width?: number; height?: number; productSlug?: string } {
-  if (!slug) return {};
-  const parts = Array.isArray(slug) ? slug : String(slug).split("/").map((s) => s.trim()).filter(Boolean);
-
-  const dimExact = /^(\d{1,5})[xX×-](\d{1,5})$/;
-  const dimAnywhere = /(\d{1,5})[xX×-](\d{1,5})/;
-
-  let width: number | undefined;
-  let height: number | undefined;
-  const remaining: string[] = [];
-
-  for (const seg of parts) {
-    const mExact = seg.match(dimExact);
-    if (mExact && width === undefined && height === undefined) {
-      width = Number(mExact[1]);
-      height = Number(mExact[2]);
-      continue;
-    }
-
-    const mAny = seg.match(dimAnywhere);
-    if (mAny && width === undefined && height === undefined) {
-      width = Number(mAny[1]);
-      height = Number(mAny[2]);
-      const cleaned = seg.replace(mAny[0], "").replace(/(^[-_]+|[-_]+$)/g, "").trim();
-      if (cleaned) remaining.push(cleaned);
-      continue;
-    }
-
-    remaining.push(seg);
-  }
-
-  const productSlug = remaining.length ? remaining.join("/") : parts.join("/");
-  const out: { width?: number; height?: number; productSlug?: string } = {};
-  if (width !== undefined && !Number.isNaN(width)) out.width = width;
-  if (height !== undefined && !Number.isNaN(height)) out.height = height;
-  out.productSlug = productSlug || undefined;
-  return out;
+export async function generateStaticParams() {
+  // Verifică dacă categoria în lib/products este 'carton' sau 'materiale'
+  const slugs = getAllProductSlugsByCategory("carton");
+  return slugs.map((slug) => ({ slug: [slug] }));
 }
 
-export default function Page({ params }: Props) {
-  const parsed = parseDimsFromSlug(params.slug);
-  const productSlug = parsed.productSlug ?? (Array.isArray(params.slug) ? params.slug.join("/") : params.slug ?? "plexiglass");
+export async function generateMetadata({ params }: Props) {
+  const resolved = await params;
+  const raw = (resolved?.slug ?? []).join("/");
+  const { product, isFallback } = await resolveProductForRequestedSlug(String(raw), "carton");
+  if (!product) return {};
+
+  const metadata: any = {
+    title: product.seo?.title || `${product.title} | Prynt`,
+    description: product.seo?.description || product.description,
+    openGraph: { 
+      title: product.seo?.title || product.title, 
+      description: product.description, 
+      images: product.images 
+    },
+  };
+  if (isFallback) metadata.robots = { index: false, follow: true };
+  return metadata;
+}
+
+export default async function Page({ params }: Props) {
+  const resolved = await params;
+  const slugParts: string[] = resolved?.slug ?? [];
+  const joinedSlug = slugParts.join("/");
+
+  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug), "carton");
+
+  if (!product) return notFound();
+
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/carton/${joinedSlug}`;
 
   return (
-    <main style={{ padding: 24 }}>
-      <ConfiguratorPlexiglass productSlug={productSlug} />
-    </main>
+    <>
+      <ProductJsonLd product={(product as Product)} url={url} />
+      <ConfiguratorCarton 
+        productSlug={product.slug ?? product.routeSlug} 
+        initialWidth={initialWidth}
+        initialHeight={initialHeight}
+      />
+    </>
   );
 }
