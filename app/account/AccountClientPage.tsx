@@ -1,230 +1,194 @@
-"use client";
+import { prisma } from "@/lib/prisma";
+import { getAuthSession } from "@/lib/auth";
+import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
+import UserGraphicsManager from "@/components/UserGraphicsManager";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import AddressesManager from "@/components/AddressesManager";
-import ChangePasswordForm from "@/components/ChangePasswordForm";
-// CORECTAT: Import default (fără acolade)
-import SignOutButton from "@/components/SignOutButton";
-import OrderDetails from "@/components/OrderDetails";
+export const dynamic = "force-dynamic";
 
-// Funcții utilitare pentru afișare
-function getAwbTrackingUrl(awb: string | null | undefined, carrier: string | null | undefined): string | null {
-  if (!awb || !carrier) return null;
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+function getAwbTrackingUrl(awb: string | null, carrier: string | null) {
+  if (!awb || awb === "0") return null; // Nu generăm link pentru AWB 0
   const awbClean = encodeURIComponent(awb);
-  const carrierLower = carrier.toLowerCase();
+  const carrierLower = (carrier || "").toLowerCase();
   if (carrierLower.includes('dpd')) return `https://tracking.dpd.ro/awb?awb=${awbClean}`;
   if (carrierLower.includes('fan')) return `https://www.fancourier.ro/awb-tracking/?awb=${awbClean}`;
   if (carrierLower.includes('sameday')) return `https://sameday.ro/awb-tracking/?awb=${awbClean}`;
   return null;
 }
 
-function resolveStatusMeta(status: string | null | undefined) {
-  switch (status) {
-    case "fulfilled":
-      return { label: "Finalizată", badge: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" };
-    case "canceled":
-      return { label: "Anulată", badge: "bg-red-500/10 text-red-500 border border-red-500/20" };
-    case "processing":
-      return { label: "În procesare", badge: "bg-blue-500/10 text-blue-500 border border-blue-500/20" };
-    default:
-      return { label: "În lucru", badge: "bg-amber-500/10 text-amber-500 border border-amber-500/20" };
+export default async function OrderDetailPage(props: PageProps) {
+  const { id } = await props.params;
+  const session = await getAuthSession();
+
+  if (!session?.user?.email) {
+    redirect("/login");
   }
-}
 
-interface AccountClientPageProps {
-  orders?: any[];
-  billing?: any;
-  session?: any;
-}
+  // Citim comanda direct din bază, cu toate câmpurile
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { items: true },
+  });
 
-export default function AccountClientPage({ orders = [], billing }: AccountClientPageProps) {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  if (!order) notFound();
+
+  if (order.userId !== session.user.id) {
+    return <div className="text-white p-10">Acces interzis</div>;
+  }
+
+  // Pregătim datele produselor
+  const cleanItems = order.items.map((item) => ({
+    id: item.id,
+    name: item.name,
+    qty: item.qty,
+    unit: Number(item.unit),
+    total: Number(item.total),
+  }));
+
+  // Grafica
+  const graphics = await prisma.userGraphic.findMany({
+    where: { orderId: id },
+  });
   
-  const [tab, setTab] = useState<'orders' | 'addresses' | 'security'>('orders');
+  const cleanGraphics = graphics.map((g) => ({
+    ...g,
+    createdAt: g.createdAt.toISOString(),
+    updatedAt: g.updatedAt.toISOString(),
+    fileSize: Number(g.fileSize),
+  }));
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam === 'security') setTab('security');
-    else if (tabParam === 'addresses') setTab('addresses');
-    else if (tabParam === 'orders') setTab('orders');
-  }, [searchParams]);
-
-  if (status === "loading") {
-    return <div className="p-8 text-center">Se încarcă...</div>;
-  }
-
-  if (!session) {
-    return null; 
-  }
-
-  const handleTabChange = (newTab: 'orders' | 'addresses' | 'security') => {
-    setTab(newTab);
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', newTab);
-    window.history.pushState({}, '', url);
-  };
+  const shippingAddress = order.address as any;
+  const billingDetails = order.billing as any;
+  
+  // Verificăm AWB-ul. Dacă e "0" sau null, îl tratăm corespunzător.
+  const awbDisplay = order.awbNumber && order.awbNumber !== "0" ? order.awbNumber : null;
+  const awbUrl = getAwbTrackingUrl(order.awbNumber, order.awbCarrier);
 
   return (
-    <div className="min-h-[60vh]">
-      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Contul meu</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Salut, {session.user?.name || session.user?.email}!
-          </p>
+    <div className="min-h-screen bg-slate-950 text-white p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        
+        <div className="mb-8">
+          <Link href="/account?tab=orders" className="text-indigo-400 text-sm hover:underline mb-2 inline-block">
+            ← Înapoi la comenzi
+          </Link>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+               <h1 className="text-3xl font-bold text-white">Comanda #{order.orderNo}</h1>
+               <p className="text-slate-400 text-sm">Data: {new Date(order.createdAt).toLocaleDateString('ro-RO')}</p>
+            </div>
+            <span className={`px-4 py-2 rounded-full text-sm font-bold border w-fit ${
+                order.status === 'fulfilled' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                order.status === 'canceled' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' :
+                'bg-blue-500/20 text-blue-400 border-blue-500/30'
+              }`}>
+              {order.status === 'active' ? 'În Procesare' : 
+               order.status === 'fulfilled' ? 'Finalizată' : 
+               order.status === 'canceled' ? 'Anulată' : order.status}
+            </span>
+          </div>
         </div>
-        <SignOutButton />
-      </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar / Navigation Tabs */}
-        <aside className="w-full lg:w-64 shrink-0 space-y-2">
-          <button
-            onClick={() => handleTabChange('orders')}
-            className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-              tab === 'orders'
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            Comenzile mele
-          </button>
-          <button
-            onClick={() => handleTabChange('addresses')}
-            className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-              tab === 'addresses'
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            Adrese de livrare
-          </button>
-          <button
-            onClick={() => handleTabChange('security')}
-            className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-              tab === 'security'
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            Securitate
-          </button>
-        </aside>
-
-        {/* Content Area */}
-        <main className="flex-1 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-          {tab === 'orders' && (
-             <div className="animate-fadeIn">
-               <div className="flex items-center justify-between mb-6 pb-4 border-b dark:border-gray-700">
-                 <h2 className="text-xl font-semibold">Istoric comenzi</h2>
-                 <span className="text-sm text-muted-foreground">Total: {orders.length}</span>
-               </div>
-               
-               {orders.length === 0 ? (
-                 <div className="text-center py-10 text-gray-500">
-                   Nu ai nicio comandă plasată încă.
-                 </div>
-               ) : (
-                 <ul className="space-y-4">
-                   {orders.map((o: any) => {
-                     const statusMeta = resolveStatusMeta(o.status);
-                     const awbUrl = getAwbTrackingUrl(o.awbNumber, o.awbCarrier);
-                     const previewItems = (o.items || []).slice(0, 3).map((item: any) => `${item.qty}x ${item.name}`);
-                     
-                     return (
-                       <li key={o.id} className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
-                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                           <div className="flex-1">
-                             <div className="flex items-center justify-between flex-wrap gap-2">
-                               <div>
-                                 <div className="font-medium text-gray-900 dark:text-white">
-                                   Comanda #{o.orderNo}
-                                 </div>
-                                 <div className="text-xs text-gray-500">
-                                   {new Date(o.createdAt).toLocaleString("ro-RO")}
-                                 </div>
-                               </div>
-                               <div className="text-right">
-                                 <div className="text-sm font-bold text-gray-900 dark:text-white">
-                                   {new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(o.total)}
-                                 </div>
-                                 <div className="text-xs text-gray-500">
-                                   {o.itemsCount} produse • {o.paymentType}
-                                 </div>
-                               </div>
-                             </div>
-
-                             <div className="mt-3 space-y-2 text-sm">
-                               {previewItems.length > 0 && (
-                                 <div className="text-gray-600 dark:text-gray-300 text-xs">
-                                   {previewItems.join(" | ")}
-                                   {o.itemsCount > previewItems.length ? ` +${o.itemsCount - previewItems.length} altele` : ""}
-                                 </div>
-                               )}
-                               
-                               <div className="flex flex-wrap items-center gap-2 mt-2">
-                                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusMeta.badge}`}>
-                                   {statusMeta.label}
-                                 </span>
-                                 
-                                 {o.awbNumber && (
-                                   <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-600 px-2.5 py-0.5 text-xs text-gray-600 dark:text-gray-300">
-                                     <span>AWB: {o.awbNumber}</span>
-                                     {awbUrl && (
-                                       <a href={awbUrl} target="_blank" rel="noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
-                                         Tracking
-                                       </a>
-                                     )}
-                                   </span>
-                                 )}
-                                 
-                                 {o.invoiceLink && (
-                                   <a
-                                     href={o.invoiceLink}
-                                     target="_blank"
-                                     rel="noreferrer"
-                                     className="inline-flex items-center rounded-full border border-gray-200 dark:border-gray-600 px-2.5 py-0.5 text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
-                                   >
-                                     Factură
-                                   </a>
-                                 )}
-                               </div>
-                             </div>
-                           </div>
-                         </div>
-                         <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-end">
-                            <OrderDetails order={o} />
-                         </div>
-                       </li>
-                     );
-                   })}
-                 </ul>
-               )}
-             </div>
-          )}
-          {tab === 'addresses' && (
-            <div className="animate-fadeIn">
-              <h2 className="text-xl font-semibold mb-6 pb-4 border-b dark:border-gray-700">Adresele mele</h2>
-              <AddressesManager />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* STÂNGA: Upload Grafică */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+              <h2 className="text-xl font-semibold mb-4 text-white">Gestionare Grafică</h2>
+              <p className="text-sm text-slate-400 mb-6 bg-indigo-900/30 p-3 rounded-lg border border-indigo-500/30">
+                ℹ️ Încarcă fișierele grafice (PDF, AI, TIFF, JPG) pentru fiecare produs.
+              </p>
+              
+              <UserGraphicsManager 
+                orderId={order.id} 
+                items={cleanItems} 
+                initialGraphics={cleanGraphics} 
+              />
             </div>
-          )}
-          {tab === 'security' && (
-            <div className="animate-fadeIn">
-              <h2 className="text-xl font-semibold mb-6 pb-4 border-b dark:border-gray-700">Securitate cont</h2>
-              <ChangePasswordForm />
+          </div>
+
+          {/* DREAPTA: DOCUMENTE (AWB & Factură) */}
+          <div className="space-y-6">
+            
+            {/* CARD DOCUMENTE - Îl afișăm mereu dacă există ORICE urmă de document */}
+            <div className="bg-indigo-900/20 border border-indigo-500/40 rounded-2xl p-6 shadow-lg shadow-indigo-900/20">
+                <h3 className="font-bold text-indigo-100 mb-4 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                  Documente
+                </h3>
+                <div className="space-y-4">
+                  
+                  {/* AWB */}
+                  {order.awbNumber ? (
+                    <div className="bg-slate-950/50 p-3 rounded-xl border border-indigo-500/20">
+                      <div className="text-[10px] text-indigo-300 uppercase font-bold tracking-wider mb-1">
+                        AWB {order.awbCarrier || "Curier"}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono font-bold text-white text-lg">
+                          {order.awbNumber === "0" ? "În generare..." : order.awbNumber}
+                        </span>
+                        {awbUrl && (
+                          <a 
+                            href={awbUrl} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-colors font-medium"
+                          >
+                            Urmărește
+                          </a>
+                        )}
+                      </div>
+                      {order.awbNumber === "0" && (
+                        <p className="text-xs text-amber-500 mt-2">
+                          * AWB-ul a fost solicitat dar încă nu are număr alocat (apare 0).
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-slate-500 italic">Niciun AWB emis.</div>
+                  )}
+
+                  {/* FACTURA */}
+                  {order.invoiceLink ? (
+                    <a 
+                      href={order.invoiceLink} 
+                      target="_blank"
+                      className="flex items-center justify-center w-full gap-2 bg-white text-indigo-950 font-bold text-sm py-3 rounded-xl hover:bg-slate-200 transition-colors"
+                    >
+                      📄 Descarcă Factura
+                    </a>
+                  ) : (
+                    <div className="text-sm text-slate-500 italic border-t border-white/10 pt-2 mt-2">
+                      Factura nu a fost încă încărcată.
+                    </div>
+                  )}
+                </div>
             </div>
-          )}
-        </main>
+
+            {/* ADRESE */}
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+              <h3 className="font-semibold mb-4 text-slate-200 border-b border-slate-800 pb-2">Detalii Livrare</h3>
+              
+              <div className="space-y-4">
+                  <div>
+                      <div className="text-xs text-slate-500 uppercase mb-1">Adresă Livrare</div>
+                      <div className="text-sm text-slate-300 font-medium bg-black/20 p-3 rounded-lg">
+                        <p className="text-white mb-1">{shippingAddress?.nume_prenume || shippingAddress?.name}</p>
+                        <p>{shippingAddress?.strada_nr}</p>
+                        <p>{shippingAddress?.localitate}, {shippingAddress?.judet}</p>
+                        <p className="mt-2 text-indigo-300">{shippingAddress?.telefon}</p>
+                      </div>
+                  </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
       </div>
     </div>
   );
