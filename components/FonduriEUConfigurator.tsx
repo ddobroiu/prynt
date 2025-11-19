@@ -1,398 +1,284 @@
 "use client";
-
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
-import { CheckCircle, Info, ShoppingCart, X } from "lucide-react";
-import MobilePriceBar from "./MobilePriceBar";
-import DeliveryInfo from "@/components/DeliveryInfo";
+import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, FileText } from "lucide-react";
+import DeliveryEstimation from "./DeliveryEstimation";
+import FaqAccordion from "./FaqAccordion";
+import Reviews from "./Reviews";
+import { QA } from "@/types";
+import { 
+  calculateFonduriEUPrice, 
+  FONDURI_EU_CONSTANTS, 
+  formatMoneyDisplay, 
+  type PriceInputFonduriEU 
+} from "@/lib/pricing";
 
-type Option = { id: string; label: string; price: number };
-
-// Simple gallery images (reuse existing assets to avoid missing files)
 const GALLERY = [
+  "/products/afise/1.webp", // Placeholder - ideal ar fi imagini specifice kitului
   "/products/banner/1.webp",
-  "/products/afise/1.webp",
   "/products/autocolante/1.webp",
-  "/products/canvas/1.webp",
 ] as const;
 
-// Groups and options (prices in RON)
-const GROUPS = {
-  comunicat: {
-    title: "Comunicat",
-    options: [
-      { id: "none", label: "Fără comunicat", price: 0 },
-      { id: "start", label: "Începere proiect", price: 247 },
-      { id: "final", label: "Finalizare proiect", price: 247 },
-      { id: "start+final", label: "Începere și finalizare proiect", price: 494 },
-    ] as Option[],
-  },
-  bannerSite: {
-    title: "Banner site",
-    options: [
-      { id: "none", label: "Fără banner", price: 0 },
-      { id: "with", label: "Banner site", price: 100 },
-    ] as Option[],
-  },
-  afisInformativ: {
-    title: "Afiș informativ",
-    options: [
-      { id: "none", label: "Fără afiș informativ", price: 0 },
-      { id: "A2", label: "A2", price: 79 },
-      { id: "A3", label: "A3", price: 49 },
-      { id: "A4", label: "A4", price: 19 },
-    ] as Option[],
-  },
-  autoMici: {
-    title: "Autocolante mici",
-    options: [
-      { id: "none", label: "Fără autocolante mici", price: 0 },
-      { id: "10x10-20", label: "10×10 cm — set 20 buc", price: 49 },
-      { id: "15x15-10", label: "15×15 cm — set 10 buc", price: 49 },
-      { id: "15x21-5", label: "15×21 cm — set 5 buc", price: 49 },
-    ] as Option[],
-  },
-  autoMari: {
-    title: "Autocolante mari",
-    options: [
-      { id: "none", label: "Fără autocolante mari", price: 0 },
-      { id: "30x30-3", label: "30×30 cm — set 3 buc", price: 49 },
-      { id: "40x40", label: "40×40 cm", price: 49 },
-    ] as Option[],
-  },
-  panouTemporar: {
-    title: "Panou temporar",
-    options: [
-      { id: "none", label: "Fără panou temporar", price: 0 },
-      { id: "A2", label: "A2", price: 200 },
-      { id: "80x50", label: "80×50 cm", price: 290 },
-      { id: "200x300", label: "200×300 cm", price: 1190 },
-      { id: "200x150", label: "200×150 cm", price: 700 },
-    ] as Option[],
-  },
-  placaPermanenta: {
-    title: "Placă permanentă",
-    options: [
-      { id: "none", label: "Fără placă permanentă", price: 0 },
-      { id: "A2", label: "A2", price: 200 },
-      { id: "80x50", label: "80×50 cm", price: 290 },
-      { id: "200x300", label: "200×300 cm", price: 1190 },
-      { id: "200x150", label: "200×150 cm", price: 700 },
-    ] as Option[],
-  },
+/* --- UI COMPONENTS --- */
+const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
+    <div className="relative pl-12">
+        <div className="absolute top-5 left-0 flex flex-col items-center h-full">
+            <span className={`flex items-center justify-center w-8 h-8 rounded-full text-md font-bold transition-colors ${isOpen ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}>{stepNumber}</span>
+            {!isLast && <div className="w-px flex-grow bg-gray-200 mt-2"></div>}
+        </div>
+        <div className="flex-1">
+            <button type="button" className="w-full flex items-center justify-between py-5 text-left" onClick={onClick}>
+                <div>
+                    <h2 className="text-lg font-bold text-gray-800">{title}</h2>
+                    {!isOpen && <p className="text-sm text-gray-500 truncate">{summary}</p>}
+                </div>
+                <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+            </button>
+            <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? "grid-rows-[1fr] opacity-100 pb-5" : "grid-rows-[0fr] opacity-0"}`}>
+                <div className="overflow-hidden">{children}</div>
+            </div>
+        </div>
+    </div>
+);
+
+const ProductTabs = ({ productSlug }: { productSlug: string }) => {
+    const [activeTab, setActiveTab] = useState("descriere");
+    const faq: QA[] = [
+        { question: "Sunt materialele conforme cu manualul de identitate?", answer: "Da, respectăm cu strictețe manualul de identitate vizuală pentru fiecare program (PNRR, Regio, etc.), folosind fonturile, culorile și elementele grafice obligatorii." },
+        { question: "Ce include comunicatul de presă?", answer: "Serviciul include redactarea textului conform cerințelor și publicarea acestuia într-un ziar online sau fizic, cu dovadă de publicare (link sau scan)." },
+        { question: "Panourile sunt rezistente la exterior?", answer: "Da, panourile temporare și plăcile permanente sunt realizate din materiale rezistente la intemperii (PVC Forex, Bond sau Banner) și printate cu cerneală UV." },
+    ];
+    return (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
+            <nav className="border-b border-gray-200 flex">
+                <TabButtonSEO active={activeTab === "descriere"} onClick={() => setActiveTab("descriere")}>Descriere</TabButtonSEO>
+                <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
+                <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
+            </nav>
+            <div className="p-6">
+                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Kit Vizibilitate Fonduri Europene</h3><p>Soluție completă pentru beneficiarii de fonduri nerambursabile. Oferim toate elementele obligatorii de vizibilitate, personalizate pentru proiectul tău, conform manualului de identitate vizuală aplicabil (PNRR, POC, POR, etc.).</p></div>}
+                {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
+                {activeTab === 'faq' && <FaqAccordion qa={faq} />}
+            </div>
+        </div>
+    );
 };
 
-type Selected = {
-  comunicat?: string | null;
-  bannerSite?: string | null;
-  afisInformativ?: string | null;
-  autoMici?: string | null;
-  autoMari?: string | null;
-  panouTemporar?: string | null;
-  placaPermanenta?: string | null;
-};
+const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
 
+const SelectGroup = ({ label, options, value, onChange }: { label: string, options: { id: string, label: string, price: number }[], value: string, onChange: (val: string) => void }) => (
+    <div className="mb-4">
+        <label className="field-label mb-1">{label}</label>
+        <select className="input w-full" value={value || "none"} onChange={(e) => onChange(e.target.value)}>
+            {options.map(opt => (
+                <option key={opt.id} value={opt.id}>
+                    {opt.label} {opt.price > 0 ? `(+${formatMoneyDisplay(opt.price)})` : ""}
+                </option>
+            ))}
+        </select>
+    </div>
+);
+
+/* --- MAIN COMPONENT --- */
 export default function FonduriEUConfigurator() {
   const { addItem } = useCart();
-
-  const [sel, setSel] = useState<Selected>({
-    comunicat: "none",
-    bannerSite: "none", // explicit 0 RON default
-    afisInformativ: "none",
-    autoMici: "none",
-    autoMari: "none",
-    panouTemporar: "none",
-    placaPermanenta: "none",
+  
+  // State for selections
+  const [selections, setSelections] = useState<Record<string, string>>({
+      comunicat: "none",
+      bannerSite: "none",
+      afisInformativ: "none",
+      autoMici: "none",
+      autoMari: "none",
+      panouTemporar: "none",
+      placaPermanenta: "none"
   });
 
-  const [toastVisible, setToastVisible] = useState(false);
-  const [errorToast, setErrorToast] = useState<string | null>(null);
-  const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [orderNotes, setOrderNotes] = useState<string>("");
-
-  // Artwork upload (optional)
+  const [orderNotes, setOrderNotes] = useState("");
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
-  const [artworkLink, setArtworkLink] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeImage, setActiveImage] = useState(GALLERY[0]);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
+  const [activeStep, setActiveStep] = useState(1);
 
-  // No tabs (single page). We use compact dropdown selects to save vertical space.
+  // Calculate Price
+  const priceData = useMemo(() => calculateFonduriEUPrice({ selections }), [selections]);
+  const displayedTotal = priceData.finalPrice;
 
-  const sum = useMemo(() => {
-    const priceOf = (groupKey: keyof typeof GROUPS, id?: string | null) => {
-      if (!id) return 0;
-      const opt = GROUPS[groupKey].options.find((o) => o.id === id);
-      return opt?.price ?? 0;
-    };
-    return (
-      priceOf("comunicat", sel.comunicat) +
-      priceOf("bannerSite", sel.bannerSite) +
-      priceOf("afisInformativ", sel.afisInformativ) +
-      priceOf("autoMici", sel.autoMici) +
-      priceOf("autoMari", sel.autoMari) +
-      priceOf("panouTemporar", sel.panouTemporar) +
-      priceOf("placaPermanenta", sel.placaPermanenta)
-    );
-  }, [sel]);
+  const handleSelectionChange = (key: string, value: string) => {
+      setSelections(prev => ({ ...prev, [key]: value }));
+  };
 
-  const canAdd = sum > 0;
+  const handleArtworkFileInput = async (file: File | null) => {
+    setArtworkUrl(null); setUploadError(null);
+    if (!file) return;
+    try {
+      setUploading(true);
+      const form = new FormData(); form.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (!res.ok) throw new Error("Upload eșuat");
+      const data = await res.json();
+      setArtworkUrl(data.url);
+    } catch (e: any) {
+      setUploadError(e?.message ?? "Eroare la upload");
+    } finally {
+      setUploading(false);
+    }
+  };
 
-  function choose(group: keyof Selected, id: string) {
-    setSel((s) => ({ ...s, [group]: s[group] === id ? null : id }));
-  }
-
-  function handleAdd() {
-    if (!canAdd) {
-      setErrorToast("Selectează cel puțin o opțiune înainte de a adăuga în coș.");
-      setTimeout(() => setErrorToast(null), 1600);
-      return;
+  function handleAddToCart() {
+    if (displayedTotal <= 0) {
+      setErrorToast("Selectați cel puțin o opțiune."); setTimeout(() => setErrorToast(null), 1600); return;
     }
 
-    const selectedReadable = Object.entries(sel)
-      .filter(([, v]) => !!v && v !== "none")
-      .map(([k, v]) => {
-        const g = GROUPS[k as keyof typeof GROUPS];
-        const o = g?.options.find((x) => x.id === v);
-        return `${g?.title}: ${o?.label} (${o?.price} RON)`;
-      })
-      .join(" • ");
+    // Build descriptive title
+    const selectedItems = Object.entries(selections)
+        .filter(([_, val]) => val !== "none")
+        .map(([key, val]) => {
+            const group = FONDURI_EU_CONSTANTS.GROUPS[key as keyof typeof FONDURI_EU_CONSTANTS.GROUPS];
+            const opt = group?.options.find(o => o.id === val);
+            return `${group?.title}: ${opt?.label}`;
+        });
 
     addItem({
-      id: `fonduri-eu-${Object.values(sel).filter(Boolean).join("_")}-${sum}`,
+      id: `fonduri-${Date.now()}`, // Unique ID per custom config
       productId: "fonduri-eu",
       slug: "fonduri-eu",
-      title: `Fonduri EU — pachet personalizat`,
-      price: sum,
+      title: "Kit Vizibilitate Fonduri Europene",
+      price: displayedTotal,
       quantity: 1,
       currency: "RON",
       metadata: {
-        selections: sel,
-        selectedReadable,
+        "Configurație": selectedItems.join(" | "),
+        "Detalii Proiect": orderNotes,
         artworkUrl,
-        artworkLink,
-        orderNotes,
       },
     });
-
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 1400);
+    setToastVisible(true); setTimeout(() => setToastVisible(false), 1600);
   }
 
-  // Compact group select
+  useEffect(() => {
+    const id = setInterval(() => setActiveIndex((i) => (i + 1) % GALLERY.length), 3000);
+    return () => clearInterval(id);
+  }, []);
+  useEffect(() => setActiveImage(GALLERY[activeIndex]), [activeIndex]);
 
-  const Group = ({
-    groupKey,
-  }: {
-    groupKey: keyof typeof GROUPS;
-  }) => {
-    const g = GROUPS[groupKey];
-    const selected = sel[groupKey as keyof Selected] ?? null;
-    return (
-      <div className="card p-4">
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">{g.title}</h2></div>
-          <div className="text-sm text-muted">{(() => {
-            const o = g.options.find((x) => x.id === selected);
-            return o ? `${o.price} RON` : "0 RON";
-          })()}</div>
-        </div>
-
-        <label className="field-label mb-2 block">Alege opțiunea</label>
-        <select
-          className="input w-full"
-          value={selected ?? "none"}
-          onChange={(e) => choose(groupKey as keyof Selected, e.target.value)}
-        >
-          {g.options.map((o) => (
-            <option key={o.id} value={o.id}>{o.label} — {o.price} RON</option>
-          ))}
-        </select>
-      </div>
-    );
+  // Summaries for steps
+  const getSummaryStep1 = () => {
+      const s = [];
+      if(selections.comunicat !== 'none') s.push('Comunicat');
+      if(selections.bannerSite !== 'none') s.push('Banner Site');
+      return s.length ? s.join(", ") : "Selectează";
+  };
+  const getSummaryStep2 = () => {
+      const s = [];
+      if(selections.afisInformativ !== 'none') s.push('Afiș');
+      if(selections.autoMici !== 'none' || selections.autoMari !== 'none') s.push('Autocolante');
+      return s.length ? s.join(", ") : "Selectează";
+  };
+  const getSummaryStep3 = () => {
+       const s = [];
+       if(selections.panouTemporar !== 'none') s.push('Panou');
+       if(selections.placaPermanenta !== 'none') s.push('Placă');
+       return s.length ? s.join(", ") : "Selectează";
   };
 
   return (
-    <main className="min-h-screen">
-      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
-        Produs adăugat în coș
-      </div>
-      {errorToast && (
-        <div className={`toast-success opacity-100 translate-y-0`} aria-live="assertive">{errorToast}</div>
-      )}
-
-      <div className="page py-10 pb-24 lg:pb-10">
-        <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <main className="bg-gray-50 min-h-screen">
+      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">Produs adăugat în coș</div>
+      {errorToast && <div className={`toast-error opacity-100 translate-y-0`} aria-live="assertive">{errorToast}</div>}
+      
+      <div className="container mx-auto px-4 py-10 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="lg:sticky top-24 h-max space-y-8">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="aspect-square"><img src={activeImage} alt="Fonduri EU" className="h-full w-full object-cover" /></div>
+              <div className="p-2 grid grid-cols-4 gap-2">
+                {GALLERY.map((src, i) => <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
+              </div>
+            </div>
+            <div className="hidden lg:block"><ProductTabs productSlug="fonduri-eu" /></div>
+          </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Fonduri EU</h1>
-            <p className="mt-2 text-muted">Alege opțiunile dorite; totalul se calculează automat.</p>
-          </div>
-          <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline text-sm self-start">
-            <Info size={18} />
-            <span className="ml-2">Detalii</span>
-          </button>
-        </header>
+            <header className="mb-6">
+              <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Fonduri EU</h1></div>
+              <div className="flex justify-between items-center"><p className="text-gray-600">Configurează pachetul complet.</p><button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5"><Info size={16} /><span className="ml-2">Detalii</span></button></div>
+            </header>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4">
+              
+              {/* STEP 1: Publicitate Obligatorie */}
+              <AccordionStep stepNumber={1} title="Publicitate & Online" summary={getSummaryStep1()} isOpen={activeStep === 1} onClick={() => setActiveStep(1)}>
+                <SelectGroup label="Comunicat de presă" options={FONDURI_EU_CONSTANTS.GROUPS.comunicat.options} value={selections.comunicat} onChange={(v) => handleSelectionChange("comunicat", v)} />
+                <SelectGroup label="Banner Web (Site)" options={FONDURI_EU_CONSTANTS.GROUPS.bannerSite.options} value={selections.bannerSite} onChange={(v) => handleSelectionChange("bannerSite", v)} />
+              </AccordionStep>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* LEFT - options (single page, compact selects) */}
-          <div className="order-2 lg:order-1 lg:col-span-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Group groupKey="comunicat" />
-              <Group groupKey="bannerSite" />
-              <Group groupKey="afisInformativ" />
-              <Group groupKey="autoMici" />
-              <Group groupKey="autoMari" />
-              <Group groupKey="panouTemporar" />
-              <Group groupKey="placaPermanenta" />
+              {/* STEP 2: Materiale Informare */}
+              <AccordionStep stepNumber={2} title="Afișe & Autocolante" summary={getSummaryStep2()} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>
+                <SelectGroup label="Afiș Informativ (Interior)" options={FONDURI_EU_CONSTANTS.GROUPS.afisInformativ.options} value={selections.afisInformativ} onChange={(v) => handleSelectionChange("afisInformativ", v)} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <SelectGroup label="Autocolante Mici" options={FONDURI_EU_CONSTANTS.GROUPS.autoMici.options} value={selections.autoMici} onChange={(v) => handleSelectionChange("autoMici", v)} />
+                    <SelectGroup label="Autocolante Mari" options={FONDURI_EU_CONSTANTS.GROUPS.autoMari.options} value={selections.autoMari} onChange={(v) => handleSelectionChange("autoMari", v)} />
+                </div>
+              </AccordionStep>
+
+              {/* STEP 3: Panouri & Plăci */}
+              <AccordionStep stepNumber={3} title="Panouri & Plăci" summary={getSummaryStep3()} isOpen={activeStep === 3} onClick={() => setActiveStep(3)}>
+                <SelectGroup label="Panou Temporar (Șantier)" options={FONDURI_EU_CONSTANTS.GROUPS.panouTemporar.options} value={selections.panouTemporar} onChange={(v) => handleSelectionChange("panouTemporar", v)} />
+                <SelectGroup label="Placă Permanentă (După proiect)" options={FONDURI_EU_CONSTANTS.GROUPS.placaPermanenta.options} value={selections.placaPermanenta} onChange={(v) => handleSelectionChange("placaPermanenta", v)} />
+              </AccordionStep>
+
+              {/* STEP 4: Documente */}
+              <AccordionStep stepNumber={4} title="Detalii Proiect" summary={orderNotes ? "Completat" : "Opțional"} isOpen={activeStep === 4} onClick={() => setActiveStep(4)} isLast={true}>
+                 <div className="space-y-4">
+                    <div>
+                        <label className="field-label">Date Proiect (Titlu, Cod SMIS, Beneficiar)</label>
+                        <textarea className="input" rows={4} value={orderNotes} onChange={(e) => setOrderNotes(e.target.value)} placeholder="Introduceți aici datele proiectului pentru personalizarea materialelor..."></textarea>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">Dacă aveți deja machetele grafice:</p>
+                      <label className="flex flex-col items-center justify-center w-full h-24 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
+                        <span className="flex items-center space-x-2"><UploadCloud className="w-6 h-6 text-gray-600" /><span className="font-medium text-gray-600">Încarcă Arhivă / PDF</span></span>
+                        <input type="file" name="file_upload" className="hidden" onChange={e => handleArtworkFileInput(e.target.files?.[0] ?? null)} />
+                      </label>
+                      {uploading && <p className="text-sm text-indigo-600">Se încarcă...</p>}
+                      {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
+                      {artworkUrl && !uploadError && <p className="text-sm text-green-600 font-semibold">Fișier încărcat!</p>}
+                    </div>
+                 </div>
+              </AccordionStep>
+
             </div>
-
-            {/* Grafică (opțional) */}
-            <div className="card p-4 mt-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">Grafică (opțional)</h2></div>
-              <div>
-                <label className="field-label">Încarcă fișier</label>
-                <input
-                  type="file"
-                  accept=".pdf,.ai,.psd,.jpg,.jpeg,.png"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0] || null;
-                    setUploadError(null);
-                    setArtworkUrl(null);
-                    if (!file) return;
-                    try {
-                      setUploading(true);
-                      const form = new FormData();
-                      form.append("file", file);
-                      const res = await fetch("/api/upload", { method: "POST", body: form });
-                      if (!res.ok) throw new Error("Upload eșuat");
-                      const data = await res.json();
-                      setArtworkUrl(data.url);
-                      setArtworkLink("");
-                    } catch (err: any) {
-                      try {
-                        const preview = file ? URL.createObjectURL(file) : null;
-                        setArtworkUrl(preview);
-                      } catch {}
-                      setUploadError(err?.message ?? "Eroare la upload");
-                    } finally {
-                      setUploading(false);
-                    }
-                  }}
-                  className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500"
-                />
-                <div className="text-xs text-muted mt-1">sau</div>
+            <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
+                <button onClick={handleAddToCart} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
               </div>
-
-              <div className="mt-2">
-                <label className="field-label">Link descărcare (opțional)</label>
-                <input type="url" value={artworkLink} onChange={(e) => setArtworkLink(e.target.value)} placeholder="Ex: https://.../fisier.pdf" className="input" />
-              </div>
-
-              <div className="text-xs text-muted mt-2">
-                {uploading && "Se încarcă…"}
-                {uploadError && "Eroare upload"}
-                {artworkUrl && "Fișier încărcat"}
-                {!artworkUrl && artworkLink && "Link salvat"}
-              </div>
-            </div>
-
-            {/* Detalii comandă */}
-            <div className="card p-4 mt-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">Detalii comandă</h2></div>
-              <label htmlFor="order-notes" className="field-label mb-2 block">Note pentru comandă (opțional)</label>
-              <textarea
-                id="order-notes"
-                className="input min-h-24"
-                placeholder="Ex: termene, instrucțiuni de montaj, poziționări, persoană de contact etc."
-                value={orderNotes}
-                onChange={(e) => setOrderNotes(e.target.value)}
-              />
-              <div className="mt-2 text-xs text-muted">Aceste detalii vor fi trimise împreună cu comanda.</div>
+              <DeliveryEstimation />
             </div>
           </div>
-
-          {/* RIGHT - gallery + summary */}
-          <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
-            <div className="space-y-6 lg:sticky lg:top-6">
-              <div className="card p-4">
-                <div className="aspect-square overflow-hidden rounded border bg-black">
-                  <img src={activeImage} alt="Previzualizare" className="h-full w-full object-cover" />
-                </div>
-                <div className="mt-3 grid grid-cols-4 gap-3">
-                  {GALLERY.map((src, i) => (
-                    <button
-                      key={src}
-                      onClick={() => { setActiveImage(src); setActiveIndex(i); }}
-                      className={`rounded-md overflow-hidden border aspect-square ${activeIndex === i ? "border-indigo-500" : "border-white/10"}`}
-                      aria-label={`Imagine ${i + 1}`}
-                    >
-                      <img src={src} alt={`thumb-${i + 1}`} className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="card p-4">
-                <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-                <div className="space-y-2 text-muted text-sm">
-                  {Object.entries(sel).filter(([, v]) => !!v && v !== "none").length === 0 ? (
-                    <p>Nicio opțiune selectată încă.</p>
-                  ) : (
-                    Object.entries(sel).map(([k, v]) => {
-                      if (!v) return null;
-                      if (v === "none") return null;
-                      const g = GROUPS[k as keyof typeof GROUPS];
-                      const o = g.options.find((x) => x.id === v);
-                      return (
-                        <p key={k}>{g.title}: <span className="text-ui font-semibold">{o?.label}</span> — {o?.price} RON</p>
-                      );
-                    })
-                  )}
-                  {orderNotes && (
-                    <p className="pt-2 border-t border-white/10 text-ui/80"><span className="font-semibold text-ui">Detalii:</span> {orderNotes}</p>
-                  )}
-                  <p className="flex items-center gap-2 flex-wrap">
-                    <span>Total:</span>
-                    <span className="text-2xl font-extrabold text-ui">{sum.toFixed(2)} RON</span>
-                    <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
-                  </p>
-                </div>
-
-                <div className="mt-4">
-                  <DeliveryInfo className="hidden lg:block" variant="minimal" icon="📦" showCod={false} showShippingFrom={false} />
-                </div>
-
-                <div className="hidden lg:block mt-4">
-                  <button onClick={handleAdd} disabled={!canAdd} className="btn-primary w-full flex items-center justify-center">
-                    <ShoppingCart size={16} />
-                    <span className="ml-2">Adaugă în coș</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </aside>
+          <div className="lg:hidden col-span-1"><ProductTabs productSlug="fonduri-eu" /></div>
         </div>
       </div>
 
-      <MobilePriceBar total={sum} disabled={!canAdd} onAddToCart={handleAdd} onShowSummary={() => document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth" })} />
-
-      {/* Details modal */}
       {detailsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setDetailsOpen(false)} />
-          <div className="relative z-10 w-full max-w-2xl bg-[#0b0b0b] rounded-md border border-white/10 p-6">
-            <button className="absolute right-3 top-3 p-1" onClick={() => setDetailsOpen(false)} aria-label="Închide">
-              <X size={18} className="text-ui" />
-            </button>
-            <h3 className="text-xl font-bold text-ui mb-3">Detalii comandă - Fonduri UE</h3>
-            <div className="text-sm text-muted space-y-2">
-              <p>- Selectează elementele necesare (comunicat, bannere, printuri etc.). Fiecare opțiune are preț fix.</p>
-              <p>- Poți încărca grafică sau să trimiți un link de descărcare (opțional).</p>
-              <p>- Totalul se calculează automat; elementele "Fără …" nu adaugă cost.</p>
-            </div>
-            <div className="mt-6 text-right">
-              <button onClick={() => setDetailsOpen(false)} className="btn-primary py-2 px-4">Închide</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetailsOpen(false)}>
+          <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8" onClick={e => e.stopPropagation()}>
+            <button className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100" onClick={() => setDetailsOpen(false)}><X size={20} className="text-gray-600" /></button>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Cum funcționează?</h3>
+            <div className="prose prose-sm max-w-none">
+              <p>Acest configurator vă permite să selectați exact elementele de vizibilitate necesare proiectului dvs.</p>
+              <ul>
+                  <li>Selectați produsele dorite (comunicat, panouri, etc.).</li>
+                  <li>Introduceți datele proiectului în pasul 4 sau încărcați machetele.</li>
+                  <li>Adăugați în coș și finalizați comanda.</li>
+                  <li>Vă vom contacta pentru confirmarea graficii înainte de producție.</li>
+              </ul>
             </div>
           </div>
         </div>

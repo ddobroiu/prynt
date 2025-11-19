@@ -1,265 +1,171 @@
 "use client";
-
-import React, { useMemo, useState, useRef, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
-import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, X } from "lucide-react";
-import MobilePriceBar from "./MobilePriceBar";
-import DeliveryInfo from "@/components/DeliveryInfo";
+import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { usePathname, useRouter } from "next/navigation";
+import FaqAccordion from "./FaqAccordion";
+import Reviews from "./Reviews";
+import { QA } from "@/types";
+import { 
+  calculateAutocolantePrice, 
+  AUTOCOLANTE_CONSTANTS, 
+  formatMoneyDisplay, 
+  type PriceInputAutocolante 
+} from "@/lib/pricing";
 
-/* GALLERY (exemplu) — păstrăm același pattern ca la bannere */
 const GALLERY = [
-  "/products/autocolante/1.webp",
-  "/products/autocolante/2.webp",
-  "/products/autocolante/3.webp",
-  "/products/autocolante/4.webp",
+  "/products/autocolante/1.webp", 
+  "/products/autocolante/2.webp", 
+  "/products/autocolante/3.webp", 
+  "/products/autocolante/4.webp"
 ] as const;
 
-/* LOGICA PREȚ LOCAL (preview instant)
-   Am păstrat aceeași structură ca la Banner pentru a fi ușor de adaptat.
-   Valorile sunt PLACEHOLDER — îmi spui tu regulile reale și le integrez.
-*/
-type StickerMaterial = "paper_gloss" | "paper_matte" | "vinyl";
-type PriceInput = {
-  width_cm: number;
-  height_cm: number;
-  quantity: number;
-  material: StickerMaterial;
-  laminated: boolean;
-  shape_diecut: boolean;
-};
-type LocalPriceOutput = {
-  sqm_per_unit: number;
-  total_sqm: number;
-  pricePerUnitBase: number;
-  pricePerUnitAfterSurcharges: number;
-  finalPrice: number;
-};
+/* --- UI COMPONENTS --- */
+const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
+    <div className="relative pl-12">
+        <div className="absolute top-5 left-0 flex flex-col items-center h-full">
+            <span className={`flex items-center justify-center w-8 h-8 rounded-full text-md font-bold transition-colors ${isOpen ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}>{stepNumber}</span>
+            {!isLast && <div className="w-px flex-grow bg-gray-200 mt-2"></div>}
+        </div>
+        <div className="flex-1">
+            <button type="button" className="w-full flex items-center justify-between py-5 text-left" onClick={onClick}>
+                <div>
+                    <h2 className="text-lg font-bold text-gray-800">{title}</h2>
+                    {!isOpen && <p className="text-sm text-gray-500 truncate">{summary}</p>}
+                </div>
+                <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+            </button>
+            <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? "grid-rows-[1fr] opacity-100 pb-5" : "grid-rows-[0fr] opacity-0"}`}>
+                <div className="overflow-hidden">{children}</div>
+            </div>
+        </div>
+    </div>
+);
 
-const roundMoney = (n: number) => Math.round(n * 100) / 100;
-const formatMoneyDisplay = (n: number) => (n && n > 0 ? n.toFixed(2) : "0");
-const formatAreaDisplay = (n: number) => (n && n > 0 ? String(n) : "0");
-
-/**
- * Exemplu de reguli (placeholder) — le adaptezi după ce îmi dai tarifele:
- * - calculăm aria per bucată (m²)
- * - definim un preț de referință per bucată în funcție de aria totală comandată
- * - aplicăm suprataxe (laminare, die-cut, material premium)
- *
- * Structura returnată urmează aceeași formă ca Banner pentru consistență UI.
- */
-const localCalculatePrice = (input: PriceInput): LocalPriceOutput => {
-  if (input.width_cm <= 0 || input.height_cm <= 0 || input.quantity <= 0) {
-    return { sqm_per_unit: 0, total_sqm: 0, pricePerUnitBase: 0, pricePerUnitAfterSurcharges: 0, finalPrice: 0 };
-  }
-
-  const sqm_per_unit = (input.width_cm / 100) * (input.height_cm / 100);
-  const total_sqm = sqm_per_unit * input.quantity;
-
-  // Exemplu: stabilim un preț bază per bucată în funcție de aria totală
-  // (valori demonstrative)
-  let pricePerUnitBase = 0.5; // RON per buc mică
-  if (total_sqm < 0.1) pricePerUnitBase = 0.6;
-  else if (total_sqm <= 0.5) pricePerUnitBase = 0.45;
-  else if (total_sqm <= 2) pricePerUnitBase = 0.35;
-  else pricePerUnitBase = 0.25;
-
-  // multiplicatori / surcharges
-  let multiplier = 1;
-  if (input.material === "vinyl") multiplier *= 1.15; // +15% vinyl premium (ex)
-  if (input.laminated) multiplier *= 1.10; // +10% laminare
-  if (input.shape_diecut) multiplier *= 1.12; // +12% die-cut
-
-  const pricePerUnitAfterSurcharges = roundMoney(pricePerUnitBase * multiplier);
-  const final = roundMoney(pricePerUnitAfterSurcharges * input.quantity);
-
-  return {
-    sqm_per_unit: roundMoney(sqm_per_unit),
-    total_sqm: roundMoney(total_sqm),
-    pricePerUnitBase: roundMoney(pricePerUnitBase),
-    pricePerUnitAfterSurcharges,
-    finalPrice: final,
-  };
+const ProductTabs = ({ productSlug }: { productSlug: string }) => {
+    const [activeTab, setActiveTab] = useState("descriere");
+    const faq: QA[] = [
+        { question: "Care este diferența dintre hârtie și vinyl?", answer: "Hârtia este economică și potrivită pentru interior sau etichete de produs de scurtă durată. Vinyl-ul (PVC) este plastic, rezistent la apă și rupere, ideal pentru exterior sau produse care intră în contact cu umezeala." },
+        { question: "Ce înseamnă 'Die-cut'?", answer: "Die-cut (tăiere pe contur) înseamnă că autocolantul este tăiat exact pe forma graficii tale (ex: rotund, stea, formă liberă), nu doar dreptunghiular." },
+        { question: "Laminarea este necesară?", answer: "Laminarea adaugă un strat de protecție transparent. Recomandăm laminarea pentru autocolantele expuse la soare, frecare sau umezeală intensă, pentru a prelungi durata de viață." },
+    ];
+    return (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
+            <nav className="border-b border-gray-200 flex">
+                <TabButtonSEO active={activeTab === "descriere"} onClick={() => setActiveTab("descriere")}>Descriere</TabButtonSEO>
+                <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
+                <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
+            </nav>
+            <div className="p-6">
+                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Autocolante și Etichete</h3><p>Personalizează orice suprafață cu autocolantele noastre de înaltă calitate. Disponibile pe hârtie sau vinyl, cu opțiuni de laminare și tăiere pe contur.</p><h4>Aplicații</h4><ul><li>Etichete de produs (borcane, sticle, cutii)</li><li>Promoții și marketing</li><li>Decorare laptopuri, telefoane</li><li>Stickere auto (varianta Vinyl + Laminare)</li></ul></div>}
+                {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
+                {activeTab === 'faq' && <FaqAccordion qa={faq} />}
+            </div>
+        </div>
+    );
 };
 
-/* GRAFICĂ / OPCIUNI */
-type DesignOption = "upload" | "text_only" | "pro";
-const PRO_DESIGN_FEE = 30; // exemplu (înlocuiește după ce-mi spui)
+const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
 
-/* Props (compatibil cu BannerConfigurator) */
-type Props = {
-  productSlug?: string;
-  initialWidth?: number;
-  initialHeight?: number;
-};
-
-/* Inline ModeSwitch — identic pattern cu Banner (Foile / Die-cut) */
 function AutocolanteModeSwitchInline() {
   const pathname = usePathname();
   const router = useRouter();
-
   const isDiecut = pathname?.includes("/autocolante-diecut");
-
-  const goSheet = () => {
-    if (isDiecut) router.push("/autocolante");
-  };
-  const goDiecut = () => {
-    if (!isDiecut) router.push("/autocolante-diecut");
-  };
-
   return (
-    <div className="inline-flex rounded-lg border border-white/10 bg-white/5 p-1">
-      <button
-        type="button"
-        onClick={goSheet}
-  className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${!isDiecut ? "bg-indigo-600 text-white" : "text-muted hover:bg-white/10"}`}
-        aria-pressed={!isDiecut}
-      >
-        Foile
-      </button>
-      <button
-        type="button"
-        onClick={goDiecut}
-  className={`ml-1 px-3 py-1.5 rounded-md text-sm font-medium transition ${isDiecut ? "bg-indigo-600 text-white" : "text-muted hover:bg-white/10"}`}
-        aria-pressed={isDiecut}
-      >
-        Die-cut
-      </button>
+    <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
+      <button type="button" onClick={() => router.push("/autocolante")} className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${!isDiecut ? "bg-indigo-600 text-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>Standard</button>
+      <button type="button" onClick={() => router.push("/autocolante-diecut")} className={`ml-1 px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${isDiecut ? "bg-indigo-600 text-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>Die-cut</button>
     </div>
   );
 }
 
+function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  const inc = (d: number) => onChange(Math.max(10, value + d)); // Min 10 qty default
+  return <div><label className="field-label">{label}</label><div className="flex"><button onClick={() => inc(-10)} className="p-3 bg-gray-100 rounded-l-lg hover:bg-gray-200"><Minus size={16} /></button><input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-center w-full rounded-none border-x-0" /><button onClick={() => inc(10)} className="p-3 bg-gray-100 rounded-r-lg hover:bg-gray-200"><Plus size={16} /></button></div></div>;
+}
+
+function OptionButton({ active, onClick, title, subtitle }: { active: boolean; onClick: () => void; title: string; subtitle?: string; }) {
+  return <button type="button" onClick={onClick} className={`w-full text-left p-3 rounded-lg border-2 transition-all text-sm ${active ? "border-indigo-600 bg-indigo-50" : "border-gray-300 bg-white hover:border-gray-400"}`}><div className="font-bold text-gray-800">{title}</div>{subtitle && <div className="text-xs text-gray-600 mt-1">{subtitle}</div>}</button>;
+}
+
+function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode; }) {
+  return <button type="button" onClick={onClick} className={`px-4 py-2 text-sm font-semibold transition-colors rounded-t-lg ${active ? "border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50" : "text-gray-500 hover:text-gray-800"}`}>{children}</button>;
+}
+
+type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number };
+
+/* --- MAIN COMPONENT --- */
 export default function AutocolanteConfigurator({ productSlug, initialWidth: initW, initialHeight: initH }: Props) {
   const { addItem } = useCart();
-
-  // păstrăm aceleași convenții: valori inițiale 0 => utilizatorul completează
-  const [input, setInput] = useState<PriceInput>({
+  const [input, setInput] = useState<PriceInputAutocolante>({
     width_cm: initW ?? 0,
     height_cm: initH ?? 0,
-    quantity: 10,
+    quantity: 50,
     material: "paper_gloss",
     laminated: false,
     shape_diecut: false,
+    designOption: "upload",
   });
 
   const [lengthText, setLengthText] = useState(initW ? String(initW) : "");
   const [heightText, setHeightText] = useState(initH ? String(initH) : "");
-  const [activeIndex, setActiveIndex] = useState<number>(0);
+  
   const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
-
-  const [designOption, setDesignOption] = useState<DesignOption>("upload");
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+  
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
-  const [artworkLink, setArtworkLink] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [textDesign, setTextDesign] = useState<string>("");
-
+  
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
+  const [activeStep, setActiveStep] = useState(1);
 
-  const [materialOpen, setMaterialOpen] = useState<boolean>(false);
-  const [graphicsOpen, setGraphicsOpen] = useState<boolean>(false);
+  // Pricing
+  const priceData = useMemo(() => calculateAutocolantePrice(input), [input]);
+  const displayedTotal = priceData.finalPrice;
 
-  const priceDetailsLocal = useMemo(() => localCalculatePrice(input), [input]);
-
-  const displayedTotal = useMemo(() => {
-    const base = priceDetailsLocal.finalPrice || 0;
-    return designOption === "pro" ? roundMoney(base + PRO_DESIGN_FEE) : base;
-  }, [priceDetailsLocal, designOption]);
-
-  const pricePerUnitLocal = input.quantity > 0 && displayedTotal > 0 ? roundMoney(displayedTotal / input.quantity) : 0;
-
-  const [serverPrice, setServerPrice] = useState<number | null>(null);
-  const [calcLoading, setCalcLoading] = useState(false);
-
-  const updateInput = <K extends keyof PriceInput>(k: K, v: PriceInput[K]) => setInput((p) => ({ ...p, [k]: v }));
-  const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
-
-  const onChangeLength = (v: string) => {
-    const d = v.replace(/\D/g, "");
-    setLengthText(d);
-    updateInput("width_cm", d === "" ? 0 : parseInt(d, 10));
-  };
-  const onChangeHeight = (v: string) => {
-    const d = v.replace(/\D/g, "");
-    setHeightText(d);
-    updateInput("height_cm", d === "" ? 0 : parseInt(d, 10));
-  };
+  const updateInput = <K extends keyof PriceInputAutocolante>(k: K, v: PriceInputAutocolante[K]) => setInput((p) => ({ ...p, [k]: v }));
+  const setQty = (v: number) => updateInput("quantity", Math.max(10, Math.floor(v))); // Min 10
+  const onChangeLength = (v: string) => { const d = v.replace(/\D/g, ""); setLengthText(d); updateInput("width_cm", d === "" ? 0 : parseInt(d, 10)); };
+  const onChangeHeight = (v: string) => { const d = v.replace(/\D/g, ""); setHeightText(d); updateInput("height_cm", d === "" ? 0 : parseInt(d, 10)); };
 
   const handleArtworkFileInput = async (file: File | null) => {
-    setArtworkUrl(null);
-    setUploadError(null);
+    setArtworkUrl(null); setUploadError(null);
     if (!file) return;
     try {
       setUploading(true);
-      const form = new FormData();
-      form.append("file", file);
+      const form = new FormData(); form.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: form });
       if (!res.ok) throw new Error("Upload eșuat");
       const data = await res.json();
       setArtworkUrl(data.url);
-      setArtworkLink("");
     } catch (e: any) {
-      try {
-        const preview = file ? URL.createObjectURL(file) : null;
-        setArtworkUrl(preview);
-      } catch {}
       setUploadError(e?.message ?? "Eroare la upload");
     } finally {
       setUploading(false);
     }
   };
 
-  async function calculateServer() {
-    setCalcLoading(true);
-    setServerPrice(null);
-    try {
-      // pentru acum folosim calcul local + pro fee
-      const result = localCalculatePrice(input);
-      const total = designOption === "pro" ? roundMoney(result.finalPrice + PRO_DESIGN_FEE) : result.finalPrice;
-      setServerPrice(total);
-    } catch (err) {
-      console.error("calc error", err);
-      setErrorToast("Eroare la calcul preț");
-      setTimeout(() => setErrorToast(null), 1600);
-    } finally {
-      setCalcLoading(false);
-    }
-  }
-
   function handleAddToCart() {
     if (!input.width_cm || !input.height_cm) {
-      setErrorToast("Te rugăm să completezi lungimea și înălțimea (cm) înainte de a adăuga în coș.");
-      setTimeout(() => setErrorToast(null), 1600);
-      return;
+      setErrorToast("Introduceți dimensiunile."); setTimeout(() => setErrorToast(null), 1600); return;
+    }
+    if (displayedTotal <= 0) {
+      setErrorToast("Prețul trebuie calculat."); setTimeout(() => setErrorToast(null), 1600); return;
     }
 
-    const totalForOrder = serverPrice ?? displayedTotal;
-    if (!totalForOrder || totalForOrder <= 0) {
-      setErrorToast("Calculează prețul înainte de a adăuga în coș.");
-      setTimeout(() => setErrorToast(null), 1600);
-      return;
-    }
-
-    const unitPrice = roundMoney(totalForOrder / input.quantity);
-
-    const uniqueId = [
-      "autocolant",
-      input.material,
-      input.width_cm,
-      input.height_cm,
-      input.laminated ? "lam" : "no",
-      input.shape_diecut ? "die" : "rect",
-    ].join("-");
-
-    const title = `Autocolant personalizat - ${input.width_cm}x${input.height_cm} cm`;
+    const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
+    const uniqueId = ["autocolant", input.material, input.width_cm, input.height_cm, input.laminated ? "lam" : "std", input.shape_diecut ? "die" : "sq", input.designOption].join("-");
+    const title = `Autocolant ${input.material === 'vinyl' ? 'Vinyl' : 'Hârtie'} - ${input.width_cm}x${input.height_cm} cm`;
 
     addItem({
       id: uniqueId,
-      productId: productSlug ?? "autocolant-generic",
-      slug: productSlug ?? "autocolant-generic",
+      productId: productSlug ?? "autocolante",
+      slug: productSlug ?? "autocolante",
       title,
       width: input.width_cm,
       height: input.height_cm,
@@ -267,331 +173,147 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
       quantity: input.quantity,
       currency: "RON",
       metadata: {
+        "Material": input.material === 'vinyl' ? "Vinyl" : (input.material === 'paper_matte' ? "Hârtie Mată" : "Hârtie Lucioasă"),
+        "Finisaje": `${input.laminated ? "Laminat" : "Nelaminat"}, ${input.shape_diecut ? "Die-cut (Contur)" : "Formă Dreptunghiulară"}`,
+        "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : input.designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
+        ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(AUTOCOLANTE_CONSTANTS.PRO_DESIGN_FEE) }),
+        ...(input.designOption === 'text_only' && { "Text": textDesign }),
         artworkUrl,
-        artworkLink,
-        designOption,
-        textDesign,
-        proDesignFee: designOption === "pro" ? PRO_DESIGN_FEE : 0,
-        totalSqm: priceDetailsLocal.total_sqm,
-        pricePerUnit: priceDetailsLocal.pricePerUnitAfterSurcharges,
       },
     });
-
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 1600);
+    setToastVisible(true); setTimeout(() => setToastVisible(false), 1600);
   }
 
-  // click outside handlers for dropdowns to close them
-  const materialRef = useRef<HTMLDivElement | null>(null);
-  const graphicsRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const onDoc = (e: MouseEvent) => {
-      if (materialRef.current && !materialRef.current.contains(e.target as Node)) setMaterialOpen(false);
-      if (graphicsRef.current && !graphicsRef.current.contains(e.target as Node)) setGraphicsOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
-
-  // auto-advance gallery every 3s (ca la banner)
-  useEffect(() => {
-    const id = setInterval(() => {
-      setActiveIndex((i) => {
-        const next = (i + 1) % GALLERY.length;
-        setActiveImage(GALLERY[next]);
-        return next;
-      });
-    }, 3000);
+    const id = setInterval(() => setActiveIndex((i) => (i + 1) % GALLERY.length), 3000);
     return () => clearInterval(id);
   }, []);
+  useEffect(() => setActiveImage(GALLERY[activeIndex]), [activeIndex]);
 
-  const totalShown = serverPrice ?? displayedTotal;
-  const canAdd = totalShown > 0 && input.width_cm > 0 && input.height_cm > 0 && input.quantity > 0;
+  const summaryStep1 = input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}x${input.height_cm}cm, ${input.quantity} buc.` : "Alege";
+  const materialLabel = input.material === 'vinyl' ? "Vinyl" : (input.material === 'paper_matte' ? "Hârtie Mată" : "Hârtie Lucioasă");
+  const summaryStep2 = `${materialLabel}, ${input.laminated ? "Laminat" : "Standard"}`;
+  const summaryStep3 = input.designOption === 'upload' ? 'Grafică proprie' : input.designOption === 'text_only' ? 'Doar text' : 'Design Pro';
 
   return (
-    <main className="min-h-screen">
-      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
-        Produs adăugat în coș
-      </div>
-      {errorToast && (
-        <div className={`toast-success opacity-100 translate-y-0`} aria-live="assertive">{errorToast}</div>
-      )}
-
-      <div className="page py-10 pb-24 lg:pb-10">
-        <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <div className="mb-2"><AutocolanteModeSwitchInline /></div>
-            <h1 className="text-3xl md:text-4xl font-extrabold">Configurator Autocolante</h1>
-            <p className="mt-2 text-muted">Configurație identică ca la bannere — dimensiune, material, grafică.</p>
-          </div>
-          <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline text-sm self-start">
-            <Info size={18} />
-            <span className="ml-2">Detalii</span>
-          </button>
-        </header>
-
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="order-2 lg:order-1 lg:col-span-3 space-y-6">
-            {/* 1. Dimensiuni & cantitate */}
-            <div className="card p-4">
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Ruler /></div><h2 className="text-lg font-bold text-ui">1. Dimensiuni & cantitate</h2></div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="field-label">Lungime (cm)</label>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="ex: 10" className="input text-lg font-semibold" />
-                </div>
-                <div>
-                  <label className="field-label">Înălțime (cm)</label>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="ex: 10" className="input text-lg font-semibold" />
-                </div>
-                <NumberInput label="Cantitate" value={input.quantity} onChange={(v) => setQty(v)} />
+    <main className="bg-gray-50 min-h-screen">
+      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">Produs adăugat în coș</div>
+      {errorToast && <div className={`toast-error opacity-100 translate-y-0`} aria-live="assertive">{errorToast}</div>}
+      
+      <div className="container mx-auto px-4 py-10 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="lg:sticky top-24 h-max space-y-8">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="aspect-square"><img src={activeImage} alt="Autocolante" className="h-full w-full object-cover" /></div>
+              <div className="p-2 grid grid-cols-4 gap-2">
+                {GALLERY.map((src, i) => <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
               </div>
             </div>
-
-            {/* 2. Material & 3. Finisaje */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="card p-4" ref={materialRef}>
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><Layers /></div><h2 className="text-lg font-bold text-ui">2. Material</h2></div>
-
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setMaterialOpen((s) => !s)}
-                    className="w-full flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5"
-                    aria-expanded={materialOpen}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="text-sm text-muted">
-                        {input.material === "vinyl" ? "Vinyl (premium)" : input.material === "paper_matte" ? "Hârtie Mată" : "Hârtie Lucioasă"}
-                      </div>
+            <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'autocolante'} /></div>
+          </div>
+          <div>
+            <header className="mb-6">
+              <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Autocolante</h1><AutocolanteModeSwitchInline /></div>
+              <div className="flex justify-between items-center"><p className="text-gray-600">Personalizează opțiunile în 3 pași simpli.</p><button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5"><Info size={16} /><span className="ml-2">Detalii</span></button></div>
+            </header>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4">
+              <AccordionStep stepNumber={1} title="Dimensiuni & Cantitate" summary={summaryStep1} isOpen={activeStep === 1} onClick={() => setActiveStep(1)}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div><label className="field-label">Lungime (cm)</label><input type="text" inputMode="numeric" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="10" className="input" /></div>
+                  <div><label className="field-label">Înălțime (cm)</label><input type="text" inputMode="numeric" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="10" className="input" /></div>
+                  <div className="md:col-span-2"><NumberInput label="Cantitate" value={input.quantity} onChange={setQty} /></div>
+                </div>
+              </AccordionStep>
+              <AccordionStep stepNumber={2} title="Material & Finisaje" summary={summaryStep2} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>
+                <label className="field-label mb-2">Material</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+                    <OptionButton active={input.material === "paper_gloss"} onClick={() => updateInput("material", "paper_gloss")} title="Hârtie Lucioasă" subtitle="Standard" />
+                    <OptionButton active={input.material === "paper_matte"} onClick={() => updateInput("material", "paper_matte")} title="Hârtie Mată" subtitle="Elegant" />
+                    <OptionButton active={input.material === "vinyl"} onClick={() => updateInput("material", "vinyl")} title="Vinyl (PVC)" subtitle="Rezistent apă" />
+                </div>
+                <label className="field-label mb-2">Opțiuni Extra</label>
+                <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-3 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input type="checkbox" className="checkbox" checked={input.laminated} onChange={(e) => updateInput("laminated", e.target.checked)} />
+                        <div><span className="text-sm font-bold text-gray-800">Laminare</span><p className="text-xs text-gray-500">Protecție extra UV și zgârieturi</p></div>
+                    </label>
+                    <label className="flex items-center gap-3 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input type="checkbox" className="checkbox" checked={input.shape_diecut} onChange={(e) => updateInput("shape_diecut", e.target.checked)} />
+                        <div><span className="text-sm font-bold text-gray-800">Die-cut (Tăiere contur)</span><p className="text-xs text-gray-500">Decupare pe forma graficii</p></div>
+                    </label>
+                </div>
+              </AccordionStep>
+              <AccordionStep stepNumber={3} title="Grafică" summary={summaryStep3} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
+                <div>
+                  <div className="mb-4 border-b border-gray-200">
+                    <div className="flex -mb-px">
+                      <TabButton active={input.designOption === 'upload'} onClick={() => updateInput("designOption", 'upload')}>Am Grafică</TabButton>
+                      <TabButton active={input.designOption === 'text_only'} onClick={() => updateInput("designOption", 'text_only')}>Doar Text</TabButton>
+                      <TabButton active={input.designOption === 'pro'} onClick={() => updateInput("designOption", 'pro')}>Vreau Grafică</TabButton>
                     </div>
-                    <div className="text-xs text-muted">{materialOpen ? "Închide" : "Schimbă"}</div>
-                  </button>
+                  </div>
 
-                  {materialOpen && (
-                    <div className="mt-2 p-2 bg-black/60 rounded-md border border-white/10 space-y-2">
-                      <MaterialOptionDropdown checked={input.material === "paper_gloss"} onSelect={() => { updateInput("material", "paper_gloss"); setMaterialOpen(false); }} title="Hârtie lucioasă" subtitle="Econom" />
-                      <MaterialOptionDropdown checked={input.material === "paper_matte"} onSelect={() => { updateInput("material", "paper_matte"); setMaterialOpen(false); }} title="Hârtie mată" subtitle="Aspect premium" />
-                      <MaterialOptionDropdown checked={input.material === "vinyl"} onSelect={() => { updateInput("material", "vinyl"); setMaterialOpen(false); }} title="Vinyl" subtitle="+15%" />
+                  {input.designOption === 'upload' && (
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-600">Încarcă fișierul tău (PDF, JPG, PNG, AI, CDR).</p>
+                      <label className="flex flex-col items-center justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
+                        <span className="flex items-center space-x-2"><UploadCloud className="w-6 h-6 text-gray-600" /><span className="font-medium text-gray-600">Apasă pentru a încărca</span></span>
+                        <input type="file" name="file_upload" className="hidden" onChange={e => handleArtworkFileInput(e.target.files?.[0] ?? null)} />
+                      </label>
+                      {uploading && <p className="text-sm text-indigo-600">Se încarcă...</p>}
+                      {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
+                      {artworkUrl && !uploadError && <p className="text-sm text-green-600 font-semibold">Grafică încărcată cu succes!</p>}
+                    </div>
+                  )}
+
+                  {input.designOption === 'text_only' && (
+                    <div className="space-y-3">
+                      <label className="field-label">Introdu textul dorit</label>
+                      <textarea className="input" rows={3} value={textDesign} onChange={e => setTextDesign(e.target.value)} placeholder="Ex: ETICHETA PRODUS, PROMOȚIE, etc."></textarea>
+                    </div>
+                  )}
+
+                  {input.designOption === 'pro' && (
+                    <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-sm text-indigo-800">
+                      <p className="font-semibold">Serviciu de Grafică Profesională</p>
+                      <p>Cost: <strong>{formatMoneyDisplay(AUTOCOLANTE_CONSTANTS.PRO_DESIGN_FEE)}</strong>. Un designer te va contacta pentru detalii.</p>
                     </div>
                   )}
                 </div>
-
-                <div className="mt-2 text-xs text-muted">Alege materialul potrivit; laminarea protejează autocolantul.</div>
-              </div>
-
-              <div className="card p-4">
-                <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">3. Finisaje</h2></div>
-                <div className="flex flex-col gap-2">
-                  <label className="flex items-center gap-3">
-                    <input type="checkbox" className="checkbox" checked={input.laminated} onChange={(e) => updateInput("laminated", e.target.checked)} />
-                    <span className="text-sm">Laminat (+10%)</span>
-                  </label>
-
-                  <label className="flex items-center gap-3">
-                    <input type="checkbox" className="checkbox" checked={input.shape_diecut} onChange={(e) => updateInput("shape_diecut", e.target.checked)} />
-                    <span className="text-sm">Tăiere contur (die-cut) (+12%)</span>
-                  </label>
-                </div>
-              </div>
+              </AccordionStep>
             </div>
-
-            {/* 4. Grafică */}
-            <div className="card p-4" ref={graphicsRef}>
-              <div className="flex items-center gap-3 mb-3"><div className="text-indigo-400"><CheckCircle /></div><h2 className="text-lg font-bold text-ui">4. Grafică</h2></div>
-
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setGraphicsOpen((s) => !s)}
-                  className="w-full flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5"
-                  aria-expanded={graphicsOpen}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="text-sm text-muted">
-                      {designOption === "upload" ? (artworkUrl || artworkLink ? "Am grafică" : "Am grafică (select)") : designOption === "text_only" ? "Text (gratis)" : `Pro (+${PRO_DESIGN_FEE} RON)`}
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted">{graphicsOpen ? "Închide" : "Alege"}</div>
-                </button>
-
-                {graphicsOpen && (
-                  <div className="mt-2 p-2 bg-black/60 rounded-md border border-white/10 space-y-2">
-                    <SelectCardSmall active={designOption === "upload"} onClick={() => { setDesignOption("upload"); setGraphicsOpen(false); }} title="Am grafică" subtitle="Upload / link" />
-                    <SelectCardSmall active={designOption === "text_only"} onClick={() => { setDesignOption("text_only"); setGraphicsOpen(false); }} title="Text" subtitle="Gratis" />
-                    <SelectCardSmall active={designOption === "pro"} onClick={() => { setDesignOption("pro"); setGraphicsOpen(false); }} title="Pro" subtitle={`+${PRO_DESIGN_FEE} RON`} />
-                  </div>
-                )}
+            <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
+                <button onClick={handleAddToCart} disabled={!input.width_cm || !input.height_cm} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
               </div>
-
-              {designOption === "upload" && (
-                <div className="panel p-3 mt-3 space-y-2 border-t border-white/5">
-                  <div>
-                    <label className="field-label">Încarcă fișier</label>
-                    <input
-                      type="file"
-                      accept=".pdf,.ai,.psd,.jpg,.jpeg,.png"
-                      onChange={(e) => handleArtworkFileInput(e.target.files?.[0] || null)}
-                      className="block w-full text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1 file:text-white hover:file:bg-indigo-500"
-                    />
-                    <div className="text-xs text-muted mt-1">sau</div>
-                  </div>
-
-                  <div>
-                    <label className="field-label">Link descărcare (opțional)</label>
-                    <input
-                      type="url"
-                      value={artworkLink}
-                      onChange={(e) => setArtworkLink(e.target.value)}
-                      placeholder="Ex: https://.../fisier.pdf"
-                      className="input"
-                    />
-                    <div className="text-xs text-muted mt-1">Încarcă fișier sau folosește link — alege doar una dintre opțiuni.</div>
-                  </div>
-
-                  <div className="text-xs text-muted">
-                    {uploading && "Se încarcă…"}
-                    {uploadError && "Eroare upload"}
-                    {artworkUrl && "Fișier încărcat"}
-                    {!artworkUrl && artworkLink && "Link salvat"}
-                  </div>
-                </div>
-              )}
-
-              {designOption === "text_only" && (
-                <div className="panel p-3 mt-3 border-t border-white/5">
-                  <textarea value={textDesign} onChange={(e) => setTextDesign(e.target.value)} rows={3} placeholder="Ex: LOGO • www.exemplu.ro" className="input resize-y min-h-20" />
-                </div>
-              )}
-
-              {designOption === "pro" && (
-                <div className="panel p-3 mt-3 border-t border-white/5">
-                  <div className="text-sm text-muted">Grafică profesională (+{PRO_DESIGN_FEE} RON)</div>
-                </div>
-              )}
+              <DeliveryEstimation />
             </div>
           </div>
-
-          {/* RIGHT - summary */}
-          <aside id="order-summary" className="order-1 lg:order-2 lg:col-span-2">
-            <div className="space-y-6 lg:sticky lg:top-6">
-              <div className="card p-4">
-                <div className="aspect-square overflow-hidden rounded-xl border border-white/10 bg-black">
-                  <img src={activeImage} alt="Autocolant preview" className="h-full w-full object-cover" loading="eager" />
-                </div>
-                <div className="mt-3 grid grid-cols-4 gap-3">
-                  {GALLERY.map((src, i) => (
-                    <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative overflow-hidden rounded-md border transition aspect-square ${activeIndex === i ? "border-indigo-500 ring-2 ring-indigo-500/40" : "border-white/10 hover:border-white/30"}`} aria-label="Previzualizare">
-                      <img src={src} alt="Thumb" className="w-full h-full object-cover" loading="lazy" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="card p-4">
-                <h2 className="text-lg font-bold border-b border-white/10 pb-3 mb-3">Sumar</h2>
-                <div className="space-y-2 text-muted text-sm">
-                  <p>Suprafață per bucată: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.sqm_per_unit)} m²</span></p>
-                  <p>Total suprafață: <span className="text-ui font-semibold">{formatAreaDisplay(priceDetailsLocal.total_sqm)} m²</span></p>
-                  <p className="flex items-center gap-2 flex-wrap">
-                    <span>Total:</span>
-                    <span className="text-2xl font-extrabold text-ui">{formatMoneyDisplay(totalShown)} RON</span>
-                    <span className="text-xs text-white whitespace-nowrap">• Livrare de la 19,99 RON</span>
-                  </p>
-                  <div className="my-2">
-                    <DeliveryEstimation />
-                  </div>
-                  <p className="text-sm text-muted">Preț per bucată: {pricePerUnitLocal} RON</p>
-                </div>
-
-                <div className="mt-3">
-                  <DeliveryInfo className="hidden lg:block" variant="minimal" icon="📦" showCod={false} showShippingFrom={false} />
-                </div>
-
-                <div className="hidden lg:block mt-4">
-                  <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-full py-2">
-                    <ShoppingCart size={18} /><span className="ml-2">Adaugă</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Footer promo eliminat pentru consistență UI */}
-            </div>
-          </aside>
+          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'autocolante'} /></div>
         </div>
       </div>
 
-      {/* Mobile price bar */}
-      <MobilePriceBar total={totalShown} disabled={!canAdd} onAddToCart={handleAddToCart} onShowSummary={() => document.getElementById("order-summary")?.scrollIntoView({ behavior: "smooth" })} />
-
-      {/* Details modal */}
       {detailsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setDetailsOpen(false)} />
-          <div className="relative z-10 w-full max-w-2xl bg-[#0b0b0b] rounded-md border border-white/10 p-6">
-            <button className="absolute right-3 top-3 p-1" onClick={() => setDetailsOpen(false)} aria-label="Închide">
-              <X size={18} className="text-muted" />
-            </button>
-            <h3 className="text-xl font-bold text-ui mb-3">Detalii comandă - Autocolante</h3>
-            <div className="text-sm text-muted space-y-2">
-              <p>- Alege materialul și finisajul; laminarea previne zgârieturile.</p>
-              <p>- Die-cut este recomandat pentru logo-uri/forme speciale (+taxă).</p>
-              <p>- Trimite link sau încarcă fișierul; dacă alegi Pro, vom realiza grafică pentru tine.</p>
-            </div>
-            <div className="mt-6 text-right">
-              <button onClick={() => setDetailsOpen(false)} className="btn-primary py-2 px-4">Închide</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetailsOpen(false)}>
+          <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8" onClick={e => e.stopPropagation()}>
+            <button className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100" onClick={() => setDetailsOpen(false)}><X size={20} className="text-gray-600" /></button>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Detalii Autocolante</h3>
+            <div className="prose prose-sm max-w-none">
+              <h4>Materiale</h4>
+              <ul>
+                <li><strong>Hârtie (Mată/Lucioasă):</strong> Ideală pentru etichete de interior, ambalaje de produs, cutii. Economică.</li>
+                <li><strong>Vinyl (PVC):</strong> Material plastic rezistent la rupere, apă și UV. Ideal pentru exterior sau produse expuse la umezeală.</li>
+              </ul>
+              <h4>Finisaje</h4>
+              <ul>
+                <li><strong>Laminare:</strong> Strat protector transparent aplicat peste print. Mărește rezistența la zgârieturi și decolorare.</li>
+                <li><strong>Die-cut:</strong> Tăiere pe contur neregulat (nu doar dreptunghiular).</li>
+              </ul>
             </div>
           </div>
         </div>
       )}
     </main>
-  );
-}
-
-/* small UI helpers (identice/potrivite pentru layout-ul Banner) */
-
-function MaterialOptionDropdown({ checked, onSelect, title, subtitle }: { checked: boolean; onSelect: () => void; title: string; subtitle?: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={`w-full flex items-center gap-3 p-2 rounded-md ${checked ? "bg-indigo-900/30 border border-indigo-500" : "hover:bg-white/5"}`}
-    >
-      <span className={`h-3 w-3 rounded-full border ${checked ? "bg-indigo-500 border-indigo-500" : "bg-transparent border-white/20"}`} />
-      <div className="text-left">
-  <div className="text-sm text-ui">{title}</div>
-  {subtitle && <div className="text-xs text-muted">{subtitle}</div>}
-      </div>
-    </button>
-  );
-}
-
-function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
-  const inc = (d: number) => onChange(Math.max(1, value + d));
-  return (
-    <div>
-      <label className="field-label">{label}</label>
-      <div className="flex items-center">
-        <button onClick={() => inc(-1)} className="p-2 bg-white/10 rounded-l-md hover:bg-white/15" aria-label="Decrement">
-          <Minus size={14} />
-        </button>
-        <input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-lg font-semibold text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-y-0 rounded-none" />
-        <button onClick={() => inc(1)} className="p-2 bg-white/10 rounded-r-md hover:bg-white/15" aria-label="Increment">
-          <Plus size={14} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function SelectCardSmall({ active, onClick, title, subtitle }: { active: boolean; onClick: () => void; title: string; subtitle?: string }) {
-  return (
-    <button type="button" onClick={onClick} className={`w-full rounded-md p-2 text-left transition flex items-center gap-3 ${active ? "border-2 border-indigo-500 bg-indigo-900/20" : "border border-white/10 bg-transparent hover:bg-white/5"}`}>
-      <span className={`h-3 w-3 rounded-full border ${active ? "bg-indigo-500 border-indigo-500" : "bg-transparent border-white/20"}`} />
-      <div>
-  <div className="text-sm text-ui">{title}</div>
-  {subtitle && <div className="text-xs text-muted">{subtitle}</div>}
-      </div>
-    </button>
   );
 }
