@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link"; // Importăm Link
 
 type Item = { name: string; qty: number; unit?: number; total?: number };
 type Order = {
@@ -81,7 +82,20 @@ export default function OrderDetails({ order }: { order: Order }) {
 
             <div className="mt-6 grid flex-1 grid-cols-1 gap-6 overflow-y-auto pb-2 md:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <h4 className="font-semibold">Produse</h4>
+                <div className="flex justify-between items-center mb-3">
+                    <h4 className="font-semibold">Produse</h4>
+                    {/* BUTONUL NOU CĂTRE PAGINA DE UPLOAD */}
+                    <Link 
+                        href={`/account/orders/${order.id}`}
+                        className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors font-medium flex items-center gap-1"
+                    >
+                        <span>Gestionare Grafică</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </Link>
+                </div>
+                
                 {items ? (
                   <ul className="mt-3 divide-y divide-white/5 text-sm">
                     {items.map((it, idx) => (
@@ -104,7 +118,6 @@ export default function OrderDetails({ order }: { order: Order }) {
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                 <h4 className="font-semibold">Detalii livrare & facturare</h4>
                 <div className="mt-3 text-sm text-muted">
-                  {/* Prefer billing data (importată via CUI) when available for juridical companies */}
                   {((order.billing as any)?.tip_factura && (order.billing as any).tip_factura !== 'persoana_fizica' && ((order.billing as any).cui || (order.billing as any).name)) ? (
                     <div>
                       <div><strong>Nume / Firmă:</strong> {(order.billing as any).name || (order.billing as any).cui}</div>
