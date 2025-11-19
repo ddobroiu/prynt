@@ -1,69 +1,76 @@
-import { NextResponse } from 'next/server';
-import { getAuthSession } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
-import { v2 as cloudinary } from 'cloudinary';
+import { getAuthSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
-  api_key: process.env.CLOUDINARY_API_KEY!,
-  api_secret: process.env.CLOUDINARY_API_SECRET!,
-});
-
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
-// GET: Listează graficele utilizatorului
-export async function GET() {
-  const session = await getAuthSession();
-  const userId = (session?.user as any)?.id as string | undefined;
-
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-  }
-
-  try {
-    const graphics = await prisma.userGraphic.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-    });
-    return NextResponse.json({ graphics });
-  } catch (e) {
-    console.error('[GET /api/account/graphics]', e);
-    return NextResponse.json({ error: 'A apărut o eroare internă.' }, { status: 500 });
-  }
-}
-
-// POST: Salvează metadatele unei grafice încărcate
 export async function POST(req: Request) {
-  const session = await getAuthSession();
-  const userId = (session?.user as any)?.id as string | undefined;
-
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-  }
-
   try {
-    const body = await req.json();
-    const { originalName, storagePath, publicId, size, mimeType } = body;
-
-    if (!originalName || !storagePath || !publicId || !size || !mimeType) {
-      return NextResponse.json({ error: 'Datele furnizate sunt incomplete.' }, { status: 400 });
+    const session = await getAuthSession();
+    if (!session?.user) {
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const newGraphic = await prisma.userGraphic.create({
+    const body = await req.json();
+    const { orderId, orderItemId, fileUrl, fileName, publicId, fileSize, fileType } = body;
+
+    // Validare simplă: ne asigurăm că această comandă aparține user-ului
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order || order.userId !== session.user.id) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
+    // Creare înregistrare în UserGraphic
+    const graphic = await prisma.userGraphic.create({
       data: {
-        userId,
-        originalName,
-        storagePath,
+        userId: session.user.id,
+        orderId,
+        orderItemId,
+        fileUrl,
+        fileName,
         publicId,
-        size,
-        mimeType,
+        fileSize: Number(fileSize || 0),
+        fileType,
       },
     });
 
-    return NextResponse.json({ success: true, graphic: newGraphic }, { status: 201 });
-  } catch (e) {
-    console.error('[POST /api/account/graphics]', e);
-    return NextResponse.json({ error: 'A apărut o eroare internă.' }, { status: 500 });
+    return NextResponse.json(graphic);
+  } catch (error) {
+    console.error("[GRAPHICS_POST]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const session = await getAuthSession();
+    if (!session?.user) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) return new NextResponse("Missing ID", { status: 400 });
+
+    // Verificăm proprietatea
+    const graphic = await prisma.userGraphic.findUnique({
+      where: { id },
+    });
+
+    if (!graphic || graphic.userId !== session.user.id) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
+    // Ștergem din DB (Opțional: Aici se poate apela și Cloudinary Admin API pentru a șterge fizic fișierul)
+    await prisma.userGraphic.delete({
+      where: { id },
+    });
+
+    return new NextResponse("OK");
+  } catch (error) {
+    console.error("[GRAPHICS_DELETE]", error);
+    return new NextResponse("Internal Error", { status: 500 });
   }
 }

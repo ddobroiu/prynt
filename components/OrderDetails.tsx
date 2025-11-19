@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link"; // Import necesar
+import Link from "next/link";
 
 type Item = { name: string; qty: number; unit?: number; total?: number };
 type Order = {
@@ -84,15 +84,16 @@ export default function OrderDetails({ order }: { order: Order }) {
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                 <div className="flex justify-between items-center mb-3">
                     <h4 className="font-semibold">Produse</h4>
-                    {/* Buton Nou - Duce la pagina completă pentru upload */}
+                    {/* Buton CĂTRE PAGINA DE UPLOAD */}
                     <Link 
                         href={`/account/orders/${order.id}`}
-                        className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors font-medium flex items-center gap-1"
+                        onClick={() => setOpen(false)} // Închidem modalul când navigăm
+                        className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-colors font-medium flex items-center gap-1 shadow-sm shadow-indigo-500/20"
                     >
-                        <span>Gestionare Grafică</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                         </svg>
+                        <span>Gestionare Grafică</span>
                     </Link>
                 </div>
                 
