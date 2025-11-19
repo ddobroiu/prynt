@@ -1,7 +1,8 @@
 import { cookies } from 'next/headers';
 import { verifyAdminSession } from '../../../lib/adminSession';
 import { listOrders } from '../../../lib/orderStore';
-import OrdersDashboard from './OrdersDashboard'; // Import the new client component
+import OrdersDashboard from './OrdersDashboard';
+import { TrendingUp, ShoppingBag, CheckCircle2, AlertCircle } from 'lucide-react';
 
 function fmtRON(n: number) {
   return new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON', maximumFractionDigits: 2 }).format(n);
@@ -20,31 +21,30 @@ export default async function OrdersPage() {
   const token = cookieStore.get('admin_auth')?.value;
   const session = verifyAdminSession(token);
 
+  // Dacă nu există sesiune, layout-ul se ocupă de randare, dar aici putem afișa mesajul de acces interzis
   if (!session) {
     return (
-      <main className="relative min-h-screen overflow-hidden bg-[#04060c] text-ui">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.35),_transparent_55%)]" />
-        <div className="relative z-10 flex min-h-screen items-center justify-center px-6 py-12">
-          <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-2xl backdrop-blur-xl">
-            <p className="text-sm uppercase tracking-[0.25em] text-indigo-300">Panou administrare</p>
-            <h1 className="mt-4 text-3xl font-bold">Acces restricționat</h1>
-            <p className="mt-3 text-muted">
-              Te rugăm să te autentifici pentru a vedea comenzile și acțiunile disponibile.
-            </p>
-            <a
-              href="/admin/login"
-              className="mt-6 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-400 to-sky-400 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:scale-[1.01]"
-            >
-              Intră în panou
-            </a>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-2xl backdrop-blur-xl">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+             <AlertCircle size={24} />
           </div>
+          <h1 className="text-xl font-bold text-white">Acces Neautorizat</h1>
+          <p className="mt-2 text-sm text-zinc-400">
+            Te rugăm să te autentifici pentru a accesa panoul de comenzi.
+          </p>
+          <a
+            href="/admin/login"
+            className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-all hover:bg-indigo-500"
+          >
+            Mergi la Login
+          </a>
         </div>
-      </main>
+      </div>
     );
   }
 
-  // Fetch all orders for stats - This could be slow with many orders.
-  // A dedicated stats API endpoint would be a future optimization.
+  // Fetch comenzi pentru statistici
   const allOrders = await listOrders(10000); 
 
   const now = Date.now();
@@ -64,61 +64,103 @@ export default async function OrdersPage() {
   const averageValue = totalOrders ? totals.totalValue / totalOrders : 0;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#05070f] text-ui">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_60%)]" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 translate-x-1/3 bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.25),_transparent_65%)] blur-3xl" />
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-12 md:py-16">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-indigo-300">Admin</p>
-            <h1 className="mt-3 text-3xl font-bold text-white md:text-4xl">Panou Comenzi</h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted">
-              Gestionează comenzile, filtrează, caută și monitorizează statusul în timp real.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <a
-              href="/"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              <span aria-hidden>↩</span>
-              Înapoi la site
-            </a>
-          </div>
+    <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-2">
+      {/* Header Pagina */}
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard Comenzi</h1>
+          <p className="text-zinc-400 mt-1">
+            Monitorizare în timp real și gestionare comenzi.
+          </p>
         </div>
-
-        {/* Stats Cards */}
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 shadow-lg">
-            <div className="text-sm text-muted">Total comenzi</div>
-            <div className="mt-2 text-3xl font-semibold text-white">{totalOrders}</div>
-            <div className="mt-1 text-xs text-muted">Ultimele 24h: {totals.last24h}</div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-indigo-500/20" />
-          </div>
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 shadow-lg">
-            <div className="text-sm text-muted">Valoare totală</div>
-            <div className="mt-2 text-3xl font-semibold text-white">{fmtRON(totals.totalValue)}</div>
-            <div className="mt-1 text-xs text-muted">Medie comandă: {fmtRON(averageValue)}</div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-emerald-500/20" />
-          </div>
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 shadow-lg">
-            <div className="text-sm text-muted">În lucru</div>
-            <div className="mt-2 text-3xl font-semibold text-white">{totals.in_progress}</div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-amber-500/20" />
-          </div>
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 shadow-lg">
-            <div className="text-sm text-muted">Finalizate & Anulate</div>
-            <div className="mt-2 text-3xl font-semibold text-white">{totals.fulfilled}</div>
-            <div className="mt-1 text-xs text-muted">Anulate: {totals.canceled}</div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-rose-500/10" />
-          </div>
-        </div>
-
-        {/* Interactive Orders Dashboard */}
-        <div className="mt-10">
-          <OrdersDashboard />
+        <div className="flex items-center gap-3">
+           <div className="text-right hidden sm:block">
+             <p className="text-xs text-zinc-500 font-medium uppercase">Ultima actualizare</p>
+             <p className="text-sm text-white font-mono">{new Date().toLocaleTimeString('ro-RO', {hour: '2-digit', minute:'2-digit'})}</p>
+           </div>
         </div>
       </div>
-    </main>
+
+      {/* Stats Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* Card Total Comenzi */}
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-sm hover:bg-white/[0.05] transition-colors group">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-zinc-400">Total Comenzi</p>
+              <h3 className="mt-2 text-2xl font-bold text-white">{totalOrders}</h3>
+            </div>
+            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-500/20 transition-colors">
+              <ShoppingBag size={20} />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-2 text-xs">
+            <span className="flex items-center text-emerald-400 font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded">
+              +{totals.last24h}
+            </span>
+            <span className="text-zinc-500">în ultimele 24h</span>
+          </div>
+        </div>
+
+        {/* Card Venituri */}
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-sm hover:bg-white/[0.05] transition-colors group">
+           <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-zinc-400">Venit Total</p>
+              <h3 className="mt-2 text-2xl font-bold text-white">{fmtRON(totals.totalValue)}</h3>
+            </div>
+            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500/20 transition-colors">
+              <TrendingUp size={20} />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-2 text-xs">
+            <span className="text-zinc-500">Medie:</span>
+            <span className="text-white font-mono">{fmtRON(averageValue)}</span>
+          </div>
+        </div>
+
+        {/* Card In Lucru */}
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-sm hover:bg-white/[0.05] transition-colors group">
+           <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-zinc-400">În Prelucrare</p>
+              <h3 className="mt-2 text-2xl font-bold text-white">{totals.in_progress}</h3>
+            </div>
+            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 group-hover:bg-amber-500/20 transition-colors">
+              <AlertCircle size={20} />
+            </div>
+          </div>
+           <div className="mt-4 w-full bg-white/5 rounded-full h-1.5">
+             <div 
+               className="bg-amber-500 h-1.5 rounded-full transition-all duration-500" 
+               style={{ width: `${Math.min((totals.in_progress / (totalOrders || 1)) * 100, 100)}%` }} 
+             />
+           </div>
+        </div>
+
+        {/* Card Finalizate */}
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-sm hover:bg-white/[0.05] transition-colors group">
+           <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-zinc-400">Finalizate</p>
+              <h3 className="mt-2 text-2xl font-bold text-white">{totals.fulfilled}</h3>
+            </div>
+            <div className="p-2 rounded-lg bg-zinc-500/10 text-zinc-400 group-hover:bg-zinc-500/20 transition-colors">
+              <CheckCircle2 size={20} />
+            </div>
+          </div>
+           <div className="mt-4 flex items-center gap-2 text-xs">
+            <span className="text-rose-400">{totals.canceled} anulate</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-zinc-500">Rată succes {((totals.fulfilled / (totalOrders || 1)) * 100).toFixed(0)}%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Orders Dashboard Component - Tabelul Principal */}
+      <div className="rounded-3xl border border-white/10 bg-black/20 backdrop-blur-sm overflow-hidden">
+        <OrdersDashboard />
+      </div>
+    </div>
   );
 }
