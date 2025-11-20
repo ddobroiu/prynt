@@ -1,13 +1,12 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
-import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
-import DeliveryInfo from "@/components/DeliveryInfo";
+import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Box } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
+import DynamicBannerPreview from "./DynamicBannerPreview";
 import { QA } from "@/types";
 import { 
   calculateBannerVersoPrice, 
@@ -65,11 +64,10 @@ const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick:
 
 function BannerModeSwitchInline() {
   const router = useRouter();
-  const isDouble = usePathname()?.startsWith("/banner-verso");
   return (
     <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
-      <button type="button" onClick={() => router.push("/banner")} className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${!isDouble ? "bg-indigo-600 text-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>O față</button>
-      <button type="button" onClick={() => router.push("/banner-verso")} className={`ml-1 px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${isDouble ? "bg-indigo-600 text-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>Față-verso</button>
+      <button type="button" onClick={() => router.push("/banner")} className="px-4 py-1.5 rounded-md text-sm font-semibold transition-all text-gray-600 hover:bg-gray-100">O față</button>
+      <button type="button" onClick={() => router.push("/banner-verso")} className="ml-1 px-4 py-1.5 rounded-md text-sm font-semibold transition-all bg-indigo-600 text-white shadow-md">Față-verso</button>
     </div>
   );
 }
@@ -98,6 +96,9 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   const [heightText, setHeightText] = useState(initH ? String(initH) : "");
   const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/verso/1.webp", "/products/banner/verso/2.webp"] : ["/products/banner/verso/1.webp", "/products/banner/verso/2.webp", "/products/banner/verso/3.webp"], [productImage]);
   
+  // VIEW MODE STATE
+  const [viewMode, setViewMode] = useState<'gallery' | 'preview'>('gallery');
+  
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeImage, setActiveImage] = useState<string>(galleryImages[0]);
 
@@ -121,8 +122,19 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
 
   const updateInput = <K extends keyof PriceInputBannerVerso>(k: K, v: PriceInputBannerVerso[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
-  const onChangeLength = (v: string) => { const d = v.replace(/\D/g, ""); setLengthText(d); updateInput("width_cm", d === "" ? 0 : parseInt(d, 10)); };
-  const onChangeHeight = (v: string) => { const d = v.replace(/\D/g, ""); setHeightText(d); updateInput("height_cm", d === "" ? 0 : parseInt(d, 10)); };
+
+  const onChangeLength = (v: string) => { 
+      const d = v.replace(/\D/g, ""); 
+      setLengthText(d); 
+      updateInput("width_cm", d === "" ? 0 : parseInt(d, 10));
+      if(d && parseInt(d) > 0) setViewMode('preview');
+  };
+  const onChangeHeight = (v: string) => { 
+      const d = v.replace(/\D/g, ""); 
+      setHeightText(d); 
+      updateInput("height_cm", d === "" ? 0 : parseInt(d, 10));
+      if(d && parseInt(d) > 0) setViewMode('preview');
+  };
   
   const handleArtworkFileInput = async (file: File | null, side: 'front' | 'back') => {
     const setUrl = side === 'front' ? setArtworkUrlFront : setArtworkUrlBack;
@@ -133,6 +145,11 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
     if (!file) return;
     
     try {
+      // Preview instant
+      const previewUrl = URL.createObjectURL(file);
+      setUrl(previewUrl);
+      if (side === 'front') setViewMode('preview');
+
       setUploading(true);
       const form = new FormData(); form.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: form });
@@ -185,9 +202,11 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   }
 
   useEffect(() => {
+    if(viewMode !== 'gallery') return;
     const id = setInterval(() => setActiveIndex((i) => (i + 1) % galleryImages.length), 3000);
     return () => clearInterval(id);
-  }, [galleryImages.length]);
+  }, [galleryImages.length, viewMode]);
+
   useEffect(() => setActiveImage(galleryImages[activeIndex]), [activeIndex, galleryImages]);
 
   const summaryStep1 = input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}x${input.height_cm}cm, ${input.quantity} buc.` : "Alege";
@@ -201,15 +220,54 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          
+          {/* STÂNGA - Vizualizare */}
           <div className="lg:sticky top-24 h-max space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-              <div className="aspect-square"><img src={activeImage} alt="Banner Verso" className="h-full w-full object-cover" /></div>
-              <div className="p-2 grid grid-cols-4 gap-2">
-                {galleryImages.map((src, i) => <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
+                
+                <div className="flex border-b border-gray-100">
+                    <button 
+                        onClick={() => setViewMode('gallery')}
+                        className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'gallery' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
+                        <ImageIcon size={16} /> Galerie Foto
+                    </button>
+                    <button 
+                        onClick={() => setViewMode('preview')}
+                        className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'preview' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
+                        <Box size={16} /> Previzualizare Formă
+                    </button>
+                </div>
+
+              <div className="aspect-square relative bg-white">
+                 {viewMode === 'gallery' ? (
+                    <img src={activeImage} alt="Banner Verso" className="h-full w-full object-cover animate-in fade-in duration-300" />
+                 ) : (
+                    <div className="h-full w-full p-4 animate-in fade-in slide-in-from-bottom-4 duration-300 bg-zinc-50">
+                        <DynamicBannerPreview 
+                            width={input.width_cm} 
+                            height={input.height_cm} 
+                            hasGrommets={true} // Bannerele verso au standard capse
+                            hasWindHoles={input.want_wind_holes}
+                            label="Banner Față-Verso"
+                            imageUrl={artworkUrlFront} // Afișăm doar fața
+                        />
+                    </div>
+                 )}
               </div>
+
+              {viewMode === 'gallery' && (
+                <div className="p-2 grid grid-cols-4 gap-2">
+                    {galleryImages.map((src, i) => <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
+                </div>
+              )}
+
             </div>
             <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'banner-verso'} /></div>
           </div>
+
+          {/* DREAPTA - Configurator */}
           <div>
             <header className="mb-6">
               <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Banner Față-Verso</h1><BannerModeSwitchInline /></div>
