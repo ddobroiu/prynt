@@ -32,9 +32,22 @@ export default function AdminAwbControl({ orderId, currentAwb }: { orderId: stri
   };
 
   const saveManualAwb = async () => {
-    // Simulare salvare
-    setAwb(manualInput);
-    setIsEditing(false);
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}/update-awb`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ awbNumber: manualInput, awbCarrier: "DPD" })
+      });
+      if (!res.ok) throw new Error("Eroare la salvare AWB");
+      setAwb(manualInput);
+      setIsEditing(false);
+      window.location.reload();
+    } catch (error) {
+      alert("Eroare la salvare AWB.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (isEditing) {

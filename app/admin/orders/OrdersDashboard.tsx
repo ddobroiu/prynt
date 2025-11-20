@@ -79,7 +79,7 @@ export default function OrdersDashboard() {
     const shippingAddress = o.address || o.billing;
 
     return (
-      <tr key={o.id} className="transition hover:bg-white/[0.02] border-b border-white/5 last:border-0 group">
+      <tr key={o.id} className="transition hover:bg-white/2 border-b border-white/5 last:border-0 group">
         
         {/* 1. INFO & STATUS (Compact) */}
         <td className="px-4 py-4 align-top w-[150px]">
@@ -121,7 +121,7 @@ export default function OrdersDashboard() {
         </td>
 
         {/* 3. ADRESĂ LIVRARE (Editabilă) */}
-        <td className="px-4 py-4 align-top w-[240px]">
+        <td className="px-4 py-4 align-top w-60">
              <AdminAddressEditor 
                 orderId={o.id} 
                 initialAddress={shippingAddress} 
@@ -162,7 +162,7 @@ export default function OrdersDashboard() {
   return (
     <section className="flex flex-col h-full overflow-hidden rounded-3xl border border-white/10 bg-[#09090b]/80 shadow-2xl backdrop-blur-xl ring-1 ring-white/5">
       {/* Toolbar */}
-      <div className="flex-none flex flex-col gap-4 border-b border-white/5 px-6 py-4 md:flex-row md:items-center md:justify-between bg-white/[0.02]">
+      <div className="flex-none flex flex-col gap-4 border-b border-white/5 px-6 py-4 md:flex-row md:items-center md:justify-between bg-white/2">
         <div className="flex items-center gap-4">
             <div>
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
