@@ -1,116 +1,97 @@
 "use client";
 
 import { useState } from "react";
+import { FileText, Upload, Eye, Loader2, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-type Props = {
-  id: string;
-  invoiceLink?: string | null;
-};
+export default function AdminInvoiceControl({ id, invoiceLink }: { id: string; invoiceLink?: string | null }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-export default function AdminInvoiceControl({ id, invoiceLink: initialLink }: Props) {
-  const [uploadedUrl, setUploadedUrl] = useState<string | null>(initialLink || null);
-  const [uploadedName, setUploadedName] = useState<string | null>(null);
-  const [showLink, setShowLink] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const MAX_BYTES = 10 * 1024 * 1024; // 10MB
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  // Note: Removed "saveLink" and "generateInvoice" actions per UX request.
-  // Admin now only uploads PDF or views existing invoice link.
-
-  async function uploadInvoice(file?: File) {
-    setLoading(true);
-    setMessage(null);
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    
     try {
-      const fd = new FormData();
-      if (file) {
-        if (file.size && file.size > MAX_BYTES) throw new Error('Fișier prea mare (max 10MB)');
-        if (file.type && file.type !== 'application/pdf') throw new Error('Acceptăm doar PDF');
-        fd.append('file', file, file.name);
-      }
-      // ensure cookies are sent so server can verify admin session
-      const res = await fetch(`/api/admin/order/${encodeURIComponent(id)}/upload-invoice`, {
-        method: 'POST',
-        body: fd,
-        credentials: 'same-origin',
+      // Presupunem endpoint-ul standard pentru upload factură
+      const res = await fetch(`/api/admin/order/${id}/upload-invoice`, {
+        method: "POST",
+        body: formData,
       });
 
-      const ct = (res.headers.get('content-type') || '').toLowerCase();
-      let data: any = null;
-      if (ct.includes('application/json')) {
-        data = await res.json();
-      } else {
-        const text = await res.text();
-        try { data = JSON.parse(text); } catch { data = { message: text }; }
-      }
-      if (!res.ok) throw new Error(data?.message || res.statusText || 'Upload failed');
-      const url = data.url || data.link || data.invoiceLink || null;
-      setUploadedUrl(url);
-      setUploadedName(file?.name || null);
-      setMessage('Factura încărcată cu succes. Clientul a fost anunțat.');
-    } catch (err: any) {
-      setMessage('Eroare upload: ' + (err?.message || err));
+      if (!res.ok) throw new Error("Upload failed");
+      
+      // Refresh rapid sau reload
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      alert("Eroare la încărcare factură.");
     } finally {
-      setLoading(false);
+      setUploading(false);
+      setIsOpen(false);
     }
-  }
+  };
 
-  async function copyLink() {
-    if (!uploadedUrl || copied) return;
-    try {
-      await navigator.clipboard.writeText(uploadedUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err: any) {
-      setMessage('Nu am putut copia linkul: ' + (err?.message || err));
-    }
+  if (invoiceLink) {
+    return (
+      <div className="flex gap-1">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="h-7 w-full bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 text-[10px]"
+          asChild
+        >
+          <a href={invoiceLink} target="_blank" rel="noopener noreferrer">
+            <Eye size={12} className="mr-1" /> Vezi Factura
+          </a>
+        </Button>
+        {/* Buton mic pentru re-upload dacă e nevoie de corecție */}
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+             <button className="p-1 text-zinc-500 hover:text-white bg-zinc-800/50 rounded border border-white/5" title="Modifică factura">
+               <Upload size={10} />
+             </button>
+          </DialogTrigger>
+          <DialogContent className="bg-[#09090b] border-white/10 text-white">
+             <DialogHeader><DialogTitle>Înlocuiește Factura</DialogTitle></DialogHeader>
+             <div className="py-4">
+                <label className="block mb-2 text-sm text-zinc-400">Selectează noul fișier PDF</label>
+                <Input type="file" accept=".pdf" onChange={handleUpload} disabled={uploading} className="bg-zinc-900 border-white/10" />
+                {uploading && <p className="text-xs text-indigo-400 mt-2 animate-pulse">Se încarcă...</p>}
+             </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
   }
 
   return (
-    <div className="w-full rounded-3xl border border-white/10 bg-black/30 p-4 text-sm text-white shadow-inner shadow-black/40">
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-indigo-400 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:scale-[1.01]">
-          Încarcă PDF
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) uploadInvoice(f);
-            }}
-            style={{ display: 'none' }}
-          />
+    <div className="w-full">
+      <div className="relative">
+        <input 
+          type="file" 
+          id={`invoice-${id}`} 
+          className="hidden" 
+          accept=".pdf"
+          onChange={handleUpload}
+          disabled={uploading}
+        />
+        <label 
+          htmlFor={`invoice-${id}`} 
+          className={`flex items-center justify-center w-full h-7 rounded border text-[10px] font-medium cursor-pointer transition-all
+            ${uploading 
+              ? 'bg-zinc-800 border-zinc-700 text-zinc-500 cursor-wait' 
+              : 'bg-indigo-600/10 border-indigo-600/30 text-indigo-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-500'
+            }`}
+        >
+          {uploading ? <Loader2 size={12} className="animate-spin" /> : <><Upload size={12} className="mr-1" /> Încarcă</>}
         </label>
-        {uploadedUrl ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowLink((s) => !s)}
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-2 text-xs font-semibold text-white/80 transition hover:bg-white/5"
-            >
-              {showLink ? 'Ascunde link' : 'Vizualizează'}
-            </button>
-            <button
-              type="button"
-              onClick={copyLink}
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-2 text-xs font-semibold text-white/80 transition hover:bg-white/5"
-            >
-              {copied ? 'Copiat' : 'Copiază link'}
-            </button>
-          </div>
-        ) : null}
-      </div>
-      {uploadedUrl && showLink ? (
-        <div className="mt-3 text-xs">
-          <a href={uploadedUrl} target="_blank" rel="noreferrer" className="text-indigo-200 underline">
-            Descarcă factura
-          </a>
-        </div>
-      ) : null}
-      {uploadedName ? <div className="mt-2 text-xs text-muted">Ultimul fișier: {uploadedName}</div> : null}
-      <div className="mt-2 min-h-[1.25rem] text-xs text-muted">
-        {loading ? 'Se încarcă…' : message}
       </div>
     </div>
   );

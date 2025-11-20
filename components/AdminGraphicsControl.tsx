@@ -1,93 +1,160 @@
 "use client";
 
 import { useState } from "react";
-import { Image as ImageIcon, Upload, FileDown, Loader2 } from "lucide-react";
+import { 
+  Image as ImageIcon, 
+  Download, 
+  Eye, 
+  AlertCircle, 
+  CheckCircle2, 
+  Upload, 
+  Loader2 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function AdminGraphicsControl({ orderId, items }: { orderId: string, items: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, itemId?: string) => {
+  // Funcție de backup: Adminul încarcă doar dacă e nevoie de o corectură
+  const handleAdminUpload = async (e: React.ChangeEvent<HTMLInputElement>, itemId: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
+    setUploading(itemId);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("orderId", orderId);
-    if (itemId) formData.append("orderItemId", itemId);
-    formData.append("type", "admin_upload"); // Marcăm că e încărcat de admin
+    formData.append("orderItemId", itemId);
+    // Marcăm că e upload de admin (opțional, pentru backend)
+    formData.append("uploadedBy", "admin"); 
 
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const res = await fetch(`/api/admin/orders/${orderId}/upload-artwork`, {
+        method: "POST",
+        body: formData
+      });
+
       if (!res.ok) throw new Error("Upload failed");
-      alert("Fișier încărcat cu succes!");
-      window.location.reload(); // Refresh pentru a vedea fișierul (sau update local state)
-    } catch (err) {
-      console.error(err);
-      alert("Eroare la încărcare.");
+      window.location.reload(); 
+    } catch (error) {
+      console.error(error);
+      alert("Eroare la încărcarea fișierului.");
     } finally {
-      setUploading(false);
+      setUploading(null);
     }
   };
 
-  // Numărăm fișierele existente
-  const totalFiles = items.reduce((acc, item) => acc + (item.artworkUrl ? 1 : 0), 0);
+  // Statistici rapide pentru butonul din tabel
+  const totalItems = items.length;
+  const uploadedItems = items.reduce((acc, item) => acc + (item.artworkUrl ? 1 : 0), 0);
+  const isComplete = totalItems === uploadedItems;
+
+  // Badge-ul principal din tabel
+  const triggerBadge = (
+    <Button 
+      variant="ghost" 
+      size="sm" 
+      className={`h-auto py-1.5 w-full border transition-all justify-between px-2 group ${
+        isComplete 
+          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20" 
+          : uploadedItems > 0 
+            ? "bg-amber-500/10 border-amber-500/20 text-amber-400 hover:bg-amber-500/20"
+            : "bg-zinc-900/40 border-zinc-800 text-zinc-500 hover:text-zinc-300"
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        {isComplete ? <CheckCircle2 size={14} /> : <ImageIcon size={14} />}
+        <span className="text-[11px] font-medium">
+          {isComplete ? "Grafică OK" : uploadedItems > 0 ? "Parțial" : "Lipsă Grafică"}
+        </span>
+      </div>
+      {uploadedItems > 0 && (
+         <span className={`text-[10px] font-bold px-1.5 rounded-md min-w-[18px] text-center ${
+           isComplete ? "bg-emerald-500 text-white" : "bg-amber-500 text-black"
+         }`}>
+           {uploadedItems}/{totalItems}
+         </span>
+      )}
+    </Button>
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8 bg-zinc-900/50 border-zinc-700 text-zinc-300 hover:text-white hover:bg-indigo-500/20 hover:border-indigo-500/50 transition-all">
-          <ImageIcon size={14} className="mr-2" />
-          Grafică {totalFiles > 0 && <span className="ml-1 bg-indigo-500 text-white text-[9px] px-1.5 rounded-full">{totalFiles}</span>}
-        </Button>
+        {triggerBadge}
       </DialogTrigger>
-      <DialogContent className="bg-[#09090b] border-white/10 text-white max-w-2xl">
+      <DialogContent className="bg-[#09090b] border-white/10 text-white max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Gestionare Grafică & Fișiere</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Eye className="text-indigo-500" />
+            Verificare Fișiere Grafice
+          </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
           {items.map((item, idx) => (
-            <div key={idx} className="bg-white/5 p-4 rounded-xl border border-white/5">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h4 className="font-bold text-sm text-indigo-300">{item.productName || "Produs Custom"}</h4>
-                  <p className="text-xs text-zinc-500">Cantitate: {item.quantity} buc</p>
-                </div>
+            <div key={idx} className="bg-white/5 p-4 rounded-xl border border-white/5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                 
-                {/* Upload Buton pentru acest item */}
-                <div className="relative">
-                    <input 
-                        type="file" 
-                        id={`upload-${idx}`} 
-                        className="hidden" 
-                        onChange={(e) => handleUpload(e, item.id)}
-                        disabled={uploading}
-                    />
-                    <label htmlFor={`upload-${idx}`} className="cursor-pointer inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-medium transition-colors">
-                        {uploading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
-                        Încarcă Fișier
-                    </label>
+                {/* Detalii Produs */}
+                <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-sm text-white truncate">{item.productName || "Produs Custom"}</h4>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-xs text-zinc-400 bg-white/5 px-2 py-0.5 rounded">
+                        Cantitate: <span className="text-white font-mono">{item.quantity}</span>
+                      </span>
+                      {/* Aici poți afișa dimensiuni dacă există în item.details */}
+                    </div>
                 </div>
-              </div>
 
-              {/* Lista fișiere existente (Simulare link dacă există artworkUrl) */}
-              {item.artworkUrl ? (
-                 <div className="flex items-center gap-3 bg-black/20 p-2 rounded-lg">
-                    <div className="h-10 w-10 bg-indigo-900/30 rounded flex items-center justify-center">
-                        <FileDown size={18} className="text-indigo-400" />
+                {/* Zona Acțiuni Fișier */}
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                    {item.artworkUrl ? (
+                        <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-lg w-full sm:w-auto">
+                            <div className="hidden sm:flex h-8 w-8 bg-emerald-500/20 rounded items-center justify-center">
+                                <CheckCircle2 size={16} className="text-emerald-400" />
+                            </div>
+                            <div className="flex-1 min-w-0 mr-2">
+                                <p className="text-xs font-medium text-emerald-400">Fișier Client</p>
+                                <p className="text-[10px] text-emerald-400/60 truncate max-w-[150px]">
+                                  Încărcat
+                                </p>
+                            </div>
+                            <Button asChild size="sm" className="h-8 bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20">
+                                <a href={item.artworkUrl} target="_blank" rel="noopener noreferrer">
+                                    <Download size={14} className="mr-1.5" /> Descarcă
+                                </a>
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2 bg-rose-500/10 border border-rose-500/20 p-2 rounded-lg text-rose-400 w-full sm:w-auto justify-center">
+                            <AlertCircle size={16} />
+                            <span className="text-xs font-medium">Clientul nu a încărcat fișier</span>
+                        </div>
+                    )}
+
+                    {/* Buton Backup Upload (Doar iconiță mică) */}
+                    <div className="relative group" title="Încarcă o corectură (Admin)">
+                        <input 
+                            type="file" 
+                            id={`admin-up-${item.id}`} 
+                            className="hidden" 
+                            onChange={(e) => handleAdminUpload(e, item.id)}
+                            disabled={uploading === item.id}
+                        />
+                        <label 
+                            htmlFor={`admin-up-${item.id}`} 
+                            className={`cursor-pointer flex items-center justify-center h-8 w-8 rounded-lg border transition-colors
+                                ${uploading === item.id 
+                                    ? 'bg-zinc-800 border-zinc-700 cursor-wait' 
+                                    : 'bg-zinc-900 border-zinc-700 text-zinc-500 hover:text-white hover:border-zinc-500 hover:bg-zinc-800'
+                                }`
+                            }
+                        >
+                            {uploading === item.id ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                        </label>
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-xs text-zinc-300 truncate">Fișier atașat</p>
-                        <a href={item.artworkUrl} target="_blank" className="text-[10px] text-indigo-400 hover:underline">Descarcă / Vizualizează</a>
-                    </div>
-                 </div>
-              ) : (
-                  <p className="text-xs text-zinc-600 italic">Niciun fișier încărcat de client.</p>
-              )}
+                </div>
             </div>
           ))}
         </div>

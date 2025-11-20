@@ -1,44 +1,107 @@
-import { prisma } from "@/lib/prisma";
-import { getAuthSession } from "@/lib/auth";
-import { redirect, notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { ArrowLeft, MapPin, CreditCard } from "lucide-react";
 import UserGraphicsManager from "@/components/UserGraphicsManager";
 
-export const dynamic = "force-dynamic";
-
-interface PageProps {
-  params: Promise<{ id: string }>;
+function fmtRON(n: number) {
+  return new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(n);
 }
 
-export default async function OrderDetailPage(props: PageProps) {
-  const { id } = await props.params;
-  const session = await getAuthSession();
+export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const session = await getServerSession(authOptions);
+  if (!session) redirect("/login");
 
-  if (!session?.user?.email) redirect("/login");
+  const { id } = await params;
 
-  const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
-  if (!order || order.userId !== session.user.id) return notFound();
+  // FIX: Am scos 'address: true' din include, deoarece este un câmp JSON, nu o relație.
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { 
+      items: true, // Păstrăm items pentru că este o relație (OrderItem[]) și avem nevoie de ele pentru grafică
+    },
+  });
 
-  // Curățăm datele
-  const cleanItems = order.items.map(item => ({
-    id: item.id, name: item.name, qty: item.qty, unit: Number(item.unit), total: Number(item.total)
-  }));
+  if (!order) notFound();
 
-  // Luăm grafica existentă
-  const graphics = await prisma.userGraphic.findMany({ where: { orderId: id } });
-  const cleanGraphics = graphics.map(g => ({
-    ...g, createdAt: g.createdAt.toISOString(), updatedAt: g.updatedAt.toISOString(), fileSize: Number(g.fileSize)
-  }));
+  // Verificare securitate: comanda trebuie să aparțină utilizatorului logat
+  if (order.userId !== (session.user as any).id) {
+     return <div className="p-8 text-center text-red-500">Acces interzis la această comandă.</div>;
+  }
+
+  // Castăm address la 'any' pentru a accesa proprietățile JSON fără erori de TS
+  const address = order.address as any; 
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
-        <Link href="/account?tab=orders" className="text-indigo-400 text-sm hover:underline mb-4 inline-block">← Înapoi</Link>
-        <h1 className="text-2xl font-bold mb-2">Gestionare Grafică - Comanda #{order.orderNo}</h1>
-        <p className="text-slate-400 mb-6">Încarcă fișierele pentru fiecare produs din lista de mai jos.</p>
+    <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="mb-6">
+        <Link href="/account/orders" className="inline-flex items-center text-sm text-zinc-500 hover:text-indigo-600 mb-4">
+          <ArrowLeft size={16} className="mr-1" /> Înapoi la comenzi
+        </Link>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+          Comanda #{order.orderNo || order.id.slice(0,8)}
+        </h1>
+        <div className="flex items-center gap-2 mt-2">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 dark:bg-zinc-800">
+                {new Date(order.createdAt).toLocaleDateString("ro-RO")}
+            </span>
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium uppercase ${
+              order.status === 'fulfilled' ? 'bg-emerald-100 text-emerald-700' :
+              order.status === 'canceled' ? 'bg-red-100 text-red-700' :
+              'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+            }`}>
+                {order.status === 'active' ? 'În lucru' : order.status}
+            </span>
+        </div>
+      </div>
 
-        <div className="bg-slate-900 p-6 rounded-xl border border-slate-800">
-          <UserGraphicsManager orderId={order.id} items={cleanItems} initialGraphics={cleanGraphics} />
+      <div className="grid gap-8 lg:grid-cols-3">
+        {/* Coloana Principală */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* BLOCUL PENTRU GRAFICĂ (Aici folosim componenta nouă care merge pe produs) */}
+          <div className="bg-white dark:bg-zinc-950 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-5">
+             <UserGraphicsManager items={order.items} /> 
+          </div>
+
+          {/* Detalii Livrare */}
+          <div className="bg-white dark:bg-zinc-950 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-5">
+             <h3 className="font-semibold flex items-center gap-2 mb-3 text-sm uppercase tracking-wide text-zinc-500">
+                <MapPin size={16} /> Detalii Livrare
+             </h3>
+             {address ? (
+               <div className="text-sm space-y-1 text-zinc-700 dark:text-zinc-300">
+                 <p className="font-bold text-zinc-900 dark:text-white">{address.nume_prenume || address.name}</p>
+                 <p>{address.strada}, Nr. {address.numar}</p>
+                 <p>{address.localitate}, {address.judet}</p>
+                 <p>{address.telefon || address.phone}</p>
+               </div>
+             ) : (
+               <p className="text-sm text-zinc-500">Fără adresă salvată.</p>
+             )}
+          </div>
+        </div>
+
+        {/* Coloana Dreapta: Sumar */}
+        <div className="space-y-6">
+           <div className="bg-white dark:bg-zinc-950 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-5 sticky top-24">
+             <h3 className="font-semibold flex items-center gap-2 mb-4 text-sm uppercase tracking-wide text-zinc-500">
+                <CreditCard size={16} /> Sumar Plată
+             </h3>
+             <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                    <span className="text-zinc-500">Metodă</span>
+                    <span className="font-medium capitalize">{order.paymentType}</span>
+                </div>
+                <div className="border-t border-dashed border-zinc-200 dark:border-zinc-800 my-2" />
+                <div className="flex justify-between items-end">
+                    <span className="text-zinc-900 dark:text-white font-bold text-lg">Total</span>
+                    <span className="text-indigo-600 dark:text-indigo-400 font-bold text-xl">{fmtRON(Number(order.total))}</span>
+                </div>
+             </div>
+           </div>
         </div>
       </div>
     </div>
