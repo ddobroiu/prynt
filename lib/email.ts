@@ -2,95 +2,85 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Template HTML Modern pentru Bun Venit
-const getWelcomeEmailHtml = (name: string) => {
-  // Poți ajusta culorile și logo-ul după preferințe
-  const brandColor = '#4f46e5'; // Indigo
-  const grayColor = '#4b5563';
-  const lightGray = '#f3f4f6';
+// --- TEMPLATE COMUN PENTRU EMAILS (Reset Password & Magic Link) ---
+export function getHtmlTemplate({
+  title,
+  message,
+  buttonText,
+  buttonUrl,
+  footerText
+}: {
+  title: string;
+  message: string;
+  buttonText: string;
+  buttonUrl: string;
+  footerText?: string;
+}) {
+  const logoUrl = `${process.env.NEXT_PUBLIC_APP_URL}/logo.png`;
   
-  // Dacă nu ai încă variabila definită, fallback pe localhost pentru development
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  const logoUrl = `${appUrl}/logo.png`;
-  const loginUrl = `${appUrl}/login`;
-
   return `
 <!DOCTYPE html>
-<html lang="ro">
+<html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bine ai venit la Prynt!</title>
+  <title>${title}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f5; margin: 0; padding: 0; }
+    .container { max-width: 500px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .header { background-color: #171717; padding: 24px; text-align: center; }
+    .header img { height: 32px; width: auto; }
+    .content { padding: 32px 24px; }
+    .h1 { font-size: 20px; font-weight: 700; color: #111; margin-bottom: 16px; }
+    .text { font-size: 15px; color: #555; margin-bottom: 24px; }
+    .button { display: inline-block; background-color: #4f46e5; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 15px; text-align: center; }
+    .button:hover { background-color: #4338ca; }
+    .footer { background-color: #f9fafb; padding: 16px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee; }
+    .link-fallback { font-size: 11px; color: #999; margin-top: 20px; word-break: break-all; }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: ${lightGray}; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
-  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
-    
-    <tr>
-      <td align="center" style="padding: 40px 0 20px 0; background-color: #ffffff; border-bottom: 1px solid #f0f0f0;">
-        <a href="${appUrl}" target="_blank">
-           <img src="${logoUrl}" alt="Prynt Logo" width="120" style="display: block; border: 0; max-width: 100%; height: auto;" />
-        </a>
-      </td>
-    </tr>
-
-    <tr>
-      <td style="padding: 40px 40px 20px 40px;">
-        <h1 style="color: #111827; font-size: 24px; font-weight: 700; margin: 0 0 20px 0; text-align: center;">
-          Salut, ${name || 'prietene'}! 👋
-        </h1>
-        <p style="color: ${grayColor}; font-size: 16px; line-height: 26px; margin: 0 0 20px 0; text-align: center;">
-          Contul tău a fost creat cu succes. Ne bucurăm să te avem alături de noi la <strong>Prynt</strong>.
-        </p>
-        <p style="color: ${grayColor}; font-size: 16px; line-height: 26px; margin: 0 0 30px 0; text-align: center;">
-          Platforma noastră te ajută să configurezi rapid materialele publicitare de care ai nevoie.
-        </p>
-        
-        <table border="0" cellpadding="0" cellspacing="0" width="100%">
-          <tr>
-            <td align="center">
-              <a href="${loginUrl}" style="display: inline-block; padding: 14px 32px; background-color: ${brandColor}; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; border-radius: 8px; transition: background-color 0.2s;">
-                Intră în cont
-              </a>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-
-    <tr>
-      <td style="background-color: #f9fafb; padding: 30px; text-align: center;">
-        <p style="color: #9ca3af; font-size: 12px; margin: 0 0 10px 0;">
-          © ${new Date().getFullYear()} Prynt. Toate drepturile rezervate.
-        </p>
-        <div style="margin-top: 15px;">
-          <a href="${appUrl}/termeni" style="color: #9ca3af; font-size: 12px; text-decoration: underline; margin: 0 10px;">Termeni</a>
-          <a href="${appUrl}/confidentialitate" style="color: #9ca3af; font-size: 12px; text-decoration: underline; margin: 0 10px;">Confidențialitate</a>
-        </div>
-      </td>
-    </tr>
-  </table>
+<body>
+  <div class="container">
+    <div class="header">
+       <span style="color: white; font-weight: bold; font-size: 20px;">Prynt</span>
+    </div>
+    <div class="content">
+      <div class="h1">${title}</div>
+      <p class="text">${message}</p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${buttonUrl}" class="button" target="_blank">${buttonText}</a>
+      </div>
+      ${footerText ? `<p class="text" style="font-size: 13px;">${footerText}</p>` : ''}
+      <div class="link-fallback">
+        Dacă butonul nu funcționează, copiază acest link:<br/>
+        <a href="${buttonUrl}" style="color: #4f46e5;">${buttonUrl}</a>
+      </div>
+    </div>
+    <div class="footer">
+      © ${new Date().getFullYear()} Prynt. Toate drepturile rezervate.<br/>
+      Acest email a fost trimis automat.
+    </div>
+  </div>
 </body>
 </html>
   `;
-};
+}
 
-export async function sendWelcomeEmail(to: string, name: string) {
-  try {
-    // Folosim EMAIL_FROM din .env (ex: 'Prynt <contact@prynt.ro>') 
-    // sau fallback la testing domain-ul Resend dacă nu ai domeniul verificat încă
-    const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+export async function sendPasswordResetEmail(to: string, token: string) {
+  const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/login/reset?token=${token}`;
+  
+  const html = getHtmlTemplate({
+    title: "Resetare Parolă",
+    message: "Am primit o cerere de resetare a parolei pentru contul tău Prynt. Apasă pe butonul de mai jos pentru a seta o parolă nouă.",
+    buttonText: "Resetează Parola",
+    buttonUrl: resetLink,
+    footerText: "Dacă nu ai cerut acest lucru, poți ignora acest email."
+  });
 
-    const data = await resend.emails.send({
-      from: fromEmail,
-      to: to,
-      subject: 'Bine ai venit în comunitatea Prynt! 🎨',
-      html: getWelcomeEmailHtml(name),
-    });
-
-    console.log(`Email trimis cu ID: ${data.data?.id}`);
-    return { success: true, data };
-  } catch (error) {
-    console.error('Eroare la trimiterea emailului prin Resend:', error);
-    return { success: false, error };
-  }
+  await resend.emails.send({
+    from: 'Prynt <no-reply@prynt.ro>', // Asigura-te ca ai domeniul verificat in Resend
+    to,
+    subject: 'Resetare parolă Prynt',
+    html,
+  });
 }

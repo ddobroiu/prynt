@@ -41,11 +41,18 @@ export default function UserDetailsForm({ session }: UserDetailsFormProps) {
       setLoading(false);
     }
   };
+  
+  // Stilul modernizat pentru input (vizibil în ambele teme)
+  const inputCls = "w-full rounded-lg border border-gray-600 dark:border-gray-500 bg-gray-100 dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition";
+  const btnPrimaryCls = "w-full rounded-lg px-4 py-2 bg-indigo-600 text-white font-semibold shadow-md hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition";
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md space-y-4">
+    <form onSubmit={handleSubmit} className="max-w-lg space-y-5">
+      <h2 className="text-xl font-semibold mb-6 pb-4 border-b dark:border-gray-700 text-gray-900 dark:text-white">Detaliile contului</h2>
+      
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+        {/* FIX CONTRAST: text-gray-900 (negru) în Light Mode, dark:text-white în Dark Mode */}
+        <label htmlFor="name" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
           Nume
         </label>
         <input
@@ -53,12 +60,13 @@ export default function UserDetailsForm({ session }: UserDetailsFormProps) {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="input w-full"
+          className={inputCls} 
           required
         />
       </div>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+        {/* FIX CONTRAST: text-gray-900 (negru) în Light Mode, dark:text-white în Dark Mode */}
+        <label htmlFor="email" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
           Adresă de e-mail
         </label>
         <input
@@ -66,16 +74,17 @@ export default function UserDetailsForm({ session }: UserDetailsFormProps) {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="input w-full"
+          className={inputCls} 
           required
         />
       </div>
       
-      {success && <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md">{success}</div>}
-      {error && <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">{error}</div>}
+      {/* Mesaje */}
+      {success && <div className="text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 p-3 rounded-lg border border-emerald-500/20">{success}</div>}
+      {error && <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/40 p-3 rounded-lg border border-red-500/20">{error}</div>}
 
       <div>
-        <button type="submit" className="btn-primary w-full" disabled={loading}>
+        <button type="submit" className={btnPrimaryCls} disabled={loading}>
           {loading ? "Se salvează..." : "Salvează modificările"}
         </button>
       </div>

@@ -3,6 +3,9 @@
 // Updated: MaterialOption includes `id`, `key`, `name` and `label` (aliases) so existing components
 // that expect .id, .key, .label or .name all compile and work.
 
+import { EXTRA_PRODUCTS_RAW } from "./extraProducts";
+import { generateSeoForProduct } from "./seoTemplates";
+
 export type MaterialOption = {
   id: string;            // canonical identifier (used by UI & components)
   key?: string;          // backwards compat
@@ -21,10 +24,6 @@ export const MATERIAL_OPTIONS: MaterialOption[] = [
   { id: "couche-170", key: "couche-170", name: "Hârtie couché 170 g/mp", label: "Hârtie couché 170 g/mp", description: "Hârtie premium pentru pliante/catalog", priceModifier: 0.12, recommendedFor: ["pliante"] },
   { id: "pp-5mm", key: "pp-5mm", name: "PVC 5mm", label: "PVC 5mm", description: "Material rigid pentru indoor/outdoor", priceModifier: 0.15, recommendedFor: ["decor", "materiale-rigide"] },
 ];
-
-// Extra products raw data (user-provided list). Mapped and appended into PRODUCTS below.
-import { EXTRA_PRODUCTS_RAW } from "./extraProducts";
-import { generateSeoForProduct } from "./seoTemplates";
 
 // Product type: add optional materials property so components can read available materials per product
 export type Product = {
@@ -46,14 +45,6 @@ export type Product = {
   metadata?: Record<string, any>;
   materials?: MaterialOption[]; // optional list of material options for this product
 };
-
-// NOTE:
-// All shop product entries are now sourced from EXTRA_PRODUCTS_RAW only.
-// Keep this file focused on types, materials and helper utilities.
-const BASE_PRODUCTS: Product[] = [];
-
-  // Append user-provided extras, avoiding duplicates by routeSlug/slug/id
-  const existingSlugs = new Set(BASE_PRODUCTS.map((p) => String(p.routeSlug ?? p.slug ?? p.id)));
 
 // Convert product image paths to .webp when they reference our `/products/` assets.
 function toWebpPaths(imgs?: string[]): string[] | undefined {
@@ -96,16 +87,16 @@ export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
   } as Product;
 });
 
-  // Ensure every product has an SEO title/description. Generated text is used only when
-  // an explicit `seo` field is not provided on the product object.
-  for (const _p of PRODUCTS) {
-    if (!_p.seo) {
-      // use the generator imported above
-      // NOTE: mutate in-place so consuming code gets the enriched objects
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      _p.seo = generateSeoForProduct(_p as any);
-    }
+// Ensure every product has an SEO title/description. Generated text is used only when
+// an explicit `seo` field is not provided on the product object.
+for (const _p of PRODUCTS) {
+  if (!_p.seo) {
+    // use the generator imported above
+    // NOTE: mutate in-place so consuming code gets the enriched objects
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    _p.seo = generateSeoForProduct(_p as any);
   }
+}
 
 
 //=== UTILITARE =============================================================
@@ -177,8 +168,11 @@ export function getProductBySlug(slug: string | undefined): Product | undefined 
  * - Extracts first dimension occurrence and removes it from the slug used for lookup
  * - Tries lookups with the cleaned slug first (category-scoped then global), falls back to original slug
  * - If dimensions are detected but no product is found, returns a dimension fallback product
+ * * NEXT.JS 16 UPDATE: This function is now cached.
  */
 export async function resolveProductForRequestedSlug(requestedSlug: string, category?: string) {
+  'use cache'; // NEXT.JS 16 DIRECTIVE: Cache the result of this function based on arguments
+
   const raw = String(requestedSlug || "").toLowerCase().trim();
 
   // Normalize into segments

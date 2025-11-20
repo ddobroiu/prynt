@@ -2,8 +2,9 @@
 
 import { FormEvent, useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 
-// Componente simple pentru iconițe (SVG) pentru a nu depinde de o librărie externă
+// Componente simple pentru iconițe (SVG)
 const EyeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
     <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -20,14 +21,13 @@ const EyeOffIcon = () => (
 export default function LoginPage() {
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [mode, setMode] = useState<'magic' | 'password'>('password');
+  const [isResetView, setIsResetView] = useState(false);
   
-  // State-uri pentru input-uri
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [regName, setRegName] = useState("");
   const [regConfirm, setRegConfirm] = useState("");
 
-  // State-uri pentru vizibilitate parolă
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
 
@@ -64,19 +64,31 @@ export default function LoginPage() {
     }
   }
 
-  async function requestReset(emailValue: string) {
+  async function handleResetRequest(e: FormEvent) {
+    e.preventDefault();
+    if (!email) return;
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
     try {
       const res = await fetch('/api/auth/request-reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailValue }),
+        body: JSON.stringify({ email }),
       });
+      
+      const data = await res.json().catch(() => ({}));
+      
       if (res.ok) {
-        alert('Dacă există cont pe acest email, vei primi un link de resetare.');
+        setSuccess('Dacă există un cont cu acest email, vei primi instrucțiunile de resetare.');
       } else {
-        alert('Nu s-a putut trimite resetarea.');
+        setError(data.message || 'Nu s-a putut trimite cererea.');
       }
-    } catch {}
+    } catch (err) {
+      setError('Eroare de conexiune.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function onRegister(e: FormEvent) {
@@ -107,175 +119,260 @@ export default function LoginPage() {
     }
   }
 
+  useEffect(() => {
+    setError(null);
+    setSuccess(null);
+  }, [tab, isResetView]);
+
+  // Aplicăm stilul modern (centrat, card închis, margini rotunjite)
   return (
-    <div className="mx-auto max-w-md px-6 py-16">
-      <h1 className="text-2xl font-bold mb-6">Cont</h1>
-      <div className="flex gap-2 mb-6">
-        <button
-          type="button"
-          onClick={() => setTab('login')}
-          className={`flex-1 rounded-md px-3 py-2 text-sm font-semibold border ${tab==='login' ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}
-        >Autentificare</button>
-        <button
-          type="button"
-          onClick={() => setTab('register')}
-          className={`flex-1 rounded-md px-3 py-2 text-sm font-semibold border ${tab==='register' ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}
-        >Creează cont</button>
-      </div>
-      <div className="space-y-6">
-        {tab === 'login' && (
-        <form onSubmit={onSubmit} className="space-y-3">
-          <div>
-            <label className="block text-sm mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-md border px-3 py-2 bg-surface border-[--border]"
-              placeholder="email@exemplu.ro"
-              required
-              autoComplete="email"
-            />
-          </div>
-          {mode === 'password' && (
-            <div>
-              <label className="block text-sm mb-1">Parolă</label>
-              <div className="relative">
-                <input
-                  type={showLoginPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-md border px-3 py-2 bg-surface border-[--border] pr-10"
-                  placeholder="••••••••"
-                  required
-                  autoComplete="current-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowLoginPassword(!showLoginPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                >
-                  {showLoginPassword ? <EyeOffIcon /> : <EyeIcon />}
-                </button>
-              </div>
-            </div>
-          )}
-          <button
-            type="submit"
-            disabled={loading || !email || (mode==='password' && !password)}
-            className="w-full rounded-md px-4 py-2 bg-indigo-600 text-white font-semibold hover:bg-indigo-500 disabled:opacity-60"
-          >
-            {loading ? 'Se procesează...' : mode === 'magic' ? 'Trimite link de login' : 'Autentifică-te'}
-          </button>
-          <div className="flex items-center justify-between text-[11px]">
+    <div className="flex min-h-[calc(100vh-100px)] items-center justify-center py-12">
+      <div className="w-full max-w-md space-y-6 rounded-xl border border-white/10 bg-gray-800 p-8 shadow-2xl">
+        <h1 className="text-3xl font-extrabold text-white text-center">
+          {isResetView ? 'Resetare Parolă' : 'Contul Meu'}
+        </h1>
+        
+        {/* Tab-uri Principale */}
+        {!isResetView && (
+          <div className="flex gap-2 p-1 rounded-xl bg-gray-700/50 shadow-inner">
             <button
               type="button"
-              className="text-indigo-300 hover:underline"
-              onClick={() => setMode(m => m === 'password' ? 'magic' : 'password')}
-            >{mode === 'password' ? 'Login cu link pe email' : 'Login cu parolă'}</button>
+              onClick={() => setTab('login')}
+              className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
+                tab==='login' 
+                  ? 'bg-indigo-600 text-white shadow-md' 
+                  : 'text-gray-300 hover:bg-gray-700/70'
+              }`}
+            >Autentificare</button>
+            <button
+              type="button"
+              onClick={() => setTab('register')}
+              className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
+                tab==='register' 
+                  ? 'bg-indigo-600 text-white shadow-md' 
+                  : 'text-gray-300 hover:bg-gray-700/70'
+              }`}
+            >Creează cont</button>
           </div>
-          <div className="flex justify-between items-center mt-1">
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); if (email) requestReset(email); }}
-              className="text-[11px] text-indigo-300 hover:underline"
-            >Resetare parolă</a>
-          </div>
-          {error && <p className="text-red-400 text-xs">{error}</p>}
-          {success && <p className="text-emerald-400 text-xs">{success}</p>}
-          {mode === 'password' && (
-            <p className="text-xs text-muted">Nu ai cont? Îl poți crea rapid la checkout bifând "Creează cont".</p>
-          )}
-        </form>
         )}
-        {tab === 'register' && (
-          <form onSubmit={onRegister} className="space-y-3">
+
+        <div className="space-y-5">
+          
+          {/* --- LOGIN FORM --- */}
+          {tab === 'login' && !isResetView && (
+          <form onSubmit={onSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm mb-1">Nume (opțional)</label>
-              <input
-                type="text"
-                value={regName}
-                onChange={(e) => setRegName(e.target.value)}
-                className="w-full rounded-md border px-3 py-2 bg-surface border-[--border]"
-                placeholder="Nume și prenume"
-                autoComplete="name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-md border px-3 py-2 bg-surface border-[--border]"
+                className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 placeholder="email@exemplu.ro"
                 required
                 autoComplete="email"
               />
             </div>
-            <div>
-              <label className="block text-sm mb-1">Parolă</label>
-              <div className="relative">
-                <input
-                  type={showRegisterPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-md border px-3 py-2 bg-surface border-[--border] pr-10"
-                  placeholder="Minim 8 caractere"
-                  required
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                >
-                  {showRegisterPassword ? <EyeOffIcon /> : <EyeIcon />}
-                </button>
+            
+            {mode === 'password' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Parolă</label>
+                <div className="relative">
+                  <input
+                    type={showLoginPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 pr-10 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    placeholder="••••••••"
+                    required
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showLoginPassword ? <EyeOffIcon /> : <EyeIcon />}
+                  </button>
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="block text-sm mb-1">Confirmă parola</label>
-              <div className="relative">
-                <input
-                  type={showRegisterPassword ? "text" : "password"}
-                  value={regConfirm}
-                  onChange={(e) => setRegConfirm(e.target.value)}
-                  className="w-full rounded-md border px-3 py-2 bg-surface border-[--border] pr-10"
-                  placeholder="Repetă parola"
-                  required
-                  autoComplete="new-password"
-                />
-                {/* Folosim același switch pentru confirmare pentru a nu aglomera UI-ul, 
-                    dar poți adăuga un state separat dacă dorești */}
-                <button
-                  type="button"
-                  onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                >
-                  {showRegisterPassword ? <EyeOffIcon /> : <EyeIcon />}
-                </button>
-              </div>
-            </div>
+            )}
+
             <button
               type="submit"
-              disabled={loading || !email || password.length < 8 || password !== regConfirm}
-              className="w-full rounded-md px-4 py-2 bg-indigo-600 text-white font-semibold hover:bg-indigo-500 disabled:opacity-60"
-            >{loading ? 'Se procesează...' : 'Creează cont'}</button>
-            {error && <p className="text-red-400 text-xs">{error}</p>}
-            {success && <p className="text-emerald-400 text-xs">{success}</p>}
+              disabled={loading || !email || (mode==='password' && !password)}
+              className="w-full rounded-lg px-4 py-2 bg-indigo-600 text-white font-semibold shadow-md hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              {loading ? 'Se procesează...' : mode === 'magic' ? 'Trimite link de login' : 'Autentifică-te'}
+            </button>
+
+            {/* Acțiuni Secundare */}
+            <div className="flex items-center justify-between text-xs pt-1">
+              <button
+                type="button"
+                className="text-indigo-300 hover:text-indigo-200 hover:underline transition-colors"
+                onClick={() => setMode(m => m === 'password' ? 'magic' : 'password')}
+              >
+                {mode === 'password' ? 'Login cu link pe email' : 'Login cu parolă'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setError(null); setSuccess(null); setIsResetView(true); }}
+                className="text-gray-400 hover:text-white hover:underline transition-colors"
+              >
+                Resetare parolă
+              </button>
+            </div>
           </form>
-        )}
-        <div className="relative text-center">
-          <span className="text-sm text-muted">sau</span>
+          )}
+
+          {/* --- RESET PASSWORD FORM --- */}
+          {isResetView && (
+            <form onSubmit={handleResetRequest} className="space-y-4">
+              <div className="p-4 rounded-lg bg-gray-700 border border-gray-600 text-center">
+                  <p className="text-sm text-gray-300 mb-4">Introdu adresa de email și îți vom trimite un link pentru a seta o parolă nouă.</p>
+                  
+                  <div className="text-left mb-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                      placeholder="email@exemplu.ro"
+                      required
+                      autoComplete="email"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading || !email}
+                    className="w-full rounded-lg px-4 py-2 bg-indigo-600 text-white font-semibold shadow-md hover:bg-indigo-500 disabled:opacity-50 transition"
+                  >
+                    {loading ? 'Se trimite...' : 'Trimite link resetare'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsResetView(false)}
+                    className="mt-4 text-xs text-gray-400 hover:text-white hover:underline"
+                  >
+                    ← Înapoi la autentificare
+                  </button>
+              </div>
+            </form>
+          )}
+
+          {/* --- REGISTER FORM --- */}
+          {tab === 'register' && !isResetView && (
+            <form onSubmit={onRegister} className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Nume (opțional)</label>
+                <input
+                  type="text"
+                  value={regName}
+                  onChange={(e) => setRegName(e.target.value)}
+                  className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                  placeholder="Nume și prenume"
+                  autoComplete="name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                  placeholder="email@exemplu.ro"
+                  required
+                  autoComplete="email"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Parolă</label>
+                <div className="relative">
+                  <input
+                    type={showRegisterPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 pr-10 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    placeholder="Minim 8 caractere"
+                    required
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showRegisterPassword ? <EyeOffIcon /> : <EyeIcon />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Confirmă parola</label>
+                <div className="relative">
+                  <input
+                    type={showRegisterPassword ? "text" : "password"}
+                    value={regConfirm}
+                    onChange={(e) => setRegConfirm(e.target.value)}
+                    className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 pr-10 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    placeholder="Repetă parola"
+                    required
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showRegisterPassword ? <EyeOffIcon /> : <EyeIcon />}
+                  </button>
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={loading || !email || password.length < 8 || password !== regConfirm}
+                className="w-full rounded-lg px-4 py-2 bg-indigo-600 text-white font-semibold shadow-md hover:bg-indigo-500 disabled:opacity-50 transition"
+              >{loading ? 'Se procesează...' : 'Creează cont'}</button>
+            </form>
+          )}
+
+          {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">{error}</div>}
+          {success && <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm text-center">{success}</div>}
+
+          {/* Social Login / Separator */}
+          {!isResetView && (
+            <>
+              <div className="relative text-center py-2">
+                <span className="text-sm text-gray-400 bg-gray-800 px-2 relative z-10">sau continuă cu</span>
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-700"></div></div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => signIn("google", { callbackUrl: "/account" })}
+                    className="flex-1 rounded-lg px-4 py-2 bg-white text-black border border-gray-300 font-semibold shadow-sm hover:bg-gray-100 transition"
+                    type="button"
+                  >
+                    Google
+                  </button>
+                  <button
+                    onClick={() => signIn("facebook", { callbackUrl: "/account" })}
+                    className="flex-1 rounded-lg px-4 py-2 bg-blue-600 text-white border border-blue-600 font-semibold shadow-sm hover:bg-blue-700 transition"
+                    type="button"
+                  >
+                    Facebook
+                  </button>
+              </div>
+            </>
+          )}
+           {!isResetView && tab === 'login' && mode === 'password' && (
+             <p className="text-xs text-gray-400 text-center pt-2">Nu ai cont? Îl poți crea rapid aici sau la checkout.</p>
+           )}
         </div>
-        <button
-          onClick={() => signIn("google", { callbackUrl: "/account" })}
-          className="w-full rounded-md px-4 py-2 bg-white text-black border border-[--border] font-semibold hover:bg-gray-50"
-          type="button"
-        >
-          Continuă cu Google
-        </button>
       </div>
     </div>
   );
