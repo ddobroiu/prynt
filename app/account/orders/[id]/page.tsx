@@ -75,6 +75,15 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
              ) : (
                <p className="text-sm text-zinc-500">Fără adresă salvată.</p>
              )}
+
+             {/* AWB vizibil dacă există */}
+             {order.awbNumber && (
+               <div className="mt-4 p-3 rounded-lg bg-indigo-50 border border-indigo-200 text-sm text-indigo-800 flex items-center gap-2">
+                 <span className="font-semibold">AWB:</span>
+                 <span className="font-mono text-indigo-700">{order.awbNumber}</span>
+                 {order.awbCarrier && <span className="ml-2 text-xs text-zinc-500">({order.awbCarrier})</span>}
+               </div>
+             )}
           </div>
         </div>
 
