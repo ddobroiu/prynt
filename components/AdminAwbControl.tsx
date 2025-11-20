@@ -14,6 +14,7 @@ export default function AdminAwbControl({ orderId, currentAwb }: { orderId: stri
   const generateAwb = async () => {
     setLoading(true);
     try {
+      console.log('[AWB GENERATE] orderId trimis:', orderId);
       const res = await fetch("/api/dpd/awb", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

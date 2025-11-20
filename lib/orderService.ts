@@ -337,12 +337,14 @@ async function sendEmails(
         address,
         paymentType,
         totalAmount: totalComanda,
+        orderId: orderId || undefined,
       });
       const tokenConfirm = signAdminAction({
         action: 'confirm_awb',
         address,
         paymentType,
         totalAmount: totalComanda,
+        orderId: orderId || undefined,
       });
       const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
       const defaultSid = encodeURIComponent(String(process.env.DPD_DEFAULT_SERVICE_ID));
