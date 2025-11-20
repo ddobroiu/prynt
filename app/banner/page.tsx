@@ -1,54 +1,25 @@
-import { notFound } from "next/navigation";
-import ProductJsonLd from "@/components/ProductJsonLd";
-import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
-import type { Product } from "@/lib/products";
+import React from "react";
 import BannerConfigurator from "@/components/BannerConfigurator";
+import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 
-type Props = { params?: Promise<{ slug?: string[] }> };
+export const metadata = {
+  title: "Bannere Publicitare Personalizate | Frontlit 440g & 510g | Prynt",
+  description: "Comandă bannere publicitare outdoor personalizate. Print digital de mari dimensiuni, finisaje incluse (tiv și capse). Rezistente la apă și UV.",
+  alternates: { canonical: "/banner" },
+};
 
-export async function generateStaticParams() {
-  const slugs = getAllProductSlugsByCategory("banner");
-  return slugs.map((slug) => ({ slug: [slug] }));
-}
-
-export async function generateMetadata({ params }: Props) {
-  const resolved = await params;
-  const raw = (resolved?.slug ?? []).join("/");
-  const { product, isFallback } = await resolveProductForRequestedSlug(String(raw), "banner");
-  if (!product) return {};
-
-  const metadata: any = {
-    title: product.seo?.title || `${product.title} | Prynt`,
-    description: product.seo?.description || product.description,
-    openGraph: { 
-      title: product.seo?.title || product.title, 
-      description: product.description, 
-      images: product.images 
-    },
-  };
-  if (isFallback) metadata.robots = { index: false, follow: true };
-  return metadata;
-}
-
-export default async function Page({ params }: Props) {
-  const resolved = await params;
-  const slugParts: string[] = resolved?.slug ?? [];
-  const joinedSlug = slugParts.join("/");
-
-  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug), "banner");
-
-  if (!product) return notFound();
-
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/banner/${joinedSlug}`;
+export default function BannerPage() {
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro";
 
   return (
     <>
-      <ProductJsonLd product={(product as Product)} url={url} />
-      <BannerConfigurator 
-        productSlug={product.slug ?? product.routeSlug} 
-        initialWidth={initialWidth}
-        initialHeight={initialHeight}
+      <BreadcrumbsJsonLd 
+        items={[
+          { name: "Acasă", url: `${base}/` }, 
+          { name: "Banner", url: `${base}/banner` }
+        ]} 
       />
+      <BannerConfigurator productSlug="banner" />
     </>
   );
 }
