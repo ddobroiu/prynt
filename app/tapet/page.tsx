@@ -1,11 +1,10 @@
 import React from "react";
 import TapetConfigurator from "@/components/TapetConfigurator";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
-import { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Tapet Personalizat | Imprimare Tapet Decorativ",
-  description: "Creează un decor unic cu tapet personalizat. Introdu dimensiunile peretelui, alege materialul și încarcă designul tău. Calitate superioară și montaj ușor.",
+export const metadata = {
+  title: "Tapet Personalizat | Print Digital HD | Decor Pereți",
+  description: "Transformă pereții cu tapet personalizat. Printam orice imagine sau grafică la dimensiunile dorite. Materiale premium, lavabile.",
   alternates: { canonical: "/tapet" },
 };
 

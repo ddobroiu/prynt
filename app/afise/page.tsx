@@ -3,8 +3,8 @@ import AfiseConfigurator from "@/components/AfiseConfigurator";
 import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 
 export const metadata = {
-  title: "Afișe Personalizate | Print Digital Calitate Superioară",
-  description: "Creează și comandă afișe personalizate online. Alege din multiple dimensiuni și materiale, de la hârtie standard la materiale speciale. Prețuri competitive și livrare rapidă.",
+  title: "Afișe Publicitare Personalizate | Print Digital | Prynt",
+  description: "Comandă afișe publicitare (postere) online. Formate A3, A2, A1, A0, 50x70, 70x100. Hârtie lucioasă sau mată, print indoor/outdoor.",
   alternates: { canonical: "/afise" },
 };
 
