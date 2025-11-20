@@ -618,7 +618,7 @@ export const calculateTapetPrice = (input: PriceInputTapet) => {
   if (input.want_adhesive) pricePerSqm *= TAPET_CONSTANTS.PRICES.multipliers.adhesive;
   let finalPrice = roundMoney(totalSqm * pricePerSqm);
   if (input.designOption === "pro") finalPrice += TAPET_CONSTANTS.PRO_DESIGN_FEE;
-  return { finalPrice: roundMoney(finalPrice), total_sqm, pricePerUnit: roundMoney(finalPrice / input.quantity) };
+  return { finalPrice: roundMoney(finalPrice), totalSqm, pricePerUnit: roundMoney(finalPrice / input.quantity) };
 };
 
 // ==========================================

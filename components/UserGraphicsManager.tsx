@@ -116,12 +116,12 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
                   
                   {item.artworkUrl ? (
                     <div className="flex flex-col sm:flex-row gap-2">
-                        <Button variant="outline" size="sm" asChild className="w-full sm:w-auto border-zinc-200 dark:border-zinc-700">
+                        <Button variant="outline" size="sm" className="w-full sm:w-auto border-zinc-200 dark:border-zinc-700">
                             <a href={item.artworkUrl} target="_blank" rel="noopener noreferrer">
                                 <FileText size={14} className="mr-2 text-indigo-500" /> Vezi Fișierul
                             </a>
                         </Button>
-                        <Button variant="ghost" size="sm" asChild className="w-full sm:w-auto text-zinc-500 hover:text-zinc-900">
+                        <Button variant="ghost" size="sm" className="w-full sm:w-auto text-zinc-500 hover:text-zinc-900">
                             <label htmlFor={`upload-${item.id}`} className="cursor-pointer">
                                 {uploadingId === item.id ? <Loader2 className="animate-spin" size={14}/> : "Înlocuiește"}
                             </label>
@@ -129,7 +129,7 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
                     </div>
                   ) : (
                     <div className="flex flex-col gap-1">
-                        <Button asChild size="sm" className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">
+                        <Button size="sm" className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">
                         <label htmlFor={`upload-${item.id}`} className="cursor-pointer flex items-center justify-center gap-2">
                             {uploadingId === item.id ? (
                             <>
