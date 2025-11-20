@@ -16,6 +16,42 @@ import {
 } from "@/lib/pricing";
 import { QA } from "@/types";
 
+/* --- NEW COMPONENT: ARTWORK RATIO PREVIEW --- */
+// Aceasta este componenta nouă cerută. 
+// Ea afișează strict imaginea într-un container cu aspect ratio corect (L/H).
+const ArtworkRatioPreview = ({ width, height, imageUrl }: { width: number; height: number; imageUrl: string | null }) => {
+    // Calculăm raportul de aspect. Dacă nu sunt dimensiuni, folosim pătrat (1/1)
+    const ratio = (width > 0 && height > 0) ? width / height : 1;
+    
+    return (
+        <div className="w-full h-full flex items-center justify-center bg-zinc-100 p-6 overflow-hidden relative">
+            {/* Containerul care ține forma corectă */}
+            <div 
+                style={{ aspectRatio: ratio }} 
+                className="relative shadow-2xl border-4 border-white bg-white max-w-full max-h-full flex items-center justify-center"
+            >
+                {imageUrl ? (
+                    <img 
+                        src={imageUrl} 
+                        alt="Simulare Grafică" 
+                        className="w-full h-full object-cover" 
+                    />
+                ) : (
+                    <div className="flex flex-col items-center justify-center p-4 text-center">
+                         <UploadCloud className="w-10 h-10 text-gray-300 mb-2" />
+                         <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Încarcă imagine</span>
+                    </div>
+                )}
+            </div>
+            
+            {/* Label informativ */}
+            <div className="absolute bottom-2 left-0 w-full text-center text-[10px] text-gray-400 uppercase tracking-widest">
+                Raport dimensiune: {width || 0}x{height || 0} cm
+            </div>
+        </div>
+    );
+};
+
 /* --- SUB-COMPONENTS --- */
 const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
     <div className="relative pl-12">
@@ -103,7 +139,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   
   const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"] : ["/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp", "/products/banner/4.webp"], [productImage]);
   
-  // 3 Moduri: Galerie, Schiță (doar forma), Simulare (cu poza)
+  // 3 Moduri: Galerie, Schiță (doar forma tehnică), Simulare (Componenta nouă cu poza)
   const [viewMode, setViewMode] = useState<ViewMode>('gallery');
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -123,7 +159,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const updateInput = <K extends keyof PriceInputBanner>(k: K, v: PriceInputBanner[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
   
-  // Auto-switch la 'shape' când se modifică dimensiunile, pentru a vedea proporțiile
+  // Auto-switch la 'shape' când se modifică dimensiunile
   const onChangeLength = (v: string) => { 
       const d = v.replace(/\D/g, ""); 
       setLengthText(d); 
@@ -146,10 +182,10 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       const previewUrl = URL.createObjectURL(file);
       setArtworkUrl(previewUrl); 
       
-      // Comutăm automat pe modul Simulare când se încarcă o poză
+      // Comutăm automat pe modul Simulare (Componenta Nouă) când se încarcă o poză
       setViewMode('simulation');
 
-      // 2. Upload în Background
+      // 2. Upload în Background (către Cloudinary prin API)
       setUploading(true);
       const form = new FormData();
       form.append("file", file);
@@ -228,7 +264,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
-          {/* STÂNGA - ZONA VIZUALĂ (ACUM CU 3 TAB-URI) */}
+          {/* STÂNGA - ZONA VIZUALĂ */}
           <div className="lg:sticky top-24 h-max space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
               
@@ -246,14 +282,14 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                       className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'shape' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
                   >
                       <Ruler size={16} /> 
-                      <span className="hidden sm:inline">Schiță</span>
+                      <span className="hidden sm:inline">Schiță Tehnică</span>
                   </button>
                   <button 
                       onClick={() => setViewMode('simulation')}
                       className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'simulation' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
                   >
                       <Eye size={16} /> 
-                      <span className="hidden sm:inline">Simulare</span>
+                      <span className="hidden sm:inline">Grafica Mea</span>
                   </button>
               </div>
 
@@ -264,7 +300,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                   
                   {viewMode === 'shape' && (
                       <div className="h-full w-full p-4 animate-in fade-in slide-in-from-bottom-4 duration-300 bg-zinc-50">
-                          {/* SCHIȚA: Trimitem imageUrl={null} pentru a vedea doar forma tehnică */}
+                          {/* AICI E SCHIȚA TEHNICĂ (NU NE ATINGEM DE EA, E SEPARATĂ) */}
                           <DynamicBannerPreview 
                               width={input.width_cm} 
                               height={input.height_cm} 
@@ -273,25 +309,23 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                               imageUrl={null} 
                           />
                           <div className="absolute bottom-4 left-0 w-full text-center text-xs text-gray-400">
-                             Previzualizare tehnică (poziționare capse)
+                             Vizualizare tehnică (poziționare capse)
                           </div>
                       </div>
                   )}
 
                   {viewMode === 'simulation' && (
-                      <div className="h-full w-full p-4 animate-in fade-in slide-in-from-bottom-4 duration-300 bg-zinc-50 relative">
-                          {/* SIMULARE: Trimitem imageUrl={artworkUrl} pentru a vedea grafica */}
-                          <DynamicBannerPreview 
+                      <div className="h-full w-full animate-in fade-in slide-in-from-bottom-4 duration-300 bg-zinc-50 relative">
+                          {/* AICI ESTE COMPONENTA NOUĂ - ARTWORK PREVIEW */}
+                          <ArtworkRatioPreview 
                               width={input.width_cm} 
                               height={input.height_cm} 
-                              hasGrommets={input.want_hem_and_grommets}
-                              hasWindHoles={input.want_wind_holes}
-                              imageUrl={artworkUrl} 
+                              imageUrl={artworkUrl}
                           />
+                          
                           {!artworkUrl && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px]">
-                                <UploadCloud className="w-12 h-12 text-gray-300 mb-2" />
-                                <p className="text-sm text-gray-500 font-medium">Încarcă o grafică pentru simulare</p>
+                                <p className="text-sm text-gray-500 font-medium">Încarcă o grafică pentru previzualizare</p>
                                 <button onClick={() => setActiveStep(3)} className="mt-2 text-xs text-indigo-600 hover:underline">Mergi la pasul upload</button>
                             </div>
                           )}
