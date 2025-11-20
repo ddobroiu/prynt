@@ -45,7 +45,6 @@ export default function AdminInvoiceControl({ id, invoiceLink }: { id: string; i
           variant="outline" 
           size="sm" 
           className="h-7 w-full bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 text-[10px]"
-          asChild
         >
           <a href={invoiceLink} target="_blank" rel="noopener noreferrer">
             <Eye size={12} className="mr-1" /> Vezi Factura

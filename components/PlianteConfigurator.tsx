@@ -102,7 +102,8 @@ export default function PlianteConfigurator({ productSlug }: Props) {
   const [errorToast, setErrorToast] = useState<string | null>(null);
   
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
+  type GalleryImage = typeof GALLERY[number];
+  const [activeImage, setActiveImage] = useState<GalleryImage>(GALLERY[0]);
 
   // Pricing
   const priceData = useMemo(() => calculatePliantePrice({ weight, quantity, fold, designOption }), [weight, quantity, fold, designOption]);

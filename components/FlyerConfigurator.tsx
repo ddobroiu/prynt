@@ -24,7 +24,7 @@ const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, 
     <div className="relative pl-12">
         <div className="absolute top-5 left-0 flex flex-col items-center h-full">
             <span className={`flex items-center justify-center w-8 h-8 rounded-full text-md font-bold transition-colors ${isOpen ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}>{stepNumber}</span>
-            {!isLast && <div className="w-px flex-grow bg-gray-200 mt-2"></div>}
+            {!isLast && <div className="w-px grow bg-gray-200 mt-2"></div>}
         </div>
         <div className="flex-1">
             <button type="button" className="w-full flex items-center justify-between py-5 text-left" onClick={onClick}>
@@ -101,7 +101,8 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
   const [uploadError, setUploadError] = useState<string | null>(null);
   
   const [activeIndex, setActiveIndex] = useState(0);
-  const [activeImage, setActiveImage] = useState(GALLERY[0]);
+  type GalleryImage = typeof GALLERY[number];
+  const [activeImage, setActiveImage] = useState<GalleryImage>(GALLERY[0]);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);

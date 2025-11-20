@@ -11,6 +11,7 @@ import {
   calculateBannerPrice, 
   BANNER_CONSTANTS, 
   formatMoneyDisplay, 
+  roundMoney,
   type PriceInputBanner 
 } from "@/lib/pricing";
 
@@ -19,7 +20,7 @@ const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, 
     <div className="relative pl-12">
         <div className="absolute top-5 left-0 flex flex-col items-center h-full">
             <span className={`flex items-center justify-center w-8 h-8 rounded-full text-md font-bold transition-colors ${isOpen ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}>{stepNumber}</span>
-            {!isLast && <div className="w-px flex-grow bg-gray-200 mt-2"></div>}
+            {!isLast && <div className="w-px grow bg-gray-200 mt-2"></div>}
         </div>
         <div className="flex-1">
             <button type="button" className="w-full flex items-center justify-between py-5 text-left" onClick={onClick}>
