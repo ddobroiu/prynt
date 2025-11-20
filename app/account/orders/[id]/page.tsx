@@ -78,10 +78,19 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
 
              {/* AWB vizibil dacă există */}
              {order.awbNumber && (
-               <div className="mt-4 p-3 rounded-lg bg-indigo-50 border border-indigo-200 text-sm text-indigo-800 flex items-center gap-2">
-                 <span className="font-semibold">AWB:</span>
-                 <span className="font-mono text-indigo-700">{order.awbNumber}</span>
-                 {order.awbCarrier && <span className="ml-2 text-xs text-zinc-500">({order.awbCarrier})</span>}
+               <div className="mt-4 p-3 rounded-lg bg-indigo-50 border border-indigo-200 text-sm text-indigo-800 flex flex-col gap-2">
+                 <div className="flex items-center gap-2">
+                   <span className="font-semibold">AWB:</span>
+                   <span className="font-mono text-indigo-700">{order.awbNumber}</span>
+                   {order.awbCarrier && <span className="ml-2 text-xs text-zinc-500">({order.awbCarrier})</span>}
+                 </div>
+                 <a
+                   href={`https://tracking.dpd.ro/?shipmentNumber=${encodeURIComponent(order.awbNumber)}&language=ro`}
+                   target="_blank"
+                   className="inline-block mt-2 text-xs font-bold bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-500 transition-colors"
+                 >
+                   Urmărește livrarea
+                 </a>
                </div>
              )}
           </div>

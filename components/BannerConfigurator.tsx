@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
 import DynamicBannerPreview from "./DynamicBannerPreview";
-import ArtworkRatioPreview from "./ArtworkRatioPreview"; // Importăm componenta nouă
+import ArtworkRatioPreview from "./ArtworkRatioPreview"; 
 import { 
   calculateBannerPrice, 
   BANNER_CONSTANTS, 
@@ -91,7 +91,6 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 
 type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string; renderOnlyConfigurator?: boolean; imageUrl?: string | null };
 
-// Doar două moduri acum: Galerie și Schiță (Shape)
 type ViewMode = 'gallery' | 'shape';
 
 /* --- MAIN COMPONENT --- */
@@ -104,9 +103,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   
   const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"] : ["/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp", "/products/banner/4.webp"], [productImage]);
   
-  // 2 Moduri: Galerie (poze) și Schiță (tehnic)
   const [viewMode, setViewMode] = useState<ViewMode>('gallery');
-
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeImage, setActiveImage] = useState<string>(galleryImages[0]);
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
@@ -124,7 +121,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const updateInput = <K extends keyof PriceInputBanner>(k: K, v: PriceInputBanner[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
   
-  // Când modificăm dimensiunile -> Mutăm automat pe Schiță Tehnică
   const onChangeLength = (v: string) => { 
       const d = v.replace(/\D/g, ""); 
       setLengthText(d); 
@@ -143,21 +139,16 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     setUploadError(null);
     if (!file) return;
     try {
-      // 1. Previzualizare Locală
       const previewUrl = URL.createObjectURL(file);
       setArtworkUrl(previewUrl); 
-      
-      // Când încărcăm o poză -> Mutăm automat pe Galerie (unde se va vedea ArtworkRatioPreview)
       setViewMode('gallery');
 
-      // 2. Upload
       setUploading(true);
       const form = new FormData();
       form.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: form });
       if (!res.ok) throw new Error("Upload eșuat");
       const data = await res.json();
-      
       setArtworkUrl(data.url); 
     } catch (e: any) {
       setUploadError(e?.message ?? "Eroare la upload");
@@ -205,9 +196,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   }
 
   useEffect(() => {
-    // Facem autoplay la galerie doar dacă NU avem o grafică încărcată
     if (viewMode !== 'gallery' || artworkUrl) return;
-    
     const id = setInterval(() => {
       setActiveIndex((i) => {
         const next = (i + 1) % galleryImages.length;
@@ -234,8 +223,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
           {/* STÂNGA - ZONA VIZUALĂ */}
           <div className="lg:sticky top-24 h-max space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-              
-              {/* Header Switch: Doar Galerie și Schiță */}
               <div className="flex border-b border-gray-100 overflow-x-auto">
                   <button 
                       onClick={() => setViewMode('gallery')}
@@ -256,15 +243,14 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               <div className="aspect-square relative bg-white">
                   {viewMode === 'gallery' && (
                     <>
-                        {/* LOGICA: Dacă avem artworkUrl, afișăm ArtworkRatioPreview.
-                           Dacă NU, afișăm imaginea standard din galerie.
-                        */}
                         {artworkUrl ? (
                             <div className="h-full w-full animate-in fade-in duration-300">
                                 <ArtworkRatioPreview 
                                     width={input.width_cm} 
                                     height={input.height_cm} 
                                     imageUrl={artworkUrl}
+                                    hasGrommets={input.want_hem_and_grommets}
+                                    hasWindHoles={input.want_wind_holes}
                                 />
                             </div>
                         ) : (
@@ -283,7 +269,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                               imageUrl={null} 
                           />
                           <div className="absolute bottom-4 left-0 w-full text-center text-xs text-gray-400">
-                             Vizualizare tehnică (poziționare capse)
+                             Vizualizare tehnică (cote și finisaje)
                           </div>
                       </div>
                   )}
@@ -295,12 +281,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                         <button 
                             key={src} 
                             onClick={() => { 
-                                // Dacă userul dă click pe o poză mică, o setăm ca activă.
-                                // Notă: Dacă artworkUrl există, acesta va rămâne prioritar deasupra.
                                 setActiveImage(src); 
                                 setActiveIndex(i); 
-                                // Opțional: Putem șterge artworkUrl dacă userul vrea să vadă pozele stock
-                                // setArtworkUrl(null); 
                             }} 
                             className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}
                         >
@@ -351,7 +333,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                     </div>
                   </div>
 
-                  {/* AICI ESTE INPUT-UL */}
                   {input.designOption === 'upload' && (
                     <div className="space-y-3">
                       <p className="text-sm text-gray-600">Încarcă fișierul tău (PDF, JPG, TIFF, etc.).</p>
