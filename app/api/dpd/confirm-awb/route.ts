@@ -49,9 +49,10 @@ export async function POST(req: NextRequest) {
     // Persist AWB to order if provided
     if (orderId) {
       try {
-        await prisma.order.update({ where: { id: orderId }, data: { awbNumber: shipmentId, awbCarrier: 'DPD' } });
+        const result = await prisma.order.update({ where: { id: orderId }, data: { awbNumber: shipmentId, awbCarrier: 'DPD' } });
+        console.log('[AWB UPDATE] orderId:', orderId, 'awbNumber:', shipmentId, 'awbCarrier: DPD', 'result:', result);
       } catch (e) {
-        console.warn('[confirm-awb] Persist AWB failed:', (e as any)?.message || e);
+        console.error('[AWB UPDATE ERROR] orderId:', orderId, 'awbNumber:', shipmentId, 'awbCarrier: DPD', 'error:', (e as any)?.message || e);
       }
     }
 

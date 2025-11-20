@@ -342,9 +342,10 @@ export async function GET(req: NextRequest) {
       // Persist AWB to order if we know it (confirm flow)
       if (payload.orderId) {
         try {
-          await prisma.order.update({ where: { id: payload.orderId }, data: { awbNumber: shipmentId, awbCarrier: 'DPD' } });
+          const result = await prisma.order.update({ where: { id: payload.orderId }, data: { awbNumber: shipmentId, awbCarrier: 'DPD' } });
+          console.log('[AWB UPDATE] orderId:', payload.orderId, 'awbNumber:', shipmentId, 'awbCarrier: DPD', 'result:', result);
         } catch (e) {
-          console.warn('[admin-action] Persist AWB (confirm) failed:', (e as any)?.message || e);
+          console.error('[AWB UPDATE ERROR] orderId:', payload.orderId, 'awbNumber:', shipmentId, 'awbCarrier: DPD', 'error:', (e as any)?.message || e);
         }
       }
 
