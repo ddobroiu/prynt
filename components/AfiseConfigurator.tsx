@@ -71,11 +71,21 @@ function OptionButton({ active, onClick, title, subtitle }: { active: boolean; o
   return <button type="button" onClick={onClick} className={`w-full text-left p-3 rounded-lg border-2 transition-all text-sm ${active ? "border-indigo-600 bg-indigo-50" : "border-gray-300 bg-white hover:border-gray-400"}`}><div className="font-bold text-gray-800">{title}</div>{subtitle && <div className="text-xs text-gray-600 mt-1">{subtitle}</div>}</button>;
 }
 
-export default function AfiseConfigurator({ productSlug }: { productSlug?: string }) {
+export default function AfiseConfigurator({ productSlug, initialWidth, initialHeight }: { productSlug?: string; initialWidth?: number; initialHeight?: number }) {
   const { addItem } = useCart();
   const [size, setSize] = useState<string>("A2");
   const [material, setMaterial] = useState<string>("whiteback_150_material");
   const [quantity, setQuantity] = useState<number>(50);
+  // Setează dimensiuni inițiale dacă sunt furnizate
+  useEffect(() => {
+    if (initialWidth) {
+      // Poți folosi initialWidth pentru logica custom (ex: setare dimensiune)
+      // Exemplu: setSize('custom') sau altă logică specifică
+    }
+    if (initialHeight) {
+      // Similar pentru initialHeight
+    }
+  }, [initialWidth, initialHeight]);
   const [designOption, setDesignOption] = useState<"upload" | "pro">("upload");
   
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
