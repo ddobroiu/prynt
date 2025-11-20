@@ -26,33 +26,39 @@ const uploadStream = (buffer: Buffer, folder: string) => {
 
 
 export async function POST(req: NextRequest) {
-  try {
-    const formData = await req.formData();
-    const file = formData.get('file') as File;
-    const type = formData.get('type') as string; 
-    const publicId = formData.get('publicId') as string; // Acesta va fi orderItemId
+    try {
+        const formData = await req.formData();
+        const file = formData.get('file') as File;
+        const type = formData.get('type') as string; 
+        const publicId = formData.get('publicId') as string; // Acesta va fi orderItemId
 
-    if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 });
+        if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 });
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+        const buffer = Buffer.from(await file.arrayBuffer());
 
-    // 1. Încărcare pe Cloudinary
-    const result: any = await uploadStream(buffer, "prynt-uploads"); 
+        // 1. Încărcare pe Cloudinary
+        let result: any = null;
+        try {
+            result = await uploadStream(buffer, "prynt-uploads");
+        } catch (cloudinaryError) {
+            // Returnează eroarea exactă de la Cloudinary
+            return NextResponse.json({ error: 'Cloudinary', details: cloudinaryError }, { status: 500 });
+        }
 
-    const fileUrl = result.secure_url; // URL-ul final de la Cloudinary
+        const fileUrl = result.secure_url; // URL-ul final de la Cloudinary
 
-    // LOGICA CRITICĂ: Dacă e grafică de produs, actualizăm OrderItem
-    if (type === 'order_item_artwork' && publicId) {
-        await prisma.orderItem.update({
-            where: { id: publicId },
-            data: { artworkUrl: fileUrl }
-        });
+        // LOGICA CRITICĂ: Dacă e grafică de produs, actualizăm OrderItem
+        if (type === 'order_item_artwork' && publicId) {
+                await prisma.orderItem.update({
+                        where: { id: publicId },
+                        data: { artworkUrl: fileUrl }
+                });
+        }
+
+        // Aici, URL-ul se returnează către BannerConfigurator.tsx
+        return NextResponse.json({ success: true, url: fileUrl });
+    } catch (error) {
+        console.error("Cloudinary Upload Error:", error);
+        return NextResponse.json({ error: 'Fail', details: error }, { status: 500 });
     }
-
-    // Aici, URL-ul se returnează către BannerConfigurator.tsx
-    return NextResponse.json({ success: true, url: fileUrl });
-  } catch (error) {
-    console.error("Cloudinary Upload Error:", error);
-    return NextResponse.json({ error: 'Fail' }, { status: 500 });
-  }
 }
