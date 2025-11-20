@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
-import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Box } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Box, Eye, Ruler } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { useRouter } from "next/navigation";
 import FaqAccordion from "./FaqAccordion";
@@ -90,6 +90,9 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 
 type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string; renderOnlyConfigurator?: boolean; imageUrl?: string | null };
 
+// Definesc tipurile de view posibile
+type ViewMode = 'gallery' | 'shape' | 'simulation';
+
 /* --- MAIN COMPONENT --- */
 export default function BannerConfigurator({ productSlug, initialWidth: initW, initialHeight: initH, productImage, renderOnlyConfigurator = false }: Props) {
   const { addItem } = useCart();
@@ -100,8 +103,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   
   const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"] : ["/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp", "/products/banner/4.webp"], [productImage]);
   
-  // SWITCH: Galerie vs Preview
-  const [viewMode, setViewMode] = useState<'gallery' | 'preview'>('gallery');
+  // 3 Moduri: Galerie, Schiță (doar forma), Simulare (cu poza)
+  const [viewMode, setViewMode] = useState<ViewMode>('gallery');
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeImage, setActiveImage] = useState<string>(galleryImages[0]);
@@ -120,18 +123,18 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const updateInput = <K extends keyof PriceInputBanner>(k: K, v: PriceInputBanner[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
   
-  // Auto-switch la Preview când se modifică dimensiunile
+  // Auto-switch la 'shape' când se modifică dimensiunile, pentru a vedea proporțiile
   const onChangeLength = (v: string) => { 
       const d = v.replace(/\D/g, ""); 
       setLengthText(d); 
       updateInput("width_cm", d === "" ? 0 : parseInt(d, 10));
-      if(d && parseInt(d) > 0) setViewMode('preview');
+      if(d && parseInt(d) > 0) setViewMode('shape');
   };
   const onChangeHeight = (v: string) => { 
       const d = v.replace(/\D/g, ""); 
       setHeightText(d); 
       updateInput("height_cm", d === "" ? 0 : parseInt(d, 10));
-      if(d && parseInt(d) > 0) setViewMode('preview');
+      if(d && parseInt(d) > 0) setViewMode('shape');
   };
   
   const handleArtworkFileInput = async (file: File | null) => {
@@ -139,12 +142,14 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     setUploadError(null);
     if (!file) return;
     try {
-      // 1. Previzualizare Locală Imediată (pentru UX rapid)
+      // 1. Previzualizare Locală Imediată
       const previewUrl = URL.createObjectURL(file);
-      setArtworkUrl(previewUrl); // Apare imediat în stânga
-      setViewMode('preview');    // Mutăm automat pe tab-ul de preview
+      setArtworkUrl(previewUrl); 
+      
+      // Comutăm automat pe modul Simulare când se încarcă o poză
+      setViewMode('simulation');
 
-      // 2. Upload în Background (pentru baza de date)
+      // 2. Upload în Background
       setUploading(true);
       const form = new FormData();
       form.append("file", file);
@@ -152,7 +157,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       if (!res.ok) throw new Error("Upload eșuat");
       const data = await res.json();
       
-      // Actualizăm cu URL-ul final din cloud (care va fi salvat în comandă)
       setArtworkUrl(data.url); 
     } catch (e: any) {
       setUploadError(e?.message ?? "Eroare la upload");
@@ -192,7 +196,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : input.designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(BANNER_CONSTANTS.PRO_DESIGN_FEE) }),
         ...(input.designOption === 'text_only' && { "Text": textDesign }),
-        artworkUrl, // Acesta este URL-ul care se salvează în comandă (Raport)
+        artworkUrl, 
       },
     });
     setToastVisible(true);
@@ -224,39 +228,73 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
-          {/* STÂNGA - ZONA VIZUALĂ (Aici apare PREVIEW-ul) */}
+          {/* STÂNGA - ZONA VIZUALĂ (ACUM CU 3 TAB-URI) */}
           <div className="lg:sticky top-24 h-max space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
               
-              {/* Header Switch: Galerie / Preview */}
-              <div className="flex border-b border-gray-100">
+              {/* Header Switch: Galerie / Schiță / Simulare */}
+              <div className="flex border-b border-gray-100 overflow-x-auto">
                   <button 
                       onClick={() => setViewMode('gallery')}
-                      className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'gallery' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:bg-gray-50'}`}
+                      className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'gallery' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
                   >
-                      <ImageIcon size={16} /> Galerie Foto
+                      <ImageIcon size={16} /> 
+                      <span className="hidden sm:inline">Galerie</span>
                   </button>
                   <button 
-                      onClick={() => setViewMode('preview')}
-                      className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'preview' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:bg-gray-50'}`}
+                      onClick={() => setViewMode('shape')}
+                      className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'shape' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
                   >
-                      <Box size={16} /> Previzualizare Formă
+                      <Ruler size={16} /> 
+                      <span className="hidden sm:inline">Schiță</span>
+                  </button>
+                  <button 
+                      onClick={() => setViewMode('simulation')}
+                      className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'simulation' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
+                  >
+                      <Eye size={16} /> 
+                      <span className="hidden sm:inline">Simulare</span>
                   </button>
               </div>
 
               <div className="aspect-square relative bg-white">
-                  {viewMode === 'gallery' ? (
+                  {viewMode === 'gallery' && (
                       <img src={activeImage} alt="Banner" className="h-full w-full object-cover animate-in fade-in duration-300" />
-                  ) : (
+                  )}
+                  
+                  {viewMode === 'shape' && (
                       <div className="h-full w-full p-4 animate-in fade-in slide-in-from-bottom-4 duration-300 bg-zinc-50">
-                          {/* COMPONENTA PREVIEW (Primește imaginea încărcată) */}
+                          {/* SCHIȚA: Trimitem imageUrl={null} pentru a vedea doar forma tehnică */}
                           <DynamicBannerPreview 
                               width={input.width_cm} 
                               height={input.height_cm} 
                               hasGrommets={input.want_hem_and_grommets}
                               hasWindHoles={input.want_wind_holes}
-                              imageUrl={artworkUrl} // POZA ÎNCĂRCATĂ
+                              imageUrl={null} 
                           />
+                          <div className="absolute bottom-4 left-0 w-full text-center text-xs text-gray-400">
+                             Previzualizare tehnică (poziționare capse)
+                          </div>
+                      </div>
+                  )}
+
+                  {viewMode === 'simulation' && (
+                      <div className="h-full w-full p-4 animate-in fade-in slide-in-from-bottom-4 duration-300 bg-zinc-50 relative">
+                          {/* SIMULARE: Trimitem imageUrl={artworkUrl} pentru a vedea grafica */}
+                          <DynamicBannerPreview 
+                              width={input.width_cm} 
+                              height={input.height_cm} 
+                              hasGrommets={input.want_hem_and_grommets}
+                              hasWindHoles={input.want_wind_holes}
+                              imageUrl={artworkUrl} 
+                          />
+                          {!artworkUrl && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px]">
+                                <UploadCloud className="w-12 h-12 text-gray-300 mb-2" />
+                                <p className="text-sm text-gray-500 font-medium">Încarcă o grafică pentru simulare</p>
+                                <button onClick={() => setActiveStep(3)} className="mt-2 text-xs text-indigo-600 hover:underline">Mergi la pasul upload</button>
+                            </div>
+                          )}
                       </div>
                   )}
               </div>
@@ -270,7 +308,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
             <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'banner'} /></div>
           </div>
 
-          {/* DREAPTA - CONFIGURATOR (Aici e INPUT-ul pentru Raport) */}
+          {/* DREAPTA - CONFIGURATOR */}
           <div>
             <header className="mb-6">
               <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Banner</h1><BannerModeSwitchInline /></div>
@@ -308,7 +346,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                     </div>
                   </div>
 
-                  {/* AICI ESTE INPUT-UL (Rămâne la locul lui pentru Raport) */}
+                  {/* AICI ESTE INPUT-UL */}
                   {input.designOption === 'upload' && (
                     <div className="space-y-3">
                       <p className="text-sm text-gray-600">Încarcă fișierul tău (PDF, JPG, TIFF, etc.).</p>
