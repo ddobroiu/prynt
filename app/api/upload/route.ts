@@ -1,15 +1,29 @@
+// app/api/upload/route.ts (COD NOU)
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { prisma } from '@/lib/prisma'; //
+import { prisma } from '@/lib/prisma';
+import { v2 as cloudinary } from 'cloudinary'; // Importăm Cloudinary
+import streamifier from 'streamifier'; // Necesită instalare: npm install streamifier
 
-const s3 = new S3Client({
-  region: process.env.DO_REGION || 'us-east-1',
-  endpoint: process.env.DO_ENDPOINT,
-  credentials: {
-    accessKeyId: process.env.DO_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.DO_SECRET_ACCESS_KEY || '',
-  },
-});
+// Configurația Cloudinary se încarcă automat din variabilele de mediu
+// CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+
+// Funcție utilitară pentru a transforma un Buffer/File în upload Cloudinary
+const uploadStream = (buffer: Buffer, folder: string) => {
+    return new Promise((resolve, reject) => {
+        const upload_stream = cloudinary.uploader.upload_stream(
+            { folder: folder, resource_type: "auto" }, // Stocăm în folderul specificat
+            (error, result) => {
+                if (result) {
+                    resolve(result);
+                } else {
+                    reject(error);
+                }
+            }
+        );
+        streamifier.createReadStream(buffer).pipe(upload_stream);
+    });
+};
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,17 +35,11 @@ export async function POST(req: NextRequest) {
     if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 });
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const fileName = `uploads/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
 
-    await s3.send(new PutObjectCommand({
-      Bucket: process.env.DO_BUCKET,
-      Key: fileName,
-      Body: buffer,
-      ACL: 'public-read',
-      ContentType: file.type,
-    }));
+    // 1. Încărcare pe Cloudinary
+    const result: any = await uploadStream(buffer, "prynt-uploads"); 
 
-    const fileUrl = `${process.env.DO_CDN_URL || process.env.NEXT_PUBLIC_CDN_URL}/${fileName}`;
+    const fileUrl = result.secure_url; // URL-ul final de la Cloudinary
 
     // LOGICA CRITICĂ: Dacă e grafică de produs, actualizăm OrderItem
     if (type === 'order_item_artwork' && publicId) {
@@ -41,9 +49,10 @@ export async function POST(req: NextRequest) {
         });
     }
 
+    // Aici, URL-ul se returnează către BannerConfigurator.tsx
     return NextResponse.json({ success: true, url: fileUrl });
   } catch (error) {
-    console.error(error);
+    console.error("Cloudinary Upload Error:", error);
     return NextResponse.json({ error: 'Fail' }, { status: 500 });
   }
 }
