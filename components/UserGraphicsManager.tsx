@@ -38,18 +38,24 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
     formData.append("type", "order_item_artwork"); // IMPORTANT: Tipul corect pentru API
     formData.append("publicId", itemId); // Trimitem ID-ul produsului (OrderItem), nu al comenzii
 
+    // DEBUG: Afișează id-ul produsului la upload
+    console.log("Upload pentru produs:", itemId);
+    alert(`Upload pentru produs cu ID: ${itemId}`);
+
     try {
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Eroare upload");
+      const apiResponse = await res.json();
+      console.log("Răspuns API upload:", apiResponse);
+      if (!res.ok) throw new Error(apiResponse?.error || "Eroare upload");
 
       router.refresh(); // Reîmprospătăm pagina pentru a vedea noul status
     } catch (error) {
       console.error(error);
-      alert("Eroare la încărcare. Încearcă din nou.");
+      alert(`Eroare la încărcare. ID produs: ${itemId}. Mesaj: ${error}`);
     } finally {
       setUploadingId(null);
     }
@@ -78,7 +84,7 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
             {/* Detalii Produs */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <span className="flex-shrink-0 inline-flex items-center justify-center h-6 min-w-[24px] px-1.5 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-bold">
+                <span className="shrink-0 inline-flex items-center justify-center h-6 min-w-6 px-1.5 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-bold">
                   {item.qty}x
                 </span>
                 <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">
