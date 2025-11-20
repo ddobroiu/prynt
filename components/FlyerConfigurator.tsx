@@ -148,7 +148,7 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
         });
 
     addItem({
-      id: `fonduri-${Date.now()}`, // Unique ID per custom config
+      id: `${productSlug ?? 'flyer'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       productId: "fonduri-eu",
       slug: "fonduri-eu",
       title: "Kit Vizibilitate Fonduri Europene",

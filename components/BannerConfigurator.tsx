@@ -173,14 +173,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       return;
     }
     const unitPrice = roundMoney(displayedTotal / input.quantity);
-    const uniqueId = [
-      "banner",
-      input.material,
-      input.width_cm,
-      input.height_cm,
-      input.want_wind_holes ? "g" : "f",
-      input.designOption,
-    ].join("-");
+    const uniqueId = `${productSlug ?? 'banner'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const title = `Banner personalizat - ${input.width_cm}x${input.height_cm} cm`;
 
     addItem({

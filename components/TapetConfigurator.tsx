@@ -139,7 +139,7 @@ export default function TapetConfigurator({ productSlug }: Props) {
     }
 
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
-    const uniqueId = ["tapet", input.width_cm, input.height_cm, input.want_adhesive, input.designOption].join("-");
+    const uniqueId = `${productSlug ?? 'tapet'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     addItem({
       id: uniqueId,

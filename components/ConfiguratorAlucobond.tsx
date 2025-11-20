@@ -148,7 +148,7 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
     }
 
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
-    const uniqueId = ["alucobond", input.thickness_mm, input.color, input.width_cm, input.height_cm, input.designOption].join("-");
+    const uniqueId = `${productSlug ?? 'alucobond'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const title = `Panou Alucobond ${input.thickness_mm}mm - ${input.width_cm}x${input.height_cm} cm`;
 
     addItem({

@@ -150,7 +150,7 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
     const selectedSizeLabel = AFISE_CONSTANTS.SIZES.find(s => s.key === size)?.label || size;
 
     addItem({
-      id: `afis-${size}-${material}-${quantity}`,
+      id: `${productSlug ?? 'afise'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       productId: productSlug ?? "afise",
       slug: productSlug ?? "afise",
       title: `Afiș ${selectedSizeLabel} - ${selectedMaterialLabel}`,

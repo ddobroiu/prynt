@@ -155,7 +155,7 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
 
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
     const matLabel = input.material === "ondulat" ? `Ondulat ${input.ondula}` : `Reciclat ${input.reciclatBoard}`;
-    const uniqueId = ["carton", input.material, input.width_cm, input.height_cm, input.designOption].join("-");
+    const uniqueId = `${productSlug ?? 'carton'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     addItem({
       id: uniqueId,

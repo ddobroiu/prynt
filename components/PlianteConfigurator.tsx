@@ -132,7 +132,7 @@ export default function PlianteConfigurator({ productSlug }: Props) {
     }
 
     addItem({
-      id: `pliant-${fold}-${weight}-${quantity}-${designOption}`,
+      id: `${productSlug ?? 'pliante'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       productId: productSlug ?? "pliante",
       slug: productSlug ?? "pliante",
       title: `Pliante ${PLIANTE_CONSTANTS.FOLDS[fold].label}`,

@@ -173,7 +173,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
     }
 
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
-    const uniqueId = ["banner-verso", input.width_cm, input.height_cm, input.designOption, input.same_graphic ? 'same' : 'diff'].join("-");
+    const uniqueId = `${productSlug ?? 'banner-verso'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const title = `Banner Față-Verso ${input.width_cm}x${input.height_cm} cm`;
 
     addItem({

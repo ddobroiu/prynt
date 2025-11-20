@@ -147,7 +147,7 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
     }
 
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
-    const uniqueId = ["polipropilena", input.thickness_mm, input.width_cm, input.height_cm, input.designOption].join("-");
+    const uniqueId = `${productSlug ?? 'polipropilena'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const title = `Placă Polipropilenă ${input.thickness_mm}mm - ${input.width_cm}x${input.height_cm} cm`;
 
     addItem({

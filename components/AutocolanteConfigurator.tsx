@@ -159,7 +159,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
     }
 
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
-    const uniqueId = ["autocolant", input.material, input.width_cm, input.height_cm, input.laminated ? "lam" : "std", input.shape_diecut ? "die" : "sq", input.designOption].join("-");
+    const uniqueId = `${productSlug ?? 'autocolante'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const title = `Autocolant ${input.material === 'vinyl' ? 'Vinyl' : 'Hârtie'} - ${input.width_cm}x${input.height_cm} cm`;
 
     addItem({

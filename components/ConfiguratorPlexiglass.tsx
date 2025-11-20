@@ -161,7 +161,7 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
     }
 
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
-    const uniqueId = ["plexi", input.material, input.thickness_mm, input.width_cm, input.height_cm, input.designOption].join("-");
+    const uniqueId = `${productSlug ?? 'plexiglass'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const matLabel = input.material === "alb" ? "Plexiglas Alb" : "Plexiglas Transparent";
 
     addItem({

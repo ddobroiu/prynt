@@ -408,9 +408,9 @@ export default function AssistantWidget() {
   const isYes = (text: string) => /^(da|yes|sigur|ok)/i.test(text);
 
   const addToCart = (productId: string, title: string, data: any) => {
-     // Aici se face legătura cu CartContext
-     addItem({
-        id: `${productId}-${Date.now()}`,
+      // Aici se face legatura cu CartContext
+      addItem({
+        id: `${productId}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
         productId,
         slug: productId,
         title: title,
@@ -418,7 +418,7 @@ export default function AssistantWidget() {
         quantity: data.quantity || 1,
         currency: "RON",
         metadata: { ...data, source: "assistant" }
-     });
+      });
   };
 
   // Auto-scroll
@@ -444,7 +444,7 @@ export default function AssistantWidget() {
         {messages.map((m, i) => (
           <div key={i} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
             <div className={`flex gap-4 max-w-[85%] ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm ${m.role === "assistant" ? "bg-indigo-100 text-indigo-600" : "bg-zinc-200 text-zinc-600"}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm ${m.role === "assistant" ? "bg-indigo-100 text-indigo-600" : "bg-zinc-200 text-zinc-600"}`}>
                   {m.role === "assistant" ? <Bot size={20} /> : <User size={20} />}
                 </div>
                 <div className={`p-4 rounded-2xl text-sm sm:text-base leading-relaxed shadow-sm whitespace-pre-wrap ${

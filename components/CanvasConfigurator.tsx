@@ -142,7 +142,7 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
     }
 
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
-    const uniqueId = ["canvas", input.width_cm, input.height_cm, input.edge_type, input.designOption].join("-");
+    const uniqueId = `${productSlug ?? 'canvas'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const title = `Tablou Canvas ${input.width_cm}x${input.height_cm} cm`;
 
     const edgeLabels = { white: "Albă", mirror: "Oglindită", wrap: "Continuată (Wrap)" };
