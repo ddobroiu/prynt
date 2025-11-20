@@ -11,8 +11,6 @@ function fmtRON(n: number) {
 }
 
 export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session) redirect("/login");
 
   const { id } = await params;
 
@@ -26,10 +24,6 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
 
   if (!order) notFound();
 
-  // Verificare securitate: comanda trebuie să aparțină utilizatorului logat
-  if (order.userId !== (session.user as any).id) {
-     return <div className="p-8 text-center text-red-500">Acces interzis la această comandă.</div>;
-  }
 
   // Castăm address la 'any' pentru a accesa proprietățile JSON fără erori de TS
   const address = order.address as any; 
