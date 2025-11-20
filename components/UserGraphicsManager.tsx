@@ -5,15 +5,17 @@ import { Upload, FileText, CheckCircle, AlertCircle, Loader2, RefreshCw, X } fro
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
+// Definim interfața compatibilă cu modelul Prisma (OrderItem)
 interface OrderItem {
   id: string;
-  productName: string;
-  quantity: number;
+  name: string; // Actualizat din productName pentru a corespunde cu DB
+  qty: number;  // Actualizat din quantity pentru a corespunde cu DB
   artworkUrl?: string | null;
+  // Alte câmpuri opționale care pot veni din DB dar nu le folosim aici (ex: price, total) sunt acceptate implicit
 }
 
 interface UserGraphicsManagerProps {
-  items: OrderItem[]; // Primim lista de produse, nu doar ID-ul comenzii
+  items: OrderItem[]; // Primim lista de produse
 }
 
 export default function UserGraphicsManager({ items }: UserGraphicsManagerProps) {
@@ -77,10 +79,10 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="flex-shrink-0 inline-flex items-center justify-center h-6 min-w-[24px] px-1.5 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-bold">
-                  {item.quantity}x
+                  {item.qty}x
                 </span>
                 <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">
-                  {item.productName || "Produs Personalizat"}
+                  {item.name || "Produs Personalizat"}
                 </span>
               </div>
               
