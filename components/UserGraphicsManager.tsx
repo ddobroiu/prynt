@@ -38,9 +38,7 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
     formData.append("type", "order_item_artwork"); // IMPORTANT: Tipul corect pentru API
     formData.append("publicId", itemId); // Trimitem ID-ul produsului (OrderItem), nu al comenzii
 
-    // DEBUG: Afișează id-ul produsului la upload
-    console.log("Upload pentru produs:", itemId);
-    alert(`Upload pentru produs cu ID: ${itemId}`);
+    // ...existing code...
 
     try {
       const res = await fetch("/api/upload", {
@@ -61,6 +59,9 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
     }
   };
 
+  // Sortează produsele după id (sau după createdAt dacă există)
+  const sortedItems = [...items].sort((a, b) => a.id.localeCompare(b.id));
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -76,7 +77,7 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
       </div>
 
       <div className="grid gap-4">
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <div 
             key={item.id} 
             className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50"
@@ -90,7 +91,7 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
                 <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">
                   {item.name || "Produs Personalizat"}
                 </span>
-                <span className="ml-2 text-[10px] text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">ID: {item.id}</span>
+                {/* ID-ul produsului nu se mai afișează pentru client */}
               </div>
               
               {/* Status */}
