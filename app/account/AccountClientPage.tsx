@@ -14,7 +14,7 @@ function getAwbTrackingUrl(awb: string | null | undefined, carrier: string | nul
   if (!awb || awb === "0") return null;
   const awbClean = encodeURIComponent(awb);
   const carrierLower = (carrier || "").toLowerCase();
-  if (carrierLower.includes('dpd')) return `https://tracking.dpd.ro/awb?awb=${awbClean}`;
+  if (carrierLower.includes('dpd')) return `https://tracking.dpd.ro/?shipmentNumber=${awbClean}&language=ro`;
   if (carrierLower.includes('fan')) return `https://www.fancourier.ro/awb-tracking/?awb=${awbClean}`;
   if (carrierLower.includes('sameday')) return `https://sameday.ro/awb-tracking/?awb=${awbClean}`;
   return null;
@@ -137,7 +137,7 @@ export default function AccountClientPage({ orders = [], billing }: AccountClien
                                         </span>
                                         {awbUrl && (
                                           <a href={awbUrl} target="_blank" className="text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded hover:bg-indigo-500 uppercase tracking-wide font-bold no-underline">
-                                            Track
+                                            Urmărește livrarea
                                           </a>
                                         )}
                                      </div>
