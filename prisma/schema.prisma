@@ -17,14 +17,13 @@ model User {
   phone         String?
   passwordHash  String?   // hash pentru autentificare cu parolă (Credentials Provider)
   emailVerified DateTime?
-
-  addresses            Address[]
-  orders               Order[]
-  accounts             Account[]
-  sessions             Session[]
-  passwordResetTokens  PasswordResetToken[]
-  graphics             UserGraphic[]
-  reviews              Review[]
+  addresses     Address[]
+  orders        Order[]
+  accounts      Account[]
+  sessions      Session[]
+  passwordResetTokens PasswordResetToken[]
+  graphics      UserGraphic[]
+  reviews       Review[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -34,11 +33,17 @@ model UserGraphic {
   id           String   @id @default(cuid())
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
-  originalName String
-  storagePath  String   @unique // The secure_url from Cloudinary
-  publicId     String   @unique // The public_id from Cloudinary, for deletion
-  size         Int      // in bytes
-  mimeType     String
+
+  // Câmpuri noi pentru legătura cu comanda (Adăugate pentru a rezolva eroarea de tip)
+  orderId      String?
+  orderItemId  String?
+
+  originalName String   // Corespunde cu "fileName" din API
+  storagePath  String   @unique // Corespunde cu "fileUrl" din API (secure_url Cloudinary)
+  publicId     String   @unique // Corespunde cu "publicId" din API (pentru ștergere Cloudinary)
+  size         Int      // Corespunde cu "fileSize" din API (bytes)
+  mimeType     String   // Corespunde cu "fileType" din API
+  
   createdAt    DateTime @default(now())
 }
 
@@ -91,7 +96,7 @@ model Order {
   awbNumber    String?
   awbCarrier   String?
   // Status lifecycle
-  status       String    @default("active") // active | canceled | fulfilled (future)
+  status       String    @default("active") // active | canceled | fulfilled
   canceledAt   DateTime?
   marketing    Json?
   createdAt    DateTime  @default(now())

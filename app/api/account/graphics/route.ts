@@ -12,27 +12,27 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { orderId, orderItemId, fileUrl, fileName, publicId, fileSize, fileType } = body;
 
-    // Validare simplă: ne asigurăm că această comandă aparține user-ului
+    // Check for valid order ownership
     const order = await prisma.order.findUnique({
       where: { id: orderId },
     });
 
-    // FIX: Folosim 'as any' pentru a accesa proprietatea 'id' care nu este în tipul default NextAuth
+    // Use 'as any' for session.user.id if typescript complains
     if (!order || order.userId !== (session.user as any).id) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
-    // Creare înregistrare în UserGraphic
+    // Create record mapping variables to Schema fields
     const graphic = await prisma.userGraphic.create({
       data: {
-        userId: (session.user as any).id, // FIX
-        orderId,
-        orderItemId,
-        fileUrl,
-        fileName,
+        userId: (session.user as any).id,
+        orderId,          // Now exists in schema
+        orderItemId,      // Now exists in schema
+        storagePath: fileUrl,     // Map fileUrl -> storagePath
+        originalName: fileName,   // Map fileName -> originalName
         publicId,
-        fileSize: Number(fileSize || 0),
-        fileType,
+        size: Number(fileSize || 0), // Map fileSize -> size
+        mimeType: fileType,       // Map fileType -> mimeType
       },
     });
 
@@ -55,17 +55,14 @@ export async function DELETE(req: Request) {
 
     if (!id) return new NextResponse("Missing ID", { status: 400 });
 
-    // Verificăm proprietatea
     const graphic = await prisma.userGraphic.findUnique({
       where: { id },
     });
 
-    // FIX: Folosim 'as any' pentru a accesa proprietatea 'id'
     if (!graphic || graphic.userId !== (session.user as any).id) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
-    // Ștergem din DB (Opțional: Aici se poate apela și Cloudinary Admin API pentru a șterge fizic fișierul)
     await prisma.userGraphic.delete({
       where: { id },
     });
