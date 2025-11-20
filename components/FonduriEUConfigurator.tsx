@@ -80,7 +80,7 @@ const SelectGroup = ({ label, options, value, onChange }: { label: string, optio
 );
 
 /* --- MAIN COMPONENT --- */
-type Props = { productSlug?: string };
+type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number };
 export default function FonduriEUConfigurator({ productSlug }: Props) {
   const { addItem } = useCart();
   

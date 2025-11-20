@@ -80,7 +80,8 @@ const SelectGroup = ({ label, options, value, onChange }: { label: string, optio
 );
 
 /* --- MAIN COMPONENT --- */
-export default function FlyerConfigurator({ productSlug }: { productSlug?: string }) {
+type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number };
+export default function FlyerConfigurator({ productSlug, initialWidth, initialHeight }: Props) {
   const { addItem } = useCart();
   
   // State for selections
