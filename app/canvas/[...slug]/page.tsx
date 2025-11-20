@@ -46,8 +46,9 @@ export default async function Page({ params }: Props) {
       <ProductJsonLd product={(product as Product)} url={url} />
       <CanvasConfigurator 
         productSlug={product.slug ?? product.routeSlug} 
-        initialWidth={initialWidth}
-        initialHeight={initialHeight}
+        // FIX: Convertim null în undefined folosind operatorul ??
+        initialWidth={initialWidth ?? undefined}
+        initialHeight={initialHeight ?? undefined}
       />
     </>
   );
