@@ -17,9 +17,10 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(req: NextRequest) {
   try {
-    const { shipment, print } = (await req.json()) as {
+    const { shipment, print, orderId } = (await req.json()) as {
       shipment?: CreateShipmentRequest;
       print?: { paperSize?: 'A6' | 'A4' | 'A4_4xA6'; format?: 'pdf' | 'zpl' };
+      orderId?: string;
     };
 
     if (!shipment?.recipient || !shipment?.service || !shipment?.content || !shipment?.payment) {
@@ -81,6 +82,16 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Salvează AWB-ul în DB dacă avem orderId
+    if (orderId) {
+      try {
+        const { prisma } = await import('../../../../lib/prisma');
+        await prisma.order.update({ where: { id: orderId }, data: { awbNumber: shipmentId, awbCarrier: 'DPD' } });
+        console.log('[AWB UPDATE] orderId:', orderId, 'awbNumber:', shipmentId, 'awbCarrier: DPD');
+      } catch (e) {
+        console.error('[AWB UPDATE ERROR] orderId:', orderId, 'awbNumber:', shipmentId, 'awbCarrier: DPD', 'error:', (e as any)?.message || e);
+      }
+    }
     const trackingUrl = trackingUrlForAwb(shipmentId);
     return NextResponse.json({ success: true, shipmentId, parcels, labelBase64, labelFileName, trackingUrl });
   } catch (e: any) {

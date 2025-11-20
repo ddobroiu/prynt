@@ -1,12 +1,13 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
-import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Box, Eye, Ruler } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { useRouter } from "next/navigation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
-import DynamicBannerPreview from "./DynamicBannerPreview"; 
+import DynamicBannerPreview from "./DynamicBannerPreview";
+import ArtworkRatioPreview from "./ArtworkRatioPreview"; // Importăm componenta nouă
 import { 
   calculateBannerPrice, 
   BANNER_CONSTANTS, 
@@ -15,42 +16,6 @@ import {
   type PriceInputBanner 
 } from "@/lib/pricing";
 import { QA } from "@/types";
-
-/* --- NEW COMPONENT: ARTWORK RATIO PREVIEW --- */
-// Aceasta este componenta nouă cerută. 
-// Ea afișează strict imaginea într-un container cu aspect ratio corect (L/H).
-const ArtworkRatioPreview = ({ width, height, imageUrl }: { width: number; height: number; imageUrl: string | null }) => {
-    // Calculăm raportul de aspect. Dacă nu sunt dimensiuni, folosim pătrat (1/1)
-    const ratio = (width > 0 && height > 0) ? width / height : 1;
-    
-    return (
-        <div className="w-full h-full flex items-center justify-center bg-zinc-100 p-6 overflow-hidden relative">
-            {/* Containerul care ține forma corectă */}
-            <div 
-                style={{ aspectRatio: ratio }} 
-                className="relative shadow-2xl border-4 border-white bg-white max-w-full max-h-full flex items-center justify-center"
-            >
-                {imageUrl ? (
-                    <img 
-                        src={imageUrl} 
-                        alt="Simulare Grafică" 
-                        className="w-full h-full object-cover" 
-                    />
-                ) : (
-                    <div className="flex flex-col items-center justify-center p-4 text-center">
-                         <UploadCloud className="w-10 h-10 text-gray-300 mb-2" />
-                         <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Încarcă imagine</span>
-                    </div>
-                )}
-            </div>
-            
-            {/* Label informativ */}
-            <div className="absolute bottom-2 left-0 w-full text-center text-[10px] text-gray-400 uppercase tracking-widest">
-                Raport dimensiune: {width || 0}x{height || 0} cm
-            </div>
-        </div>
-    );
-};
 
 /* --- SUB-COMPONENTS --- */
 const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
@@ -126,8 +91,8 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 
 type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string; renderOnlyConfigurator?: boolean; imageUrl?: string | null };
 
-// Definesc tipurile de view posibile
-type ViewMode = 'gallery' | 'shape' | 'simulation';
+// Doar două moduri acum: Galerie și Schiță (Shape)
+type ViewMode = 'gallery' | 'shape';
 
 /* --- MAIN COMPONENT --- */
 export default function BannerConfigurator({ productSlug, initialWidth: initW, initialHeight: initH, productImage, renderOnlyConfigurator = false }: Props) {
@@ -139,7 +104,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   
   const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"] : ["/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp", "/products/banner/4.webp"], [productImage]);
   
-  // 3 Moduri: Galerie, Schiță (doar forma tehnică), Simulare (Componenta nouă cu poza)
+  // 2 Moduri: Galerie (poze) și Schiță (tehnic)
   const [viewMode, setViewMode] = useState<ViewMode>('gallery');
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -159,7 +124,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const updateInput = <K extends keyof PriceInputBanner>(k: K, v: PriceInputBanner[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
   
-  // Auto-switch la 'shape' când se modifică dimensiunile
+  // Când modificăm dimensiunile -> Mutăm automat pe Schiță Tehnică
   const onChangeLength = (v: string) => { 
       const d = v.replace(/\D/g, ""); 
       setLengthText(d); 
@@ -178,14 +143,14 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     setUploadError(null);
     if (!file) return;
     try {
-      // 1. Previzualizare Locală Imediată
+      // 1. Previzualizare Locală
       const previewUrl = URL.createObjectURL(file);
       setArtworkUrl(previewUrl); 
       
-      // Comutăm automat pe modul Simulare (Componenta Nouă) când se încarcă o poză
-      setViewMode('simulation');
+      // Când încărcăm o poză -> Mutăm automat pe Galerie (unde se va vedea ArtworkRatioPreview)
+      setViewMode('gallery');
 
-      // 2. Upload în Background (către Cloudinary prin API)
+      // 2. Upload
       setUploading(true);
       const form = new FormData();
       form.append("file", file);
@@ -240,7 +205,9 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   }
 
   useEffect(() => {
-    if (viewMode !== 'gallery') return;
+    // Facem autoplay la galerie doar dacă NU avem o grafică încărcată
+    if (viewMode !== 'gallery' || artworkUrl) return;
+    
     const id = setInterval(() => {
       setActiveIndex((i) => {
         const next = (i + 1) % galleryImages.length;
@@ -249,7 +216,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       });
     }, 3000);
     return () => clearInterval(id);
-  }, [galleryImages, viewMode]);
+  }, [galleryImages, viewMode, artworkUrl]);
   
   const canAdd = displayedTotal > 0 && input.width_cm > 0 && input.height_cm > 0;
   const summaryStep1 = input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}x${input.height_cm}cm, ${input.quantity} buc.` : "Alege";
@@ -268,7 +235,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
           <div className="lg:sticky top-24 h-max space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
               
-              {/* Header Switch: Galerie / Schiță / Simulare */}
+              {/* Header Switch: Doar Galerie și Schiță */}
               <div className="flex border-b border-gray-100 overflow-x-auto">
                   <button 
                       onClick={() => setViewMode('gallery')}
@@ -284,23 +251,30 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                       <Ruler size={16} /> 
                       <span className="hidden sm:inline">Schiță Tehnică</span>
                   </button>
-                  <button 
-                      onClick={() => setViewMode('simulation')}
-                      className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'simulation' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
-                  >
-                      <Eye size={16} /> 
-                      <span className="hidden sm:inline">Grafica Mea</span>
-                  </button>
               </div>
 
               <div className="aspect-square relative bg-white">
                   {viewMode === 'gallery' && (
-                      <img src={activeImage} alt="Banner" className="h-full w-full object-cover animate-in fade-in duration-300" />
+                    <>
+                        {/* LOGICA: Dacă avem artworkUrl, afișăm ArtworkRatioPreview.
+                           Dacă NU, afișăm imaginea standard din galerie.
+                        */}
+                        {artworkUrl ? (
+                            <div className="h-full w-full animate-in fade-in duration-300">
+                                <ArtworkRatioPreview 
+                                    width={input.width_cm} 
+                                    height={input.height_cm} 
+                                    imageUrl={artworkUrl}
+                                />
+                            </div>
+                        ) : (
+                            <img src={activeImage} alt="Banner" className="h-full w-full object-cover animate-in fade-in duration-300" />
+                        )}
+                    </>
                   )}
                   
                   {viewMode === 'shape' && (
                       <div className="h-full w-full p-4 animate-in fade-in slide-in-from-bottom-4 duration-300 bg-zinc-50">
-                          {/* AICI E SCHIȚA TEHNICĂ (NU NE ATINGEM DE EA, E SEPARATĂ) */}
                           <DynamicBannerPreview 
                               width={input.width_cm} 
                               height={input.height_cm} 
@@ -313,29 +287,26 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                           </div>
                       </div>
                   )}
-
-                  {viewMode === 'simulation' && (
-                      <div className="h-full w-full animate-in fade-in slide-in-from-bottom-4 duration-300 bg-zinc-50 relative">
-                          {/* AICI ESTE COMPONENTA NOUĂ - ARTWORK PREVIEW */}
-                          <ArtworkRatioPreview 
-                              width={input.width_cm} 
-                              height={input.height_cm} 
-                              imageUrl={artworkUrl}
-                          />
-                          
-                          {!artworkUrl && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px]">
-                                <p className="text-sm text-gray-500 font-medium">Încarcă o grafică pentru previzualizare</p>
-                                <button onClick={() => setActiveStep(3)} className="mt-2 text-xs text-indigo-600 hover:underline">Mergi la pasul upload</button>
-                            </div>
-                          )}
-                      </div>
-                  )}
               </div>
               
               {viewMode === 'gallery' && (
                   <div className="p-2 grid grid-cols-4 gap-2">
-                    {galleryImages.map((src, i) => <button key={src} onClick={() => { setActiveImage(src); setActiveIndex(i); }} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
+                    {galleryImages.map((src, i) => (
+                        <button 
+                            key={src} 
+                            onClick={() => { 
+                                // Dacă userul dă click pe o poză mică, o setăm ca activă.
+                                // Notă: Dacă artworkUrl există, acesta va rămâne prioritar deasupra.
+                                setActiveImage(src); 
+                                setActiveIndex(i); 
+                                // Opțional: Putem șterge artworkUrl dacă userul vrea să vadă pozele stock
+                                // setArtworkUrl(null); 
+                            }} 
+                            className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}
+                        >
+                            <img src={src} alt="Thumb" className="w-full h-full object-cover" />
+                        </button>
+                    ))}
                   </div>
               )}
             </div>
