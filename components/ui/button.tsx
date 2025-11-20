@@ -1,18 +1,15 @@
-// components/ui/button.tsx
 import React from "react";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: "default" | "sm" | "lg" | "icon";
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", ...props }, ref) => {
-    // Basic styling for the button. We can expand this later.
+  ({ className, variant = "default", size = "default", ...props }, ref) => {
     const baseClasses =
       "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
 
-    // For now, we only need the default variant for the footer.
-    // A more complex implementation could go here.
     const variantClasses = {
       default: "bg-indigo-600 text-white hover:bg-indigo-700",
       destructive: "bg-red-600 text-white hover:bg-red-700",
@@ -22,7 +19,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       link: "text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400",
     };
 
-    const combinedClasses = `${baseClasses} px-4 py-2 ${variantClasses[variant]} ${className || ""}`;
+    const sizeClasses = {
+      default: "h-10 px-4 py-2",
+      sm: "h-9 rounded-md px-3",
+      lg: "h-11 rounded-md px-8",
+      icon: "h-10 w-10",
+    };
+
+    const combinedClasses = `${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${className || ""}`;
 
     return <button className={combinedClasses} ref={ref} {...props} />;
   }
