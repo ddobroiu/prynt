@@ -120,7 +120,7 @@ export default function AdminGraphicsControl({ orderId, items }: { orderId: stri
                                   Încărcat
                                 </p>
                             </div>
-                            <Button asChild size="sm" className="h-8 bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20">
+                            <Button size="sm" className="h-8 bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20">
                                 <a href={item.artworkUrl} target="_blank" rel="noopener noreferrer">
                                     <Download size={14} className="mr-1.5" /> Descarcă
                                 </a>
