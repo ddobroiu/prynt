@@ -17,14 +17,15 @@ export async function POST(req: Request) {
       where: { id: orderId },
     });
 
-    if (!order || order.userId !== session.user.id) {
+    // FIX: Folosim 'as any' pentru a accesa proprietatea 'id' care nu este în tipul default NextAuth
+    if (!order || order.userId !== (session.user as any).id) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
     // Creare înregistrare în UserGraphic
     const graphic = await prisma.userGraphic.create({
       data: {
-        userId: session.user.id,
+        userId: (session.user as any).id, // FIX
         orderId,
         orderItemId,
         fileUrl,
@@ -59,7 +60,8 @@ export async function DELETE(req: Request) {
       where: { id },
     });
 
-    if (!graphic || graphic.userId !== session.user.id) {
+    // FIX: Folosim 'as any' pentru a accesa proprietatea 'id'
+    if (!graphic || graphic.userId !== (session.user as any).id) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
