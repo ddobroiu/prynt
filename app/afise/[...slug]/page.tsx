@@ -30,7 +30,7 @@ export default async function Page({ params }: Props) {
   const slugParts: string[] = resolved?.slug ?? [];
   const joinedSlug = slugParts.join("/");
 
-  const { product } = await resolveProductForRequestedSlug(String(joinedSlug), "afise");
+  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug), "afise");
 
   if (!product) return notFound();
 
@@ -39,8 +39,11 @@ export default async function Page({ params }: Props) {
   return (
     <>
       <ProductJsonLd product={(product as Product)} url={url} />
-      {/* Randăm direct configuratorul, fără containere sau titluri extra */}
-      <AfiseConfigurator productSlug={product.slug ?? product.routeSlug} />
+      <AfiseConfigurator 
+        productSlug={product.slug ?? product.routeSlug} 
+        initialWidth={initialWidth ?? undefined}
+        initialHeight={initialHeight ?? undefined}
+      />
     </>
   );
 }

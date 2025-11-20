@@ -7,8 +7,6 @@ import ConfiguratorAlucobond from "@/components/ConfiguratorAlucobond";
 type Props = { params?: Promise<{ slug?: string[] }> };
 
 export async function generateStaticParams() {
-  // Asigură-te că 'alucobond' este categoria corectă în fișierul de produse,
-  // altfel schimbă cu 'materiale' sau categoria corespunzătoare.
   const slugs = getAllProductSlugsByCategory("alucobond");
   return slugs.map((slug) => ({ slug: [slug] }));
 }
@@ -41,15 +39,15 @@ export default async function Page({ params }: Props) {
 
   if (!product) return notFound();
 
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/alucobond/${joinedSlug}`;
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/materiale/alucobond/${joinedSlug}`;
 
   return (
     <>
       <ProductJsonLd product={(product as Product)} url={url} />
       <ConfiguratorAlucobond 
         productSlug={product.slug ?? product.routeSlug} 
-        initialWidth={initialWidth}
-        initialHeight={initialHeight}
+        initialWidth={initialWidth ?? undefined}
+        initialHeight={initialHeight ?? undefined}
       />
     </>
   );

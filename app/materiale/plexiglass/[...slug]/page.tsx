@@ -7,7 +7,6 @@ import ConfiguratorPlexiglass from "@/components/ConfiguratorPlexiglass";
 type Props = { params?: Promise<{ slug?: string[] }> };
 
 export async function generateStaticParams() {
-  // Categoria în lib/products.ts trebuie să fie "plexiglass" sau "plexiglas"
   const slugs = getAllProductSlugsByCategory("plexiglass");
   return slugs.map((slug) => ({ slug: [slug] }));
 }
@@ -47,8 +46,8 @@ export default async function Page({ params }: Props) {
       <ProductJsonLd product={(product as Product)} url={url} />
       <ConfiguratorPlexiglass 
         productSlug={product.slug ?? product.routeSlug} 
-        initialWidth={initialWidth}
-        initialHeight={initialHeight}
+        initialWidth={initialWidth ?? undefined}
+        initialHeight={initialHeight ?? undefined}
       />
     </>
   );

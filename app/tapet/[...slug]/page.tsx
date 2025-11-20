@@ -7,7 +7,6 @@ import type { Product } from "@/lib/products";
 type Props = { params?: Promise<{ slug?: string[] }> };
 
 export async function generateStaticParams() {
-  // IMPORTANT: Asigură-te că "tapet" este categoria corectă în lib/products.ts
   const slugs = getAllProductSlugsByCategory("tapet");
   return slugs.map((slug) => ({ slug: [slug] }));
 }
@@ -38,7 +37,7 @@ export default async function Page({ params }: Props) {
   const slugParts: string[] = resolved?.slug ?? [];
   const joinedSlug = slugParts.join("/");
 
-  const { product } = await resolveProductForRequestedSlug(String(joinedSlug), "tapet");
+  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug), "tapet");
 
   if (!product) {
     return notFound();
@@ -49,7 +48,11 @@ export default async function Page({ params }: Props) {
   return (
     <>
       <ProductJsonLd product={(product as Product)} url={url} />
-      <TapetConfigurator productSlug={product.slug ?? product.routeSlug} />
+      <TapetConfigurator 
+        productSlug={product.slug ?? product.routeSlug} 
+        initialWidth={initialWidth ?? undefined}
+        initialHeight={initialHeight ?? undefined}
+      />
     </>
   );
 }

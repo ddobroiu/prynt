@@ -1,35 +1,54 @@
-import React from "react";
+import { notFound } from "next/navigation";
+import ProductJsonLd from "@/components/ProductJsonLd";
+import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import BannerVersoConfigurator from "@/components/BannerVersoConfigurator";
 
-type Props = {
-  params: {
-    slug?: string[];
-  };
-};
+type Props = { params?: Promise<{ slug?: string[] }> };
 
-function parseDimsFromSlug(slug?: string[]): { width?: number; height?: number; productSlug?: string } {
-  if (!slug || slug.length === 0) return {};
-  // Try to find a segment like "100x200" or "100X200"
-  for (const seg of slug) {
-    const m = seg.match(/^(\d{1,5})[xX](\d{1,5})$/);
-    if (m) {
-      return { width: parseInt(m[1], 10), height: parseInt(m[2], 10), productSlug: slug.join("/") };
-    }
-  }
-  // If no WxH found, return productSlug as joined slug (useful to map to DB)
-  return { productSlug: slug.join("/") };
+export async function generateStaticParams() {
+  const slugs = getAllProductSlugsByCategory("banner-verso");
+  return slugs.map((slug) => ({ slug: [slug] }));
 }
 
-export default function BannerVersoCatchAllPage({ params }: Props) {
-  const { width, height, productSlug } = parseDimsFromSlug(params.slug);
+export async function generateMetadata({ params }: Props) {
+  const resolved = await params;
+  const raw = (resolved?.slug ?? []).join("/");
+  const { product, isFallback } = await resolveProductForRequestedSlug(String(raw), "banner-verso");
+  if (!product) return {};
+
+  const metadata: any = {
+    title: product.seo?.title || `${product.title} | Prynt`,
+    description: product.seo?.description || product.description,
+    openGraph: { 
+      title: product.seo?.title || product.title, 
+      description: product.description, 
+      images: product.images 
+    },
+  };
+  if (isFallback) metadata.robots = { index: false, follow: true };
+  return metadata;
+}
+
+export default async function Page({ params }: Props) {
+  const resolved = await params;
+  const slugParts: string[] = resolved?.slug ?? [];
+  const joinedSlug = slugParts.join("/");
+
+  const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug), "banner-verso");
+
+  if (!product) return notFound();
+
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/banner-verso/${joinedSlug}`;
 
   return (
-    <div>
-      <BannerVersoConfigurator
-        productSlug={productSlug ?? "banner-verso"}
-        initialWidth={width}
-        initialHeight={height}
+    <>
+      <ProductJsonLd product={(product as Product)} url={url} />
+      <BannerVersoConfigurator 
+        productSlug={product.slug ?? product.routeSlug} 
+        initialWidth={initialWidth ?? undefined}
+        initialHeight={initialHeight ?? undefined}
       />
-    </div>
+    </>
   );
 }

@@ -7,7 +7,6 @@ import ConfiguratorPVCForex from "@/components/ConfiguratorPVCForex";
 type Props = { params?: Promise<{ slug?: string[] }> };
 
 export async function generateStaticParams() {
-  // Asigură-te că în lib/products.ts categoria este "pvc-forex"
   const slugs = getAllProductSlugsByCategory("pvc-forex");
   return slugs.map((slug) => ({ slug: [slug] }));
 }
@@ -47,8 +46,8 @@ export default async function Page({ params }: Props) {
       <ProductJsonLd product={(product as Product)} url={url} />
       <ConfiguratorPVCForex 
         productSlug={product.slug ?? product.routeSlug} 
-        initialWidth={initialWidth}
-        initialHeight={initialHeight}
+        initialWidth={initialWidth ?? undefined}
+        initialHeight={initialHeight ?? undefined}
         productType="pvc-forex"
       />
     </>

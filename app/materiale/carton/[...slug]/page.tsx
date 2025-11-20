@@ -7,7 +7,6 @@ import ConfiguratorCarton from "@/components/ConfiguratorCarton";
 type Props = { params?: Promise<{ slug?: string[] }> };
 
 export async function generateStaticParams() {
-  // Verifică dacă categoria în lib/products este 'carton' sau 'materiale'
   const slugs = getAllProductSlugsByCategory("carton");
   return slugs.map((slug) => ({ slug: [slug] }));
 }
@@ -40,15 +39,15 @@ export default async function Page({ params }: Props) {
 
   if (!product) return notFound();
 
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/carton/${joinedSlug}`;
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/materiale/carton/${joinedSlug}`;
 
   return (
     <>
       <ProductJsonLd product={(product as Product)} url={url} />
       <ConfiguratorCarton 
         productSlug={product.slug ?? product.routeSlug} 
-        initialWidth={initialWidth}
-        initialHeight={initialHeight}
+        initialWidth={initialWidth ?? undefined}
+        initialHeight={initialHeight ?? undefined}
       />
     </>
   );
