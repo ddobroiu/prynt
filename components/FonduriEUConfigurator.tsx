@@ -101,7 +101,7 @@ export default function FonduriEUConfigurator({ productSlug }: Props) {
   const [uploadError, setUploadError] = useState<string | null>(null);
   
   const [activeIndex, setActiveIndex] = useState(0);
-  const [activeImage, setActiveImage] = useState(GALLERY[0]);
+  const [activeImage, setActiveImage] = useState<typeof GALLERY[number]>(GALLERY[0]);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
