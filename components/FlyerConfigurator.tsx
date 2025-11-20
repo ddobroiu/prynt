@@ -80,7 +80,7 @@ const SelectGroup = ({ label, options, value, onChange }: { label: string, optio
 );
 
 /* --- MAIN COMPONENT --- */
-export default function FonduriEUConfigurator() {
+export default function FlyerConfigurator({ productSlug }: { productSlug?: string }) {
   const { addItem } = useCart();
   
   // State for selections

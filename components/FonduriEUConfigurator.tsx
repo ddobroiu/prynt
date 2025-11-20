@@ -80,7 +80,8 @@ const SelectGroup = ({ label, options, value, onChange }: { label: string, optio
 );
 
 /* --- MAIN COMPONENT --- */
-export default function FonduriEUConfigurator() {
+type Props = { productSlug?: string };
+export default function FonduriEUConfigurator({ productSlug }: Props) {
   const { addItem } = useCart();
   
   // State for selections
