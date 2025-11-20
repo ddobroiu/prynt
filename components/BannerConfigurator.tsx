@@ -139,19 +139,21 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     setUploadError(null);
     if (!file) return;
     try {
-      // 1. Previzualizare Locală Imediată
+      // 1. Previzualizare Locală Imediată (pentru UX rapid)
       const previewUrl = URL.createObjectURL(file);
-      setArtworkUrl(previewUrl); // Setăm imediat pentru a vedea în Preview
+      setArtworkUrl(previewUrl); // Apare imediat în stânga
       setViewMode('preview');    // Mutăm automat pe tab-ul de preview
 
-      // 2. Upload în Background
+      // 2. Upload în Background (pentru baza de date)
       setUploading(true);
       const form = new FormData();
       form.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: form });
       if (!res.ok) throw new Error("Upload eșuat");
       const data = await res.json();
-      setArtworkUrl(data.url); // Actualizăm cu URL-ul final din cloud
+      
+      // Actualizăm cu URL-ul final din cloud (care va fi salvat în comandă)
+      setArtworkUrl(data.url); 
     } catch (e: any) {
       setUploadError(e?.message ?? "Eroare la upload");
     } finally {
@@ -197,7 +199,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : input.designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(BANNER_CONSTANTS.PRO_DESIGN_FEE) }),
         ...(input.designOption === 'text_only' && { "Text": textDesign }),
-        artworkUrl,
+        artworkUrl, // Acesta este URL-ul care se salvează în comandă (Raport)
       },
     });
     setToastVisible(true);
@@ -229,9 +231,11 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
-          {/* STÂNGA - Vizualizare */}
+          {/* STÂNGA - ZONA VIZUALĂ (Aici apare PREVIEW-ul) */}
           <div className="lg:sticky top-24 h-max space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+              
+              {/* Header Switch: Galerie / Preview */}
               <div className="flex border-b border-gray-100">
                   <button 
                       onClick={() => setViewMode('gallery')}
@@ -252,12 +256,13 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                       <img src={activeImage} alt="Banner" className="h-full w-full object-cover animate-in fade-in duration-300" />
                   ) : (
                       <div className="h-full w-full p-4 animate-in fade-in slide-in-from-bottom-4 duration-300 bg-zinc-50">
+                          {/* COMPONENTA PREVIEW (Primește imaginea încărcată) */}
                           <DynamicBannerPreview 
                               width={input.width_cm} 
                               height={input.height_cm} 
                               hasGrommets={input.want_hem_and_grommets}
                               hasWindHoles={input.want_wind_holes}
-                              imageUrl={artworkUrl} // CONECTAT: Imaginea încărcată apare aici
+                              imageUrl={artworkUrl} // POZA ÎNCĂRCATĂ
                           />
                       </div>
                   )}
@@ -272,7 +277,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
             <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'banner'} /></div>
           </div>
 
-          {/* DREAPTA - Configurator */}
+          {/* DREAPTA - CONFIGURATOR (Aici e INPUT-ul pentru Raport) */}
           <div>
             <header className="mb-6">
               <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Banner</h1><BannerModeSwitchInline /></div>
@@ -310,6 +315,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                     </div>
                   </div>
 
+                  {/* AICI ESTE INPUT-UL (Rămâne la locul lui pentru Raport) */}
                   {input.designOption === 'upload' && (
                     <div className="space-y-3">
                       <p className="text-sm text-gray-600">Încarcă fișierul tău (PDF, JPG, TIFF, etc.).</p>

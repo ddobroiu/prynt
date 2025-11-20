@@ -96,7 +96,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   const [heightText, setHeightText] = useState(initH ? String(initH) : "");
   const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/verso/1.webp", "/products/banner/verso/2.webp"] : ["/products/banner/verso/1.webp", "/products/banner/verso/2.webp", "/products/banner/verso/3.webp"], [productImage]);
   
-  // VIEW MODE STATE
+  // VIEW MODE
   const [viewMode, setViewMode] = useState<'gallery' | 'preview'>('gallery');
   
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -145,11 +145,12 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
     if (!file) return;
     
     try {
-      // Preview instant
+      // Preview
       const previewUrl = URL.createObjectURL(file);
       setUrl(previewUrl);
-      if (side === 'front') setViewMode('preview');
+      if (side === 'front') setViewMode('preview'); // Auto-switch doar la fața principală
 
+      // Upload
       setUploading(true);
       const form = new FormData(); form.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: form });
@@ -221,7 +222,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
-          {/* STÂNGA - Vizualizare */}
+          {/* STÂNGA - PREVIEW */}
           <div className="lg:sticky top-24 h-max space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                 
@@ -248,10 +249,10 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                         <DynamicBannerPreview 
                             width={input.width_cm} 
                             height={input.height_cm} 
-                            hasGrommets={true} // Bannerele verso au standard capse
+                            hasGrommets={true} 
                             hasWindHoles={input.want_wind_holes}
                             label="Banner Față-Verso"
-                            imageUrl={artworkUrlFront} // Afișăm doar fața
+                            imageUrl={artworkUrlFront} // Doar fața apare în preview
                         />
                     </div>
                  )}
@@ -267,7 +268,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
             <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'banner-verso'} /></div>
           </div>
 
-          {/* DREAPTA - Configurator */}
+          {/* DREAPTA - CONFIGURATOR */}
           <div>
             <header className="mb-6">
               <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Banner Față-Verso</h1><BannerModeSwitchInline /></div>
