@@ -1,45 +1,68 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    // 1. Verificăm sesiunea
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { itemId, artworkUrl } = await req.json();
+    const body = await req.json();
+    const { orderItemId, artworkUrl } = body;
 
-    if (!itemId || !artworkUrl) {
-      return NextResponse.json({ error: "Date incomplete" }, { status: 400 });
+    if (!orderItemId || !artworkUrl) {
+      return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
-    // Verificăm dacă itemul aparține unei comenzi a utilizatorului curent
-    const item = await prisma.orderItem.findUnique({
-      where: { id: itemId },
-      include: { order: { include: { user: true } } }
+    // 2. Căutăm OrderItem-ul și Comanda asociată
+    const orderItem = await prisma.orderItem.findUnique({
+      where: { id: orderItemId },
+      include: {
+        order: true, // Avem nevoie de comandă pentru a verifica userId
+      },
     });
 
-    if (!item) {
-      return NextResponse.json({ error: "Produsul nu a fost găsit" }, { status: 404 });
+    if (!orderItem) {
+      return NextResponse.json({ error: 'Order item not found' }, { status: 404 });
     }
 
-    // Măsură de securitate: ne asigurăm că userul deține comanda
-    if (item.order.user?.email !== session.user.email) {
-      return NextResponse.json({ error: "Nu ai acces la această comandă" }, { status: 403 });
-    }
-
-    // Actualizăm câmpul artworkUrl
-    const updatedItem = await prisma.orderItem.update({
-      where: { id: itemId },
-      data: { artworkUrl },
+    // 3. Verificarea Permisiunilor (Aici era probabil problema)
+    // Utilizatorul trebuie să fie proprietarul comenzii SAU un Admin
+    
+    // Găsim utilizatorul din baza de date pe baza emailului din sesiune (pentru siguranță)
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
     });
 
-    return NextResponse.json({ success: true, item: updatedItem });
+    if (!user) {
+        return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const isOwner = orderItem.order.userId === user.id;
+    // Dacă ai un flag de admin în modelul User, îl poți folosi aici:
+    // const isAdmin = user.role === 'ADMIN'; 
+    // Momentan verificăm doar proprietarul:
+    
+    if (!isOwner) {
+      console.error(`Access denied: User ${user.id} tried to modify order ${orderItem.order.id} owned by ${orderItem.order.userId}`);
+      return NextResponse.json({ error: 'Acces interzis la această comandă.' }, { status: 403 });
+    }
+
+    // 4. Actualizăm URL-ul graficii
+    await prisma.orderItem.update({
+      where: { id: orderItemId },
+      data: {
+        artworkUrl: artworkUrl,
+      },
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Eroare la salvare artwork:", error);
-    return NextResponse.json({ error: "Eroare internă" }, { status: 500 });
+    console.error('Error updating artwork:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
