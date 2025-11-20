@@ -84,6 +84,7 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
                 <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">
                   {item.name || "Produs Personalizat"}
                 </span>
+                <span className="ml-2 text-[10px] text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">ID: {item.id}</span>
               </div>
               
               {/* Status */}
@@ -103,7 +104,7 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
             </div>
 
             {/* Zona Butoane */}
-            <div className="flex-shrink-0 w-full md:w-auto">
+            <div className="shrink-0 w-full md:w-auto">
                <div className="relative">
                   <input
                     type="file"
