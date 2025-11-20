@@ -86,6 +86,17 @@ export default function OrderDetails({ order }: { order: any }) {
                         Descarcă Factura
                     </a>
                  )}
+
+                 {/* AWB tracking button vizibil dacă există AWB */}
+                 {order.awbNumber && (
+                   <a
+                     href={`https://tracking.dpd.ro/?shipmentNumber=${encodeURIComponent(order.awbNumber)}&language=ro`}
+                     target="_blank"
+                     className="mt-2 block text-center w-full rounded-lg border border-indigo-400 bg-indigo-600 py-2 text-sm text-white font-bold hover:bg-indigo-500 transition-colors"
+                   >
+                     Urmărește livrarea
+                   </a>
+                 )}
               </div>
             </div>
 
