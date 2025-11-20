@@ -1,3 +1,20 @@
+// Trimite email de bun venit la înregistrare
+export async function sendWelcomeEmail(to: string, name: string) {
+  const html = getHtmlTemplate({
+    title: "Bine ai venit pe Prynt!",
+    message: `Salut, ${name}! Contul tău a fost creat cu succes. Poți începe să plasezi comenzi și să gestionezi grafica direct din contul tău.`,
+    buttonText: "Accesează contul",
+    buttonUrl: `${process.env.NEXT_PUBLIC_APP_URL}/account`,
+    footerText: "Dacă nu ai creat acest cont, ignoră acest email."
+  });
+
+  await resend.emails.send({
+    from: 'Prynt <no-reply@prynt.ro>',
+    to,
+    subject: 'Bine ai venit pe Prynt!',
+    html,
+  });
+}
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);

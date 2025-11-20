@@ -5,10 +5,7 @@ const nextConfig: NextConfig = {
     // Activează noul sistem de cache din Next.js 16
     // dynamicIO: true, // Notă: Verifică documentația dacă acest flag e necesar specific pentru build-ul tău, de obicei 'use cache' funcționează out-of-the-box în canary/16+ pentru funcții server
     
-    // Turbopack options (deja implicit în v16, dar configurabil)
-    turbo: {
-      // Aici poți adăuga reguli specifice de rezolvare module dacă ai nevoie
-    },
+    // Turbopack este implicit în Next.js 16, nu mai folosi cheia 'turbo' aici
     serverActions: {
       bodySizeLimit: '10mb', // Util pentru upload-ul de fișiere grafice mari
     },

@@ -171,7 +171,6 @@ export function getProductBySlug(slug: string | undefined): Product | undefined 
  * * NEXT.JS 16 UPDATE: This function is now cached.
  */
 export async function resolveProductForRequestedSlug(requestedSlug: string, category?: string) {
-  'use cache'; // NEXT.JS 16 DIRECTIVE: Cache the result of this function based on arguments
 
   const raw = String(requestedSlug || "").toLowerCase().trim();
 
