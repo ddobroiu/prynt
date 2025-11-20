@@ -8,6 +8,7 @@ type Props = {
   hasGrommets?: boolean;
   hasWindHoles?: boolean;
   label?: string;
+  imageUrl?: string | null;
 };
 
 export default function DynamicBannerPreview({ 
@@ -76,7 +77,7 @@ export default function DynamicBannerPreview({
       <div className="flex-1 w-full bg-zinc-50 relative flex items-center justify-center p-6 overflow-hidden">
         {/* Decoruri */}
         <div className="absolute inset-0 opacity-[0.4]" style={{ backgroundImage: 'radial-gradient(#94a3b8 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }}></div>
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-black/40 to-transparent pointer-events-none"></div>
         <div className="absolute bottom-12 left-0 right-0 h-px bg-zinc-400/50 shadow-sm w-full"></div>
 
         {/* SCENA SCALABILĂ */}
@@ -119,7 +120,7 @@ export default function DynamicBannerPreview({
 
                 {/* Capse */}
                 {hasGrommets && grommets.map((style, i) => (
-                    <div key={i} className="absolute z-20 w-[3%] min-w-[6px] max-w-[12px] aspect-square rounded-full bg-gradient-to-b from-gray-100 to-gray-400 shadow-sm flex items-center justify-center ring-1 ring-black/20" style={style}>
+                    <div key={i} className="absolute z-20 w-[3%] min-w-1.5 max-w-3 aspect-square rounded-full bg-linear-to-b from-gray-100 to-gray-400 shadow-sm flex items-center justify-center ring-1 ring-black/20" style={style}>
                         <div className="w-1/2 h-1/2 rounded-full bg-zinc-800 shadow-inner"></div>
                     </div>
                 ))}
