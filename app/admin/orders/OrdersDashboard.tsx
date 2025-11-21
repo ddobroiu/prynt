@@ -154,23 +154,21 @@ function ArtworkStatus({ item }: { item: OrderItem }) {
   const designOption = meta.designOption;
   const hasArtwork = !!item.artworkUrl;
 
-  // 1. Dacă există link direct (fie upload inițial, fie upload ulterior)
+  // 1. Fișier Client
   if (hasArtwork) {
     return (
       <a 
-        href={item.artworkUrl!} 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold hover:bg-emerald-100 border border-emerald-100 transition-colors"
+        href={item.artworkUrl || '#'} 
+        target={item.artworkUrl ? '_blank' : undefined} 
+        rel={item.artworkUrl ? 'noopener noreferrer' : undefined} 
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100`}
       >
         <CheckCircle2 className="w-3.5 h-3.5" />
-        Vezi Grafica
+        Fișier Client
         <ExternalLink className="w-3 h-3 opacity-50" />
       </a>
     );
   }
-
-  // 2. Opțiune: Doar Text
   if (designOption === 'text_only') {
     return (
       <div className="flex flex-col items-end gap-1">
@@ -178,26 +176,24 @@ function ArtworkStatus({ item }: { item: OrderItem }) {
           <Type className="w-3.5 h-3.5" />
           Grafică Text
         </div>
-        {meta.textDesign && (
-          <span className="text-[10px] text-gray-500 max-w-[150px] truncate bg-white px-1 rounded border border-gray-100" title={meta.textDesign}>
-            "{meta.textDesign}"
+      </div>
+    );
+  }
+  if (designOption === 'pro') {
+    return (
+      <div className="flex flex-col items-end gap-1">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-bold border border-purple-100">
+          <Palette className="w-3.5 h-3.5" />
+          Design Pro
+        </div>
+        {meta['Cost grafică'] && (
+          <span className="text-[10px] text-purple-700 bg-purple-50 px-1 rounded border border-purple-100 font-semibold" title="Cost grafică">
+            {meta['Cost grafică']}
           </span>
         )}
       </div>
     );
   }
-
-  // 3. Opțiune: Grafică Pro
-  if (designOption === 'pro') {
-    return (
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-bold border border-purple-100">
-        <Palette className="w-3.5 h-3.5" />
-        Solicitat Design Pro
-      </div>
-    );
-  }
-
-  // 4. Opțiune: Upload (explicit)
   if (designOption === 'upload') {
     return (
       <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 text-yellow-700 rounded-lg text-xs font-bold border border-yellow-100">
@@ -207,7 +203,40 @@ function ArtworkStatus({ item }: { item: OrderItem }) {
     );
   }
 
-  // 5. Fallback: Lipsă sau necunoscut
+  // 2. Grafică Text
+  if (designOption === 'text_only') {
+    const textValue = meta.textDesign || meta.Text || '';
+    return (
+      <div className="flex flex-col items-end gap-1">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100">
+          <Type className="w-3.5 h-3.5" />
+          Grafică Text
+        </div>
+        <span className="text-[10px] text-gray-500 max-w-[180px] truncate bg-white px-1 rounded border border-gray-100" title={textValue}>
+          {textValue ? `"${textValue}"` : <span className="italic text-gray-400">(nu a fost introdus text)</span>}
+        </span>
+      </div>
+    );
+  }
+
+  // 3. Design Pro
+  if (designOption === 'pro') {
+    return (
+      <div className="flex flex-col items-end gap-1">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-bold border border-purple-100">
+          <Palette className="w-3.5 h-3.5" />
+          Design Pro
+        </div>
+        {meta['Cost grafică'] && (
+          <span className="text-[10px] text-purple-700 bg-purple-50 px-1 rounded border border-purple-100 font-semibold" title="Cost grafică">
+            {meta['Cost grafică']}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  // 4. Fallback: Lipsă sau necunoscut
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-bold border border-red-100">
       <UploadCloud className="w-3.5 h-3.5" />
@@ -429,10 +458,19 @@ export default function OrdersDashboard({ initialOrders = [] }: OrdersDashboardP
                                                   <p className="text-sm text-gray-500">
                                                     <span className="font-semibold text-gray-900">{item.qty} buc</span> × {formatMoney(item.unit)}
                                                   </p>
-                                              </div>
+                                                  {/* Opțiune grafică și text client, dacă există */}
+                                                  {item.metadata?.designOption && (
+                                                    <span className="block text-xs text-indigo-700 font-semibold mt-1">
+                                                      Opțiune grafică: {item.metadata.designOption === 'pro' ? 'Design Pro' : item.metadata.designOption === 'text_only' ? 'Grafică Text' : item.metadata.designOption === 'upload' ? 'Fișier Client' : item.metadata.designOption}
+                                                    </span>
+                                                  )}
+                                                  {item.metadata?.textDesign && (
+                                                    <span className="block text-xs text-gray-600 mt-1" title={item.metadata.textDesign}>
+                                                      Text client: "{item.metadata.textDesign}"
+                                                    </span>
+                                                  )}
+                                                </div>
                                           </div>
-                                          
-                                          {/* AICI ESTE FIXUL PENTRU AFIȘARE */}
                                           <div className="flex items-center justify-end w-full sm:w-auto">
                                               <ArtworkStatus item={item} />
                                           </div>
