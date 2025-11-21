@@ -18,9 +18,10 @@ import {
 } from "lucide-react";
 
 const menuItems = [
-  { href: "/admin/orders", label: "Comenzi", icon: ShoppingCart },
+  { href: "/admin/orders", label: "Comenzi", icon: ShoppingCart, disabled: false },
   { href: "/admin/products", label: "Produse", icon: Package, disabled: true },
-  { href: "/admin/customers", label: "Clienți", icon: Users, disabled: true },
+  // AICI AM ACTIVAT SECȚIUNEA CLIENȚI
+  { href: "/admin/users", label: "Clienți", icon: Users, disabled: false },
   { href: "/admin/invoices", label: "Facturi", icon: FileText, disabled: true },
   { href: "/admin/coupons", label: "Cupoane", icon: Tags, disabled: true },
   { href: "/admin/settings", label: "Setări", icon: Settings, disabled: true },
@@ -73,7 +74,7 @@ export default function AdminSidebar() {
           {/* Navigation */}
           <nav className="flex-1 space-y-1.5">
             {menuItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = pathname.startsWith(item.href);
               const Icon = item.icon;
               
               return (
@@ -111,13 +112,19 @@ export default function AdminSidebar() {
               Înapoi la Site
             </Link>
             
-            {/* Fake Logout Button - API endpoint needed for real functionality */}
-            <button 
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors text-left"
-            >
-              <LogOut size={18} />
-              Delogare
-            </button>
+            {/* Sign Out - Folosim componenta specială sau un buton simplu */}
+            <div className="w-full px-4 py-1">
+               {/* Poți importa SignOutButton aici dacă vrei funcționalitate reală */}
+               <form action="/api/auth/signout" method="POST">
+                  <button 
+                    type="submit"
+                    className="w-full flex items-center gap-3 text-sm font-medium text-red-400 hover:text-red-300 transition-colors text-left"
+                  >
+                    <LogOut size={18} />
+                    Delogare
+                  </button>
+               </form>
+            </div>
           </div>
           
           {/* User Info Mini */}
