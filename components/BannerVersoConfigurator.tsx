@@ -295,7 +295,9 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : input.designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(BANNER_CONSTANTS.PRO_DESIGN_FEE) }),
         ...(input.designOption === 'text_only' && { "Text": textDesign }),
-        artworkUrl, 
+        artworkUrl,
+        designOption: input.designOption,
+        ...(input.designOption === 'text_only' && { textDesign }),
       },
     });
     setToastVisible(true);
