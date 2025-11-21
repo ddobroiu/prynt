@@ -15,26 +15,25 @@ export default function ArtworkRatioPreview({ width, height, imageUrl, hasGromme
   const h = height > 0 ? height : 100;
   const ratio = w / h;
 
-  const grommetSpacing = 25; // cm
-  const windHoleSpacing = 30; // cm
+  // --- CONFIGURARE DENSITATE ---
+  // Am mărit distanța la 50cm pentru a reduce numărul de capse (să nu fie prea dese)
+  const grommetSpacing = 50; 
+  const windHoleSpacing = 50; 
 
   // Definire OFFSET procentual (aproximativ) pentru simulare
-  // 3cm offset la un banner de 100cm înseamnă 3%. 
-  // Calculăm dinamic un mic padding ca să fie mereu "inauntru".
   const offsetPerc = 3; // 3% de la margine (aprox)
   const startP = offsetPerc; 
   const endP = 100 - offsetPerc;
   
   const grommets = [];
   if (hasGrommets) {
-    const safeW = w; // simplificare pt simulare
+    const safeW = w; 
     const safeH = h;
     const countX = Math.ceil(safeW / grommetSpacing);
     const countY = Math.ceil(safeH / grommetSpacing);
     
     // Top & Bottom Row
     for (let i = 0; i <= countX; i++) {
-        // Interpolăm între startP și endP
         const progress = i / countX; 
         const leftPos = startP + progress * (endP - startP);
         
@@ -42,7 +41,7 @@ export default function ArtworkRatioPreview({ width, height, imageUrl, hasGromme
         grommets.push({ left: `${leftPos}%`, top: `${endP}%` });       // Jos
     }
     
-    // Left & Right Row (excludem capetele i=0 și i=max ca să nu dublăm colțurile, dar aici e simulare vizuală, dublarea nu deranjează vizual așa tare, dar e mai curat fără)
+    // Left & Right Row (fără colțuri)
     for (let i = 1; i < countY; i++) {
         const progress = i / countY;
         const topPos = startP + progress * (endP - startP);

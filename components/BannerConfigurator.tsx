@@ -1,9 +1,9 @@
 "use client";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useCart } from "@/components/CartContext";
-import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
 import DynamicBannerPreview from "./DynamicBannerPreview";
@@ -56,7 +56,27 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
                 <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
             </nav>
             <div className="p-6">
-                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Bannere Publicitare Durabile</h3><p>Fie că dorești să anunți o promoție sau să îți faci brandul cunoscut, bannerele noastre personalizate sunt soluția ideală, imprimate la o calitate excepțională.</p><h4>Structură Preț</h4><ul><li>Sub 1 m²: <strong>100 RON/m²</strong></li><li>1-5 m²: <strong>75 RON/m²</strong></li><li>5-20 m²: <strong>60 RON/m²</strong></li><li>20-50 m²: <strong>45 RON/m²</strong></li><li>Peste 50 m²: <strong>35 RON/m²</strong></li></ul></div>}
+                {activeTab === 'descriere' && (
+                    <div className="prose max-w-none text-sm text-gray-600">
+                        <h3 className="text-gray-900 text-lg font-bold mb-2">Bannere Publicitare Outdoor (Frontlit)</h3>
+                        <p className="mb-4">
+                            <strong>Atrageți toate privirile cu bannere imprimate la rezoluție fotografică.</strong> Fie că dorești să anunți o promoție, o deschidere de magazin sau să îți faci brandul cunoscut, bannerele noastre personalizate sunt soluția ideală pentru vizibilitate maximă la un cost eficient.
+                        </p>
+                        
+                        <h4 className="text-gray-900 font-semibold mt-4 mb-2">Materiale & Calitate</h4>
+                        <ul className="list-disc pl-5 space-y-1 mb-4">
+                            <li><strong>Frontlit 440g (Standard):</strong> Un material PVC flexibil și economic, perfect pentru campanii pe termen scurt și mediu.</li>
+                            <li><strong>Frontlit 510g (Premium):</strong> Varianta "Coated" (turnată), mult mai rezistentă la rupere și diferențe de temperatură (iarnă/vară), recomandată pentru expunere îndelungată.</li>
+                        </ul>
+
+                        <h4 className="text-gray-900 font-semibold mt-4 mb-2">De ce să alegi bannerele noastre?</h4>
+                        <ul className="list-disc pl-5 space-y-1">
+                            <li><strong>Rezistență UV și Apă:</strong> Folosim cerneluri Eco-Solvent de ultimă generație care nu se decolorează.</li>
+                            <li><strong>Finisaje Incluse:</strong> Tivul perimetral și capsele de prindere sunt incluse standard în preț.</li>
+                            <li><strong>Orice Dimensiune:</strong> Putem realiza bannere de la mici dimensiuni până la formate gigant (prin termosudare).</li>
+                        </ul>
+                    </div>
+                )}
                 {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
                 {activeTab === 'faq' && <FaqAccordion qa={bannerFaqs} />}
             </div>
@@ -91,24 +111,52 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 
 type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string; renderOnlyConfigurator?: boolean; imageUrl?: string | null };
 
+// Definesc tipurile de view posibile
 type ViewMode = 'gallery' | 'shape';
 
 /* --- MAIN COMPONENT --- */
 export default function BannerConfigurator({ productSlug, initialWidth: initW, initialHeight: initH, productImage, renderOnlyConfigurator = false }: Props) {
   const { addItem } = useCart();
-  const [input, setInput] = useState<PriceInputBanner>({ width_cm: initW ?? 0, height_cm: initH ?? 0, quantity: 1, material: "frontlit_440", want_wind_holes: false, want_hem_and_grommets: true, designOption: "upload" });
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  // --- 1. INITIALIZARE STATE DIN URL SAU DEFAULT ---
+  const [input, setInput] = useState<PriceInputBanner>(() => {
+    const pW = searchParams.get("w");
+    const pH = searchParams.get("h");
+    const pQ = searchParams.get("q");
+    const pMat = searchParams.get("mat");
+    const pWind = searchParams.get("wind");
+    const pHem = searchParams.get("hem");
+
+    return {
+      width_cm: pW ? parseInt(pW) : (initW ?? 0),
+      height_cm: pH ? parseInt(pH) : (initH ?? 0),
+      quantity: pQ ? parseInt(pQ) : 1,
+      material: pMat === '510' ? "frontlit_510" : "frontlit_440",
+      want_wind_holes: pWind === '1',
+      want_hem_and_grommets: pHem !== '0', // Default true, doar '0' il face false
+      designOption: "upload"
+    };
+  });
   
-  const [lengthText, setLengthText] = useState(initW ? String(initW) : "");
-  const [heightText, setHeightText] = useState(initH ? String(initH) : "");
+  const [lengthText, setLengthText] = useState(input.width_cm ? String(input.width_cm) : "");
+  const [heightText, setHeightText] = useState(input.height_cm ? String(input.height_cm) : "");
   
   const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"] : ["/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp", "/products/banner/4.webp"], [productImage]);
   
   const [viewMode, setViewMode] = useState<ViewMode>('gallery');
+
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeImage, setActiveImage] = useState<string>(galleryImages[0]);
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  
+  // State pentru avertisment rezoluție
+  const [lowResWarning, setLowResWarning] = useState(false);
+
   const [textDesign, setTextDesign] = useState<string>("");
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
@@ -133,22 +181,77 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       updateInput("height_cm", d === "" ? 0 : parseInt(d, 10));
       if(d && parseInt(d) > 0) setViewMode('shape');
   };
+
+  // --- 2. URL SYNCHRONIZATION ---
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (input.width_cm > 0) params.set("w", input.width_cm.toString());
+      if (input.height_cm > 0) params.set("h", input.height_cm.toString());
+      if (input.quantity > 1) params.set("q", input.quantity.toString());
+      
+      // Parametrii opționali
+      if (input.material === 'frontlit_510') params.set("mat", "510");
+      if (input.want_wind_holes) params.set("wind", "1");
+      if (!input.want_hem_and_grommets) params.set("hem", "0");
+      
+      // Actualizăm URL-ul fără refresh
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }, 500); // Debounce 500ms
+
+    return () => clearTimeout(timer);
+  }, [input, pathname, router]);
+
+  // --- 3. RESOLUTION CHECK FUNCTION ---
+  const checkResolution = useCallback((file: File) => {
+    setLowResWarning(false);
+    if (input.width_cm <= 0 || input.height_cm <= 0) return;
+
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.src = objectUrl;
+
+    img.onload = () => {
+        const { naturalWidth, naturalHeight } = img;
+        // 1 inch = 2.54 cm -> Calculăm DPI estimativ
+        const widthInches = input.width_cm / 2.54;
+        const heightInches = input.height_cm / 2.54;
+        
+        const dpiW = naturalWidth / widthInches;
+        const dpiH = naturalHeight / heightInches;
+        const avgDpi = (dpiW + dpiH) / 2;
+
+        // Dacă DPI-ul e sub 70, afișăm warning
+        if (avgDpi < 70) {
+            setLowResWarning(true);
+        }
+        URL.revokeObjectURL(objectUrl);
+    };
+  }, [input.width_cm, input.height_cm]);
   
   const handleArtworkFileInput = async (file: File | null) => {
     setArtworkUrl(null);
     setUploadError(null);
+    setLowResWarning(false);
+
     if (!file) return;
     try {
+      // Verificăm rezoluția înainte de orice
+      checkResolution(file);
+
+      // 1. Previzualizare Locală Imediată
       const previewUrl = URL.createObjectURL(file);
       setArtworkUrl(previewUrl); 
-      setViewMode('gallery');
+      setViewMode('gallery'); // Mutăm pe tab-ul galerie
 
+      // 2. Upload
       setUploading(true);
       const form = new FormData();
       form.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: form });
       if (!res.ok) throw new Error("Upload eșuat");
       const data = await res.json();
+      
       setArtworkUrl(data.url); 
     } catch (e: any) {
       setUploadError(e?.message ?? "Eroare la upload");
@@ -196,7 +299,9 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   }
 
   useEffect(() => {
+    // Facem autoplay la galerie doar dacă NU avem o grafică încărcată
     if (viewMode !== 'gallery' || artworkUrl) return;
+    
     const id = setInterval(() => {
       setActiveIndex((i) => {
         const next = (i + 1) % galleryImages.length;
@@ -223,6 +328,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
           {/* STÂNGA - ZONA VIZUALĂ */}
           <div className="lg:sticky top-24 h-max space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+              
+              {/* Header Switch: Doar Galerie și Schiță */}
               <div className="flex border-b border-gray-100 overflow-x-auto">
                   <button 
                       onClick={() => setViewMode('gallery')}
@@ -345,7 +452,14 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                       </label>
                       {uploading && <p className="text-sm text-indigo-600">Se încarcă...</p>}
                       {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
-                      {artworkUrl && !uploadError && <p className="text-sm text-green-600 font-semibold">Grafică încărcată cu succes!</p>}
+                      {/* AVERTISMENT REZOLUȚIE MICĂ */}
+                      {lowResWarning && (
+                          <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 flex items-start gap-2">
+                              <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                              <span>Imaginea pare a avea o rezoluție mică pentru aceste dimensiuni. Printul ar putea ieși pixelat.</span>
+                          </div>
+                      )}
+                      {artworkUrl && !uploadError && !lowResWarning && <p className="text-sm text-green-600 font-semibold">Grafică încărcată cu succes!</p>}
                     </div>
                   )}
 
@@ -383,7 +497,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
             <button className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100" onClick={() => setDetailsOpen(false)} aria-label="Închide">
               <X size={20} className="text-gray-600" />
             </button>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Detalii Produs: Banner</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Detalii Produs: Banner (Frontlit)</h3>
             <div className="prose prose-sm max-w-none">
               <h4>Materiale & Durabilitate</h4>
               <ul>
