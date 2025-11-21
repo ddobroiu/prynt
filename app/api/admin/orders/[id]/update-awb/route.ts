@@ -2,13 +2,14 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAdminSession } from "@/lib/adminSession";
 
-export async function PATCH(request: NextRequest, context: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const token = request.cookies.get("admin_auth")?.value;
   const session = verifyAdminSession(token);
   if (!session) {
     return new Response("Unauthorized", { status: 401 });
   }
-  const orderId = context.params.id;
+  const params = await context.params;
+  const orderId = params.id;
   let body: any = {};
   try {
     body = await request.json();
