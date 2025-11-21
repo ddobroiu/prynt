@@ -153,9 +153,12 @@ export default function TapetConfigurator({ productSlug }: Props) {
         "Dimensiune": `${input.width_cm}x${input.height_cm} cm`,
         "Suprafață": `${priceData.total_sqm} mp`,
         "Finisaj": input.want_adhesive ? "Auto-adeziv" : "Standard (fără adeziv)",
-        "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : 'Grafică proprie',
+        "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : input.designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(TAPET_CONSTANTS.PRO_DESIGN_FEE) }),
+        ...(input.designOption === 'text_only' && { "Text": textDesign }),
         artworkUrl,
+        designOption: input.designOption,
+        ...(input.designOption === 'text_only' && { textDesign }),
       },
     });
     setToastVisible(true); setTimeout(() => setToastVisible(false), 1600);
