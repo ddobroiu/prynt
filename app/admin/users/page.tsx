@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import UsersDashboard from './UsersDashboard';
 import { Users, UserPlus, Wallet } from 'lucide-react';
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,12 +62,58 @@ export default async function UsersPage() {
   const now = Date.now();
   const oneDay = 24 * 60 * 60 * 1000;
 
+  // Pentru a ne asigura că afișăm valoarea reală a comenzilor (chiar dacă ordinele sunt înreg. separat),
+  // agregăm sumele din tabela `Order` pentru utilizatorii aflați în listă.
+  const userIds = users.map(u => u.id).filter(Boolean) as string[];
+  let aggregated: { userId: string; _sum: { total: any } }[] = [];
+  try {
+    if (userIds.length > 0) {
+      aggregated = await prisma.order.groupBy({
+        by: ['userId'],
+        where: { userId: { in: userIds }, status: { not: 'canceled' } },
+        _sum: { total: true },
+      }) as any;
+    }
+  } catch (e) {
+    console.warn('[UsersPage] groupBy orders failed:', (e as any)?.message || e);
+  }
+
+  const sumsByUser: Record<string, number> = {};
+  for (const row of aggregated) {
+    sumsByUser[row.userId] = Number(row._sum.total ?? 0);
+  }
+
+  // Fallback: dacă proiectul rulează în mod fără DB (sau avem comenzi în .data/orders.jsonl),
+  // citim fișierul local și agregăm sumele pe email pentru a le asocia utilizatorilor.
+  const emailSums: Record<string, number> = {};
+  try {
+    const dataPath = path.join(process.cwd(), '.data', 'orders.jsonl');
+    if (fs.existsSync(dataPath)) {
+      const raw = await fs.promises.readFile(dataPath, 'utf8');
+      const lines = raw.split(/\r?\n/).filter(Boolean);
+      for (const line of lines) {
+        try {
+          const obj = JSON.parse(line);
+          const email = (obj.address?.email || obj.billing?.email || '')?.toString().toLowerCase();
+          if (!email) continue;
+          const status = obj.status || 'active';
+          if (status === 'canceled') continue;
+          const total = Number(obj.total ?? 0) || 0;
+          emailSums[email] = (emailSums[email] || 0) + total;
+        } catch (_) {}
+      }
+    }
+  } catch (e) {
+    console.warn('[UsersPage] reading .data/orders.jsonl failed:', (e as any)?.message || e);
+  }
+
   const stats = users.reduce((acc, user) => {
-    // Calculăm totalul cheltuit per user (doar comenzi valide, neanulate)
-    const spent = user.orders
+    // Dacă avem o sumă agregată din baza de date, o folosim; altfel, calculăm din orders incluse
+    const spentFromOrders = user.orders
       .filter(o => o.status !== 'canceled')
       .reduce((sum, o) => sum + (o.total || 0), 0);
-    
+
+    const spent = typeof sumsByUser[user.id] === 'number' ? sumsByUser[user.id] : spentFromOrders;
     acc.totalSpentGlobal += spent;
 
     // Useri noi (ultimele 24h)

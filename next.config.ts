@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '10mb', // Util pentru upload-ul de fișiere grafice mari
     },
+    // Forțăm root-ul pentru Turbopack astfel încât să nu încerce să infereze
+    // folderul proiectului din sub-directoare (erori în Windows/WSL uneori)
+    turbopack: {
+      root: './',
+    },
   },
   images: {
     remotePatterns: [

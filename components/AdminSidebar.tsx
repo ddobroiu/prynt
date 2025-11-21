@@ -1,111 +1,144 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
-  ShoppingBag, 
+  ShoppingCart, 
   Users, 
-  FileText, 
-  Package,
-  Image as ImageIcon,
-  LogOut
+  Settings, 
+  LogOut, 
+  Package, 
+  ArrowLeft,
+  Menu,
+  X,
+  FileText,
+  Tags
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
-const sidebarLinks = [
-  {
-    label: "Dashboard",
-    href: "/admin",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Comenzi",
-    href: "/admin/orders",
-    icon: ShoppingBag,
-  },
-  {
-    label: "Clienți",
-    href: "/admin/users",
-    icon: Users,
-  },
-  {
-    label: "Facturi",
-    href: "/admin/invoices",
-    icon: FileText,
-  },
-  {
-    label: "Produse",
-    href: "/admin/products",
-    icon: Package,
-  },
-  {
-    label: "Grafică & Uploads",
-    href: "/admin/graphics",
-    icon: ImageIcon,
-  },
+const menuItems = [
+  { href: "/admin/orders", label: "Comenzi", icon: ShoppingCart, disabled: false },
+  { href: "/admin/products", label: "Produse", icon: Package, disabled: true },
+  // AICI AM ACTIVAT SECȚIUNEA CLIENȚI
+  { href: "/admin/users", label: "Clienți", icon: Users, disabled: false },
+  { href: "/admin/invoices", label: "Facturi", icon: FileText, disabled: true },
+  { href: "/admin/coupons", label: "Cupoane", icon: Tags, disabled: true },
+  { href: "/admin/settings", label: "Setări", icon: Settings, disabled: true },
 ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen fixed left-0 top-0 z-40">
-      {/* Logo Area */}
-      <div className="h-16 flex items-center px-6 border-b border-gray-100">
-        <Link href="/admin" className="flex items-center gap-2 font-bold text-xl text-gray-900">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-            P
+    <>
+      {/* Mobile Toggle Button */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-4 left-4 z-50 p-2.5 bg-zinc-900/80 backdrop-blur-md border border-white/10 rounded-xl text-white lg:hidden shadow-xl"
+      >
+        {isOpen ? <X size={22} /> : <Menu size={22} />}
+      </button>
+
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Container */}
+      <aside 
+        className={`fixed top-0 left-0 h-full w-72 bg-[#09090b]/95 backdrop-blur-xl border-r border-white/10 z-50 transition-transform duration-300 ease-out lg:translate-x-0 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col h-full p-6">
+          {/* Logo Area */}
+          <div className="mb-10 px-2 flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <span className="font-bold text-white text-lg">P</span>
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-white leading-none">
+                Prynt<span className="text-indigo-400">.Admin</span>
+              </h1>
+              <p className="text-[10px] text-zinc-500 font-medium tracking-widest uppercase mt-1">
+                Control Panel
+              </p>
+            </div>
           </div>
-          <span>Prynt Admin</span>
-        </Link>
-      </div>
 
-      {/* Navigation Links */}
-      <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
-        {sidebarLinks.map((link) => {
-          const Icon = link.icon;
-          const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+          {/* Navigation */}
+          <nav className="flex-1 space-y-1.5">
+            {menuItems.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              const Icon = item.icon;
+              
+              return (
+                <Link
+                  key={item.label}
+                  href={item.disabled ? "#" : item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={`group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    item.disabled 
+                      ? "opacity-40 cursor-not-allowed text-zinc-500 hover:bg-transparent"
+                      : isActive
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/40"
+                        : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <Icon size={18} className={isActive ? "text-white" : "text-zinc-500 group-hover:text-indigo-400 transition-colors"} />
+                  {item.label}
+                  {item.disabled && (
+                    <span className="ml-auto text-[9px] font-bold uppercase bg-white/5 px-1.5 py-0.5 rounded text-zinc-600">
+                      WIP
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
 
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group",
-                isActive
-                  ? "bg-indigo-50 text-indigo-600"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              )}
+          {/* Footer Actions */}
+          <div className="mt-auto pt-6 border-t border-white/5 space-y-2">
+            <Link 
+              href="/"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors group"
             >
-              <Icon 
-                size={20} 
-                className={cn(
-                  "transition-colors",
-                  isActive ? "text-indigo-600" : "text-gray-400 group-hover:text-gray-600"
-                )} 
-              />
-              {link.label}
+              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+              Înapoi la Site
             </Link>
-          );
-        })}
-      </nav>
-
-      {/* Bottom Section (User/Logout) */}
-      <div className="p-4 border-t border-gray-100">
-        <button 
-            onClick={() => {
-                // Logica de logout: ștergere cookie admin_auth și redirect
-                document.cookie = 'admin_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-                window.location.href = '/admin/login';
-            }}
-            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-        >
-          <LogOut size={20} />
-          Deconectare
-        </button>
-      </div>
-    </aside>
+            
+            {/* Sign Out - Folosim componenta specială sau un buton simplu */}
+            <div className="w-full px-4 py-1">
+               {/* Poți importa SignOutButton aici dacă vrei funcționalitate reală */}
+               <form action="/api/auth/signout" method="POST">
+                  <button 
+                    type="submit"
+                    className="w-full flex items-center gap-3 text-sm font-medium text-red-400 hover:text-red-300 transition-colors text-left"
+                  >
+                    <LogOut size={18} />
+                    Delogare
+                  </button>
+               </form>
+            </div>
+          </div>
+          
+          {/* User Info Mini */}
+          <div className="mt-6 flex items-center gap-3 px-2">
+             <div className="h-8 w-8 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-xs font-bold text-zinc-400">
+               AD
+             </div>
+             <div className="flex-1 overflow-hidden">
+               <p className="text-xs font-medium text-white truncate">Administrator</p>
+               <p className="text-[10px] text-zinc-500 truncate">admin@prynt.ro</p>
+             </div>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }
