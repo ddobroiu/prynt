@@ -291,6 +291,10 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         "Material": input.material === 'frontlit_510' ? "Frontlit 510g (Premium)" : "Frontlit 440g (Standard)",
         "Finisaje": `Tiv și capse, ${input.want_wind_holes ? "cu găuri de vânt" : "fără găuri de vânt"}`,
         "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : input.designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
+        // AICI ESTE FIX-UL: Adăugăm câmpurile tehnice necesare pentru admin
+        designOption: input.designOption,
+        textDesign: input.designOption === 'text_only' ? textDesign : undefined,
+        
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(BANNER_CONSTANTS.PRO_DESIGN_FEE) }),
         ...(input.designOption === 'text_only' && { "Text": textDesign }),
         artworkUrl, 
