@@ -38,7 +38,10 @@ export default function BannerPage() {
         availability="https://schema.org/InStock"
         url={`${base}/banner`}
       />
-      <BannerConfigurator productSlug="banner" />
+      {/* FIX: Suspense pentru configurator */}
+      <React.Suspense>
+        <BannerConfigurator productSlug="banner" />
+      </React.Suspense>
     </>
   );
 }
