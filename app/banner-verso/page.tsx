@@ -38,7 +38,10 @@ export default function BannerVersoPage() {
         availability="https://schema.org/InStock"
         url={`${base}/banner-verso`}
       />
-      <BannerVersoConfigurator productSlug="banner-verso" />
+      {/* FIX: Suspense pentru configurator */}
+      <React.Suspense>
+        <BannerVersoConfigurator productSlug="banner-verso" />
+      </React.Suspense>
     </>
   );
 }
