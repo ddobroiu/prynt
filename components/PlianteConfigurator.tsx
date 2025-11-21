@@ -144,7 +144,9 @@ export default function PlianteConfigurator({ productSlug }: Props) {
         "Hârtie": `${weight} g/mp`,
         "Grafică": designOption === 'pro' ? "Vreau grafică" : "Grafică proprie",
         ...(designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(priceData.proFee) }),
-        artworkUrl
+        artworkUrl,
+        designOption,
+        ...(typeof textDesign === 'string' && textDesign.length > 0 ? { textDesign } : {})
       },
     });
     setToastVisible(true); setTimeout(() => setToastVisible(false), 1600);

@@ -44,7 +44,8 @@ export default async function OrdersPage() {
     );
   }
 
-  // Fetch comenzi pentru statistici
+  // Fetch comenzi pentru statistici și listare
+  // NOTĂ: Asigură-te că funcția listOrders din lib/orderStore returnează și relația `items`
   const allOrders = await listOrders(10000); 
 
   const now = Date.now();
@@ -158,8 +159,9 @@ export default async function OrdersPage() {
       </div>
 
       {/* Orders Dashboard Component - Tabelul Principal */}
+      {/* FIX: Am adăugat prop-ul initialOrders */}
       <div className="rounded-3xl border border-white/10 bg-black/20 backdrop-blur-sm overflow-hidden">
-        <OrdersDashboard />
+        <OrdersDashboard initialOrders={allOrders as any[]} />
       </div>
     </div>
   );

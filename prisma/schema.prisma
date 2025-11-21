@@ -34,15 +34,15 @@ model UserGraphic {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
 
-  // Câmpuri noi pentru legătura cu comanda (Adăugate pentru a rezolva eroarea de tip)
+  // Câmpuri pentru legătura cu comanda
   orderId      String?
   orderItemId  String?
 
-  originalName String   // Corespunde cu "fileName" din API
-  storagePath  String   @unique // Corespunde cu "fileUrl" din API (secure_url Cloudinary)
-  publicId     String   @unique // Corespunde cu "publicId" din API (pentru ștergere Cloudinary)
-  size         Int      // Corespunde cu "fileSize" din API (bytes)
-  mimeType     String   // Corespunde cu "fileType" din API
+  originalName String   // "fileName"
+  storagePath  String   @unique // "fileUrl" / secure_url
+  publicId     String   @unique // Cloudinary public_id
+  size         Int      // bytes
+  mimeType     String   // fileType
   
   createdAt    DateTime @default(now())
 }
@@ -58,12 +58,14 @@ model Address {
   localitate   String
   strada_nr    String
   postCode     String?
-  // Detalii adresă (bloc, scară etc.)
+  
+  // Detalii adresă
   bloc         String?
   scara        String?
   etaj         String?
   ap           String?
   interfon     String?
+  
   isDefault    Boolean  @default(false)
   type         String?  // shipping | billing
 
@@ -92,9 +94,11 @@ model Order {
   shippingFee  Decimal   @default(0)
   total        Decimal   @default(0)
   invoiceLink  String?
+  
   // AWB / tracking info
   awbNumber    String?
   awbCarrier   String?
+  
   // Status lifecycle
   status       String    @default("active") // active | canceled | fulfilled
   canceledAt   DateTime?
@@ -111,11 +115,14 @@ model OrderItem {
   unit        Decimal @default(0)
   total       Decimal @default(0)
   
-  // Câmp nou pentru upload grafică per produs
+  // Grafică
   artworkUrl  String? 
+  
+  // MODIFICAT: Metadate pentru designOption, textDesign, etc.
+  metadata    Json?   
 }
 
-// NextAuth (Auth.js) tables — ready for future login
+// NextAuth (Auth.js) tables
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -150,7 +157,6 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Token reset parolă
 model PasswordResetToken {
   id        String   @id @default(cuid())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -162,7 +168,7 @@ model PasswordResetToken {
 
 model Review {
   id          String   @id @default(cuid())
-  rating      Int      // Rating de la 1 la 5
+  rating      Int      // 1-5
   title       String?
   content     String
   createdAt   DateTime @default(now())
@@ -170,7 +176,7 @@ model Review {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
 
-  productSlug String   // ex: "banner", "pliante"
+  productSlug String   // ex: "banner"
    
   @@index([productSlug])
 }

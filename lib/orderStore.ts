@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { prisma } from './prisma';
-// Avoid direct Prisma.Decimal construction to keep build portable
 
 export type Address = {
   nume_prenume: string;
@@ -10,6 +9,12 @@ export type Address = {
   judet: string;
   localitate: string;
   strada_nr: string;
+  postCode?: string;
+  bloc?: string;
+  scara?: string;
+  etaj?: string;
+  ap?: string;
+  interfon?: string;
 };
 
 export type Billing = {
@@ -41,7 +46,14 @@ export type StoredOrder = {
   paymentType: 'Ramburs' | 'Card';
   address: Address;
   billing: Billing;
-  items: Array<{ name: string; qty: number; unit: number; total: number }>;
+  items: Array<{ 
+    name: string; 
+    qty: number; 
+    unit: number; 
+    total: number;
+    artworkUrl?: string | null;
+    metadata?: any;
+  }>;
   shippingFee: number;
   total: number;
   invoiceLink?: string | null;
@@ -66,14 +78,13 @@ function ensureDir() {
 
 async function nextOrderNo(): Promise<number> {
   ensureDir();
-  let current = 999; // so first becomes 1000
+  let current = 999;
   try {
     if (fs.existsSync(SEQ_PATH)) {
       const txt = await fs.promises.readFile(SEQ_PATH, 'utf8').catch(() => '');
       const n = parseInt((txt || '').trim(), 10);
       if (Number.isFinite(n) && n >= 999) current = n;
     } else {
-      // Fallback: derive from existing orders if seq missing
       const content = await fs.promises.readFile(FILE_PATH, 'utf8').catch(() => '');
       const lines = content.split(/\r?\n/).filter(Boolean);
       let maxNo = 0;
@@ -91,12 +102,13 @@ async function nextOrderNo(): Promise<number> {
   return next;
 }
 
+// --- FUNCȚIA ESENȚIALĂ EXPORTATĂ ---
 export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
-  // If DATABASE_URL exists, persist in PostgreSQL via Prisma; else fallback to file
+  // Dacă avem bază de date, salvăm cu Prisma
   if (process.env.DATABASE_URL) {
-    // Compute next orderNo from DB to keep continuity; fallback to 1000 series
     const last = await prisma.order.findFirst({ orderBy: { orderNo: 'desc' } }).catch(() => null);
     const orderNo = (last?.orderNo ?? 999) + 1;
+    
     const created = await prisma.order.create({
       data: {
         orderNo,
@@ -114,15 +126,17 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
             qty: it.qty,
             unit: (it.unit ?? 0) as any,
             total: (it.total ?? 0) as any,
+            artworkUrl: it.artworkUrl || null,
+            metadata: it.metadata || undefined,
           })),
         },
       },
     });
-    // Best-effort: update user's default shipping address with latest order address
+
+    // Salvare adresă implicită utilizator (best-effort)
     try {
       if (created.userId) {
         const a = input.address as any;
-        // Clear previous default
         await prisma.address.updateMany({ where: { userId: created.userId, isDefault: true, type: 'shipping' }, data: { isDefault: false } });
         await prisma.address.create({
           data: {
@@ -135,10 +149,15 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
             localitate: a.localitate || '',
             strada_nr: a.strada_nr || '',
             postCode: a.postCode || null,
+            bloc: a.bloc || null,
+            scara: a.scara || null,
+            etaj: a.etaj || null,
+            ap: a.ap || null,
+            interfon: a.interfon || null,
             label: 'Implicit',
           },
         });
-        // Persist billing address if company/juridica and has fields
+        
         const b: any = input.billing;
         if (b && b.tip_factura && b.tip_factura !== 'persoana_fizica') {
           const existingBilling = await prisma.address.findFirst({ where: { userId: created.userId, type: 'billing' } });
@@ -152,6 +171,11 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
             localitate: b.localitate || a.localitate || '',
             strada_nr: b.strada_nr || a.strada_nr || '',
             postCode: b.postCode || a.postCode || null,
+            bloc: b.bloc || null,
+            scara: b.scara || null,
+            etaj: b.etaj || null,
+            ap: b.ap || null,
+            interfon: b.interfon || null,
             label: 'Facturare',
           };
           if (existingBilling) {
@@ -164,6 +188,7 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
     } catch (e) {
       console.warn('[orderStore] address save skipped:', (e as any)?.message || e);
     }
+    
     return {
       id: created.id,
       orderNo: created.orderNo,
@@ -180,7 +205,7 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
     };
   }
 
-  // File fallback (development without DB)
+  // Fallback fișier local
   ensureDir();
   const orderNo = await nextOrderNo();
   const order: StoredOrder = {
@@ -194,7 +219,6 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
 }
 
 export async function listOrders(limit = 200): Promise<StoredOrder[]> {
-  // If DATABASE_URL is present, read from PostgreSQL via Prisma
   if (process.env.DATABASE_URL) {
     try {
       const recs = await prisma.order.findMany({
@@ -202,14 +226,21 @@ export async function listOrders(limit = 200): Promise<StoredOrder[]> {
         take: limit,
         include: { items: true },
       });
-      const mapped: StoredOrder[] = recs.map((r) => ({
+      return recs.map((r) => ({
         orderNo: r.orderNo,
         id: r.id,
         createdAt: r.createdAt.toISOString(),
         paymentType: r.paymentType as any,
         address: (r.address || {}) as any,
         billing: (r.billing || {}) as any,
-        items: (r.items || []).map((it: any) => ({ name: it.name, qty: it.qty, unit: Number(it.unit), total: Number(it.total) })),
+        items: (r.items || []).map((it: any) => ({ 
+          name: it.name, 
+          qty: it.qty, 
+          unit: Number(it.unit), 
+          total: Number(it.total),
+          artworkUrl: it.artworkUrl,
+          metadata: it.metadata 
+        })),
         shippingFee: Number(r.shippingFee ?? 0),
         total: Number(r.total ?? 0),
         invoiceLink: r.invoiceLink || null,
@@ -218,18 +249,14 @@ export async function listOrders(limit = 200): Promise<StoredOrder[]> {
         status: (r.status as any) || undefined,
         canceledAt: r.canceledAt ? r.canceledAt.toISOString() : null,
       }));
-      return mapped;
     } catch (e) {
       console.warn('[orderStore] DB listOrders failed:', (e as any)?.message || e);
-      // Fallthrough to file fallback
     }
   }
 
-  // File fallback (development without DB)
   ensureDir();
   const content = await fs.promises.readFile(FILE_PATH, 'utf8').catch(() => '');
   const lines = content.split(/\r?\n/).filter(Boolean);
-  // Load cancel map for overlay in file fallback
   let cancelMap: Record<string, string> = {};
   try {
     const raw = await fs.promises.readFile(CANCEL_MAP_PATH, 'utf8').catch(() => '{}');
@@ -246,13 +273,11 @@ export async function listOrders(limit = 200): Promise<StoredOrder[]> {
       orders.push(obj);
     } catch {}
   }
-  // newest first
   orders.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   return orders;
 }
 
 export async function getOrder(id: string): Promise<StoredOrder | null> {
-  // DB-backed lookup when available
   if (process.env.DATABASE_URL) {
     try {
       const r = await prisma.order.findUnique({ where: { id }, include: { items: true } });
@@ -264,7 +289,14 @@ export async function getOrder(id: string): Promise<StoredOrder | null> {
         paymentType: r.paymentType as any,
         address: (r.address || {}) as any,
         billing: (r.billing || {}) as any,
-        items: (r.items || []).map((it: any) => ({ name: it.name, qty: it.qty, unit: Number(it.unit), total: Number(it.total) })),
+        items: (r.items || []).map((it: any) => ({ 
+          name: it.name, 
+          qty: it.qty, 
+          unit: Number(it.unit), 
+          total: Number(it.total),
+          artworkUrl: it.artworkUrl,
+          metadata: it.metadata
+        })),
         shippingFee: Number(r.shippingFee ?? 0),
         total: Number(r.total ?? 0),
         invoiceLink: r.invoiceLink || null,
@@ -275,7 +307,6 @@ export async function getOrder(id: string): Promise<StoredOrder | null> {
       } as StoredOrder;
     } catch (e) {
       console.warn('[orderStore] DB getOrder failed:', (e as any)?.message || e);
-      // continue to file fallback
     }
   }
 
@@ -291,7 +322,6 @@ export async function getOrder(id: string): Promise<StoredOrder | null> {
   return null;
 }
 
-// Stripe session -> order mapping helpers
 type SessionMap = Record<string, { orderId: string; orderNo: number; createdAt: string }>;
 
 function ensureSessionMap(): void {

@@ -1,265 +1,473 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import AdminOrderStatusControl from "@/components/AdminOrderStatusControl";
-import AdminInvoiceControl from "@/components/AdminInvoiceControl";
-import AdminAwbControl from "@/components/AdminAwbControl";
-import AdminAddressEditor from "@/components/AdminAddressEditor";
-import AdminGraphicsControl from "@/components/AdminGraphicsControl";
-import OrderDetails from "@/components/OrderDetails";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, Search, Filter, AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import React, { useState } from "react";
+import { 
+  Search, 
+  MapPin, 
+  Phone, 
+  CreditCard, 
+  Banknote, 
+  Calendar, 
+  Package, 
+  CheckCircle2, 
+  AlertCircle, 
+  ExternalLink, 
+  Truck, 
+  FileText, 
+  MoreVertical,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Mail,
+  Loader2,
+  RefreshCw,
+  Type,
+  Palette,
+  UploadCloud
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-// --- HOOKS ---
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  return debouncedValue;
-}
-
-// --- HELPERS ---
-function fmtRON(n: number) {
-  return new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(n);
-}
-
-const STATUS_META = {
-  active: { label: "În lucru", badge: "bg-amber-500/10 text-amber-400 border-amber-500/20", icon: Clock },
-  fulfilled: { label: "Finalizată", badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", icon: CheckCircle2 },
-  canceled: { label: "Anulată", badge: "bg-rose-500/10 text-rose-400 border-rose-500/20", icon: AlertCircle },
+// --- TIPURI ---
+type OrderItem = {
+  id: string;
+  name: string;
+  qty: number;
+  unit: any;
+  total: any;
+  artworkUrl?: string | null;
+  // Metadata este cheia pentru text și opțiuni
+  metadata?: {
+    designOption?: 'upload' | 'text_only' | 'pro';
+    textDesign?: string;
+    [key: string]: any;
+  } | null;
 };
 
-type StatusKey = keyof typeof STATUS_META;
+type Order = {
+  id: string;
+  orderNo: number;
+  createdAt: string | Date;
+  status: string;
+  paymentType: string;
+  total: any;
+  shippingFee: any;
+  user?: {
+    name: string | null;
+    email: string;
+    phone: string | null;
+  };
+  address: any;
+  billing: any;
+  items: OrderItem[];
+  awbNumber?: string | null;
+  awbCarrier?: string | null;
+  invoiceLink?: string | null;
+};
 
-function normalizeStatus(status?: string | null): StatusKey {
-  if (status === 'fulfilled' || status === 'canceled' || status === 'active') return status;
-  return 'active';
+interface OrdersDashboardProps {
+  initialOrders: Order[];
 }
 
-export default function OrdersDashboard() {
-  const [orders, setOrders] = useState([]);
-  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalOrders: 0 });
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [status, setStatus] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+// --- UTILS ---
+const formatDate = (date: string | Date) => {
+  return new Date(date).toLocaleDateString("ro-RO", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
-  const refreshData = () => setRefreshTrigger(prev => prev + 1);
+const formatMoney = (amount: any) => {
+  return new Intl.NumberFormat("ro-RO", {
+    style: "currency",
+    currency: "RON",
+  }).format(Number(amount));
+};
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true);
-      const params = new URLSearchParams({ page: String(page), limit: "20" });
-      if (status) params.set("status", status);
-      if (debouncedSearchTerm) params.set("query", debouncedSearchTerm);
+// --- COMPONENTĂ STATUS ---
+function OrderStatusSelector({ orderId, currentStatus }: { orderId: string; currentStatus: string }) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState(currentStatus);
 
-      try {
-        const res = await fetch(`/api/admin/orders?${params.toString()}`);
-        if (!res.ok) throw new Error("Failed to fetch");
-        const data = await res.json();
-        setOrders(data.orders);
-        setPagination(data.pagination);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrders();
-  }, [page, status, debouncedSearchTerm, refreshTrigger]);
+  const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === status) return;
+    if (newStatus === "canceled" && !confirm("Ești sigur că vrei să anulezi această comandă?")) return;
 
-  const tableRows = useMemo(() => orders.map((o: any) => {
-    const statusKey = normalizeStatus(o.status);
-    const shippingAddress = o.address || o.billing;
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/order/${orderId}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) throw new Error("Eroare la actualizare");
+      setStatus(newStatus);
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert("Eroare actualizare status.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return (
-      <tr key={o.id} className="transition hover:bg-white/2 border-b border-white/5 last:border-0 group">
-        
-        {/* 1. INFO & STATUS (Compact) */}
-        <td className="px-4 py-4 align-top w-[150px]">
-            <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-white text-sm bg-white/5 px-1.5 py-0.5 rounded">
-                      #{o.orderNo ?? '—'}
-                    </span>
-                </div>
-                <div className="flex flex-col gap-0.5 text-[10px] text-zinc-500 font-medium">
-                    <span>{new Date(o.createdAt).toLocaleDateString('ro-RO')}</span>
-                    <span>{new Date(o.createdAt).toLocaleTimeString('ro-RO', {hour: '2-digit', minute:'2-digit'})}</span>
-                </div>
-                <div className="mt-1">
-                     <AdminOrderStatusControl id={o.id} status={o.status} onChange={refreshData} />
-                </div>
-            </div>
-        </td>
-
-        {/* 2. PRODUSE & GRAFICĂ */}
-        <td className="px-4 py-4 align-top min-w-[220px] max-w-[320px]">
-           <div className="flex flex-col gap-2 h-full">
-             <div className="flex flex-col gap-1.5 max-h-[120px] overflow-y-auto custom-scrollbar pr-1">
-                {o.items && o.items.length > 0 ? (
-                    o.items.map((item: any, idx: number) => (
-                    <div key={idx} className="text-xs text-zinc-300 bg-zinc-900/40 p-1.5 rounded border border-white/5 flex justify-between gap-2">
-                        <div className="flex-1 truncate" title={item.productName}>
-                          <span className="font-bold text-indigo-400 mr-1">{item.quantity}x</span> 
-                          {item.productName || "Custom"}
-                        </div>
-                    </div>
-                    ))
-                ) : ( <span className="text-zinc-600 italic text-xs">Fără produse</span> )}
-             </div>
-             <div className="mt-auto pt-1">
-                 <AdminGraphicsControl orderId={o.id} items={o.items || []} />
-             </div>
-           </div>
-        </td>
-
-        {/* 3. ADRESĂ LIVRARE (Editabilă) */}
-        <td className="px-4 py-4 align-top w-60">
-             <AdminAddressEditor 
-                orderId={o.id} 
-                initialAddress={shippingAddress} 
-                onUpdate={refreshData} 
-             />
-        </td>
-
-        {/* 4. LOGISTICĂ (AWB) */}
-        <td className="px-4 py-4 align-top w-[180px]">
-             <div className="flex flex-col gap-1 bg-zinc-900/20 p-2 rounded-lg border border-white/5">
-                 <span className="text-[9px] font-bold uppercase text-zinc-500 tracking-wider mb-1">Livrare DPD</span>
-                 <AdminAwbControl orderId={o.id} currentAwb={o.awb} />
-             </div>
-        </td>
-
-        {/* 5. FACTURARE (Upload/View) */}
-        <td className="px-4 py-4 align-top w-[180px]">
-            <div className="flex flex-col gap-1 bg-zinc-900/20 p-2 rounded-lg border border-white/5 h-full justify-between">
-                 <div>
-                   <span className="text-[9px] font-bold uppercase text-zinc-500 tracking-wider mb-1 block">Factură</span>
-                   <AdminInvoiceControl id={o.id} invoiceLink={o.invoiceLink} />
-                 </div>
-                 <div className="mt-2 text-right">
-                    <div className="text-sm font-bold text-white">{fmtRON(Number(o.total))}</div>
-                    <div className="text-[9px] text-zinc-500 uppercase">{o.paymentType}</div>
-                 </div>
-            </div>
-        </td>
-
-        {/* 6. DETALII */}
-        <td className="px-4 py-4 align-middle text-right w-[60px]">
-             <OrderDetails order={o} />
-        </td>
-      </tr>
-    );
-  }), [orders]);
+  const getStatusColor = (s: string) => {
+    switch (s) {
+      case "active": return "bg-blue-50 text-blue-700 border-blue-200";
+      case "fulfilled": return "bg-green-50 text-green-700 border-green-200";
+      case "canceled": return "bg-red-50 text-red-700 border-red-200";
+      default: return "bg-gray-50 text-gray-700 border-gray-200";
+    }
+  };
 
   return (
-    <section className="flex flex-col h-full overflow-hidden rounded-3xl border border-white/10 bg-[#09090b]/80 shadow-2xl backdrop-blur-xl ring-1 ring-white/5">
-      {/* Toolbar */}
-      <div className="flex-none flex flex-col gap-4 border-b border-white/5 px-6 py-4 md:flex-row md:items-center md:justify-between bg-white/2">
-        <div className="flex items-center gap-4">
-            <div>
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    Centru Comenzi
-                    <button onClick={refreshData} className="p-1.5 hover:bg-white/10 rounded-lg transition-all text-zinc-500 hover:text-indigo-400" title="Reîncarcă datele">
-                        <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-                    </button>
-                </h2>
-                <div className="flex items-center gap-2 text-xs text-zinc-400 mt-0.5">
-                   <span className="bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-medium">
-                     {pagination.totalOrders}
-                   </span>
-                   <span>comenzi active</span>
-                </div>
-            </div>
+    <div className="relative inline-block text-left">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10 rounded-lg">
+          <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
         </div>
-        
-        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto items-center">
-          <div className="relative w-full md:w-64 group">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-500 transition-colors" />
-            <Input
-              placeholder="Caută (nume, telefon, ID)..."
+      )}
+      <select
+        value={status}
+        onChange={(e) => handleStatusChange(e.target.value)}
+        className={`appearance-none cursor-pointer pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold border shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all ${getStatusColor(status)}`}
+        disabled={isLoading}
+      >
+        <option value="active">În Lucru</option>
+        <option value="fulfilled">Finalizată</option>
+        <option value="canceled">Anulată</option>
+      </select>
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-current opacity-60">
+        <RefreshCw className="w-3 h-3" />
+      </div>
+    </div>
+  );
+}
+
+// --- COMPONENTĂ AFIȘARE GRAFICĂ (The Main Fix) ---
+function ArtworkStatus({ item }: { item: OrderItem }) {
+  const meta = item.metadata || {};
+  const designOption = meta.designOption;
+  const hasArtwork = !!item.artworkUrl;
+
+  // 1. Dacă există link direct (fie upload inițial, fie upload ulterior)
+  if (hasArtwork) {
+    return (
+      <a 
+        href={item.artworkUrl!} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold hover:bg-emerald-100 border border-emerald-100 transition-colors"
+      >
+        <CheckCircle2 className="w-3.5 h-3.5" />
+        Vezi Grafica
+        <ExternalLink className="w-3 h-3 opacity-50" />
+      </a>
+    );
+  }
+
+  // 2. Opțiune: Doar Text
+  if (designOption === 'text_only') {
+    return (
+      <div className="flex flex-col items-end gap-1">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100">
+          <Type className="w-3.5 h-3.5" />
+          Grafică Text
+        </div>
+        {meta.textDesign && (
+          <span className="text-[10px] text-gray-500 max-w-[150px] truncate bg-white px-1 rounded border border-gray-100" title={meta.textDesign}>
+            "{meta.textDesign}"
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  // 3. Opțiune: Grafică Pro
+  if (designOption === 'pro') {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-bold border border-purple-100">
+        <Palette className="w-3.5 h-3.5" />
+        Solicitat Design Pro
+      </div>
+    );
+  }
+
+  // 4. Opțiune: Upload (explicit)
+  if (designOption === 'upload') {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 text-yellow-700 rounded-lg text-xs font-bold border border-yellow-100">
+        <UploadCloud className="w-3.5 h-3.5" />
+        Așteaptă Upload
+      </div>
+    );
+  }
+
+  // 5. Fallback: Lipsă sau necunoscut
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-bold border border-red-100">
+      <UploadCloud className="w-3.5 h-3.5" />
+      Așteaptă Upload
+    </div>
+  );
+}
+
+// --- DASHBOARD ---
+export default function OrdersDashboard({ initialOrders = [] }: OrdersDashboardProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+
+  const safeOrders = Array.isArray(initialOrders) ? initialOrders : [];
+
+  const filteredOrders = safeOrders.filter((order) => {
+    const s = searchTerm.toLowerCase();
+    const address = order.address || {};
+    const clientName = (address.nume_prenume || address.nume || order.user?.name || "").toLowerCase();
+    const clientEmail = (address.email || order.user?.email || "").toLowerCase();
+    const clientPhone = (address.telefon || order.user?.phone || "").toLowerCase();
+
+    const matchesSearch =
+      order.orderNo.toString().includes(s) ||
+      clientEmail.includes(s) ||
+      clientName.includes(s) ||
+      clientPhone.includes(s);
+      
+    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const toggleExpand = (id: string) => {
+    setExpandedOrderId(expandedOrderId === id ? null : id);
+  };
+
+  return (
+    <div className="space-y-8 p-4 md:p-8 bg-gray-50/50 min-h-screen font-sans">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Comenzi</h1>
+          <p className="text-gray-500 mt-1">Gestionează fluxul de producție.</p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-indigo-500 transition-colors" />
+            <input
+              type="text"
+              placeholder="Caută comandă, nume..."
+              className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none w-full sm:w-72 transition-all bg-gray-50 focus:bg-white"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 bg-black/40 border-white/10 text-white placeholder:text-zinc-600 focus:border-indigo-500/50 focus:ring-indigo-500/20 w-full h-9 text-sm rounded-xl transition-all"
             />
           </div>
-          
-          <div className="w-full md:w-[180px]">
-            <Select onValueChange={setStatus} value={status}>
-              <SelectTrigger className="w-full bg-black/40 border-white/10 text-white h-9 text-sm rounded-xl hover:bg-white/5 transition-colors">
-                <div className="flex items-center gap-2">
-                  <Filter size={12} className="text-zinc-500" />
-                  <SelectValue placeholder="Status Comandă" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="bg-[#09090b] border-white/10 text-zinc-200">
-                <SelectItem value="all">Toate</SelectItem>
-                <SelectItem value="active">În lucru</SelectItem>
-                <SelectItem value="fulfilled">Finalizate</SelectItem>
-                <SelectItem value="canceled">Anulate</SelectItem>
-              </SelectContent>
-            </Select>
+          <select
+            className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none bg-gray-50 focus:bg-white cursor-pointer transition-all"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">Toate statusurile</option>
+            <option value="active">În Lucru</option>
+            <option value="fulfilled">Finalizate</option>
+            <option value="canceled">Anulate</option>
+          </select>
+        </div>
+      </div>
+
+      {/* LISTA */}
+      <div className="grid grid-cols-1 gap-6">
+        {filteredOrders.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-2xl border border-gray-200 border-dashed">
+            <Package className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+            <h3 className="text-lg font-semibold text-gray-900">Nicio comandă găsită</h3>
           </div>
-        </div>
-      </div>
+        ) : (
+          filteredOrders.map((order) => {
+            const address = order.address || {};
+            const isCard = order.paymentType === "Card";
+            const isExpanded = expandedOrderId === order.id;
+            
+            const displayName = address.nume_prenume || address.nume || order.user?.name || "Nume lipsă";
+            const displayEmail = address.email || order.user?.email || "Email lipsă";
+            const displayPhone = address.telefon || order.user?.phone || "-";
 
-      {/* Tabel Scrollabil */}
-      <div className="flex-1 overflow-auto custom-scrollbar bg-black/20">
-        <table className="min-w-full text-sm w-full border-collapse">
-          <thead className="bg-[#09090b] text-left text-[10px] uppercase tracking-wider text-zinc-500 font-semibold sticky top-0 z-10 shadow-sm">
-            <tr>
-              <th className="px-4 py-3 bg-[#09090b]/95 backdrop-blur border-b border-white/5">Comandă</th>
-              <th className="px-4 py-3 bg-[#09090b]/95 backdrop-blur border-b border-white/5">Articole & Fișiere</th>
-              <th className="px-4 py-3 bg-[#09090b]/95 backdrop-blur border-b border-white/5">Adresă (Editabil)</th>
-              <th className="px-4 py-3 bg-[#09090b]/95 backdrop-blur border-b border-white/5">Curierat</th>
-              <th className="px-4 py-3 bg-[#09090b]/95 backdrop-blur border-b border-white/5">Financiar</th>
-              <th className="px-4 py-3 bg-[#09090b]/95 backdrop-blur border-b border-white/5 text-right">Opțiuni</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {loading && orders.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="text-center py-32">
-                   <div className="flex flex-col items-center gap-3">
-                     <div className="h-8 w-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-                     <span className="text-zinc-500 text-xs animate-pulse">Se actualizează datele...</span>
-                   </div>
-                </td>
-              </tr>
-            ) : tableRows.length > 0 ? (
-              tableRows
-            ) : (
-              <tr>
-                <td colSpan={6} className="text-center py-24 text-zinc-600">
-                  <div className="flex flex-col items-center gap-2 opacity-50">
-                    <Search size={32} />
-                    <p className="text-sm font-medium">Nu am găsit comenzi</p>
-                    <p className="text-xs">Încearcă să modifici filtrele de căutare.</p>
+            // Logică pentru "Grafică Completă" (Generală pe card)
+            const itemsCount = order.items.length;
+            const itemsReady = order.items.filter(i => {
+                const meta = i.metadata || {};
+                // E gata dacă are link SAU e text_only SAU e pro
+                return !!i.artworkUrl || meta.designOption === 'text_only' || meta.designOption === 'pro';
+            }).length;
+            const isReady = itemsCount > 0 && itemsCount === itemsReady;
+
+            return (
+              <div 
+                key={order.id} 
+                className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${
+                  isExpanded ? "shadow-xl border-indigo-200 ring-1 ring-indigo-100" : "shadow-sm border-gray-200 hover:shadow-md hover:border-gray-300"
+                }`}
+              >
+                {/* CARD PRINCIPAL */}
+                <div className="p-5 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative">
+                  
+                  {/* STATUS */}
+                  <div className="lg:col-span-3 flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg text-lg font-bold font-mono border border-indigo-100">
+                        #{order.orderNo}
+                      </div>
+                      <OrderStatusSelector orderId={order.id} currentStatus={order.status} />
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                      <Calendar className="w-4 h-4" />
+                      <span>{formatDate(order.createdAt)}</span>
+                    </div>
+                    <div className="mt-3">
+                       {isReady ? (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Grafică OK</span>
+                          </div>
+                       ) : (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100">
+                              <AlertCircle className="w-3.5 h-3.5" />
+                              <span>Așteaptă Grafică ({itemsReady}/{itemsCount})</span>
+                          </div>
+                       )}
+                    </div>
                   </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
 
-      {/* Footer */}
-      <div className="flex-none flex items-center justify-between border-t border-white/5 px-6 py-3 bg-[#09090b]">
-        <span className="text-xs text-zinc-500 font-mono">
-          Pagina <span className="text-white">{pagination.currentPage}</span> / {pagination.totalPages}
-        </span>
-        <div className="flex gap-2">
-          <Button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} variant="outline" size="sm" className="h-7 text-xs bg-zinc-900 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10">Anterioară</Button>
-          <Button onClick={() => setPage((p) => p + 1)} disabled={page === pagination.totalPages} variant="outline" size="sm" className="h-7 text-xs bg-zinc-900 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10">Următoare</Button>
-        </div>
+                  {/* CLIENT */}
+                  <div className="lg:col-span-4">
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 h-full">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 bg-white p-2 rounded-lg shadow-sm text-gray-600 border border-gray-200">
+                          <User className="w-4 h-4" />
+                        </div>
+                        <div className="text-sm">
+                          <p className="font-bold text-gray-900">{displayName}</p>
+                          <div className="flex items-center gap-2 text-gray-600 mt-0.5">
+                            <Mail className="w-3 h-3" /> {displayEmail}
+                          </div>
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <Phone className="w-3 h-3" /> {displayPhone}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-gray-200 flex items-start gap-3">
+                        <div className="mt-0.5 text-indigo-600">
+                          <MapPin className="w-4 h-4" />
+                        </div>
+                        <p className="text-sm text-gray-700 leading-snug">
+                          {address?.localitate || "Localitate lipsă"}, {address?.judet || ""} <br/>
+                          <span className="text-gray-500 text-xs">{address?.strada_nr || "Stradă lipsă"}</span>
+                          {address?.bloc && <span className="text-gray-500 text-xs">, Bl. {address.bloc}</span>}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* TOTAL */}
+                  <div className="lg:col-span-3">
+                    <div className="flex flex-col h-full justify-center p-4 rounded-xl bg-white border border-gray-100 shadow-sm">
+                      <div className="flex items-center gap-3 mb-3">
+                          <div className={`p-2 rounded-lg ${isCard ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'}`}>
+                              {isCard ? <CreditCard className="w-5 h-5" /> : <Banknote className="w-5 h-5" />}
+                          </div>
+                          <div>
+                              <p className="text-xs text-gray-500 font-medium uppercase">Metodă Plată</p>
+                              <p className={`font-bold text-sm ${isCard ? 'text-emerald-700' : 'text-orange-700'}`}>
+                                  {order.paymentType}
+                              </p>
+                          </div>
+                      </div>
+                      <div className="flex justify-between items-end border-t border-gray-100 pt-3">
+                          <span className="text-sm text-gray-500">Total</span>
+                          <span className="text-xl font-black text-gray-900">{formatMoney(order.total)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* BUTON EXPAND */}
+                  <div className="lg:col-span-2 flex justify-end items-center h-full">
+                    <button 
+                        onClick={() => toggleExpand(order.id)}
+                        className={`flex items-center justify-center gap-2 w-full lg:w-auto px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
+                          isExpanded 
+                            ? "bg-indigo-600 text-white shadow-md shadow-indigo-200" 
+                            : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
+                        }`}
+                    >
+                        {isExpanded ? "Ascunde" : "Detalii"}
+                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* DETALII EXTINSE */}
+                {isExpanded && (
+                    <div className="border-t border-gray-100 bg-gray-50/30 p-6 animate-in slide-in-from-top-2 duration-200">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            
+                            <div className="lg:col-span-2 space-y-4">
+                                <h4 className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                  <Package className="w-4 h-4" />
+                                  Produse ({order.items.length})
+                                </h4>
+                                <div className="grid gap-3">
+                                  {order.items.map((item) => (
+                                      <div key={item.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                                          <div className="flex items-center gap-4">
+                                              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 border border-gray-200">
+                                                {item.artworkUrl ? <FileText className="w-6 h-6 text-indigo-500" /> : <Package className="w-6 h-6" />}
+                                              </div>
+                                              <div>
+                                                  <p className="font-bold text-gray-900 text-base">{item.name}</p>
+                                                  <p className="text-sm text-gray-500">
+                                                    <span className="font-semibold text-gray-900">{item.qty} buc</span> × {formatMoney(item.unit)}
+                                                  </p>
+                                              </div>
+                                          </div>
+                                          
+                                          {/* AICI ESTE FIXUL PENTRU AFIȘARE */}
+                                          <div className="flex items-center justify-end w-full sm:w-auto">
+                                              <ArtworkStatus item={item} />
+                                          </div>
+                                      </div>
+                                  ))}
+                                </div>
+                            </div>
+
+                            <div className="lg:col-span-1">
+                                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm h-full sticky top-6">
+                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Acțiuni Rapide</h4>
+                                    <div className="space-y-3">
+                                        <Link href={`/admin/orders/${order.id}`} className="flex items-center justify-center w-full gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-semibold transition-all shadow-sm">
+                                            <MoreVertical className="w-4 h-4" /> Editează Comanda
+                                        </Link>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button className="flex flex-col items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 p-3 rounded-lg text-xs font-bold transition-colors">
+                                                <Truck className="w-5 h-5 text-gray-500" /> Generare AWB
+                                            </button>
+                                            <button className="flex flex-col items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 p-3 rounded-lg text-xs font-bold transition-colors">
+                                                <FileText className="w-5 h-5 text-gray-500" /> Emitere Factură
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
-    </section>
+    </div>
   );
 }

@@ -19,6 +19,8 @@ interface CartItem {
   artworkUrl?: string; // direct artwork url
   textDesign?: string; // text content for text-only graphic
   metadata?: AnyRecord;
+  // Posibile câmpuri top-level din frontend
+  designOption?: string; 
 }
 
 interface Address {
@@ -282,13 +284,11 @@ async function sendEmails(
       'totalAmount',
       'qty',
       'quantity',
-      // duplicates handled separately
       'artwork',
       'artworkUrl',
       'artworkLink',
       'text',
       'textDesign',
-      // internal snapshot fields from configurators
       'selectedReadable',
       'selections',
       'title',
@@ -318,7 +318,6 @@ async function sendEmails(
     })
     .join('');
 
-  // Decide which contact info to show: prefer billing data for juridical/company
   const isCompanyBilling = (billing && (billing as any).tip_factura && (billing as any).tip_factura !== 'persoana_fizica' && ((billing as any).cui || (billing as any).name));
   const contactName = isCompanyBilling ? ((billing as any).name || (billing as any).cui || address.nume_prenume) : (address.nume_prenume || (billing as any).name || '');
   const contactEmail = isCompanyBilling ? ((billing as any).email || address.email) : (address.email || (billing as any).email || '');
@@ -327,8 +326,6 @@ async function sendEmails(
     ? buildAddressLine({ judet: (billing as any).judet, localitate: (billing as any).localitate, strada_nr: (billing as any).strada_nr }, { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr })
     : buildAddressLine({ judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr }, { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr });
 
-  // Build admin email HTML (includes artwork links / text)
-  // Build quick action buttons if config allows
   let actionButtons = '';
   try {
     if (process.env.ADMIN_ACTION_SECRET && process.env.DPD_DEFAULT_SERVICE_ID) {
@@ -360,7 +357,6 @@ async function sendEmails(
     console.warn('[OrderService] Quick actions disabled:', (e as any)?.message || e);
   }
 
-  // Build marketing/source block for admin
   function sourceLabel(m?: MarketingInfo) {
     if (!m) return '—';
     if (m.utmSource) return m.utmSource;
@@ -390,7 +386,6 @@ async function sendEmails(
     </div>
   `;
 
-  // Prepare small HTML snippets to keep main templates simple (avoid nested templates)
   const orderNoSuffix = orderNo ? ' #' + orderNo : '';
   const deliveryAptHtml = (address.bloc || address.scara || address.etaj || address.ap || address.interfon)
     ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml(apartmentLineText(address))}</p>`
@@ -399,7 +394,6 @@ async function sendEmails(
     ? `<p style="text-align: center; margin-top: 20px;"><a href="${invoiceLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Vezi Factura Oblio</a></p>`
     : `<p style=\"text-align:center;margin-top:20px;color:#b54708\">Factura va fi emisă manual în Oblio (client: ${escapeHtml(billing.cui || billing.name || address.nume_prenume)}).</p>`;
 
-  // Precompute billing block for admin email
   const billingBlockAdmin = (billing.tip_factura !== 'persoana_fizica')
     ? `<p><strong>Tip:</strong> Companie</p><p><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
     : `<p><strong>Tip:</strong> Persoană Fizică</p><p><strong>Nume Factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`;
@@ -440,7 +434,6 @@ async function sendEmails(
     </div>
   `;
 
-  // Admin email
   try {
     const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
     if (!resend) throw new Error('RESEND_API_KEY lipsă');
@@ -455,7 +448,6 @@ async function sendEmails(
     console.error('[OrderService] Eroare trimitere email admin:', e?.message || e);
   }
 
-  // Email CLIENT – include artwork link or text if provided
   const accountBlock = createdPassword
     ? `
         <h2 style="border-bottom:1px solid #eee; padding-bottom:8px; color:#333; margin-top:18px;">Cont creat</h2>
@@ -472,7 +464,6 @@ async function sendEmails(
   const clientAptHtml = (address.bloc || address.scara || address.etaj || address.ap || address.interfon)
     ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml(apartmentLineText(address))}</p>`
     : '';
-  // Precompute billing block for client email
   const billingBlockClient = (billing.tip_factura !== 'persoana_fizica')
     ? `<p style="margin:0;color:#111"><strong>Tip:</strong> Companie</p><p style="margin:4px 0 0;color:#111"><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
     : `<p style="margin:0;color:#111"><strong>Tip:</strong> Persoană fizică</p><p style="margin:4px 0 0;color:#111"><strong>Nume factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`;
@@ -586,8 +577,6 @@ export async function fulfillOrder(
   });
 
   // Emitere automată Oblio
-  // - Persoane fizice: se emite automat
-  // - Persoane juridice/companii: nu emitem automat; admin va încărca factura manual
   const billingTip = (billing as any)?.tip_factura;
   const shouldTryOblio = billingTip === 'persoana_fizica';
 
@@ -629,7 +618,7 @@ export async function fulfillOrder(
       console.warn('[OrderService] Oblio a eșuat (comanda continuă):', e?.message || e);
     }
   } else {
-    invoiceLink = null; // nu avem date suficiente pentru emitere automat
+    invoiceLink = null; 
   }
 
   // Emailuri – întotdeauna; sendEmails este tolerant la forma cart-ului
@@ -641,8 +630,26 @@ export async function fulfillOrder(
         const unit = Number((raw as any).unitAmount ?? (raw as any).price ?? (raw as any)?.metadata?.price ?? 0) || 0;
         const total = Number((raw as any).totalAmount ?? (unit > 0 ? unit * qty : (raw as any)?.metadata?.totalAmount ?? 0)) || 0;
         const name = (raw as any).name ?? (raw as any).title ?? (raw as any).slug ?? (raw as any)?.metadata?.title ?? 'Produs';
-        return { name, qty, unit, total };
+        
+        // --- FIX AICI: Preluare corectă link și metadata pentru salvare ---
+        const artworkUrl = raw.artworkUrl ?? raw.metadata?.artworkUrl ?? null;
+        const textDesign = raw.textDesign ?? raw.metadata?.textDesign ?? null;
+        const designOption = raw.designOption ?? raw.metadata?.designOption ?? null;
+
+        return { 
+            name, 
+            qty, 
+            unit, 
+            total, 
+            artworkUrl,
+            metadata: {
+                ...(raw.metadata || {}),
+                textDesign,
+                designOption
+            }
+        };
       });
+
       const subtotal = normalized.reduce((s, it) => s + (Number(it.total) || 0), 0);
       const totalComanda = subtotal + SHIPPING_FEE;
       const saved = await appendOrder({
@@ -656,6 +663,7 @@ export async function fulfillOrder(
         marketing,
         userId: orderData.userId || null,
       });
+      
       // Creează cont dacă este cerut și nu există deja
       if (orderData.createAccount) {
         try {
@@ -683,7 +691,8 @@ export async function fulfillOrder(
     } catch (e: any) {
       console.warn('[OrderService] Salvare comandă a eșuat (non-blocant):', e?.message || e);
     }
-    // Dacă salvarea eșuează, tot trimitem emailuri (fără orderNo)
+    
+    // Fallback dacă salvarea eșuează
     if (orderData.createAccount) {
       try {
         const existing = await prisma.user.findUnique({ where: { email: address.email } });
