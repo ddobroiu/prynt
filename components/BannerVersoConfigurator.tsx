@@ -1,12 +1,13 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
-import { Ruler, Layers, CheckCircle, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Box } from "lucide-react";
+import { Ruler, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Box, ShoppingCart, Plus, Minus, RefreshCw } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { useRouter } from "next/navigation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
 import DynamicBannerPreview from "./DynamicBannerPreview";
+import ArtworkRatioPreview from "./ArtworkRatioPreview"; 
 import { QA } from "@/types";
 import { 
   calculateBannerVersoPrice, 
@@ -87,6 +88,9 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 
 type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string; renderOnlyConfigurator?: boolean; };
 
+// Doar două moduri: Galerie și Schiță (Shape)
+type ViewMode = 'gallery' | 'shape';
+
 /* --- MAIN COMPONENT --- */
 export default function BannerVersoConfigurator({ productSlug, initialWidth: initW, initialHeight: initH, productImage, renderOnlyConfigurator = false }: Props) {
   const { addItem } = useCart();
@@ -97,7 +101,9 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/verso/1.webp", "/products/banner/verso/2.webp"] : ["/products/banner/verso/1.webp", "/products/banner/verso/2.webp", "/products/banner/verso/3.webp"], [productImage]);
   
   // VIEW MODE
-  const [viewMode, setViewMode] = useState<'gallery' | 'preview'>('gallery');
+  const [viewMode, setViewMode] = useState<ViewMode>('gallery');
+  // State pentru a comuta vizualizarea în simulare (Față vs Spate)
+  const [previewSide, setPreviewSide] = useState<'front' | 'back'>('front');
   
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeImage, setActiveImage] = useState<string>(galleryImages[0]);
@@ -123,17 +129,18 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   const updateInput = <K extends keyof PriceInputBannerVerso>(k: K, v: PriceInputBannerVerso[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
 
+  // Când modificăm dimensiunile -> Mutăm automat pe Schiță Tehnică
   const onChangeLength = (v: string) => { 
       const d = v.replace(/\D/g, ""); 
       setLengthText(d); 
       updateInput("width_cm", d === "" ? 0 : parseInt(d, 10));
-      if(d && parseInt(d) > 0) setViewMode('preview');
+      if(d && parseInt(d) > 0) setViewMode('shape');
   };
   const onChangeHeight = (v: string) => { 
       const d = v.replace(/\D/g, ""); 
       setHeightText(d); 
       updateInput("height_cm", d === "" ? 0 : parseInt(d, 10));
-      if(d && parseInt(d) > 0) setViewMode('preview');
+      if(d && parseInt(d) > 0) setViewMode('shape');
   };
   
   const handleArtworkFileInput = async (file: File | null, side: 'front' | 'back') => {
@@ -145,10 +152,15 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
     if (!file) return;
     
     try {
-      // Preview
+      // Preview Local
       const previewUrl = URL.createObjectURL(file);
       setUrl(previewUrl);
-      if (side === 'front') setViewMode('preview'); // Auto-switch doar la fața principală
+      
+      // LOGICA VIZUALĂ:
+      // 1. Activăm Tab-ul Galerie
+      setViewMode('gallery');
+      // 2. Setăm fața activă în preview corespunzător upload-ului
+      setPreviewSide(side);
 
       // Upload
       setUploading(true);
@@ -203,16 +215,20 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   }
 
   useEffect(() => {
-    if(viewMode !== 'gallery') return;
+    // Facem autoplay la galerie doar dacă NU avem o grafică încărcată
+    if(viewMode !== 'gallery' || artworkUrlFront || artworkUrlBack) return;
     const id = setInterval(() => setActiveIndex((i) => (i + 1) % galleryImages.length), 3000);
     return () => clearInterval(id);
-  }, [galleryImages.length, viewMode]);
+  }, [galleryImages.length, viewMode, artworkUrlFront, artworkUrlBack]);
 
   useEffect(() => setActiveImage(galleryImages[activeIndex]), [activeIndex, galleryImages]);
 
   const summaryStep1 = input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}x${input.height_cm}cm, ${input.quantity} buc.` : "Alege";
   const summaryStep2 = `Blockout, ${input.want_wind_holes ? "cu găuri" : "fără găuri"}`;
   const summaryStep3 = input.designOption === 'upload' ? (input.same_graphic ? 'Grafică identică' : 'Grafică diferită') : input.designOption === 'text_only' ? 'Doar text' : 'Design Pro';
+
+  // Verificăm dacă avem ceva de afișat în simulare
+  const showSimulation = artworkUrlFront || artworkUrlBack;
 
   return (
     <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
@@ -222,45 +238,105 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
-          {/* STÂNGA - PREVIEW */}
+          {/* STÂNGA - ZONA VIZUALĂ */}
           <div className="lg:sticky top-24 h-max space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                 
-                <div className="flex border-b border-gray-100">
+                {/* Header Switch: Galerie / Schiță */}
+                <div className="flex border-b border-gray-100 overflow-x-auto">
                     <button 
                         onClick={() => setViewMode('gallery')}
-                        className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'gallery' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:bg-gray-50'}`}
+                        className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'gallery' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
                     >
-                        <ImageIcon size={16} /> Galerie Foto
+                        <ImageIcon size={16} /> 
+                        <span className="hidden sm:inline">Galerie</span>
                     </button>
                     <button 
-                        onClick={() => setViewMode('preview')}
-                        className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'preview' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:bg-gray-50'}`}
+                        onClick={() => setViewMode('shape')}
+                        className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'shape' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
                     >
-                        <Box size={16} /> Previzualizare Formă
+                        <Ruler size={16} /> 
+                        <span className="hidden sm:inline">Schiță Tehnică</span>
                     </button>
                 </div>
 
               <div className="aspect-square relative bg-white">
-                 {viewMode === 'gallery' ? (
-                    <img src={activeImage} alt="Banner Verso" className="h-full w-full object-cover animate-in fade-in duration-300" />
-                 ) : (
+                 {viewMode === 'gallery' && (
+                    <>
+                        {/* Dacă avem grafică, arătăm simularea */}
+                        {showSimulation ? (
+                           // Folosim un wrapper simplu h-full w-full, fără flex-col care să împingă layout-ul
+                           <div className="h-full w-full relative animate-in fade-in duration-300 group">
+                                {/* 1. Componenta de vizualizare - Ocupă tot spațiul */}
+                                <ArtworkRatioPreview 
+                                    width={input.width_cm} 
+                                    height={input.height_cm} 
+                                    // Dacă e grafică identică, arătăm mereu front. 
+                                    // Dacă e diferită, arătăm ce e selectat în `previewSide` (front sau back)
+                                    imageUrl={
+                                        input.same_graphic 
+                                            ? artworkUrlFront 
+                                            : (previewSide === 'front' ? artworkUrlFront : artworkUrlBack)
+                                    }
+                                    hasGrommets={true} // Banner verso are implicit capse
+                                    hasWindHoles={input.want_wind_holes}
+                                />
+
+                                {/* 2. Butoane de comutare Față/Spate (Floating Overlay) 
+                                    Le punem peste imagine, jos-centru, ca să nu ocupe spațiu în layout.
+                                */}
+                                {!input.same_graphic && (
+                                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-lg p-1 z-20 transition-opacity opacity-90 hover:opacity-100">
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); setPreviewSide('front'); }}
+                                            className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${previewSide === 'front' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+                                        >
+                                            Față
+                                        </button>
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); setPreviewSide('back'); }}
+                                            className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${previewSide === 'back' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+                                        >
+                                            Spate
+                                        </button>
+                                    </div>
+                                )}
+                           </div>
+                        ) : (
+                           // Dacă nu avem grafică, arătăm imaginile din galerie
+                           <img src={activeImage} alt="Banner Verso" className="h-full w-full object-cover animate-in fade-in duration-300" />
+                        )}
+                    </>
+                 )}
+
+                 {viewMode === 'shape' && (
                     <div className="h-full w-full p-4 animate-in fade-in slide-in-from-bottom-4 duration-300 bg-zinc-50">
+                        {/* Schița tehnică cu cote și omuleț */}
                         <DynamicBannerPreview 
                             width={input.width_cm} 
                             height={input.height_cm} 
                             hasGrommets={true} 
                             hasWindHoles={input.want_wind_holes}
-                            label="Banner Față-Verso"
-                            imageUrl={artworkUrlFront} // Doar fața apare în preview
+                            imageUrl={null} 
                         />
+                        <div className="absolute bottom-4 left-0 w-full text-center text-xs text-gray-400">
+                             Vizualizare tehnică (cote și finisaje)
+                        </div>
                     </div>
                  )}
               </div>
 
               {viewMode === 'gallery' && (
                 <div className="p-2 grid grid-cols-4 gap-2">
-                    {galleryImages.map((src, i) => <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
+                    {galleryImages.map((src, i) => (
+                        <button 
+                            key={src} 
+                            onClick={() => setActiveIndex(i)} 
+                            className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}
+                        >
+                            <img src={src} alt="Thumb" className="w-full h-full object-cover" />
+                        </button>
+                    ))}
                 </div>
               )}
 
