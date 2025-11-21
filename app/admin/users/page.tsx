@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { verifyAdminSession } from '@/lib/adminSession'; // Ajustează calea importului dacă e necesar
+import { verifyAdminSession } from '@/lib/adminSession';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import UsersDashboard from './UsersDashboard';
@@ -21,13 +21,13 @@ export default async function UsersPage() {
     redirect("/admin/login");
   }
 
-  // 2. Preluare Date
-  // Luăm userii și includem comenzile pentru a calcula totalurile
-  const users = await prisma.user.findMany({
+  // 2. Preluare Date Brute din Baza de Date
+  const usersRaw = await prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
       orders: {
         select: {
+          id: true,
           total: true,
           createdAt: true,
           status: true
@@ -40,16 +40,31 @@ export default async function UsersPage() {
     }
   });
 
-  // 3. Calcul Statistici
+  // 3. Procesare și Serializare Date (FIXUL PRINCIPAL)
+  // Convertim Decimal -> Number și Date -> String pentru a fi citite corect de React
+  const users = usersRaw.map(user => ({
+    ...user,
+    createdAt: user.createdAt.toISOString(),
+    updatedAt: user.updatedAt.toISOString(),
+    emailVerified: user.emailVerified ? user.emailVerified.toISOString() : null,
+    orders: user.orders.map(order => ({
+      ...order,
+      total: Number(order.total), // Aici transformăm Decimal în Number simplu
+      createdAt: order.createdAt.toISOString()
+    })),
+    addresses: user.addresses
+  }));
+
+  // 4. Calcul Statistici Globale
   const totalUsers = users.length;
   const now = Date.now();
   const oneDay = 24 * 60 * 60 * 1000;
 
   const stats = users.reduce((acc, user) => {
-    // Calculăm totalul cheltuit per user (doar comenzi neanulate)
+    // Calculăm totalul cheltuit per user (doar comenzi valide, neanulate)
     const spent = user.orders
       .filter(o => o.status !== 'canceled')
-      .reduce((sum, o) => sum + Number(o.total || 0), 0);
+      .reduce((sum, o) => sum + (o.total || 0), 0);
     
     acc.totalSpentGlobal += spent;
 
@@ -108,7 +123,7 @@ export default async function UsersPage() {
             </div>
           </div>
           <div className="mt-4 text-xs text-gray-500">
-            Suma totală a comenzilor finalizate
+            Suma totală a comenzilor (fără anulate)
           </div>
         </div>
 
@@ -129,7 +144,7 @@ export default async function UsersPage() {
         </div>
       </div>
 
-      {/* Dashboard Component */}
+      {/* Dashboard Component - primește datele curate */}
       <UsersDashboard users={users} />
     </div>
   );

@@ -8,29 +8,55 @@ import {
   Calendar, 
   Package, 
   MapPin, 
-  MoreVertical,
   ShieldCheck,
   User
 } from "lucide-react";
 
-interface UsersDashboardProps {
-  users: any[];
+// Definim tipurile exact cum vin din page.tsx (serializate)
+interface Order {
+  id: string;
+  total: number; // Acum este sigur number
+  status: string;
+  createdAt: string;
 }
 
-const formatDate = (date: string | Date) => {
-  return new Date(date).toLocaleDateString("ro-RO", {
+interface Address {
+  localitate: string;
+  judet: string;
+  strada_nr: string;
+  isDefault: boolean;
+}
+
+interface UserData {
+  id: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  createdAt: string;
+  emailVerified: string | null;
+  orders: Order[];
+  addresses: Address[];
+}
+
+interface UsersDashboardProps {
+  users: UserData[];
+}
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return "-";
+  return new Date(dateString).toLocaleDateString("ro-RO", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
 };
 
-const formatMoney = (amount: any) => {
+const formatMoney = (amount: number) => {
   return new Intl.NumberFormat("ro-RO", {
     style: "currency",
     currency: "RON",
     maximumFractionDigits: 0
-  }).format(Number(amount));
+  }).format(amount);
 };
 
 export default function UsersDashboard({ users = [] }: UsersDashboardProps) {
@@ -79,13 +105,11 @@ export default function UsersDashboard({ users = [] }: UsersDashboardProps) {
           filteredUsers.map((user) => {
             // Calcule per user
             const ordersCount = user.orders.length;
-            const totalSpent = user.orders
-                .filter((o: any) => o.status !== 'canceled')
-                .reduce((sum: number, o: any) => sum + Number(o.total || 0), 0);
             
-            const lastOrderDate = user.orders.length > 0 
-                ? new Date(Math.max(...user.orders.map((o:any) => new Date(o.createdAt).getTime())))
-                : null;
+            // Aici este calculul corectat. Pentru că `o.total` este deja number, adunarea funcționează direct.
+            const totalSpent = user.orders
+                .filter((o) => o.status !== 'canceled')
+                .reduce((sum, o) => sum + (o.total || 0), 0);
 
             const defaultAddress = user.addresses?.[0];
 
@@ -160,11 +184,6 @@ export default function UsersDashboard({ users = [] }: UsersDashboardProps) {
                     )}
                   </div>
 
-                  {/* Acțiuni (Placeholder pentru viitor) */}
-                  {/* <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                    <MoreVertical className="w-5 h-5" />
-                  </button> 
-                  */}
                 </div>
               </div>
             );
