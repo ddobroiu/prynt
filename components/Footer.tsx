@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { siteConfig } from "@/lib/siteConfig";
@@ -7,23 +8,48 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function Footer() {
-  const handleNewsletterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  const handleNewsletterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     const email = (form.querySelector('input[name="email"]') as HTMLInputElement)?.value || "";
+    
     if (!email) return;
 
-    fetch("/api/subscribers", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, source: "footer" }),
-    })
-      .then((r) => r.json())
-      .then((res) => {
-        alert(res?.message || "Verifică emailul pentru confirmare.");
+    setStatus("loading");
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/subscribers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "footer" }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setStatus("success");
+        setMessage(data?.message || "Te-ai abonat cu succes! Verifică emailul.");
         (form.querySelector('input[name="email"]') as HTMLInputElement).value = "";
-      })
-      .catch(() => alert("Nu am putut trimite cererea. Încearcă din nou."));
+      } else {
+        setStatus("error");
+        setMessage(data?.message || "A apărut o eroare. Încearcă din nou.");
+      }
+    } catch (err) {
+      setStatus("error");
+      setMessage("Nu am putut trimite cererea. Verifică conexiunea.");
+    }
+
+    // Reset mesaj dupa 5 secunde daca e succes
+    if (status === 'success') {
+        setTimeout(() => {
+            setStatus("idle");
+            setMessage("");
+        }, 5000);
+    }
   };
 
   return (
@@ -96,14 +122,26 @@ export default function Footer() {
                 required
                 className="flex-1"
                 aria-label="Adresa de email pentru newsletter"
+                disabled={status === "loading"}
               />
-              <Button type="submit" variant="default">
-                Abonează-mă
+              <Button type="submit" variant="default" disabled={status === "loading"}>
+                {status === "loading" ? "..." : "Abonează-mă"}
               </Button>
             </form>
-            <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">
-              Primești un email de confirmare (double opt-in).
-            </p>
+            
+            {/* Feedback Vizual */}
+            <div className="mt-2 h-6">
+                {status !== "idle" && (
+                    <p className={`text-xs ${status === "success" ? "text-green-600" : status === "error" ? "text-red-500" : "text-gray-500"}`}>
+                        {message}
+                    </p>
+                )}
+                {status === "idle" && (
+                    <p className="text-xs text-gray-500 dark:text-gray-500">
+                      Primești un email de confirmare (double opt-in).
+                    </p>
+                )}
+            </div>
           </div>
         </div>
       </div>
