@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
     const sidParam = searchParams.get('sid');
     const scidParam = searchParams.get('scid');
     const payload = verifyAdminAction(token);
+    console.log('[admin-action] token-present:', !!token, 'action:', payload?.action, 'orderId:', payload?.orderId);
     if (!payload) {
       return htmlPage('Link invalid', '<h1>Link invalid sau expirat</h1><p>Îți rugăm să soliciți un link nou.</p>');
     }
@@ -104,6 +105,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (payload.action === 'validate') {
+      console.log('[admin-action] validate payload:', { orderId: payload.orderId, items: (payload.items || []).length, paymentType: payload.paymentType, totalAmount: payload.totalAmount });
       const address = payload.address;
       const serviceId = Number(searchParams.get('sid') || process.env.DPD_DEFAULT_SERVICE_ID || '');
       if (!serviceId) {
@@ -130,7 +132,7 @@ export async function GET(req: NextRequest) {
       const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.prynt.ro';
       
       // --- FIX CRITIC: Păstrăm orderId și items ---
-      const tokenConfirm = signAdminAction({ 
+        const tokenConfirm = signAdminAction({ 
           action: 'confirm_awb', 
           address, 
           paymentType: payload.paymentType, 
@@ -138,6 +140,7 @@ export async function GET(req: NextRequest) {
           orderId: payload.orderId,
           items: payload.items 
       });
+        console.log('[admin-action] generate confirm token for order:', payload.orderId);
       
       const confirmUrl = `${baseUrl}/api/dpd/admin-action?token=${encodeURIComponent(tokenConfirm)}&sid=${serviceId}`;
       if (v.valid) {
@@ -222,6 +225,14 @@ export async function GET(req: NextRequest) {
               where: { id: payload.orderId }, 
               data: { awbNumber: shipmentId, awbCarrier: 'DPD' } 
           });
+          try {
+            // revalidate admin pages so AWB is visible immediately
+            const { revalidatePath } = await import('next/cache');
+            revalidatePath('/admin/orders');
+            revalidatePath('/admin/users');
+          } catch (re) {
+            console.warn('[revalidate] admin-action failed', (re as any)?.message || re);
+          }
         } catch (e) {
           console.error('DB Error Saving AWB', e);
         }

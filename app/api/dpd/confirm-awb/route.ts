@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
       name?: string;
       orderId?: string;
     };
+    console.log('[confirm-awb] received request orderId:', orderId, 'hasShipment:', !!shipment);
 
     if (!shipment?.recipient || !shipment?.service || !shipment?.content || !shipment?.payment) {
       return NextResponse.json(
@@ -51,6 +52,14 @@ export async function POST(req: NextRequest) {
       try {
         const result = await prisma.order.update({ where: { id: orderId }, data: { awbNumber: shipmentId, awbCarrier: 'DPD' } });
         console.log('[AWB UPDATE] orderId:', orderId, 'awbNumber:', shipmentId, 'awbCarrier: DPD', 'result:', result);
+        try {
+          // Revalidate admin pages so AWB appears in admin UI
+          const { revalidatePath } = await import('next/cache');
+          revalidatePath('/admin/orders');
+          revalidatePath('/admin/users');
+        } catch (re) {
+          console.warn('[revalidate] confirm-awb failed', (re as any)?.message || re);
+        }
       } catch (e) {
         console.error('[AWB UPDATE ERROR] orderId:', orderId, 'awbNumber:', shipmentId, 'awbCarrier: DPD', 'error:', (e as any)?.message || e);
       }

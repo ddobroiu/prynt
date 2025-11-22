@@ -4,27 +4,19 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
-  LayoutDashboard, 
   ShoppingCart, 
   Users, 
-  Settings, 
   LogOut, 
-  Package, 
   ArrowLeft,
   Menu,
   X,
-  FileText,
-  Tags
+  FileText
 } from "lucide-react";
 
 const menuItems = [
   { href: "/admin/orders", label: "Comenzi", icon: ShoppingCart, disabled: false },
-  { href: "/admin/products", label: "Produse", icon: Package, disabled: true },
-  // AICI AM ACTIVAT SECȚIUNEA CLIENȚI
   { href: "/admin/users", label: "Clienți", icon: Users, disabled: false },
-  { href: "/admin/invoices", label: "Facturi", icon: FileText, disabled: true },
-  { href: "/admin/coupons", label: "Cupoane", icon: Tags, disabled: true },
-  { href: "/admin/settings", label: "Setări", icon: Settings, disabled: true },
+  { href: "/admin/invoices", label: "Facturi", icon: FileText, disabled: false },
 ];
 
 export default function AdminSidebar() {
@@ -112,9 +104,8 @@ export default function AdminSidebar() {
               Înapoi la Site
             </Link>
             
-            {/* Sign Out - Folosim componenta specială sau un buton simplu */}
+            {/* Sign Out */}
             <div className="w-full px-4 py-1">
-               {/* Poți importa SignOutButton aici dacă vrei funcționalitate reală */}
                <form action="/api/auth/signout" method="POST">
                   <button 
                     type="submit"

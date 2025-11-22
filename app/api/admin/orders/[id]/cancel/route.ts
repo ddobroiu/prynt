@@ -42,6 +42,13 @@ export async function POST(_req: Request, ctx: any) {
 
     if (process.env.DATABASE_URL) {
       await prisma.order.update({ where: { id }, data: { status: 'canceled', canceledAt: new Date() } });
+      try {
+        const { revalidatePath } = await import('next/cache');
+        revalidatePath('/admin/users');
+        revalidatePath('/admin/orders');
+      } catch (re) {
+        console.warn('[revalidate] admin cancel failed', (re as any)?.message || re);
+      }
     } else {
       await fileCancel(id);
     }

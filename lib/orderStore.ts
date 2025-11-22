@@ -61,6 +61,8 @@ export type StoredOrder = {
   userId?: string | null;
   status?: 'active' | 'canceled';
   canceledAt?: string | null;
+  awbNumber?: string | null;
+  awbCarrier?: string | null;
 };
 
 export type NewOrder = Omit<StoredOrder, 'id' | 'createdAt' | 'orderNo'>;
@@ -118,6 +120,8 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
         shippingFee: (input.shippingFee ?? 0) as any,
         total: (input.total ?? 0) as any,
         invoiceLink: input.invoiceLink || null,
+        awbNumber: (input as any).awbNumber || null,
+        awbCarrier: (input as any).awbCarrier || null,
         marketing: (input.marketing as any) || undefined,
         userId: input.userId || undefined,
         items: {
@@ -200,6 +204,8 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
       shippingFee: Number(created.shippingFee),
       total: Number(created.total),
       invoiceLink: created.invoiceLink,
+      awbNumber: created.awbNumber || null,
+      awbCarrier: created.awbCarrier || null,
       marketing: created.marketing as any,
       userId: created.userId,
     };
@@ -244,6 +250,8 @@ export async function listOrders(limit = 200): Promise<StoredOrder[]> {
         shippingFee: Number(r.shippingFee ?? 0),
         total: Number(r.total ?? 0),
         invoiceLink: r.invoiceLink || null,
+        awbNumber: r.awbNumber || null,
+        awbCarrier: r.awbCarrier || null,
         marketing: (r.marketing || undefined) as any,
         userId: r.userId || null,
         status: (r.status as any) || undefined,
@@ -300,6 +308,8 @@ export async function getOrder(id: string): Promise<StoredOrder | null> {
         shippingFee: Number(r.shippingFee ?? 0),
         total: Number(r.total ?? 0),
         invoiceLink: r.invoiceLink || null,
+        awbNumber: r.awbNumber || null,
+        awbCarrier: r.awbCarrier || null,
         marketing: (r.marketing || undefined) as any,
         userId: r.userId || null,
         status: (r.status as any) || undefined,

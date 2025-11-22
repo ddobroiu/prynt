@@ -16,6 +16,13 @@ async function handleStatusUpdate(request: NextRequest, orderId: string) {
   if (status !== "canceled") data.canceledAt = null;
   const result = await prisma.order.update({ where: { id: orderId }, data }).catch(() => null);
   if (!result) return new Response("Eroare la actualizare", { status: 500 });
+  try {
+    const { revalidatePath } = await import('next/cache');
+    revalidatePath('/admin/users');
+    revalidatePath('/admin/orders');
+  } catch (e) {
+    console.warn('[revalidate] order status update failed', (e as any)?.message || e);
+  }
   return new Response(JSON.stringify({ id: result.id, status: result.status }), { status: 200 });
 }
 

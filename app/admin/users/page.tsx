@@ -40,6 +40,13 @@ export default async function UsersPage() {
     }
   });
 
+  // --- BACKUP: preluăm toate comenzile pentru a include acele comenzi care NU
+  // au fost legate de un `userId` (de ex. checkout guest). Astfel putem mapa
+  // comenzile după adresă/email la utilizatorii existenți și calcula totalul.
+  const allOrdersForEmailMatch = await prisma.order.findMany({
+    select: { id: true, total: true, createdAt: true, status: true, userId: true, address: true }
+  });
+
   // 3. Procesare și Serializare Date (FIXUL PRINCIPAL)
   // Convertim Decimal -> Number și Date -> String pentru a fi citite corect de React
   const users = usersRaw.map(user => ({
@@ -47,6 +54,7 @@ export default async function UsersPage() {
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
     emailVerified: user.emailVerified ? user.emailVerified.toISOString() : null,
+    // Atașăm comenzile incluse, dar transformăm Decimal -> Number.
     orders: user.orders.map(order => ({
       ...order,
       total: Number(order.total), // Aici transformăm Decimal în Number simplu
@@ -55,12 +63,38 @@ export default async function UsersPage() {
     addresses: user.addresses
   }));
 
+  // Mapăm comenzile fără userId după email din câmpul address (lowercase)
+  const ordersByEmail = new Map();
+  for (const o of allOrdersForEmailMatch) {
+    try {
+      const addr = (o.address || {}) as any;
+      const email = (addr.email || '').toLowerCase();
+      if (!email) continue;
+      const arr = ordersByEmail.get(email) || [];
+      arr.push({ id: o.id, total: Number(o.total), status: o.status });
+      ordersByEmail.set(email, arr);
+    } catch (e) {
+      // ignore malformed address
+    }
+  }
+
+  // Dacă un user nu are comenzi legate direct (orders[]), atașăm comenzile găsite
+  // prin email pentru a afișa corect 'Total Cheltuit'.
+  const usersWithMergedOrders = users.map(u => {
+    const existing = Array.isArray(u.orders) ? u.orders : [];
+    if (existing.length === 0) {
+      const fallback = ordersByEmail.get((u.email || '').toLowerCase()) || [];
+      return { ...u, orders: fallback };
+    }
+    return u;
+  });
+
   // 4. Calcul Statistici Globale
   const totalUsers = users.length;
   const now = Date.now();
   const oneDay = 24 * 60 * 60 * 1000;
 
-  const stats = users.reduce((acc, user) => {
+  const stats = usersWithMergedOrders.reduce((acc, user) => {
     // Calculăm totalul cheltuit per user (doar comenzi valide, neanulate)
     const spent = user.orders
       .filter(o => o.status !== 'canceled')
@@ -145,7 +179,7 @@ export default async function UsersPage() {
       </div>
 
       {/* Dashboard Component - primește datele curate */}
-      <UsersDashboard users={users} />
+      <UsersDashboard users={usersWithMergedOrders} />
     </div>
   );
 }

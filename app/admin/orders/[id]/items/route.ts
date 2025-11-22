@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from 'next/cache';
 import { verifyAdminSession } from "@/lib/adminSession";
 import { cookies } from "next/headers";
 
@@ -28,6 +29,13 @@ async function recalculateOrderTotal(orderId: string) {
     data: { total: newTotal }
   });
 
+  // Revalidăm paginile admin relevante astfel încât valoarea totală să apară actualizată
+  try {
+    revalidatePath('/admin/users');
+    revalidatePath('/admin/orders');
+  } catch (e) {
+    console.warn('[revalidate] failed to revalidate admin paths', (e as any)?.message || e);
+  }
   return newTotal;
 }
 
