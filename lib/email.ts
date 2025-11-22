@@ -1,25 +1,8 @@
-// Trimite email de bun venit la înregistrare
-export async function sendWelcomeEmail(to: string, name: string) {
-  const html = getHtmlTemplate({
-    title: "Bine ai venit pe Prynt!",
-    message: `Salut, ${name}! Contul tău a fost creat cu succes. Poți începe să plasezi comenzi și să gestionezi grafica direct din contul tău.`,
-    buttonText: "Accesează contul",
-    buttonUrl: `${process.env.NEXT_PUBLIC_APP_URL}/account`,
-    footerText: "Dacă nu ai creat acest cont, ignoră acest email."
-  });
-
-  await resend.emails.send({
-    from: 'Prynt <no-reply@prynt.ro>',
-    to,
-    subject: 'Bine ai venit pe Prynt!',
-    html,
-  });
-}
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// --- TEMPLATE COMUN PENTRU EMAILS (Reset Password & Magic Link) ---
+// --- TEMPLATE COMUN (Folosit de toate emailurile) ---
 export function getHtmlTemplate({
   title,
   message,
@@ -33,8 +16,6 @@ export function getHtmlTemplate({
   buttonUrl: string;
   footerText?: string;
 }) {
-  const logoUrl = `${process.env.NEXT_PUBLIC_APP_URL}/logo.png`;
-  
   return `
 <!DOCTYPE html>
 <html>
@@ -46,7 +27,6 @@ export function getHtmlTemplate({
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f5; margin: 0; padding: 0; }
     .container { max-width: 500px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .header { background-color: #171717; padding: 24px; text-align: center; }
-    .header img { height: 32px; width: auto; }
     .content { padding: 32px 24px; }
     .h1 { font-size: 20px; font-weight: 700; color: #111; margin-bottom: 16px; }
     .text { font-size: 15px; color: #555; margin-bottom: 24px; }
@@ -83,6 +63,25 @@ export function getHtmlTemplate({
   `;
 }
 
+// --- 1. EMAIL BUN VENIT ---
+export async function sendWelcomeEmail(to: string, name: string) {
+  const html = getHtmlTemplate({
+    title: "Bine ai venit pe Prynt!",
+    message: `Salut, ${name}! Contul tău a fost creat cu succes. Poți începe să plasezi comenzi și să gestionezi grafica direct din contul tău.`,
+    buttonText: "Accesează contul",
+    buttonUrl: `${process.env.NEXT_PUBLIC_APP_URL}/account`,
+    footerText: "Dacă nu ai creat acest cont, ignoră acest email."
+  });
+
+  await resend.emails.send({
+    from: 'Prynt <no-reply@prynt.ro>',
+    to,
+    subject: 'Bine ai venit pe Prynt!',
+    html,
+  });
+}
+
+// --- 2. EMAIL RESETARE PAROLĂ ---
 export async function sendPasswordResetEmail(to: string, token: string) {
   const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/login/reset?token=${token}`;
   
@@ -95,9 +94,56 @@ export async function sendPasswordResetEmail(to: string, token: string) {
   });
 
   await resend.emails.send({
-    from: 'Prynt <no-reply@prynt.ro>', // Asigura-te ca ai domeniul verificat in Resend
+    from: 'Prynt <no-reply@prynt.ro>',
     to,
     subject: 'Resetare parolă Prynt',
+    html,
+  });
+}
+
+// --- 3. EMAIL CONFIRMARE COMANDĂ (CLIENT) ---
+// Aceasta este funcția care lipsea și cauza eroarea
+export async function sendOrderConfirmationEmail(order: any) {
+  const orderIdShort = order.id.slice(-6).toUpperCase();
+  const viewUrl = `${process.env.NEXT_PUBLIC_APP_URL}/account/orders/${order.id}`;
+
+  const html = getHtmlTemplate({
+    title: `Comanda #${orderIdShort} a fost înregistrată!`,
+    message: `Salut! Îți mulțumim pentru comandă. Am primit solicitarea ta în valoare de ${order.total} ${order.currency}. Te vom notifica imediat ce expediem produsele.`,
+    buttonText: "Vezi detalii comandă",
+    buttonUrl: viewUrl,
+    footerText: "Mulțumim că ai ales Prynt.ro!"
+  });
+
+  await resend.emails.send({
+    from: 'Prynt Comenzi <no-reply@prynt.ro>',
+    to: order.userEmail,
+    subject: `Confirmare Comandă #${orderIdShort}`,
+    html,
+  });
+}
+
+// --- 4. EMAIL NOTIFICARE ADMIN (COMANDĂ NOUĂ) ---
+// Aceasta este a doua funcție care lipsea
+export async function sendNewOrderAdminEmail(order: any) {
+  const orderIdShort = order.id.slice(-6).toUpperCase();
+  const adminUrl = `${process.env.NEXT_PUBLIC_APP_URL}/admin/orders/${order.id}`;
+  
+  // Poți folosi o variabilă de mediu sau un email fix
+  const adminEmail = process.env.ADMIN_EMAIL || 'comenzi@prynt.ro'; 
+
+  const html = getHtmlTemplate({
+    title: "Comandă Nouă!",
+    message: `O nouă comandă (#${orderIdShort}) a fost plasată prin asistentul virtual sau site. Client: ${order.shippingAddress?.name}. Total: ${order.total} ${order.currency}.`,
+    buttonText: "Gestionează în Admin",
+    buttonUrl: adminUrl,
+    footerText: "Notificare internă sistem."
+  });
+
+  await resend.emails.send({
+    from: 'Prynt System <no-reply@prynt.ro>',
+    to: adminEmail,
+    subject: `[ADMIN] Comandă Nouă #${orderIdShort}`,
     html,
   });
 }

@@ -90,6 +90,9 @@ export default function FlyerConfigurator({ productSlug }: Props) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
+  
+  // Starea pentru gestionarea pașilor (fixul principal)
+  const [activeStep, setActiveStep] = useState(1);
 
   const priceData = useMemo(() => calculateFlyerPrice({ sizeKey, quantity, twoSided, paperWeightKey, designOption } as PriceInputFlyer), [sizeKey, quantity, twoSided, paperWeightKey, designOption]);
   const displayedTotal = priceData.finalPrice;
@@ -163,7 +166,7 @@ export default function FlyerConfigurator({ productSlug }: Props) {
             </header>
 
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4">
-              <AccordionStep stepNumber={1} title="Dimensiune & Hârtie" summary={summary1} isOpen={true} onClick={() => {}}>
+              <AccordionStep stepNumber={1} title="Dimensiune & Hârtie" summary={summary1} isOpen={activeStep === 1} onClick={() => setActiveStep(1)}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="field-label">Dimensiune</label>
@@ -180,7 +183,7 @@ export default function FlyerConfigurator({ productSlug }: Props) {
                 </div>
               </AccordionStep>
 
-              <AccordionStep stepNumber={2} title="Tiraj & Față/Dos" summary={summary2} isOpen={false} onClick={() => {}}>
+              <AccordionStep stepNumber={2} title="Tiraj & Față/Dos" summary={summary2} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <NumberInput label="Cantitate (buc)" value={quantity} onChange={setQuantity} />
                   <div>
@@ -193,7 +196,7 @@ export default function FlyerConfigurator({ productSlug }: Props) {
                 </div>
               </AccordionStep>
 
-              <AccordionStep stepNumber={3} title="Grafică" summary={designOption === 'upload' ? 'Grafică proprie' : 'Vreau grafică'} isOpen={false} onClick={() => {}} isLast={true}>
+              <AccordionStep stepNumber={3} title="Grafică" summary={designOption === 'upload' ? 'Grafică proprie' : 'Vreau grafică'} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <button onClick={() => setDesignOption('upload')} className={`p-3 rounded-lg border-2 text-sm ${designOption === 'upload' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>Am grafică</button>
                   <button onClick={() => setDesignOption('pro')} className={`p-3 rounded-lg border-2 text-sm ${designOption === 'pro' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>Vreau grafică ({formatMoneyDisplay(priceData.proFee || 0)})</button>
