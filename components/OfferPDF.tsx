@@ -6,8 +6,11 @@ import path from 'path';
 // Styles will be created inside the component so we can conditionally set `fontFamily`
 // depending on whether font registration succeeded.
 
-const formatPrice = (val: number) => 
-  new Intl.NumberFormat('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' RON';
+const formatPrice = (val: number) => {
+  const num = Number(val ?? 0);
+  if (!isFinite(num)) return '0,00 RON';
+  return new Intl.NumberFormat('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num) + ' RON';
+};
 
 export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }) => {
   // Try to register local fonts (preferred). If not found, fall back to remote registration.
@@ -27,21 +30,10 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
       });
       fontRegistered = true;
     } else {
-      try {
-        // Best-effort remote registration (may fail in some envs).
-        Font.register({
-          family: 'Roboto',
-          fonts: [
-            { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.ttf', fontWeight: 'normal' },
-            { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc4.ttf', fontWeight: 'bold' },
-          ],
-        });
-        fontRegistered = true;
-      } catch (err) {
-        // If remote registration fails, we'll continue without custom fonts.
-        console.error('OfferPDF: remote font registration failed', err);
-        fontRegistered = false;
-      }
+      // Do NOT attempt remote font registration to avoid Unknown font format errors
+      // in environments where remote font fetch returns unexpected content.
+      console.warn('OfferPDF: local Roboto fonts not found in public/fonts; continuing with default fonts');
+      fontRegistered = false;
     }
   } catch (err) {
     console.error('OfferPDF: font registration check failed', err);
@@ -58,26 +50,32 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
     },
     headerBg: {
       backgroundColor: '#4F46E5',
-      height: 100,
+      minHeight: 120,
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       paddingHorizontal: 40,
+      paddingTop: 16,
+      paddingBottom: 12,
     },
     headerTitle: {
       color: '#FFFFFF',
       fontSize: 24,
+      marginBottom: 6,
       fontWeight: 'bold',
       textTransform: 'uppercase',
+      lineHeight: 1.1,
     },
     headerSub: {
       color: '#E0E7FF',
       fontSize: 10,
+      marginTop: 2,
     },
     companyInfo: {
       color: 'white',
       fontSize: 9,
       alignItems: 'flex-end',
+      paddingTop: 6,
     },
     section: {
       marginHorizontal: 40,
@@ -161,8 +159,14 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
     },
   });
 
-  const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const total = subtotal + shipping;
+  // Normalize item numbers safely (price could be in `price`, `unitAmount`, or be a Decimal/string)
+  const subtotal = items.reduce((acc, item) => {
+    const unit = Number(item?.price ?? item?.unitAmount ?? item?.unit_amount ?? 0);
+    const qty = Number(item?.quantity ?? item?.qty ?? 0);
+    const line = (isFinite(unit) ? unit : 0) * (isFinite(qty) ? qty : 0);
+    return acc + line;
+  }, 0);
+  const total = (isFinite(subtotal) ? subtotal : 0) + (isFinite(Number(shipping)) ? Number(shipping) : 0);
   const today = new Date().toLocaleDateString('ro-RO');
   const expiry = new Date();
   expiry.setDate(expiry.getDate() + 30);
@@ -187,7 +191,8 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
         <View style={styles.section}>
           <View>
             <Text style={styles.label}>FURNIZOR</Text>
-            <Text style={[styles.value, { fontWeight: 'bold' }]}>SC PRYNT SRL</Text>
+            <Text style={[styles.value, { fontWeight: 'bold' }]}>CULOAREA DIN VIATA SA SRL</Text>
+            <Text style={styles.value}>CUI: 44820819 · Nr. Reg. Com.: J2021001108100</Text>
             <Text style={styles.value}>Email: contact@prynt.ro</Text>
             <Text style={styles.value}>Tel: 0750.259.955</Text>
           </View>
@@ -208,41 +213,101 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
           </View>
 
           {items.map((item, i) => {
-            const meta = item.metadata || {};
-            const details = [];
-            
-            // Construire detalii
-            if (meta.details) details.push(meta.details);
-            if (meta.width_cm || meta.width) details.push(`Dimensiuni: ${meta.width_cm || meta.width} x ${meta.height_cm || meta.height} cm`);
-            
-            // Material
-            let mat = meta.material || meta.materialId;
-            if (mat) {
-                let s = String(mat);
-                if(s.includes('frontlit_510')) s = "Frontlit 510g (Premium)";
-                if(s.includes('frontlit_440')) s = "Frontlit 440g (Standard)";
-                details.push(s);
-            }
-            
-            // Finisaje
-            if (meta.want_hem_and_grommets === true) details.push("Finisaje: Tiv și Capse");
-            if (meta.want_wind_holes === true) details.push("Găuri de vânt: Da");
-            if (item.textDesign) details.push(`Text: "${item.textDesign}"`);
+                    // Combine metadata with top-level item fields so configurators
+                    // that set width/height or other props directly on the item
+                    // are also discoverable by the `findFirst` helper.
+                    const meta = {
+                      ...(item?.metadata || {}),
+                      ...(typeof item === 'object' && item ? item : {}),
+                    } as Record<string, any>;
+                    const details: string[] = [];
 
-            return (
-              <View key={i} style={styles.row} wrap={false}>
-                <View style={styles.colProd}>
-                  <Text style={styles.prodTitle}>{item.title || item.name}</Text>
-                  {details.map((d, idx) => (
-                    <Text key={idx} style={styles.prodDetail}>• {d}</Text>
-                  ))}
-                </View>
-                <Text style={styles.colQty}>{item.quantity}</Text>
-                <Text style={styles.colPrice}>{formatPrice(item.price || item.unitAmount)}</Text>
-                <Text style={styles.colTotal}>{formatPrice((item.price || item.unitAmount) * item.quantity)}</Text>
-              </View>
-            );
-          })}
+                    // Helper pentru extragerea unei chei dintr-o listă de sinonime
+                    const findFirst = (...keys: (string | undefined)[]) => {
+                      for (const k of keys) {
+                        if (!k) continue;
+                        if (Object.prototype.hasOwnProperty.call(meta, k) && meta[k] !== undefined && meta[k] !== null && String(meta[k]).trim() !== '') return meta[k];
+                      }
+                      return undefined;
+                    };
+
+                    // Push if value exists
+                    const pushIf = (label: string, ...keys: string[]) => {
+                      const v = findFirst(...keys);
+                      if (v === undefined) return false;
+                      details.push(`${label}: ${String(v)}`);
+                      return true;
+                    };
+
+                    // 1) free-form details / description
+                    if (findFirst('details', 'description', 'detalii')) details.push(String(findFirst('details', 'description', 'detalii')));
+
+                    // 2) Dimensiuni: prefer width/height numeric pair, altfel size field
+                    const w = findFirst('width_cm', 'width');
+                    const h = findFirst('height_cm', 'height');
+                    if (w !== undefined || h !== undefined) {
+                      details.push(`Dimensiuni: ${w ?? '0'} x ${h ?? '0'} cm`);
+                    } else {
+                      pushIf('Dimensiune', 'Dimensiune', 'dimensiune', 'size', 'format');
+                    }
+
+                    // 3) Față-verso / two-sided
+                    const twoSided = findFirst('Față-verso', 'Fata-verso', 'față-verso', 'fata-verso', 'twoSided', 'two_sided', 'face', 'faces');
+                    if (twoSided !== undefined) {
+                      const tv = String(twoSided).toLowerCase();
+                      const yes = ['da', 'true', '1', 'yes'].includes(tv);
+                      const no = ['nu', 'false', '0', 'no'].includes(tv);
+                      details.push(`Față-verso: ${yes ? 'Da' : (no ? 'Nu' : String(twoSided))}`);
+                    }
+
+                    // 4) Tip împăturire / folding
+                    pushIf('Tip Împăturire', 'impaturire', 'tip_impaturire', 'fold', 'folding', 'Tip Împăturire', 'Tip Impaturire');
+
+                    // 5) Hârtie / paper
+                    const paperVal = findFirst('hartie', 'hârtie', 'paper', 'paper_gsm', 'gramaj', 'Hârtie', 'HARTIE');
+                    if (paperVal !== undefined) {
+                      const p = String(paperVal);
+                      const n = Number(p.replace(/[^0-9.,]/g, '').replace(',', '.'));
+                      if (isFinite(n) && n > 0 && (/^\d+(?:[.,]\d+)?$/).test(p)) details.push(`Hârtie: ${n} g/mp`);
+                      else details.push(`Hârtie: ${p}`);
+                    }
+
+                    // 6) Grafică
+                    pushIf('Grafică', 'grafica', 'grafic', 'graphic', 'graphics', 'Grafică', 'Grafica');
+
+                    // 7) Material
+                    const material = findFirst('material', 'materialId', 'material_id', 'material_name');
+                    if (material !== undefined) {
+                      let s = String(material);
+                      if (s.includes('frontlit_510')) s = 'Frontlit 510g (Premium)';
+                      if (s.includes('frontlit_440')) s = 'Frontlit 440g (Standard)';
+                      details.push(s);
+                    }
+
+                    // 8) Finisaje / other boolean flags
+                    if (meta.want_hem_and_grommets === true || meta.tiv === true || meta.tiv_capse === true) details.push('Finisaje: Tiv și Capse');
+                    if (meta.want_wind_holes === true || meta.wind_holes === true) details.push('Găuri de vânt: Da');
+                    if (findFirst('textDesign', 'text_design', 'text')) details.push(`Text: ${String(findFirst('textDesign', 'text_design', 'text'))}`);
+                    if (findFirst('Cost grafică', 'Cost grafica', 'cost_grafica', 'CostGrafica')) details.push(`Cost grafică: ${String(findFirst('Cost grafică', 'Cost grafica', 'cost_grafica', 'CostGrafica'))}`);
+
+                    const unit = Number(item?.price ?? item?.unitAmount ?? item?.unit_amount ?? 0);
+                    const qty = Number(item?.quantity ?? item?.qty ?? 0);
+                    const lineTotal = (isFinite(unit) ? unit : 0) * (isFinite(qty) ? qty : 0);
+
+                    return (
+                      <View key={i} style={styles.row} wrap={false}>
+                        <View style={styles.colProd}>
+                          <Text style={styles.prodTitle}>{item.title || item.name}</Text>
+                          {details.map((d, idx) => (
+                            <Text key={idx} style={styles.prodDetail}>• {d}</Text>
+                          ))}
+                        </View>
+                        <Text style={styles.colQty}>{isFinite(qty) ? String(qty) : '0'}</Text>
+                        <Text style={styles.colPrice}>{formatPrice(unit)}</Text>
+                        <Text style={styles.colTotal}>{formatPrice(lineTotal)}</Text>
+                      </View>
+                    );
+                  })}
         </View>
 
         {/* 4. TOTALURI */}
