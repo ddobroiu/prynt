@@ -1,16 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // FIX: Excludem pdfkit din procesul de bundling pentru a avea acces la fișierele de fonturi
-  serverExternalPackages: ['pdfkit'],
+  // FIX: Adăugăm @react-pdf/renderer la pachete externe pentru a evita erorile de build
+  serverExternalPackages: ['@react-pdf/renderer'],
 
   experimental: {
-    // Activează noul sistem de cache din Next.js 16
-    // dynamicIO: true, // Notă: Verifică documentația dacă acest flag e necesar specific pentru build-ul tău, de obicei 'use cache' funcționează out-of-the-box în canary/16+ pentru funcții server
-    
-    // Turbopack este implicit în Next.js 16, nu mai folosi cheia 'turbo' aici
     serverActions: {
-      bodySizeLimit: '10mb', // Util pentru upload-ul de fișiere grafice mari
+      bodySizeLimit: '10mb',
     },
   },
   images: {
@@ -22,7 +18,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Header de securitate standard
   async headers() {
     return [
       {

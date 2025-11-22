@@ -102,7 +102,6 @@ export async function sendPasswordResetEmail(to: string, token: string) {
 }
 
 // --- 3. EMAIL CONFIRMARE COMANDĂ (CLIENT) ---
-// Aceasta este funcția care lipsea și cauza eroarea
 export async function sendOrderConfirmationEmail(order: any) {
   const orderIdShort = order.id.slice(-6).toUpperCase();
   const viewUrl = `${process.env.NEXT_PUBLIC_APP_URL}/account/orders/${order.id}`;
@@ -124,13 +123,11 @@ export async function sendOrderConfirmationEmail(order: any) {
 }
 
 // --- 4. EMAIL NOTIFICARE ADMIN (COMANDĂ NOUĂ) ---
-// Aceasta este a doua funcție care lipsea
 export async function sendNewOrderAdminEmail(order: any) {
   const orderIdShort = order.id.slice(-6).toUpperCase();
   const adminUrl = `${process.env.NEXT_PUBLIC_APP_URL}/admin/orders/${order.id}`;
   
-  // Poți folosi o variabilă de mediu sau un email fix
-  const adminEmail = process.env.ADMIN_EMAIL || 'comenzi@prynt.ro'; 
+  const adminEmail = process.env.ADMIN_EMAIL || 'contact@prynt.ro'; 
 
   const html = getHtmlTemplate({
     title: "Comandă Nouă!",
@@ -146,4 +143,57 @@ export async function sendNewOrderAdminEmail(order: any) {
     subject: `[ADMIN] Comandă Nouă #${orderIdShort}`,
     html,
   });
+}
+
+// --- 5. EMAIL FORMULAR CONTACT (NOU) ---
+export async function sendContactFormEmail(data: { name: string; email: string; phone?: string; message: string }) {
+  const { name, email, phone, message } = data;
+  
+  // NOTĂ IMPORTANTĂ PENTRU RESEND:
+  // 1. Dacă ai domeniul 'prynt.ro' VERIFICAT în panoul Resend (DNS records), lasă linia de mai jos așa:
+  const fromEmail = 'Prynt Contact <no-reply@prynt.ro>';
+  
+  // 2. Dacă NU ai domeniul verificat încă (ești în Testing), TREBUIE să folosești linia de mai jos 
+  // și poți trimite emailuri DOAR către adresa ta de login Resend:
+  // const fromEmail = 'onboarding@resend.dev';
+
+  // Adresa unde vrei să primești mesajele de contact
+  const adminEmail = 'contact@prynt.ro';
+
+  const html = getHtmlTemplate({
+    title: "Mesaj Nou de pe Site",
+    message: `Ai primit un mesaj nou de la <strong>${name}</strong> (${email}).`,
+    buttonText: "Răspunde pe Email",
+    buttonUrl: `mailto:${email}`,
+    footerText: `Telefon client: ${phone || 'Nespecificat'}`
+  });
+
+  // Inserăm mesajul clientului în template-ul HTML pentru a fi vizibil clar
+  const contentHtml = html.replace(
+      '<p class="text">', 
+      `<p class="text">
+         <strong>Mesaj primit:</strong><br/>
+         <em style="display:block; background:#f3f4f6; padding:15px; border-left: 4px solid #4f46e5; margin-top:10px; border-radius: 4px;">${message.replace(/\n/g, '<br>')}</em>
+         <br/>`
+  );
+
+  try {
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: adminEmail,
+      replyTo: email, // Când dai Reply din Gmail, se va duce către client
+      subject: `[Contact] Mesaj nou de la ${name}`,
+      html: contentHtml,
+    });
+    
+    if (result.error) {
+        console.error("Resend API Error:", result.error);
+        throw new Error(result.error.message);
+    }
+
+    return { success: true, id: result.data?.id };
+  } catch (error) {
+    console.error("Eroare la trimiterea emailului de contact:", error);
+    throw error;
+  }
 }
