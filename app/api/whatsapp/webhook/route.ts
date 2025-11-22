@@ -115,8 +115,18 @@ export async function POST(req: Request) {
           messagesPayload.push(responseMessage as any); // Adăugăm intenția AI-ului în istoric
 
           for (const toolCall of responseMessage.tool_calls) {
-            const fnName = toolCall.function.name;
-            const args = JSON.parse(toolCall.function.arguments);
+            // New OpenAI SDK may provide tool call shape with top-level `name` and `arguments`.
+            // Older shape (or other variants) used `function.name` and `function.arguments`.
+            const rawName = (toolCall as any).name ?? (toolCall as any).function?.name;
+            const rawArgs = (toolCall as any).arguments ?? (toolCall as any).function?.arguments ?? '{}';
+            const fnName = String(rawName ?? 'unknown_tool');
+            let args: any = {};
+            try {
+              args = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs;
+            } catch (e) {
+              console.warn('Failed to parse toolCall arguments', rawArgs, e);
+              args = {};
+            }
             let result = "Eroare execuție tool.";
 
             console.log(`Executare tool: ${fnName}`, args);
