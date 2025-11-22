@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from "next/image"; // IMPORT NOU
+import Image from "next/image";
 import AssistantWidget from "@/components/AssistantWidget";
 import Link from "next/link";
 
@@ -69,7 +69,7 @@ const CategoryCard = ({ title, href, image }: { title: string; href: string; ima
     href={href}
     className="group relative flex h-48 w-full flex-col justify-end overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800 shadow-sm transition-all duration-500 hover:shadow-xl hover:-translate-y-1"
   >
-    {/* Imagine Background cu Next Image */}
+    {/* Imagine Background */}
     <div className="absolute inset-0 h-full w-full">
       <Image
         src={image}
@@ -133,13 +133,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- ASISTENT VIRTUAL (CENTRAL) --- */}
+      {/* --- ASISTENT VIRTUAL (CENTRAL - EMBEDDED) --- */}
       <section className="relative z-20 -mt-8 mb-24 px-4">
         <div className={`transition-all duration-1000 delay-300 ${isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             {/* Wrapper cu glow effect */}
             <div className="mx-auto max-w-5xl relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-3xl blur opacity-20 dark:opacity-40 animate-pulse-slow"></div>
-                <AssistantWidget />
+                {/* AICI ESTE MODIFICAREA: embedded={true} */}
+                <AssistantWidget embedded={true} />
             </div>
         </div>
       </section>
