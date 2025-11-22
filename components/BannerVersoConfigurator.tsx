@@ -4,6 +4,7 @@ import { useCart } from "@/components/CartContext";
 import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon, PlayCircle } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import Link from 'next/link';
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
 import DynamicBannerPreview from "./DynamicBannerPreview";
@@ -87,11 +88,24 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
 const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
 
 function BannerModeSwitchInline() {
-  const router = useRouter();
+  const pathname = usePathname();
+  const isVerso = !!pathname && pathname.startsWith("/banner-verso");
+  const isFace = !!pathname && pathname.startsWith("/banner") && !isVerso;
+
   return (
     <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
-      <button type="button" onClick={() => router.push("/banner")} className="px-4 py-1.5 rounded-md text-sm font-semibold transition-all bg-indigo-600 text-white shadow-md">O față</button>
-      <button type="button" onClick={() => router.push("/banner-verso")} className="ml-1 px-4 py-1.5 rounded-md text-sm font-semibold transition-all text-gray-600 hover:bg-gray-100">Față-verso</button>
+      <Link
+        href="/banner"
+        className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all inline-flex items-center justify-center ${isFace ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
+      >
+        O față
+      </Link>
+      <Link
+        href="/banner-verso"
+        className={`ml-1 px-4 py-1.5 rounded-md text-sm font-semibold transition-all inline-flex items-center justify-center ${isVerso ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
+      >
+        Față-verso
+      </Link>
     </div>
   );
 }
@@ -367,6 +381,18 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                         ) : (
                             <img src={activeImage} alt="Banner" className="h-full w-full object-cover animate-in fade-in duration-300" />
                         )}
+                        {/* VIDEO BUTTON - VISIBLE (overlay, like BannerConfigurator) */}
+                        <div className="absolute bottom-4 right-4 z-30">
+                          <button
+                            type="button"
+                            onClick={() => setVideoOpen(true)}
+                            aria-label="Vezi Video Prezentare"
+                            className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-bold shadow-lg hover:bg-red-700 transform hover:-translate-y-0.5 transition-all"
+                          >
+                            <PlayCircle className="w-5 h-5 text-white" />
+                            <span>Vezi Video Prezentare</span>
+                          </button>
+                        </div>
                     </>
                   )}
                   
@@ -387,26 +413,16 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               </div>
               
               {/* GALEIE THUMBNAILS + VIDEO BUTTON */}
-              {viewMode === 'gallery' && (
-                <div className="p-2 space-y-2">
-                    {/* Thumbnails */}
-                    <div className="grid grid-cols-4 gap-2">
-                        {galleryImages.map((src, i) => (
-                            <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>
-                        ))}
-                    </div>
-                    
-                    {/* VIDEO BUTTON - PROFI */}
-                    <button 
-                      onClick={() => setVideoOpen(true)} 
-                      aria-label="Vezi Video Prezentare"
-                      className="w-full py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-3 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                    >
-                      <PlayCircle size={20} className="text-white" />
-                      Vezi Video Prezentare
-                    </button>
+                {viewMode === 'gallery' && (
+                <div className="p-2">
+                  {/* Thumbnails */}
+                  <div className="grid grid-cols-4 gap-2">
+                    {galleryImages.map((src, i) => (
+                      <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>
+                    ))}
+                  </div>
                 </div>
-              )}
+                )}
             </div>
             <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'banner'} /></div>
           </div>

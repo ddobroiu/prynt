@@ -50,12 +50,22 @@ export default function Reviews({ productSlug }: { productSlug: string }) {
   const fetchReviews = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/reviews?productSlug=${productSlug}`);
-      if (!res.ok) throw new Error('Nu am putut încărca recenziile.');
+      if (!productSlug) {
+        setError('Produs invalid pentru recenzii.');
+        setReviews([]);
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`/api/reviews?productSlug=${encodeURIComponent(productSlug)}`, { credentials: 'same-origin' });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        throw new Error(errBody?.error || 'Nu am putut încărca recenziile.');
+      }
       const data = await res.json();
-      setReviews(data.reviews);
+      setReviews(data.reviews || []);
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.message || 'Eroare la încărcare recenzii.');
     } finally {
       setLoading(false);
     }
@@ -76,14 +86,15 @@ export default function Reviews({ productSlug }: { productSlug: string }) {
 
     try {
         const res = await fetch('/api/reviews', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                productSlug,
-                rating: newReviewRating,
-                title: newReviewTitle,
-                content: newReviewContent,
-            }),
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productSlug,
+            rating: newReviewRating,
+            title: newReviewTitle,
+            content: newReviewContent,
+          }),
         });
 
         if (!res.ok) {
