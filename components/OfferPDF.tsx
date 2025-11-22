@@ -275,7 +275,21 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
                     // 6) Grafică
                     pushIf('Grafică', 'grafica', 'grafic', 'graphic', 'graphics', 'Grafică', 'Grafica');
 
-                    // 7) Material
+                    // 7) Suprafață / finisaj (tapet, canvas, etc.)
+                    pushIf('Suprafață', 'Suprafață', 'Suprafata', 'Suprafața', 'Suprafata', 'Suprafață');
+                    pushIf('Finisaj', 'Finisaj', 'Finisaje', 'Finisaj', 'Finisaje');
+
+                    // 8) Design option / misc flags
+                    const designOpt = findFirst('designOption', 'design_option', 'design', 'designOpt');
+                    if (designOpt !== undefined) details.push(`Opțiune grafică: ${String(designOpt)}`);
+                    if (meta.laminated === true || meta.laminare === true) details.push('Laminare: Da');
+                    if (meta.shape_diecut === true || meta.shape_diecut === 'true' || meta.shape_diecut === 1) details.push('Die-cut: Da');
+                    if (meta.want_adhesive === true || meta.want_adhesive === 'true') details.push('Auto-adeziv: Da');
+
+                    // 9) Margine / edge (canvas)
+                    pushIf('Margine', 'Margine', 'edge', 'edge_type', 'edgeType');
+
+                    // 10) Material
                     const material = findFirst('material', 'materialId', 'material_id', 'material_name');
                     if (material !== undefined) {
                       let s = String(material);

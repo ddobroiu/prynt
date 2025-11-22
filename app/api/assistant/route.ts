@@ -5,179 +5,22 @@ import { sendOrderConfirmationEmail, sendNewOrderAdminEmail } from "@/lib/email"
 import { 
   calculateBannerPrice, 
   calculateBannerVersoPrice,
-  calculatePolipropilenaPrice,
-  calculatePVCForexPrice,
-  calculateAlucobondPrice,
-  calculatePlexiglassPrice,
-  calculateCartonPrice,
-  calculateAutocolantePrice,
-  calculateCanvasPrice,
-  calculatePosterPrice,
+  // Alte importuri rămân la fel, dar ne asigurăm că sunt importate funcțiile necesare
   calculateFlyerPrice,
-  calculatePliantePrice,
-  calculateTapetPrice,
-  type PriceInputBanner,
-  type PriceInputBannerVerso,
-  // ... alte tipuri
 } from '@/lib/pricing';
+// Importăm logica comună
+import { tools, SYSTEM_PROMPT } from '@/lib/ai-shared';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// --- 1. DEFINIREA UNELTELOR (TOOLS) ---
-const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
-  {
-    type: "function",
-    function: {
-      name: "calculate_banner_price",
-      description: "Calculează preț pentru Bannere.",
-      parameters: {
-        type: "object",
-        properties: {
-          type: { type: "string", enum: ["frontlit", "verso"] },
-          width_cm: { type: "number" },
-          height_cm: { type: "number" },
-          quantity: { type: "number" },
-          material: { type: "string", enum: ["frontlit_440", "frontlit_510"] },
-          want_wind_holes: { type: "boolean" },
-          want_hem_and_grommets: { type: "boolean" },
-          same_graphic: { type: "boolean" }
-        },
-        required: ["type", "width_cm", "height_cm", "quantity"]
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
-      name: "calculate_rigid_price",
-      description: "Calculează preț materiale rigide (Plexi, Forex, etc).",
-      parameters: {
-        type: "object",
-        properties: {
-          material_type: { type: "string", enum: ["plexiglass", "forex", "alucobond", "polipropilena", "carton"] },
-          width_cm: { type: "number" },
-          height_cm: { type: "number" },
-          quantity: { type: "number" },
-          thickness_mm: { type: "number" },
-          subtype: { type: "string" },
-          print_double: { type: "boolean" },
-          color: { type: "string" }
-        },
-        required: ["material_type", "width_cm", "height_cm", "quantity"]
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
-      name: "calculate_roll_print_price",
-      description: "Calculează preț autocolant, canvas, tapet.",
-      parameters: {
-        type: "object",
-        properties: {
-          product_type: { type: "string", enum: ["autocolant", "canvas", "tapet"] },
-          width_cm: { type: "number" },
-          height_cm: { type: "number" },
-          quantity: { type: "number" },
-          material_subtype: { type: "string" },
-          canvas_edge: { type: "string" },
-          options: { type: "object", properties: { laminated: {type:"boolean"}, diecut: {type:"boolean"}, adhesive: {type:"boolean"} } }
-        },
-        required: ["product_type", "width_cm", "height_cm", "quantity"]
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
-      name: "calculate_standard_print_price",
-      description: "Calculează preț flyere, afișe, pliante.",
-      parameters: {
-        type: "object",
-        properties: {
-          product_type: { type: "string", enum: ["flyer", "pliant", "afis"] },
-          size: { type: "string" },
-          quantity: { type: "number" },
-          paper_type: { type: "string" },
-          fold_type: { type: "string" },
-          two_sided: { type: "boolean" }
-        },
-        required: ["product_type", "size", "quantity"]
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
-      name: "create_order",
-      description: "Finalizează și salvează comanda. Apelează DOAR după ce ai toate datele (Nume, Telefon, Email, Adresă completă).",
-      parameters: {
-        type: "object",
-        properties: {
-          customer_details: {
-            type: "object",
-            properties: {
-              name: { type: "string" },
-              phone: { type: "string" },
-              email: { type: "string" },
-              address: { type: "string" },
-              city: { type: "string" },
-              county: { type: "string" }
-            },
-            required: ["name", "phone", "email", "address", "city", "county"]
-          },
-          items: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                title: { type: "string" },
-                quantity: { type: "number" },
-                price: { type: "number" },
-                details: { type: "string" }
-              },
-              required: ["title", "quantity", "price"]
-            }
-          }
-        },
-        required: ["customer_details", "items"]
-      }
-    }
-  }
-];
-
-// --- 2. SYSTEM PROMPT ---
-const SYSTEM_PROMPT = `
-Ești asistentul virtual Prynt.ro.
-
-REGULI INTERACȚIUNE:
-
-1. **VARIANTE PRODUSE (BUTOANE)**:
-   Când întrebi detalii tehnice, NU scrie variantele în text. Folosește tag-ul ||OPTIONS: [...]||.
-   
-   - Banner Material: ||OPTIONS: ["Frontlit 440g (Standard)", "Frontlit 510g (Premium)"]||
-   - Banner Finisaje: ||OPTIONS: ["Cu Tiv și Capse", "Fără Finisaje (Brut)", "Doar Capse"]||
-   - Autocolant: ||OPTIONS: ["Lucios", "Mat", "Transparent"]||
-   - Afișe: ||OPTIONS: ["A3", "A2", "A1", "A0"]||
-   - Confirmare: ||OPTIONS: ["Vreau să comand", "Modifică", "Alt produs"]||
-
-2. **FLUX LIVRARE (SELECTORII DPD)**:
-   Trebuie să ceri datele de livrare PE RÂND, folosind tag-urile speciale pentru a activa selectorii vizuali.
-
-   - PASUL 1: Cere Nume, Telefon, Email. (Fără tag)
-   - PASUL 2: Cere Județul. OBLIGATORIU adaugă tag-ul: ||REQUEST: JUDET||
-     Exemplu: "În ce județ doriți livrarea? ||REQUEST: JUDET||"
-   - PASUL 3: Cere Localitatea. OBLIGATORIU adaugă tag-ul: ||REQUEST: LOCALITATE||
-     Exemplu: "Vă rog să selectați localitatea: ||REQUEST: LOCALITATE||"
-   - PASUL 4: Cere Adresa exactă (Stradă, Nr). (Fără tag)
-   - PASUL 5: Apelează 'create_order'.
-
-3. **REGULI GENERALE**:
-   - Bannere: Implicit cu tiv și capse dacă nu se cere altfel.
-   - Prețuri: În RON.
-   - Fii politicos și scurt.
+// Adăugăm instrucțiuni specifice pentru WEB (unde avem butoane și dropdown-uri)
+const WEB_SYSTEM_PROMPT = SYSTEM_PROMPT + `
+INSTRUCȚIUNI SPECIFICE WEB:
+- Când întrebi detalii tehnice, NU scrie variantele în text. Folosește tag-ul ||OPTIONS: [...]||.
+- Pentru Județ folosește tag-ul: ||REQUEST: JUDET||
+- Pentru Localitate folosește tag-ul: ||REQUEST: LOCALITATE||
 `;
 
 export async function POST(req: Request) {
@@ -190,7 +33,7 @@ export async function POST(req: Request) {
     }
 
     const messagesPayload = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: WEB_SYSTEM_PROMPT },
       ...messages
     ];
 
@@ -214,7 +57,7 @@ export async function POST(req: Request) {
         let result = "Eroare execuție";
 
         try {
-            // --- LOGICA DE CALCUL (Aceeași ca înainte) ---
+            // --- LOGICA DE CALCUL ---
             if (fnName === "calculate_banner_price") {
                 const hem = args.want_hem_and_grommets !== false; 
                 const mat = args.material?.includes("510") ? "frontlit_510" : "frontlit_440";
@@ -230,38 +73,31 @@ export async function POST(req: Request) {
                  const res = calculateFlyerPrice({ sizeKey: args.size || "A6", quantity: args.quantity, twoSided: args.two_sided ?? true, paperWeightKey: "135", designOption: "upload" });
                  result = JSON.stringify({ pret_total: res.finalPrice });
             }
+            // ... poți adăuga restul calculelor aici (rigid, roll) la fel ca înainte ...
             else if (fnName === "calculate_rigid_price") {
-                // Păstrăm logica de fallback simplificată sau calcul real
-                result = JSON.stringify({ pret_total: 100, info: "Calcul rigid" });
+                result = JSON.stringify({ pret_total: 100, info: "Calcul rigid (mock)" });
             }
             else if (fnName === "calculate_roll_print_price") {
-                result = JSON.stringify({ pret_total: 100, info: "Calcul roll" });
+                result = JSON.stringify({ pret_total: 100, info: "Calcul roll (mock)" });
             }
 
-            // --- CREARE COMANDĂ (CU FIX PENTRU EROAREA DIN LOGURI) ---
+            // --- CREARE COMANDĂ ---
             else if (fnName === "create_order") {
                 const { customer_details, items } = args;
                 const totalAmount = items.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
 
-                // FIX: Verificăm dacă prisma este inițializat
-                if (!prisma) {
-                    console.error("PRISMA ESTE UNDEFINED. Verifică importul în route.ts și lib/prisma.ts");
-                    throw new Error("Eroare internă: Conexiunea la baza de date nu este disponibilă.");
-                }
+                if (!prisma) throw new Error("DB Connection missing");
 
-                // 2. Calculează următorul orderNo
                 const lastOrder = await prisma.order.findFirst({
                     orderBy: { orderNo: 'desc' },
                     select: { orderNo: true }
                 });
                 const nextOrderNo = (lastOrder?.orderNo ?? 1000) + 1;
 
-                // 3. Verifică user existent
                 const existingUser = await prisma.user.findUnique({
                     where: { email: customer_details.email }
                 });
 
-                // 4. Pregătește comanda
                 const orderData: any = {
                     orderNo: nextOrderNo,
                     status: "pending_verification",
@@ -302,10 +138,8 @@ export async function POST(req: Request) {
                     orderData.user = { connect: { id: existingUser.id } };
                 }
 
-                // 5. Salvează
                 const order = await prisma.order.create({ data: orderData });
 
-                // 6. Trimite emailuri
                 if (order) {
                     try {
                        if(typeof sendOrderConfirmationEmail === 'function') await sendOrderConfirmationEmail(order);
