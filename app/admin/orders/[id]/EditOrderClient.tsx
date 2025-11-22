@@ -8,7 +8,32 @@ import { Trash2, Plus, Package, Loader2, Save } from "lucide-react";
 export default function EditOrderClient({ order }: { order: any }) {
   const router = useRouter();
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>(order.status || 'active');
   const [isAdding, setIsAdding] = useState(false);
+
+  const [isStatusLoading, setIsStatusLoading] = useState(false);
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === status) return;
+    if (newStatus === "canceled" && !confirm("Ești sigur că vrei să anulezi această comandă?")) return;
+
+    setIsStatusLoading(true);
+    try {
+      const res = await fetch(`/api/order/${order.id}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) throw new Error("Eroare la actualizare");
+      setStatus(newStatus);
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert("Eroare actualizare status.");
+    } finally {
+      setIsStatusLoading(false);
+    }
+  };
 
   // State pentru formularul de adăugare
   const [newItem, setNewItem] = useState({
@@ -68,6 +93,26 @@ export default function EditOrderClient({ order }: { order: any }) {
         <h3 className="font-bold text-gray-900 flex items-center gap-2">
           <Package className="w-5 h-5 text-indigo-600" /> Produse în comandă
         </h3>
+        <div className="flex items-center gap-3">
+          <label className="text-xs text-gray-500">Status</label>
+          <div className="relative inline-block">
+            {isStatusLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10 rounded-lg">
+                <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+              </div>
+            )}
+            <select
+              value={status}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              disabled={isStatusLoading}
+              className="appearance-none cursor-pointer pl-3 pr-8 py-1.5 rounded-lg text-sm font-medium border shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all bg-gray-50"
+            >
+              <option value="active">În Lucru</option>
+              <option value="fulfilled">Finalizată</option>
+              <option value="canceled">Anulată</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Lista Produse */}

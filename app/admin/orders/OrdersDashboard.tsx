@@ -300,6 +300,7 @@ function InvoiceControl({ order }: { order: Order }) {
 // --- DASHBOARD ---
 export default function OrdersDashboard({ initialOrders = [] }: OrdersDashboardProps) {
   const router = useRouter();
+  const [generatingAwbId, setGeneratingAwbId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
@@ -328,18 +329,33 @@ export default function OrdersDashboard({ initialOrders = [] }: OrdersDashboardP
   };
 
   const handleGenerateAwb = async (orderId: string) => {
+    setGeneratingAwbId(orderId);
     try {
-      const res = await fetch(`/api/admin/orders/${orderId}/generate-awb-link`);
+      const res = await fetch(`/api/dpd/awb`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId }),
+      });
+      if (!res.ok) throw new Error('Eroare generare AWB');
       const data = await res.json();
-      
-      if (data.url) {
+
+      if (data?.awb) {
+        // open tracking page in new tab and refresh admin list
+        const awb = encodeURIComponent(data.awb);
+        window.open(`https://tracking.dpd.ro/?shipmentNumber=${awb}&language=ro`, '_blank');
+        router.refresh();
+      } else if (data?.url) {
+        // fallback if API returned a URL to complete emission
         window.open(data.url, '_blank');
       } else {
-        alert("Nu s-a putut genera link-ul. Verifică consola.");
+        alert('Emitere AWB nereușită — verifică consola.');
+        console.error('AWB response:', data);
       }
     } catch (e) {
       console.error(e);
-      alert("Eroare la generare link AWB");
+      alert('Eroare la emitere AWB.');
+    } finally {
+      setGeneratingAwbId(null);
     }
   };
 
@@ -700,10 +716,15 @@ export default function OrdersDashboard({ initialOrders = [] }: OrdersDashboardP
                                         ) : (
                                             <button 
                                                 onClick={() => handleGenerateAwb(order.id)}
-                                                className="flex flex-col items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 p-3 rounded-lg text-xs font-bold transition-colors"
+                                                disabled={generatingAwbId === order.id}
+                                                className="flex flex-col items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 p-3 rounded-lg text-xs font-bold transition-colors disabled:opacity-60"
                                             >
-                                                <Truck className="w-5 h-5 text-gray-500" /> 
-                                                Generare AWB
+                                                {generatingAwbId === order.id ? (
+                                                  <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                                                ) : (
+                                                  <Truck className="w-5 h-5 text-gray-500" />
+                                                )}
+                                                <span className="text-[11px]">{generatingAwbId === order.id ? 'Se emite...' : 'Generează AWB'}</span>
                                             </button>
                                         )}
 
