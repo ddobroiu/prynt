@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from "next/image"; // IMPORT NOU
 import AssistantWidget from "@/components/AssistantWidget";
 import Link from "next/link";
 
@@ -68,13 +69,18 @@ const CategoryCard = ({ title, href, image }: { title: string; href: string; ima
     href={href}
     className="group relative flex h-48 w-full flex-col justify-end overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800 shadow-sm transition-all duration-500 hover:shadow-xl hover:-translate-y-1"
   >
-    {/* Imagine Background */}
-    <img 
-      src={image} 
-      alt={title} 
-      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100"
-      loading="lazy"
-    />
+    {/* Imagine Background cu Next Image */}
+    <div className="absolute inset-0 h-full w-full">
+      <Image
+        src={image}
+        alt={title}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+        className="object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100"
+        priority={false}
+      />
+    </div>
+    
     {/* Gradient Overlay */}
     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-90" />
     

@@ -28,10 +28,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const shipment: any = {
       recipient: {
-        clientName: address?.nume_prenume || address?.nume || order.user?.name || 'Client',
-        contactName: address?.nume_prenume || address?.nume || order.user?.name || 'Client',
-        email: address?.email || order.user?.email || undefined,
-        phone1: { number: address?.telefon || order.user?.phone || undefined },
+        clientName: address?.nume_prenume || address?.nume || (order as any).user?.name || 'Client',
+        contactName: address?.nume_prenume || address?.nume || (order as any).user?.name || 'Client',
+        email: address?.email || (order as any).user?.email || undefined,
+        phone1: { number: address?.telefon || (order as any).user?.phone || undefined },
         privatePerson: true,
         address: { countryId: 642, siteName: address?.localitate, postCode: address?.postCode, addressNote: `${address?.strada_nr || ''}, ${address?.localitate || ''}, ${address?.judet || ''}` },
       },
@@ -80,12 +80,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       const apiKey = process.env.RESEND_API_KEY;
       const resend = apiKey ? new Resend(apiKey) : null;
       const trackingUrl = trackingUrlForAwb(shipmentId);
-      if (resend && (address?.email || order.user?.email)) {
+      if (resend && (address?.email || (order as any).user?.email)) {
         const subject = `AWB DPD ${shipmentId}`;
-        const html = `<p>Bună ${address?.nume_prenume || order.user?.name || ''},</p><p>Am emis AWB-ul: <strong>${shipmentId}</strong>.</p><p>Urmărește livrarea: <a href="${trackingUrl}">${trackingUrl}</a></p>`;
+        const html = `<p>Bună ${address?.nume_prenume || (order as any).user?.name || ''},</p><p>Am emis AWB-ul: <strong>${shipmentId}</strong>.</p><p>Urmărește livrarea: <a href="${trackingUrl}">${trackingUrl}</a></p>`;
         await resend.emails.send({
           from: process.env.EMAIL_FROM || 'contact@prynt.ro',
-          to: address?.email || order.user?.email,
+          to: address?.email || (order as any).user?.email,
           subject,
           html,
           attachments: base64 ? [{ filename: `DPD_${shipmentId}.pdf`, content: Buffer.from(base64, 'base64') }] : undefined,

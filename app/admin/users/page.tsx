@@ -55,7 +55,7 @@ export default async function UsersPage() {
     updatedAt: user.updatedAt.toISOString(),
     emailVerified: user.emailVerified ? user.emailVerified.toISOString() : null,
     // Atașăm comenzile incluse, dar transformăm Decimal -> Number.
-    orders: user.orders.map(order => ({
+    orders: (user.orders || []).map((order: any) => ({
       ...order,
       total: Number(order.total), // Aici transformăm Decimal în Number simplu
       createdAt: order.createdAt.toISOString()
