@@ -636,22 +636,17 @@ export async function fulfillOrder(
         const textDesign = raw.textDesign ?? raw.metadata?.textDesign ?? null;
         const designOption = raw.designOption ?? raw.metadata?.designOption ?? null;
 
-        // Normalizează textul: dacă există 'Text' și nu există 'textDesign', copiază
-        let normalizedTextDesign = textDesign;
-        if (!normalizedTextDesign && raw.metadata?.Text) {
-          normalizedTextDesign = raw.metadata.Text;
-        }
         return { 
-          name, 
-          qty, 
-          unit, 
-          total, 
-          artworkUrl,
-          metadata: {
-            ...(raw.metadata || {}),
-            textDesign: normalizedTextDesign,
-            designOption
-          }
+            name, 
+            qty, 
+            unit, 
+            total, 
+            artworkUrl,
+            metadata: {
+                ...(raw.metadata || {}),
+                textDesign,
+                designOption
+            }
         };
       });
 

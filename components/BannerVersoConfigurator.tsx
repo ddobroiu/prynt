@@ -295,9 +295,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : input.designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(BANNER_CONSTANTS.PRO_DESIGN_FEE) }),
         ...(input.designOption === 'text_only' && { "Text": textDesign }),
-        artworkUrl,
-        designOption: input.designOption,
-        ...(input.designOption === 'text_only' && { textDesign }),
+        artworkUrl, 
       },
     });
     setToastVisible(true);
@@ -337,17 +335,17 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               
               {/* Header Switch: Doar Galerie și Schiță */}
               <div className="flex border-b border-gray-100 overflow-x-auto">
-                  <button 
+                    <button 
                       onClick={() => setViewMode('gallery')}
-                      className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'gallery' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
-                  >
+                      className={`flex-1 py-3 min-w-20 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'gallery' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
                       <ImageIcon size={16} /> 
                       <span className="hidden sm:inline">Galerie</span>
                   </button>
-                  <button 
+                    <button 
                       onClick={() => setViewMode('shape')}
-                      className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'shape' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
-                  >
+                      className={`flex-1 py-3 min-w-20 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'shape' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
                       <Ruler size={16} /> 
                       <span className="hidden sm:inline">Schiță Tehnică</span>
                   </button>
@@ -400,11 +398,12 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                     
                     {/* VIDEO BUTTON - PROFI */}
                     <button 
-                        onClick={() => setVideoOpen(true)} 
-                        className="w-full py-3 bg-gray-900 hover:bg-gray-800 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                      onClick={() => setVideoOpen(true)} 
+                      aria-label="Vezi Video Prezentare"
+                      className="w-full py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-3 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                     >
-                        <PlayCircle size={20} className="text-red-500" />
-                        Vezi Video Prezentare
+                      <PlayCircle size={20} className="text-white" />
+                      Vezi Video Prezentare
                     </button>
                 </div>
               )}
@@ -534,7 +533,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
       {/* VIDEO MODAL (LIGHTBOX) */}
       {videoOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300" onClick={() => setVideoOpen(false)}>
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300" onClick={() => setVideoOpen(false)}>
             <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10" onClick={e => e.stopPropagation()}>
                 <button 
                     className="absolute top-4 right-4 text-white/70 hover:text-white z-20 bg-black/60 hover:bg-black/80 rounded-full p-2 transition-all backdrop-blur-sm"

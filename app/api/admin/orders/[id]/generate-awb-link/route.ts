@@ -19,7 +19,7 @@ export async function GET(
 
     const order = await prisma.order.findUnique({
       where: { id },
-      include: { items: true },
+      include: { items: true, user: true },
     });
 
     if (!order) {
@@ -29,6 +29,8 @@ export async function GET(
     const address = order.address as any;
 
     // Construim payload-ul identic cu cel din email
+    const paymentType: 'Ramburs' | 'Card' | undefined = order.paymentType === 'Ramburs' ? 'Ramburs' : order.paymentType === 'Card' ? 'Card' : undefined;
+
     const payload = {
       action: "validate", // Pornim cu validarea
       orderId: order.id,  // Trimitem ID-ul pentru a salva AWB-ul ulterior
@@ -41,7 +43,7 @@ export async function GET(
         strada_nr: address.strada_nr || "",
         postCode: address.postCode || "",
       },
-      paymentType: order.paymentType,
+      paymentType,
       totalAmount: Number(order.total),
       items: order.items.map((i) => ({ name: i.name, qty: i.qty })),
     };

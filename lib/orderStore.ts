@@ -208,21 +208,11 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
   // Fallback fișier local
   ensureDir();
   const orderNo = await nextOrderNo();
-  // Asigură includerea metadata la fiecare item
-  const itemsWithMetadata = (input.items || []).map((it: any) => ({
-    name: it.name,
-    qty: it.qty,
-    unit: it.unit,
-    total: it.total,
-    artworkUrl: it.artworkUrl || null,
-    metadata: it.metadata || {},
-  }));
   const order: StoredOrder = {
     orderNo,
     id: (globalThis as any).crypto?.randomUUID?.() || require('crypto').randomUUID(),
     createdAt: new Date().toISOString(),
     ...input,
-    items: itemsWithMetadata,
   };
   await fs.promises.appendFile(FILE_PATH, JSON.stringify(order) + '\n', 'utf8');
   return order;

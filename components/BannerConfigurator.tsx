@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useCart } from "@/components/CartContext";
-import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon, PlayCircle } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import FaqAccordion from "./FaqAccordion";
@@ -337,17 +337,17 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               
               {/* Header Switch: Doar Galerie și Schiță */}
               <div className="flex border-b border-gray-100 overflow-x-auto">
-                  <button 
+                    <button 
                       onClick={() => setViewMode('gallery')}
-                      className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'gallery' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
-                  >
+                      className={`flex-1 py-3 min-w-20 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'gallery' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
                       <ImageIcon size={16} /> 
                       <span className="hidden sm:inline">Galerie</span>
                   </button>
-                  <button 
+                    <button 
                       onClick={() => setViewMode('shape')}
-                      className={`flex-1 py-3 min-w-[80px] text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'shape' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
-                  >
+                      className={`flex-1 py-3 min-w-20 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${viewMode === 'shape' ? 'text-indigo-600 bg-indigo-50 border-b-2 border-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
                       <Ruler size={16} /> 
                       <span className="hidden sm:inline">Schiță Tehnică</span>
                   </button>
@@ -369,22 +369,23 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                         ) : (
                             <img src={activeImage} alt="Banner" className="h-full w-full object-cover animate-in fade-in duration-300" />
                         )}
-                        {/* VIDEO BUTTON - PROFI */}
+                        {/* VIDEO BUTTON - VISIBLE */}
                         <div className="absolute bottom-4 right-4 z-30">
                           <button
                             type="button"
                             onClick={() => setVideoOpen(true)}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/90 border border-red-500 shadow text-red-500 font-bold text-xs hover:bg-red-500 hover:text-white transition-colors"
+                            aria-label="Vezi Video Prezentare"
+                            className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-bold shadow-lg hover:bg-red-700 transform hover:-translate-y-0.5 transition-all"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            Vezi Video Prezentare
+                            <PlayCircle className="w-5 h-5 text-white" />
+                            <span>Vezi Video Prezentare</span>
                           </button>
                         </div>
                     </>
                   )}
                                     {/* VIDEO MODAL (LIGHTBOX) */}
                                     {videoOpen && (
-                                      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300" onClick={() => setVideoOpen(false)}>
+                                      <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300" onClick={() => setVideoOpen(false)}>
                                         <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10" onClick={e => e.stopPropagation()}>
                                           <button
                                             className="absolute right-4 top-4 p-2 rounded-full bg-white/20 text-white hover:bg-white/40"

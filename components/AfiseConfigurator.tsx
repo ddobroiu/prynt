@@ -160,12 +160,9 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
         "Dimensiune": selectedSizeLabel,
         "Material": selectedMaterialLabel,
         "Tiraj": `${quantity} buc`,
-        "Grafică": designOption === 'pro' ? "Vreau grafică" : designOption === 'text_only' ? 'Doar text' : "Grafică proprie",
+        "Grafică": designOption === 'pro' ? "Vreau grafică" : "Grafică proprie",
         ...(designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(priceData.proFee) }),
-        ...(designOption === 'text_only' && { "Text": textDesign }),
         artworkUrl,
-        designOption,
-        ...(designOption === 'text_only' && { textDesign }),
       },
     });
     setToastVisible(true);

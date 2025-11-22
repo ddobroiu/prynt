@@ -140,14 +140,11 @@ export default function PlianteConfigurator({ productSlug }: Props) {
       quantity,
       currency: "RON",
       metadata: {
-        "Tip împăturire": PLIANTE_CONSTANTS.FOLDS[fold].label,
+        "Tip Împăturire": PLIANTE_CONSTANTS.FOLDS[fold].label,
         "Hârtie": `${weight} g/mp`,
-        "Grafică": designOption === 'pro' ? "Vreau grafică" : designOption === 'text_only' ? 'Doar text' : "Grafică proprie",
+        "Grafică": designOption === 'pro' ? "Vreau grafică" : "Grafică proprie",
         ...(designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(priceData.proFee) }),
-        ...(designOption === 'text_only' && { "Text": textDesign }),
-        artworkUrl,
-        designOption,
-        ...(designOption === 'text_only' && { textDesign }),
+        artworkUrl
       },
     });
     setToastVisible(true); setTimeout(() => setToastVisible(false), 1600);

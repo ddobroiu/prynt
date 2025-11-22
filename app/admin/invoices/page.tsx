@@ -25,9 +25,9 @@ export default async function InvoicesPage() {
   // NOTĂ: Ajustează 'where' dacă logica ta de facturare e diferită (ex: tabel separat Invoice)
   const ordersWithInvoices = await prisma.order.findMany({
     where: {
-      // Presupunem că o comandă are factură dacă are o serie setată
-      // Sau poți folosi: status: { in: ['completed', 'shipped'] }
-      invoiceSeries: { not: null }, 
+      // Presupunem că o comandă are factură dacă are un link către factură
+      // Schema actuală folosește `invoiceLink` (vezi prisma/schema.prisma)
+      invoiceLink: { not: null }, 
     },
     orderBy: { createdAt: 'desc' }, // Cele mai recente primele
     include: {
@@ -43,9 +43,9 @@ export default async function InvoicesPage() {
   // 3. Procesare Date pentru UI
   const invoices = ordersWithInvoices.map(order => ({
     id: order.id,
-    // Date identificare factură
-    series: order.invoiceSeries || 'F', 
-    number: order.invoiceNumber || '-', 
+    // Date identificare factură (schema curentă nu stochează series/number)
+    series: '-',
+    number: '-',
     date: order.createdAt.toISOString(), // Sau data facturării dacă există câmp separat
     
     // Client

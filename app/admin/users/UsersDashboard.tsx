@@ -128,7 +128,7 @@ export default function UsersDashboard({ users = [] }: UsersDashboardProps) {
                     <div className="min-w-0">
                       <h3 className="font-bold text-gray-900 text-base truncate flex items-center gap-2">
                         {user.name || "Fără Nume"}
-                        {user.emailVerified && <ShieldCheck className="w-4 h-4 text-emerald-500" title="Email Verificat" />}
+                        {user.emailVerified && <ShieldCheck className="w-4 h-4 text-emerald-500" aria-label="Email Verificat" role="img" />}
                       </h3>
                       <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm text-gray-500 mt-1">
                         <div className="flex items-center gap-1.5">

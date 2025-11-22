@@ -159,8 +159,6 @@ export default function FlyerConfigurator({ productSlug, initialWidth, initialHe
         "Configurație": selectedItems.join(" | "),
         "Detalii Proiect": orderNotes,
         artworkUrl,
-        designOption,
-        ...(typeof textDesign === 'string' && textDesign.length > 0 ? { textDesign } : {})
       },
     });
     setToastVisible(true); setTimeout(() => setToastVisible(false), 1600);
