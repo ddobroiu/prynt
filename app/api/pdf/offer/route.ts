@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import PDFDocument from "pdfkit";
+import path from "path";
+import fs from "fs";
 
-// Funcție helper pentru a colecta stream-ul PDF într-un Buffer
+// Helper pentru buffer
 async function pdfStreamToBuffer(pdf: typeof PDFDocument): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: any[] = [];
@@ -11,6 +13,10 @@ async function pdfStreamToBuffer(pdf: typeof PDFDocument): Promise<Buffer> {
   });
 }
 
+// Helper pentru formatare preț
+const formatCurrency = (amount: number) => 
+  new Intl.NumberFormat("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount) + " RON";
+
 export async function POST(req: NextRequest) {
   try {
     const { items, shipping } = await req.json();
@@ -19,50 +25,61 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Nu există produse." }, { status: 400 });
     }
 
-    // 1. Inițializare Document PDF
     const doc = new PDFDocument({ margin: 50, size: 'A4' });
-
-    // Colectăm datele (nu trimitem încă răspunsul)
     const pdfBufferPromise = pdfStreamToBuffer(doc);
 
-    // --- HEADER ---
-    doc
-      .fontSize(20)
-      .text("Prynt.ro", { align: "left" })
-      .fontSize(10)
-      .text("Tipografie Online & Large Format", { align: "left" })
-      .moveDown();
+    // --- 1. HEADER & LOGO ---
+    const logoPath = path.join(process.cwd(), "public", "logo.png");
+    
+    // Logo (Stânga)
+    if (fs.existsSync(logoPath)) {
+        doc.image(logoPath, 50, 45, { width: 60 });
+    }
 
+    // Info Companie (Stânga, sub logo)
     doc
-      .fontSize(10)
-      .text(`Data ofertă: ${new Date().toLocaleDateString("ro-RO")}`, { align: "right" })
-      .moveDown(2);
-
-    doc
-      .fontSize(18)
       .font("Helvetica-Bold")
-      .text("OFERTA DE PRET", { align: "center" })
-      .moveDown(2);
+      .fontSize(10)
+      .text("PRYNT.RO", 50, 110)
+      .font("Helvetica")
+      .fontSize(9)
+      .text("Tipografie Online & Large Format", 50, 125)
+      .text("Email: contact@prynt.ro", 50, 140)
+      .text("Tel: 0750.259.955", 50, 155);
 
-    // --- TABEL PRODUSE ---
-    let y = doc.y;
-    
-    // Header Tabel
-    doc.fontSize(10).font("Helvetica-Bold");
-    doc.text("Produs", 50, y);
-    doc.text("Cant.", 300, y, { width: 40, align: "right" });
-    doc.text("Pret Unit.", 350, y, { width: 80, align: "right" });
-    doc.text("Total (RON)", 440, y, { width: 100, align: "right" });
-    
-    // Linie sub header
-    doc.moveTo(50, y + 15).lineTo(550, y + 15).stroke();
-    y += 25;
+    // Info Ofertă (Dreapta)
+    const today = new Date();
+    const validUntil = new Date();
+    validUntil.setDate(today.getDate() + 30);
 
-    doc.font("Helvetica");
+    const rightColX = 350;
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(16)
+      .text("OFERTĂ DE PREȚ", rightColX, 45, { align: "right" })
+      .fontSize(10)
+      .font("Helvetica")
+      .text(`Data emiterii: ${today.toLocaleDateString("ro-RO")}`, rightColX, 75, { align: "right" })
+      .text(`Valabilă până la: ${validUntil.toLocaleDateString("ro-RO")}`, rightColX, 90, { align: "right" })
+      .moveDown(4);
+
+    // --- 2. TABEL PRODUSE ---
+    let y = 200;
+    
+    // Header Tabel (Background Gri)
+    doc.rect(50, y, 500, 25).fill("#f3f4f6");
+    doc.fillColor("black").font("Helvetica-Bold").fontSize(9);
+    doc.text("PRODUS / DETALII", 60, y + 8);
+    doc.text("CANT.", 320, y + 8, { width: 40, align: "center" });
+    doc.text("PREȚ UNIT.", 380, y + 8, { width: 70, align: "right" });
+    doc.text("TOTAL", 460, y + 8, { width: 80, align: "right" });
+    
+    y += 35;
+    doc.font("Helvetica").fontSize(9);
 
     let subtotal = 0;
 
-    // Rânduri Produse
+    // Iterare Produse
     items.forEach((item: any) => {
       const name = item.name || item.title || "Produs";
       const qty = Number(item.quantity || 1);
@@ -70,69 +87,129 @@ export async function POST(req: NextRequest) {
       const totalItem = price * qty;
       subtotal += totalItem;
 
-      // Verificăm dacă mai avem loc pe pagină
+      // Verificare pagină nouă
       if (y > 700) {
         doc.addPage();
         y = 50;
       }
 
-      doc.text(name, 50, y, { width: 240 });
-      doc.text(qty.toString(), 300, y, { width: 40, align: "right" });
-      doc.text(price.toFixed(2), 350, y, { width: 80, align: "right" });
-      doc.text(totalItem.toFixed(2), 440, y, { width: 100, align: "right" });
+      // Titlu Produs
+      doc.font("Helvetica-Bold").text(name, 60, y, { width: 250 });
+      
+      // Coloane numerice
+      doc.font("Helvetica").text(qty.toString(), 320, y, { width: 40, align: "center" });
+      doc.text(formatCurrency(price), 380, y, { width: 70, align: "right" });
+      doc.font("Helvetica-Bold").text(formatCurrency(totalItem), 460, y, { width: 80, align: "right" });
 
-      // Detalii extra (dacă există metadata relevante)
-      if (item.metadata?.details) {
-          y += 12;
-          doc.fontSize(8).text(item.metadata.details, 50, y, { color: 'grey' });
-          doc.fontSize(10).text("", { color: 'black' }); // Reset culoare
+      // --- DETALII CONFIGURATE (METADATA) ---
+      y += 15;
+      doc.font("Helvetica").fontSize(8).fillColor("#555555");
+
+      // Extragem detaliile relevante din metadata
+      const meta = item.metadata || {};
+      const detailsParts: string[] = [];
+
+      // Mapare chei tehnice -> etichete prietenoase
+      const labels: Record<string, string> = {
+          width_cm: "Lățime", height_cm: "Înălțime", 
+          material: "Material", materialId: "Material",
+          want_hem_and_grommets: "Finisaje", want_wind_holes: "Găuri vânt",
+          details: "Specificații", textDesign: "Text dorit"
+      };
+
+      // 1. Dacă avem un câmp 'details' explicit (din Chat), îl afișăm primul
+      if (meta.details) detailsParts.push(meta.details);
+
+      // 2. Dacă avem dimensiuni
+      if (meta.width_cm && meta.height_cm) {
+          detailsParts.push(`Dimensiuni: ${meta.width_cm} x ${meta.height_cm} cm`);
       }
 
-      y += 20; // Spațiu între rânduri
+      // 3. Alte opțiuni relevante
+      Object.entries(meta).forEach(([key, val]) => {
+          if (["details", "width_cm", "height_cm", "price", "source", "productId", "productSlug"].includes(key)) return;
+          if (!val) return;
+          
+          // Formatare valori boolean/tehnice
+          let readableVal = String(val);
+          if (val === true) readableVal = "Da";
+          if (val === false) readableVal = "Nu";
+          if (String(val).includes("frontlit_")) readableVal = val === "frontlit_510" ? "Premium (510g)" : "Standard (440g)";
+
+          const label = labels[key] || key;
+          // Afișăm doar dacă pare o opțiune de produs (evităm ID-uri lungi etc)
+          if (label.length < 20 && String(readableVal).length < 50) {
+             detailsParts.push(`${label.charAt(0).toUpperCase() + label.slice(1)}: ${readableVal}`);
+          }
+      });
+
+      // Randare detalii (linie cu linie sau bullet)
+      detailsParts.forEach(detail => {
+          doc.text(`• ${detail}`, 70, y, { width: 240 });
+          y += 10;
+      });
+
+      // Linie separator
+      y += 10;
+      doc.moveTo(50, y).lineTo(550, y).lineWidth(0.5).strokeColor("#e5e7eb").stroke();
+      y += 15;
+      
+      // Reset culoare
+      doc.fillColor("black");
     });
 
-    // Linie final tabel
-    doc.moveTo(50, y).lineTo(550, y).stroke();
-    y += 10;
-
-    // --- TOTALURI ---
+    // --- 3. TOTALURI ---
     const shippingCost = Number(shipping || 0);
     const totalGrand = subtotal + shippingCost;
 
-    doc.font("Helvetica-Bold");
-    
-    // Subtotal
-    doc.text("Subtotal:", 350, y, { width: 80, align: "right" });
-    doc.text(subtotal.toFixed(2) + " RON", 440, y, { width: 100, align: "right" });
+    y += 10;
+    // Dacă suntem jos pe pagină, să nu tăiem totalul
+    if (y > 700) { doc.addPage(); y = 50; }
+
+    // Container Totaluri (Dreapta)
+    const totalX = 350;
+    const valX = 440;
+
+    doc.font("Helvetica");
+    doc.text("Subtotal:", totalX, y, { width: 80, align: "right" });
+    doc.text(formatCurrency(subtotal), valX, y, { width: 100, align: "right" });
     y += 15;
 
-    // Livrare
-    doc.text("Livrare:", 350, y, { width: 80, align: "right" });
-    doc.text(shippingCost.toFixed(2) + " RON", 440, y, { width: 100, align: "right" });
+    doc.text("Livrare:", totalX, y, { width: 80, align: "right" });
+    doc.text(shippingCost === 0 ? "Gratuit" : formatCurrency(shippingCost), valX, y, { width: 100, align: "right" });
     y += 20;
 
-    // Total General
-    doc.fontSize(12);
-    doc.text("TOTAL DE PLATA:", 300, y, { width: 130, align: "right" });
-    doc.text(totalGrand.toFixed(2) + " RON", 440, y, { width: 100, align: "right" });
+    // Linie îngroșată
+    doc.moveTo(totalX, y).lineTo(550, y).lineWidth(1).strokeColor("black").stroke();
+    y += 10;
 
-    // --- FOOTER ---
+    doc.fontSize(12).font("Helvetica-Bold");
+    doc.text("TOTAL:", totalX, y, { width: 80, align: "right" });
+    doc.text(formatCurrency(totalGrand), valX, y, { width: 100, align: "right" });
+
+    // --- 4. FOOTER ---
+    const footerY = 730;
+    doc.moveTo(50, footerY).lineTo(550, footerY).lineWidth(0.5).strokeColor("#cccccc").stroke();
+    
     doc
-      .fontSize(10)
+      .fontSize(8)
       .font("Helvetica")
-      .text("Aceasta este o ofertă generată automat și nu ține loc de factură fiscală.", 50, 750, { align: "center", width: 500 });
+      .fillColor("#777777")
+      .text(
+        "Această ofertă este valabilă timp de 30 de zile de la data emiterii. Prețurile includ TVA (dacă este aplicabil). Pentru confirmarea comenzii, vă rugăm să ne contactați sau să finalizați comanda online pe prynt.ro.",
+        50,
+        footerY + 10,
+        { align: "center", width: 500 }
+      );
 
-    // Finalizare PDF
     doc.end();
 
-    // Așteptăm generarea buffer-ului
     const buffer = await pdfBufferPromise;
 
-    // Returnăm răspunsul cu header-ul corect pentru download
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename=oferta-prynt.pdf`,
+        "Content-Disposition": `attachment; filename=Oferta_Prynt_${Date.now()}.pdf`,
       },
     });
 

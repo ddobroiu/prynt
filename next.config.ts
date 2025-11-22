@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // FIX: Excludem pdfkit din procesul de bundling pentru a avea acces la fișierele de fonturi
+  serverExternalPackages: ['pdfkit'],
+
   experimental: {
     // Activează noul sistem de cache din Next.js 16
     // dynamicIO: true, // Notă: Verifică documentația dacă acest flag e necesar specific pentru build-ul tău, de obicei 'use cache' funcționează out-of-the-box în canary/16+ pentru funcții server
