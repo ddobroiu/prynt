@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
       }
 
       // APLICĂM FUNCȚIA SAFE CONTENT
-      const contentDesc = safeContent(payload.items);
+      const contentDesc = safeContent(payload.items ?? []);
       
       const req: any = {
         recipient: {
@@ -163,7 +163,7 @@ export async function GET(req: NextRequest) {
       })();
 
       // APLICĂM FUNCȚIA SAFE CONTENT
-      const contentDesc = safeContent(payload.items);
+      const contentDesc = safeContent(payload.items ?? []);
 
       const isRamburs = (payload.paymentType || 'Ramburs') === 'Ramburs';
       const codAmount = isRamburs ? Math.max(0, Number(payload.totalAmount || 0)) : 0;

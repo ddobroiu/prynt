@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { signAdminAction } from "@/lib/adminAction"; // Asigură-te că importul e corect
+import { signAdminAction, type AdminActionPayload } from "@/lib/adminAction"; // Asigură-te că importul e corect
 import { getServerSession } from "next-auth"; // Sau mecanismul tău de admin session
 import { authOptions } from "@/lib/auth";
 
@@ -49,7 +49,7 @@ export async function GET(
     };
 
     // Semnăm token-ul
-    const token = signAdminAction(payload);
+    const token = signAdminAction(payload as Omit<AdminActionPayload, 'iat' | 'exp'>);
     const serviceId = process.env.DPD_DEFAULT_SERVICE_ID || "2505"; // Fallback service ID
     const baseUrl = process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro";
     
