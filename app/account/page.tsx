@@ -31,7 +31,7 @@ export default async function AccountPage({
   });
 
   // Convertim datele
-  const orders = orderRecords.map((o) => {
+  const orders = (orderRecords as any[]).map((o: any) => {
     const items = (o.items || []).map((it: any) => ({
       name: it.name,
       qty: it.qty,

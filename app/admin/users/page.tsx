@@ -49,7 +49,7 @@ export default async function UsersPage() {
 
   // 3. Procesare și Serializare Date (FIXUL PRINCIPAL)
   // Convertim Decimal -> Number și Date -> String pentru a fi citite corect de React
-  const users = usersRaw.map(user => ({
+  const users = (usersRaw as any[]).map((user: any) => ({
     ...user,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
@@ -80,7 +80,7 @@ export default async function UsersPage() {
 
   // Dacă un user nu are comenzi legate direct (orders[]), atașăm comenzile găsite
   // prin email pentru a afișa corect 'Total Cheltuit'.
-  const usersWithMergedOrders = users.map(u => {
+  const usersWithMergedOrders = (users as any[]).map((u: any) => {
     const existing = Array.isArray(u.orders) ? u.orders : [];
     if (existing.length === 0) {
       const fallback = ordersByEmail.get((u.email || '').toLowerCase()) || [];
@@ -96,9 +96,9 @@ export default async function UsersPage() {
 
   const stats = usersWithMergedOrders.reduce((acc, user) => {
     // Calculăm totalul cheltuit per user (doar comenzi valide, neanulate)
-    const spent = user.orders
-      .filter(o => o.status !== 'canceled')
-      .reduce((sum, o) => sum + (o.total || 0), 0);
+    const spent = (user.orders || [])
+      .filter((o: any) => o.status !== 'canceled')
+      .reduce((sum: number, o: any) => sum + (o.total || 0), 0);
     
     acc.totalSpentGlobal += spent;
 
