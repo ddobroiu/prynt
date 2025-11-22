@@ -41,13 +41,17 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
             <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 dark:bg-zinc-800">
                 {new Date(order.createdAt).toLocaleDateString("ro-RO")}
             </span>
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium uppercase ${
-              order.status === 'fulfilled' ? 'bg-emerald-100 text-emerald-700' :
-              order.status === 'canceled' ? 'bg-red-100 text-red-700' :
-              'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-            }`}>
-                {order.status === 'active' ? 'În lucru' : order.status}
-            </span>
+            {/* normalize status label and color */}
+            {(() => {
+              const s = order.status;
+              const label = s === 'active' ? 'În lucru' : s === 'fulfilled' ? 'Finalizată' : (s === 'paid' || s === 'payd') ? 'Plătit' : s === 'canceled' ? 'Anulată' : 'În lucru';
+              const colorClass = s === 'fulfilled' || s === 'paid' || s === 'payd' ? 'bg-emerald-100 text-emerald-700' : s === 'canceled' ? 'bg-red-100 text-red-700' : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300';
+              return (
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium uppercase ${colorClass}`}>
+                  {label}
+                </span>
+              );
+            })()}
         </div>
       </div>
 
@@ -105,7 +109,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
              <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                     <span className="text-zinc-500">Metodă</span>
-                    <span className="font-medium capitalize">{order.paymentType}</span>
+                    <span className="font-medium capitalize">{order.paymentType === 'Card' || order.paymentType === 'card' ? 'Card' : 'Ramburs'}</span>
                 </div>
                 <div className="border-t border-dashed border-zinc-200 dark:border-zinc-800 my-2" />
                 <div className="flex justify-between items-end">

@@ -331,10 +331,10 @@ export default function OrdersDashboard({ initialOrders = [] }: OrdersDashboardP
   const handleGenerateAwb = async (orderId: string) => {
     setGeneratingAwbId(orderId);
     try {
-      const res = await fetch(`/api/dpd/awb`, {
+      const res = await fetch(`/api/admin/orders/${orderId}/emit-awb`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId }),
+        body: JSON.stringify({}),
       });
       if (!res.ok) throw new Error('Eroare generare AWB');
       const data = await res.json();
@@ -360,11 +360,11 @@ export default function OrdersDashboard({ initialOrders = [] }: OrdersDashboardP
   };
 
   const ignoredMetadataKeys = [
-    'designOption', 
-    'textDesign', 
-    'artworkUrl', 
-    'Cost grafică', 
-    'price', 
+    'designOption',
+    'textDesign',
+    'artworkUrl',
+    'Cost grafică',
+    'price',
     'totalAmount',
     'artworkLink',
     'artwork',
@@ -520,17 +520,17 @@ export default function OrdersDashboard({ initialOrders = [] }: OrdersDashboardP
                   {/* TOTAL */}
                   <div className="lg:col-span-3">
                     <div className="flex flex-col h-full justify-center p-4 rounded-xl bg-white border border-gray-100 shadow-sm">
-                      <div className="flex items-center gap-3 mb-3">
+                        <div className="flex items-center gap-3 mb-3">
                           <div className={`p-2 rounded-lg ${isCard ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'}`}>
-                              {isCard ? <CreditCard className="w-5 h-5" /> : <Banknote className="w-5 h-5" />}
+                            {isCard ? <CreditCard className="w-5 h-5" /> : <Banknote className="w-5 h-5" />}
                           </div>
                           <div>
-                              <p className="text-xs text-gray-500 font-medium uppercase">Metodă Plată</p>
+                            <p className="text-xs text-gray-500 font-medium uppercase">Metodă Plată</p>
                               <p className={`font-bold text-sm ${isCard ? 'text-emerald-700' : 'text-orange-700'}`}>
-                                  {order.paymentType}
+                                {isCard ? 'Card' : 'Ramburs'}
                               </p>
                           </div>
-                      </div>
+                        </div>
                       <div className="flex justify-between items-end border-t border-gray-100 pt-3">
                           <span className="text-sm text-gray-500">Total</span>
                           <span className="text-xl font-black text-gray-900">{formatMoney(order.total)}</span>

@@ -22,6 +22,9 @@ function getAwbTrackingUrl(awb: string | null | undefined, carrier: string | nul
 
 function resolveStatusMeta(status: string | null | undefined) {
   switch (status) {
+    case "paid":
+    case "payd":
+      return { label: "Plătit", badge: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" };
     case "fulfilled": return { label: "Finalizată", badge: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" };
     case "canceled": return { label: "Anulată", badge: "bg-red-500/10 text-red-500 border border-red-500/20" };
     case "processing": return { label: "În procesare", badge: "bg-blue-500/10 text-blue-500 border border-blue-500/20" };
@@ -150,6 +153,13 @@ export default function AccountClientPage({ orders = [], billing }: AccountClien
                                        Factură
                                      </a>
                                    )}
+                                  {/* Metodă plată */}
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-500">Plată:</span>
+                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded ${o.paymentType === 'Card' || o.paymentType === 'card' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}>
+                                      {o.paymentType === 'Card' || o.paymentType === 'card' ? 'Card' : 'Ramburs'}
+                                    </span>
+                                  </div>
                                  </div>
                              </div>
 

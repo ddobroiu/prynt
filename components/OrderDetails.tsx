@@ -81,6 +81,17 @@ export default function OrderDetails({ order }: { order: any }) {
                         <span>{formatMoney(Number(order.total))}</span>
                     </div>
                  </div>
+                   {/* Metodă plată */}
+                   <div className="mt-4">
+                     <div className="text-sm text-slate-300">
+                       <div className="flex justify-between items-center">
+                        <span className="text-slate-400">Metodă plată:</span>
+                        <span className={`font-semibold ${order.paymentType === 'Card' ? 'text-emerald-300' : 'text-orange-300'}`}>
+                          {order.paymentType === 'Card' || order.paymentType === 'card' ? 'Card' : 'Ramburs'}
+                        </span>
+                       </div>
+                     </div>
+                   </div>
                  {order.invoiceLink && (
                     <a href={order.invoiceLink} target="_blank" className="mt-4 block text-center w-full rounded-lg border border-white/10 bg-white/5 py-2 text-sm text-indigo-400 hover:bg-white/10">
                         Descarcă Factura

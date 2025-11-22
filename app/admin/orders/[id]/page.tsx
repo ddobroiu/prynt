@@ -7,6 +7,7 @@ import { ArrowLeft, Trash2, Plus, Save, CreditCard, MapPin } from "lucide-react"
 import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/adminSession";
 import EditOrderClient from "./EditOrderClient"; // Vom crea această componentă client mai jos
+import { getOrder } from '@/lib/orderStore';
 
 export default async function AdminOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -18,11 +19,7 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
     redirect("/admin/login");
   }
 
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: { items: true }
-  });
-
+  const order = await getOrder(id);
   if (!order) notFound();
 
   return (
@@ -39,8 +36,18 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
               <p className="text-sm text-gray-500">ID: {order.id}</p>
             </div>
           </div>
-          <div className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-bold text-sm border border-indigo-100">
-            Status: {order.status}
+          <div>
+            {/* Status badge: map internal status to friendly label + color */}
+            {(() => {
+              const s = String(order.status || '');
+              const label = s === 'active' ? 'În lucru' : s === 'fulfilled' ? 'Finalizată' : (s === 'paid' || s === 'payd') ? 'Plătit' : s === 'canceled' ? 'Anulată' : s;
+              const cls = s === 'fulfilled' || s === 'paid' || s === 'payd' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : s === 'canceled' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-indigo-50 text-indigo-700 border-indigo-100';
+              return (
+                <div className={`px-4 py-2 rounded-lg font-bold text-sm border ${cls}`}>
+                  Status: {label}
+                </div>
+              );
+            })()}
           </div>
         </div>
 
