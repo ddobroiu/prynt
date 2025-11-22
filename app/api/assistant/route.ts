@@ -249,22 +249,6 @@ export async function POST(req: Request) {
                     throw new Error("Eroare internă: Conexiunea la baza de date nu este disponibilă.");
                 }
 
-                // FIX: Verificăm explicit dacă modelul 'product' există în client
-                // @ts-ignore - ignorăm eroarea TS pentru a verifica runtime
-                if (!prisma.product) {
-                    console.error("Modelul 'product' lipsește din Prisma Client. Rulează 'npx prisma generate'.");
-                    throw new Error("Eroare configurare server: Modelul de produs lipsește.");
-                }
-
-                // 1. Găsește un produs REAL (Fallback)
-                const fallbackProduct = await prisma.product.findFirst({
-                    select: { id: true, slug: true }
-                });
-
-                if (!fallbackProduct) {
-                    throw new Error("Nu există niciun produs în baza de date pentru a asocia comanda. Adaugă cel puțin un produs.");
-                }
-
                 // 2. Calculează următorul orderNo
                 const lastOrder = await prisma.order.findFirst({
                     orderBy: { orderNo: 'desc' },
@@ -303,15 +287,14 @@ export async function POST(req: Request) {
                         country: "Romania"
                     },
                     items: {
-                        create: items.map((item: any) => ({
-                            productId: fallbackProduct.id, 
-                            productSlug: fallbackProduct.slug,
-                            title: item.title,
-                            quantity: item.quantity,
-                            price: item.price,
-                            width: 0, height: 0,
-                            metadata: { details: item.details, source: "AI Chat Assistant" }
-                        }))
+                      create: items.map((item: any) => ({
+                        name: item.title,
+                        qty: Number(item.quantity) || 1,
+                        unit: Number(item.price) || 0,
+                        total: Number(item.price) * Number(item.quantity) || 0,
+                        artworkUrl: null,
+                        metadata: { details: item.details, source: "AI Chat Assistant" }
+                      }))
                     }
                 };
 
