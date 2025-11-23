@@ -1,116 +1,116 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-// ... importurile tale existente (componentele UI etc.)
-import UserDetailsForm from "@/components/UserDetailsForm";
-import AddressesManager from "@/components/AddressesManager";
-import UserGraphicsManager from "@/components/UserGraphicsManager";
-import Link from "next/link";
-import SignOutButton from "@/components/SignOutButton";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-export default function AccountClientPage() {
-  const { data: session, status } = useSession();
+interface UserData {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+}
+
+interface UserDetailsFormProps {
+  user: UserData;
+}
+
+export default function UserDetailsForm({ user }: UserDetailsFormProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'profile' | 'addresses' | 'graphics'>('profile');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-  // 1. Redirect dacă nu e logat
+  const [formData, setFormData] = useState({
+    name: user?.name || "",
+    phone: user?.phone || "",
+  });
+
+  // Actualizăm formularul dacă datele userului se schimbă (ex: la reîncărcarea sesiunii)
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
+    setFormData({
+      name: user?.name || "",
+      phone: user?.phone || "",
+    });
+  }, [user]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const res = await fetch('/api/account/details', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error('Eroare la actualizare');
+
+      setMessage({ type: 'success', text: 'Datele au fost actualizate cu succes!' });
+      router.refresh(); // Reîmprospătează datele server-side
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Nu s-a putut salva. Încearcă din nou.' });
+    } finally {
+      setLoading(false);
     }
-  }, [status, router]);
-
-  // 2. Curățare URL de Facebook hash (#_=_), doar vizual
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.location.hash === "#_=_") {
-      // Rescrie URL-ul fără hash, fără a reîncărca pagina
-      const cleanUrl = window.location.href.split("#")[0];
-      window.history.replaceState(null, "", cleanUrl);
-    }
-  }, []);
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return null; // Redirect-ul se ocupă de asta
-  }
-
-  const user = session.user as any;
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Sidebar Meniu */}
-        <aside className="w-full md:w-64 space-y-2">
-          <div className="p-4 bg-white shadow rounded-lg mb-4">
-            <p className="text-sm text-gray-500">Bun venit,</p>
-            <p className="font-bold text-gray-800 truncate">{user?.name || user?.email}</p>
-          </div>
-          
-          <nav className="flex flex-col space-y-1">
-            <button
-              onClick={() => setActiveTab('profile')}
-              className={`px-4 py-2 text-left rounded-lg transition ${activeTab === 'profile' ? 'bg-indigo-600 text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}
-            >
-              Detalii Cont
-            </button>
-            <button
-              onClick={() => setActiveTab('addresses')}
-              className={`px-4 py-2 text-left rounded-lg transition ${activeTab === 'addresses' ? 'bg-indigo-600 text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}
-            >
-              Adrese Livrare
-            </button>
-            <button
-              onClick={() => setActiveTab('graphics')}
-              className={`px-4 py-2 text-left rounded-lg transition ${activeTab === 'graphics' ? 'bg-indigo-600 text-white' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}
-            >
-              Grafica Mea
-            </button>
-            <Link 
-              href="/account/orders"
-              className="px-4 py-2 text-left rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 transition"
-            >
-              Istoric Comenzi
-            </Link>
-            <div className="pt-4">
-              <SignOutButton />
-            </div>
-          </nav>
-        </aside>
-
-        {/* Content Principal */}
-        <main className="flex-1 bg-white shadow rounded-lg p-6 min-h-[500px]">
-          {activeTab === 'profile' && (
-            <div>
-              <h2 className="text-xl font-bold mb-6 pb-2 border-b">Detalii Personale</h2>
-              <UserDetailsForm user={user} />
-            </div>
-          )}
-
-          {activeTab === 'addresses' && (
-            <div>
-              <h2 className="text-xl font-bold mb-6 pb-2 border-b">Carnet de Adrese</h2>
-              <AddressesManager />
-            </div>
-          )}
-
-          {activeTab === 'graphics' && (
-            <div>
-              <h2 className="text-xl font-bold mb-6 pb-2 border-b">Fișiere Grafice Încărcate</h2>
-              <p className="text-sm text-gray-500 mb-4">Aici poți vedea fișierele încărcate la comenzile anterioare.</p>
-              <UserGraphicsManager />
-            </div>
-          )}
-        </main>
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-lg">
+      
+      {/* Email - Read Only */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-700">Email</label>
+        <Input 
+          value={user?.email || ""} 
+          disabled 
+          className="bg-gray-100 text-gray-500 cursor-not-allowed" 
+        />
+        <p className="text-xs text-gray-400">Adresa de email nu poate fi schimbată.</p>
       </div>
-    </div>
+
+      {/* Nume */}
+      <div className="space-y-2">
+        <label htmlFor="name" className="text-sm font-medium text-gray-700">Nume Complet</label>
+        <Input
+          id="name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="Ex: Ion Popescu"
+        />
+      </div>
+
+      {/* Telefon */}
+      <div className="space-y-2">
+        <label htmlFor="phone" className="text-sm font-medium text-gray-700">Telefon</label>
+        <Input
+          id="phone"
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+          placeholder="07xx xxx xxx"
+        />
+      </div>
+
+      {/* Mesaje Erorare/Succes */}
+      {message && (
+        <div className={`p-3 rounded-md text-sm ${
+          message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+        }`}>
+          {message.text}
+        </div>
+      )}
+
+      <Button type="submit" disabled={loading} className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700">
+        {loading ? "Se salvează..." : "Salvează Modificările"}
+      </Button>
+    </form>
   );
 }
