@@ -16,7 +16,7 @@ interface UserDetailsFormProps {
   user: UserData;
 }
 
-export default function UserDetailsForm({ user }: UserDetailsFormProps) {
+export function UserDetailsForm({ user }: UserDetailsFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -114,3 +114,46 @@ export default function UserDetailsForm({ user }: UserDetailsFormProps) {
     </form>
   );
 }
+
+  interface AccountClientPageProps {
+    orders: any[];
+    billing: any;
+    session: any;
+  }
+
+  export default function AccountClientPage({ orders, billing, session }: AccountClientPageProps) {
+    const user = (session && (session.user as any)) || {};
+
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-1">
+          <h2 className="text-xl font-bold mb-4">Date cont</h2>
+          <UserDetailsForm user={user} />
+        </div>
+
+        <div className="lg:col-span-2">
+          <h2 className="text-xl font-bold mb-4">Comenzile mele</h2>
+          {orders && orders.length > 0 ? (
+            <div className="space-y-4">
+              {orders.map((o: any) => (
+                <div key={o.id} className="p-4 border rounded-lg">
+                  <div className="flex justify-between">
+                    <div>
+                      <div className="font-semibold">Comanda #{o.orderNo}</div>
+                      <div className="text-sm text-gray-500">Data: {o.createdAt}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold">{(o.total ?? 0).toLocaleString('ro-RO', { style: 'currency', currency: 'RON' })}</div>
+                      <div className="text-sm text-gray-500">Status: {o.status}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">Nu ai comenzi încă.</p>
+          )}
+        </div>
+      </div>
+    );
+  }
