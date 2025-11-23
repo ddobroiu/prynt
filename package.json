@@ -42,6 +42,7 @@
     "streamifier": "^0.1.1",
     "stripe": "^19.2.1",
     "use-debounce": "^10.0.6",
+    "whatsapp": "^0.0.5-Alpha",
     "zod": "^4.1.12"
   },
   "devDependencies": {
