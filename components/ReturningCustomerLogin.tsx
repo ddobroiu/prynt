@@ -169,7 +169,7 @@ export default function ReturningCustomerLogin() {
             >
               Autentificare Google
             </button>
-            <button // <-- NOU
+            <button
               onClick={facebookLogin}
               type="button"
               className="flex-1 rounded-md border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20"
