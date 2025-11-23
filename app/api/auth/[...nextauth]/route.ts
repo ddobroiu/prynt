@@ -18,16 +18,18 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
-    error: '/login',
+    error: '/login', // Redirecționează erorile tot către login
   },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true, // Permite conectarea automată dacă emailul există deja
     }),
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID!,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true, // ESENȚIAL: Permite conectarea dacă ai deja cont cu acest email
     }),
     EmailProvider({
       server: "", // Nu folosim SMTP, ci API-ul Resend direct
@@ -82,18 +84,21 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, token }) {
       if (session.user && token.sub) {
-        // Putem adauga ID-ul userului in sesiune
+        // Adăugăm ID-ul utilizatorului în sesiune pentru a-l avea disponibil în frontend
         (session.user as any).id = token.sub;
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      // Când utilizatorul se loghează prima dată
       if (user) {
         token.sub = user.id;
       }
       return token;
     }
-  }
+  },
+  // Secretul este obligatoriu în producție pentru criptarea token-urilor
+  secret: process.env.NEXTAUTH_SECRET, 
 };
 
 const handler = NextAuth(authOptions);
