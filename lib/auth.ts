@@ -14,7 +14,8 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   // Folosim JWT pentru a evita probleme de cookie/sesiune în producție
   session: { strategy: "jwt" },
-  secret: process.env.AUTH_SECRET,
+  // Use the standard NextAuth secret env var if present, fall back to AUTH_SECRET for compatibility
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   pages: {
     signIn: "/login",
   },
