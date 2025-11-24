@@ -15,7 +15,8 @@ export const authOptions: NextAuthOptions = {
   // Folosim JWT pentru a evita probleme de cookie/sesiune în producție
   session: { strategy: "jwt" },
   // Secretul este obligatoriu în producție pentru criptarea token-urilor
-  secret: process.env.AUTH_SECRET,
+  // Acceptăm fie NEXTAUTH_SECRET (standard) fie AUTH_SECRET (compatibilitate)
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   pages: {
     signIn: "/login",
   },

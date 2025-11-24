@@ -30,8 +30,8 @@ export default async function AccountPage({
     take: 50,
   });
 
-  // Convertim datele
-  const orders = (orderRecords as any[]).map((o: any) => {
+  // Convertim datele pentru a fi sigure de trimis la Client
+  const orders = orderRecords.map((o) => {
     const items = (o.items || []).map((it: any) => ({
       name: it.name,
       qty: it.qty,
@@ -51,7 +51,7 @@ export default async function AccountPage({
       paymentType: o.paymentType,
       items,
       itemsCount: items.length,
-      // Verificare robustă pentru AWB și Factură
+      // Verificare robustă pentru AWB și Factură (convertim la String dacă există)
       awbNumber: o.awbNumber !== undefined && o.awbNumber !== null ? String(o.awbNumber) : null,
       awbCarrier: o.awbCarrier || null,
       invoiceLink: o.invoiceLink || null,
