@@ -71,7 +71,8 @@ export default function CheckoutPage() {
   const [placing, setPlacing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showEmbed, setShowEmbed] = useState(false);
-  const [createAccount, setCreateAccount] = useState(false);
+  // Default to true per product requirement: pre-check "create account" but allow user to uncheck
+  const [createAccount, setCreateAccount] = useState(true);
 
   const firstInvalidRef = useRef<HTMLElement | null>(null);
 
