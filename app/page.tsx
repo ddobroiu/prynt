@@ -1,4 +1,4 @@
-"use client"; // Trebuie să fie client component pentru animații și slider
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -14,7 +14,7 @@ import InStockScroller from '@/components/InStockScroller';
 import ProductCard from '@/components/ProductCard';
 import Reviews from '@/components/Reviews';
 import FaqAccordion from '@/components/FaqAccordion';
-import AssistantWidget from '@/components/AssistantWidget'; // <--- ROBOTUL
+import AssistantWidget from '@/components/AssistantWidget'; 
 import { getProducts } from '@/lib/products';
 
 // --- DATA & CONSTANTS ---
@@ -78,7 +78,7 @@ export default function HomePage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [products, setProducts] = useState<any[]>([]);
 
-  // Fetch products on client side since we switched to "use client"
+  // Fetch products
   useEffect(() => {
     getProducts().then(data => setProducts(data.slice(0, 4)));
   }, []);
@@ -87,7 +87,7 @@ export default function HomePage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % SLIDES.length);
-    }, 4000); // Schimbă la fiecare 4 secunde
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
@@ -103,12 +103,12 @@ export default function HomePage() {
         </span>
       </div>
 
-      {/* --- 1. HERO SECTION (CAROUSEL DINAMIC) --- */}
+      {/* --- 1. HERO SECTION --- */}
       <section className="relative w-full bg-white overflow-hidden pt-8 pb-16 lg:pt-16 lg:pb-24">
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             
-            {/* Left: Static Text + Dynamic Slide Info */}
+            {/* Left Content */}
             <div className="flex-1 text-center lg:text-left space-y-8 z-20">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-indigo-100 shadow-sm text-indigo-600 text-sm font-semibold">
                 <Sparkles className="h-4 w-4 fill-indigo-600" />
@@ -138,7 +138,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right: Animated Carousel Image */}
+            {/* Right: Animated Carousel */}
             <div className="flex-1 relative w-full max-w-xl lg:max-w-full h-[400px] lg:h-[500px]">
                <div className="relative w-full h-full">
                   {SLIDES.map((slide, index) => (
@@ -160,7 +160,6 @@ export default function HomePage() {
                                 priority={index === 0}
                                />
                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                               {/* Floating Label */}
                                <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-md px-6 py-3 rounded-xl shadow-lg">
                                   <p className="font-bold text-slate-900 text-lg">{slide.title}</p>
                                   <p className="text-indigo-600 text-sm font-medium flex items-center gap-1">Configurează acum <ChevronRight size={14}/></p>
@@ -170,7 +169,6 @@ export default function HomePage() {
                     </div>
                   ))}
                   
-                  {/* Slide Indicators */}
                   <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-20">
                       {SLIDES.map((_, idx) => (
                           <button 
@@ -216,8 +214,8 @@ export default function HomePage() {
          <InStockScroller />
       </div>
 
-      {/* --- 4. AI ASSISTANT SECTION (ROBOTUL AICI) --- */}
-      <section className="py-20 bg-gradient-to-b from-slate-50 to-white">
+      {/* --- 4. AI ASSISTANT SECTION (AICI E MODIFICAREA IMPORTANTĂ) --- */}
+      <section className="py-20 bg-gradient-to-b from-slate-50 to-white border-b border-slate-100">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center justify-center text-center max-w-4xl mx-auto">
              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-100 text-indigo-700 text-sm font-bold mb-6">
@@ -225,18 +223,19 @@ export default function HomePage() {
              </div>
              <h2 className="text-3xl lg:text-5xl font-bold text-slate-900 mb-6">Ai nevoie de ajutor rapid?</h2>
              <p className="text-xl text-slate-500 mb-10 max-w-2xl">
-               Robotul nostru AI este pregătit să îți răspundă la întrebări despre produse, prețuri sau statusul comenzii. Încearcă-l acum!
+               Robotul nostru AI este pregătit să îți răspundă la întrebări despre produse, prețuri sau statusul comenzii.
              </p>
              
-             {/* AICI E ROBOTUL AFIȘAT DIRECT CA O SECȚIUNE */}
-             <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden min-h-[500px] relative">
-                <AssistantWidget /> 
+             {/* ROBOTUL AFIȘAT CA EMBEDDED (NU PLUTITOR) */}
+             <div className="w-full max-w-2xl mx-auto relative z-10">
+                {/* Transmitem embedded={true} pentru a-l forța să se afișeze în pagină */}
+                <AssistantWidget embedded={true} /> 
              </div>
           </div>
         </div>
       </section>
 
-      {/* --- 5. CATEGORII PRINCIPALE (BENTO GRID) --- */}
+      {/* --- 5. CATEGORII PRINCIPALE --- */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -245,14 +244,13 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-6 h-auto md:h-[600px]">
-            
-            {/* Banner - Main Feature */}
+            {/* Banner */}
             <Link href="/banner" className="group relative col-span-1 md:col-span-2 row-span-2 rounded-3xl overflow-hidden bg-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 border border-slate-100">
               <Image src="/products/banner/1.webp" alt="Bannere" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-8">
                 <span className="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full w-fit mb-3">Cel mai vândut</span>
                 <h3 className="text-3xl font-bold text-white mb-2">Bannere Outdoor</h3>
-                <p className="text-slate-200 text-sm opacity-90 translate-y-2 group-hover:translate-y-0 transition-transform">Mesh, Frontlit, Blockout - finisaje incluse.</p>
+                <p className="text-slate-200 text-sm opacity-90 translate-y-2 group-hover:translate-y-0 transition-transform">Mesh, Frontlit, Blockout.</p>
               </div>
             </Link>
 
@@ -280,18 +278,17 @@ export default function HomePage() {
                   <h3 className="text-xl font-bold text-white border-2 border-white/30 px-4 py-2 rounded-xl backdrop-blur-sm">Canvas</h3>
                </div>
             </Link>
-
           </div>
         </div>
       </section>
 
-      {/* --- 6. ALTE PRODUSE (SHOP PREVIEW) --- */}
+      {/* --- 6. ALTE PRODUSE --- */}
       <section className="py-24 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-end mb-12">
             <div>
               <h2 className="text-3xl font-bold text-slate-900 mb-2">Alte Produse</h2>
-              <p className="text-slate-500">Accesorii, standuri și produse standard din magazin.</p>
+              <p className="text-slate-500">Accesorii, standuri și produse standard.</p>
             </div>
             <Link href="/shop" className="hidden md:flex items-center text-indigo-600 font-bold hover:text-indigo-700 hover:underline decoration-2 underline-offset-4">
               Vezi Magazinul <ArrowRight className="ml-2 h-4 w-4" />
