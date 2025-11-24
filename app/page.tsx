@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { 
   ArrowRight, CheckCircle, Upload, Truck, PenTool, Star, ShieldCheck, Zap,
-  FileImage, StickyNote, Scroll, LayoutTemplate, Layers, Box, Sparkles, ChevronRight, Gift
+  FileImage, StickyNote, Scroll, LayoutTemplate, Layers, Box, Sparkles, ChevronRight, Gift, MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -14,7 +14,7 @@ import InStockScroller from '@/components/InStockScroller';
 import ProductCard from '@/components/ProductCard';
 import Reviews from '@/components/Reviews';
 import FaqAccordion from '@/components/FaqAccordion';
-import AssistantWidget from '@/components/AssistantWidget'; // <--- ROBOTUL ESTE AICI
+import AssistantWidget from '@/components/AssistantWidget'; // <--- ROBOTUL
 import { getProducts } from '@/lib/products';
 
 // --- DATA & CONSTANTS ---
@@ -216,7 +216,27 @@ export default function HomePage() {
          <InStockScroller />
       </div>
 
-      {/* --- 4. CATEGORII PRINCIPALE (BENTO GRID) --- */}
+      {/* --- 4. AI ASSISTANT SECTION (ROBOTUL AICI) --- */}
+      <section className="py-20 bg-gradient-to-b from-slate-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center justify-center text-center max-w-4xl mx-auto">
+             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-100 text-indigo-700 text-sm font-bold mb-6">
+                <MessageSquare size={16} /> Asistent Virtual Inteligent
+             </div>
+             <h2 className="text-3xl lg:text-5xl font-bold text-slate-900 mb-6">Ai nevoie de ajutor rapid?</h2>
+             <p className="text-xl text-slate-500 mb-10 max-w-2xl">
+               Robotul nostru AI este pregătit să îți răspundă la întrebări despre produse, prețuri sau statusul comenzii. Încearcă-l acum!
+             </p>
+             
+             {/* AICI E ROBOTUL AFIȘAT DIRECT CA O SECȚIUNE */}
+             <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden min-h-[500px] relative">
+                <AssistantWidget /> 
+             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- 5. CATEGORII PRINCIPALE (BENTO GRID) --- */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -265,7 +285,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- 5. ALTE PRODUSE (SHOP PREVIEW) --- */}
+      {/* --- 6. ALTE PRODUSE (SHOP PREVIEW) --- */}
       <section className="py-24 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-end mb-12">
@@ -288,7 +308,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- 6. REVIEWS & FAQ --- */}
+      {/* --- 7. REVIEWS & FAQ --- */}
       <div className="bg-white py-24 border-t border-slate-100">
          <Reviews />
       </div>
@@ -302,7 +322,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* --- 7. FINAL CTA --- */}
+      {/* --- 8. FINAL CTA --- */}
       <section className="relative py-32 bg-slate-900 overflow-hidden">
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-600/30 rounded-full blur-[100px]"></div>
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-600/30 rounded-full blur-[100px]"></div>
@@ -321,9 +341,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ROBOTUL DE CHAT - VIZIBIL */}
-      <AssistantWidget />
 
     </main>
   );

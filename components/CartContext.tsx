@@ -25,6 +25,8 @@ type CartContextType = {
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   cartTotal: number;
+  // Backwards-compatible alias used in some components/pages
+  total: number;
   cartCount: number;
   isLoaded: boolean;
 };
@@ -142,6 +144,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const cartTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
+  // Backwards-compatible alias expected by some pages/components
+  const total = cartTotal;
+
   return (
     <CartContext.Provider 
       value={{ 
@@ -151,6 +156,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity, 
         clearCart, 
         cartTotal, 
+        total,
         cartCount, 
         isLoaded 
       }}
