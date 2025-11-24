@@ -84,13 +84,13 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
     };
   }, [pages, intervalMs]);
 
-  if (!products || products.length === 0) return null;
-
   // clamp page when itemsPerPage changes
   useEffect(() => {
     const newPages = Math.max(1, Math.ceil((products?.length ?? 0) / itemsPerPage));
     if (page >= newPages) setPage(0);
   }, [itemsPerPage, products, page]);
+
+  if (!products || products.length === 0) return null;
 
   const start = page * itemsPerPage;
   const slice = products.slice(start, start + itemsPerPage);
