@@ -23,7 +23,9 @@
     "@stripe/stripe-js": "^8.3.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.8.0",
+    "clsx": "^2.1.1",
     "fast-xml-parser": "^5.3.1",
+    "framer-motion": "^12.23.24",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
@@ -41,6 +43,7 @@
     "soap": "^1.6.0",
     "streamifier": "^0.1.1",
     "stripe": "^19.2.1",
+    "tailwind-merge": "^3.4.0",
     "use-debounce": "^10.0.6",
     "whatsapp": "^0.0.5-Alpha",
     "zod": "^4.1.12"

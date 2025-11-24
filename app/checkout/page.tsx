@@ -103,7 +103,7 @@ export default function CheckoutPage() {
       .catch(() => {});
   }, [session?.user]);
 
-  // Helper: normalize cart items to the shape expected by server (name, unitAmount, totalAmount, artworkUrl, textDesign, metadata)
+  // Helper: normalize cart items to the shape expected by server
   function normalizeCart(cart: any[]) {
     return (cart ?? []).map((it) => {
       const quantity = Number(it.quantity ?? 1) || 1;
@@ -156,7 +156,6 @@ export default function CheckoutPage() {
 
     if (billing.tip_factura === "persoana_juridica") {
       if (!billing.cui?.trim()) e["billing.cui"] = "CUI/CIF obligatoriu";
-      // Nu mai cerem denumirea/adresa pentru juridică; Oblio se va rezolva pe CUI
     }
 
     if (!sameAsDelivery && billing.tip_factura === 'persoana_fizica') {
@@ -281,86 +280,12 @@ export default function CheckoutPage() {
     }
   }
 
-  function buildItemDetailsText(item: any) {
-    const meta = item.metadata ?? {};
-    const parts: string[] = [];
-    // Size
-    const width = item.width ?? item.width_cm ?? meta.width_cm ?? meta.width;
-    const height = item.height ?? item.height_cm ?? meta.height_cm ?? meta.height;
-    if (width || height) parts.push(`Dimensiune: ${width ?? "—"} x ${height ?? "—"} cm`);
-
-    // Fonduri EU readable selection
-    const isFonduri = (item?.slug === 'fonduri-eu') || (item?.productId === 'fonduri-eu');
-    if (isFonduri && typeof meta.selectedReadable === 'string' && meta.selectedReadable.trim()) {
-      parts.push(`Opțiuni selectate: ${meta.selectedReadable}`);
-    }
-
-    const labelForKey: Record<string, string> = {
-      width: "Lățime (cm)", height: "Înălțime (cm)", width_cm: "Lățime (cm)", height_cm: "Înălțime (cm)",
-      totalSqm: "Suprafață totală (m²)", sqmPerUnit: "m²/buc", pricePerSqm: "Preț pe m² (RON)",
-      materialId: "Material", material: "Material", laminated: "Laminare", designOption: "Grafică",
-      proDesignFee: "Taxă grafică Pro (RON)", want_adhesive: "Adeziv", want_hem_and_grommets: "Tiv și capse",
-      want_wind_holes: "Găuri pentru vânt", shape_diecut: "Tăiere la contur", productType: "Tip panou",
-      thickness_mm: "Grosime (mm)", sameGraphicFrontBack: "Aceeași grafică față/spate", framed: "Șasiu",
-      sizeKey: "Dimensiune preset", mode: "Mod canvas", orderNotes: "Observații",
-    };
-    const prettyValue = (k: string, v: any) => {
-      const yesNo = (x: any) => (typeof x === 'boolean' ? (x ? 'Da' : 'Nu') : String(x));
-      if (k === 'materialId') return v === 'frontlit_510' ? 'Frontlit 510g' : v === 'frontlit_440' ? 'Frontlit 440g' : String(v);
-      if (k === 'productType') return v === 'alucobond' ? 'Alucobond' : v === 'polipropilena' ? 'Polipropilenă' : v === 'pvc-forex' ? 'PVC Forex' : String(v);
-      if (k === 'designOption') return v === 'pro' ? 'Pro' : v === 'upload' ? 'Am fișier' : v === 'text_only' ? 'Text' : String(v);
-      if (k === 'framed' || typeof v === 'boolean') return yesNo(v);
-      return String(v);
-    };
-    const exclude = new Set(["price","totalAmount","qty","quantity","artwork","artworkUrl","artworkLink","text","textDesign","selectedReadable","selections","title","name"]);
-    Object.keys(meta).forEach((k) => {
-      if (exclude.has(k)) return;
-      if (!(k in labelForKey)) return; // only known keys to keep PDF concise
-      if (k === 'proDesignFee') {
-        const num = Number(meta[k]);
-        if (!isFinite(num) || num <= 0) return;
-      }
-      const val = meta[k];
-      if (val === null || val === undefined) return;
-      if (typeof val === 'number' && val === 0) return;
-      if (typeof val === 'string' && val.trim() === '') return;
-      parts.push(`${labelForKey[k]}: ${prettyValue(k, val)}`);
-    });
-    return parts.join(" \u2022 "); // bullet separator
-  }
-
-
-  async function exportOfferPdfServer() {
-    try {
-      const normalized = normalizeCart(items);
-      const res = await fetch('/api/pdf/offer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: normalized, shipping: costLivrare }),
-      });
-      if (!res.ok) throw new Error('Generarea PDF a eșuat');
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const date = new Date().toLocaleDateString('ro-RO');
-      a.href = url;
-      a.download = `oferta-${date}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (e: any) {
-      alert(e?.message || 'Nu s-a putut genera PDF-ul.');
-    }
-  }
-
   return (
-  <main className="bg-ui min-h-screen">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main className="bg-ui min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Coșul tău</h1>
         </div>
-        {/* Bara de navigare suplimentară eliminată conform cerinței */}
 
         {isEmpty ? (
           <EmptyCart />
@@ -391,17 +316,6 @@ export default function CheckoutPage() {
             </aside>
 
             <section className={`order-2 lg:order-1 lg:col-span-2 space-y-6`}>
-              <div className="flex items-center justify-start -mb-2">
-                <button
-                  type="button"
-                  onClick={exportOfferPdfServer}
-                  disabled={(items ?? []).length === 0}
-                  title="Generează ofertă în PDF (calitate)"
-                  className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition disabled:opacity-60"
-                >
-                  Generează ofertă în PDF
-                </button>
-              </div>
               <CartItems items={items} onRemove={removeItem} />
 
               {/* Login trebuie să apară deasupra secțiunii de livrare */}
@@ -420,20 +334,18 @@ export default function CheckoutPage() {
           </div>
         )}
       </div>
-
-      {/* Eliminat overlay-ul; embed este integrat în cardul sumar */}
     </main>
   );
 }
 
 function EmptyCart() {
   return (
-  <div className="rounded-2xl border card-bg p-8 text-center text-ui">
+    <div className="rounded-2xl border card-bg p-8 text-center text-ui">
       <h2 className="text-xl font-bold mb-2">Coșul tău este gol</h2>
-  <p className="text-muted mb-6">Adaugă produse pentru a continua.</p>
+      <p className="text-muted mb-6">Adaugă produse pentru a continua.</p>
       <a
         href="/"
-  className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 transition"
+        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 transition"
       >
         Continuă cumpărăturile
       </a>
@@ -473,7 +385,7 @@ function SummaryCard({
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
   return (
-  <div className="lg:sticky lg:top-6 rounded-2xl border card-bg p-5 text-ui">
+    <div className="lg:sticky lg:top-6 rounded-2xl border card-bg p-5 text-ui">
       <h2 className="text-xl font-bold mb-4">Sumar comandă</h2>
 
       <div className="space-y-3 text-sm">
@@ -562,7 +474,7 @@ function SummaryCard({
           </div>
         )}
 
-  <p className="mt-2 text-[11px] text-muted text-center">
+        <p className="mt-2 text-[11px] text-muted text-center">
           Plata cu cardul este securizată. Pentru ramburs, plătești la curier.
         </p>
       </div>
@@ -623,23 +535,19 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
     const meta = item.metadata ?? {};
     const details: Array<{ label: string; value: string }> = [];
 
-    // Dimensiuni (dacă există la top-level sau în metadata)
     const width = item.width ?? item.width_cm ?? meta.width_cm ?? meta.width;
     const height = item.height ?? item.height_cm ?? meta.height_cm ?? meta.height;
     if (width || height) {
       details.push({ label: "Dimensiune", value: `${width ?? "—"} x ${height ?? "—"} cm` });
     }
 
-    // Fonduri EU: afișăm sumarul opțiunilor configurate
     const isFonduri = (item?.slug === 'fonduri-eu') || (item?.productId === 'fonduri-eu');
     if (isFonduri && typeof meta.selectedReadable === 'string' && meta.selectedReadable.trim().length > 0) {
       details.push({ label: 'Opțiuni selectate', value: String(meta.selectedReadable) });
     }
 
-    // Chei cunoscute
     const knownKeys = Object.keys(labelForKey).filter((k) => meta[k] !== undefined);
     knownKeys.forEach((k) => {
-      // ascundem proDesignFee dacă e 0 sau falsy
       if (k === 'proDesignFee') {
         const num = Number(meta[k]);
         if (!isFinite(num) || num <= 0) return;
@@ -649,7 +557,6 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
       details.push({ label, value: val });
     });
 
-    // Dacă avem sqm/prices non-duplicate
     ["sqmPerUnit", "totalSqm", "pricePerSqm"].forEach((k) => {
       if (!knownKeys.includes(k) && meta[k] !== undefined) {
         const label = (labelForKey as any)[k] || k;
@@ -657,7 +564,6 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
       }
     });
 
-    // Leftovers (exclude chei zgomotoase)
     const exclude = new Set([
       "price",
       "totalAmount",
@@ -676,7 +582,6 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
     Object.keys(meta)
       .filter((k) => !knownKeys.includes(k) && !exclude.has(k))
       .forEach((k) => {
-        // ascundem valori 0 / goale și proDesignFee=0
         const v = meta[k];
         if (k === 'proDesignFee') {
           const num = Number(v);
@@ -703,13 +608,10 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
   }
 
   return (
-  <div className="rounded-2xl border card-bg p-4 text-ui">
+    <div className="rounded-2xl border card-bg p-4 text-ui">
       <h2 className="text-xl font-bold mb-4">Produsele tale</h2>
       <ul className="divide-y divide-white/10">
         {(items ?? []).map((item) => {
-          // Support both shapes:
-          // - current CartProvider: { id, title, price, quantity, metadata }
-          // - legacy/other: { id, name, unitAmount, totalAmount, artworkUrl, textDesign }
           const title = item.title ?? item.name ?? item.slug ?? 'Produs';
           const qty = Number(item.quantity ?? 1) || 1;
           const unit = Number(item.price ?? item.unitAmount ?? 0) || 0;
@@ -723,7 +625,6 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
                 </div>
                 {renderDetails(item)}
                 <div className="mt-1 text-sm text-muted">
-                  {/* detalii preț */}
                   <div className="mt-2">
                     <div className="text-xs text-muted">
                       {unit > 0 ? `Preț unitar: ${fmt(unit)}` : "Preț unitar: —"}

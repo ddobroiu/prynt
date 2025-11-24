@@ -101,6 +101,12 @@ for (const _p of PRODUCTS) {
 
 //=== UTILITARE =============================================================
 
+// --- NEW: Helper function required by app/page.tsx ---
+export async function getProducts(): Promise<Product[]> {
+  // Simulate async data fetching if needed, currently returns the static list
+  return PRODUCTS;
+}
+
 export function getAllProductSlugs(): string[] {
   return PRODUCTS.map((p) => String(p.routeSlug ?? p.slug ?? p.id));
 }

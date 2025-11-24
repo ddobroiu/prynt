@@ -3,9 +3,10 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { useCart } from "./CartContext";
 import { siteConfig } from "@/lib/siteConfig";
-import { ChevronDown, Menu, ShoppingCart, X, User, Search } from "lucide-react";
+import { ChevronDown, Menu, X, User } from "lucide-react";
+// 1. IMPORTĂM WIDGETUL DE CART
+import CartWidget from "./CartWidget";
 
 // --- SUB-COMPONENTS ---
 
@@ -140,26 +141,17 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 };
 
 const HeaderActions = () => {
-  const { count, isLoaded } = useCart();
+  // 2. Nu mai avem nevoie de useCart aici, CartWidget se ocupă de logică
   const { data: session } = useSession();
 
   return (
     <div className="flex items-center gap-3 sm:gap-5">
-      {/* Search (optional/future) */}
-      {/* <button className="p-2 text-zinc-500 hover:text-indigo-600 transition-colors hidden sm:block"><Search size={22} /></button> */}
-
       <Link href={session?.user ? "/account" : "/login"} className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Cont">
         <User size={24} />
       </Link>
 
-      <Link href="/checkout" className="group relative p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Coș">
-        <ShoppingCart size={24} className="transition-transform group-hover:scale-110" />
-        {isLoaded && count > 0 && (
-          <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white ring-2 ring-white dark:ring-black animate-in zoom-in duration-300">
-            {count}
-          </span>
-        )}
-      </Link>
+      {/* 3. AICI AM ÎNLOCUIT VECHIUL LINK CU COMPONENTA NOUĂ */}
+      <CartWidget />
     </div>
   );
 };
@@ -198,7 +190,6 @@ export default function Header() {
             <Menu size={26} />
           </button>
           <Link href="/" className="flex items-center gap-2 group">
-            {/* Logo Text sau Imagine */}
             <span className="text-2xl font-extrabold tracking-tighter text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
               Prynt<span className="text-indigo-600">.ro</span>
             </span>
