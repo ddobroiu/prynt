@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { 
@@ -58,7 +59,7 @@ const SLIDES = [
   }
 ];
 
-const QUICK_NAV_ITEMS = [
+const QUICK_NAV_ITEMS: { name: string; icon: LucideIcon | React.ComponentType<any>; href: string; color: string; bg: string }[] = [
   { name: "Bannere", icon: FileImage, href: "/banner", color: "text-blue-600", bg: "bg-blue-50" },
   { name: "Autocolante", icon: StickyNote, href: "/autocolante", color: "text-emerald-600", bg: "bg-emerald-50" },
   { name: "Afișe", icon: LayoutTemplate, href: "/afise", color: "text-purple-600", bg: "bg-purple-50" },
@@ -211,7 +212,7 @@ export default function HomePage() {
 
       {/* --- 3. SCROLLER STOC --- */}
       <div className="bg-slate-50 border-b border-slate-200">
-         <InStockScroller />
+        <InStockScroller products={products} />
       </div>
 
       {/* --- 4. AI ASSISTANT SECTION (AICI E MODIFICAREA IMPORTANTĂ) --- */}

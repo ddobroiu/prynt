@@ -30,7 +30,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const combinedClasses = `${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${className || ""}`;
 
     if (asChild) {
-      const child = React.Children.only(props.children) as React.ReactElement;
+      const child = React.Children.only(props.children) as React.ReactElement<any, any>;
       // Extragem children din props pentru a nu le pasa mai departe ca proprietate
       const { children, ...rest } = props;
       
@@ -38,7 +38,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         // Combinăm clasele existente ale copilului cu cele ale butonului
         className: `${combinedClasses} ${child.props.className || ""}`,
         // Pasăm restul proprietăților (ex: onClick)
-        ...rest
+        ...(rest as any)
       });
     }
 

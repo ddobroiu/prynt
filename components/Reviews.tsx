@@ -34,7 +34,7 @@ const StarRating = ({ rating, size = "md" }: { rating: number; size?: "sm" | "md
 
 
 // Componenta principală pentru Recenzii
-export default function Reviews({ productSlug }: { productSlug: string }) {
+export default function Reviews({ productSlug }: { productSlug?: string }) {
   const { data: session } = useSession();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,14 +50,8 @@ export default function Reviews({ productSlug }: { productSlug: string }) {
   const fetchReviews = useCallback(async () => {
     setLoading(true);
     try {
-      if (!productSlug) {
-        setError('Produs invalid pentru recenzii.');
-        setReviews([]);
-        setLoading(false);
-        return;
-      }
-
-      const res = await fetch(`/api/reviews?productSlug=${encodeURIComponent(productSlug)}`, { credentials: 'same-origin' });
+      const url = productSlug ? `/api/reviews?productSlug=${encodeURIComponent(productSlug)}` : `/api/reviews`;
+      const res = await fetch(url, { credentials: 'same-origin' });
       if (!res.ok) {
         const errBody = await res.json().catch(() => null);
         throw new Error(errBody?.error || 'Nu am putut încărca recenziile.');
