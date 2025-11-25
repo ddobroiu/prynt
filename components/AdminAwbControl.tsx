@@ -16,14 +16,15 @@ export default function AdminAwbControl({ orderId, currentAwb }: { orderId: stri
     setLoading(true);
     try {
       console.log('[AWB GENERATE] orderId trimis:', orderId);
-      const res = await fetch("/api/dpd/awb", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId }),
+      const res = await fetch(`/api/admin/orders/${orderId}/emit-awb`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
       });
-      if (!res.ok) throw new Error("Err");
+      if (!res.ok) throw new Error('Err');
       const data = await res.json();
-      setAwb(data.awb);
+      // emit-awb returns shipmentId
+      const shipmentId = data.shipmentId || data.shipmentId === 0 ? String(data.shipmentId) : undefined;
+      if (shipmentId) setAwb(shipmentId);
       window.location.reload();
     } catch (error) {
       alert("Eroare generare AWB DPD.");

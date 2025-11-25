@@ -103,7 +103,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const trackingUrl = trackingUrlForAwb(shipmentId);
-    return NextResponse.json({ ok: true, shipmentId, trackingUrl, hasLabel: !!base64 });
+    return NextResponse.json({ ok: true, shipmentId, awb: String(shipmentId), trackingUrl, hasLabel: !!base64 });
   } catch (e: any) {
     console.error('[API /admin/orders/[id]/emit-awb] Error:', e?.message || e);
     return NextResponse.json({ ok: false, message: 'Eroare internă' }, { status: 500 });
