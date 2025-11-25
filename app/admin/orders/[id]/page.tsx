@@ -7,6 +7,7 @@ import { ArrowLeft, Trash2, Plus, Save, CreditCard, MapPin } from "lucide-react"
 import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/adminSession";
 import EditOrderClient from "./EditOrderClient"; // Vom crea această componentă client mai jos
+import AdminAwbControl from "@/components/AdminAwbControl";
 import { getOrder } from '@/lib/orderStore';
 
 export default async function AdminOrderPage({ params }: { params: Promise<{ id: string }> }) {
@@ -88,6 +89,10 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
                   <hr className="my-2 border-dashed" />
                   <p>{(order.address as any).localitate}, {(order.address as any).judet}</p>
                   <p>{(order.address as any).strada_nr}</p>
+                </div>
+                {/* AWB control - tracking + download */}
+                <div className="mt-4">
+                  <AdminAwbControl orderId={order.id} currentAwb={order.awbNumber} />
                 </div>
             </div>
           </div>

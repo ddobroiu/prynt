@@ -2,6 +2,13 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Prefer explicit app URL environment variables. This prevents falling back to localhost
+// when env is misconfigured in production.
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
+if (!APP_URL) {
+  console.warn('Warning: NEXT_PUBLIC_APP_URL or PUBLIC_BASE_URL not set — email links may point to an incorrect origin.');
+}
+
 // --- TEMPLATE COMUN (Folosit de toate emailurile) ---
 export function getHtmlTemplate({
   title,
@@ -69,7 +76,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
     title: "Bine ai venit pe Prynt!",
     message: `Salut, ${name}! Contul tău a fost creat cu succes. Poți începe să plasezi comenzi și să gestionezi grafica direct din contul tău.`,
     buttonText: "Accesează contul",
-    buttonUrl: `${process.env.NEXT_PUBLIC_APP_URL}/account`,
+    buttonUrl: `${APP_URL}/account`,
     footerText: "Dacă nu ai creat acest cont, ignoră acest email."
   });
 
@@ -83,7 +90,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
 
 // --- 2. EMAIL RESETARE PAROLĂ ---
 export async function sendPasswordResetEmail(to: string, token: string) {
-  const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/login/reset?token=${token}`;
+  const resetLink = `${APP_URL}/login/reset?token=${token}`;
   
   const html = getHtmlTemplate({
     title: "Resetare Parolă",
@@ -104,7 +111,7 @@ export async function sendPasswordResetEmail(to: string, token: string) {
 // --- 3. EMAIL CONFIRMARE COMANDĂ (CLIENT) ---
 export async function sendOrderConfirmationEmail(order: any) {
   const orderIdShort = order.id.slice(-6).toUpperCase();
-  const viewUrl = `${process.env.NEXT_PUBLIC_APP_URL}/account/orders/${order.id}`;
+  const viewUrl = `${APP_URL}/account/orders/${order.id}`;
 
   const html = getHtmlTemplate({
     title: `Comanda #${orderIdShort} a fost înregistrată!`,
@@ -125,7 +132,7 @@ export async function sendOrderConfirmationEmail(order: any) {
 // --- 4. EMAIL NOTIFICARE ADMIN (COMANDĂ NOUĂ) ---
 export async function sendNewOrderAdminEmail(order: any) {
   const orderIdShort = order.id.slice(-6).toUpperCase();
-  const adminUrl = `${process.env.NEXT_PUBLIC_APP_URL}/admin/orders/${order.id}`;
+  const adminUrl = `${APP_URL}/admin/orders/${order.id}`;
   
   const adminEmail = process.env.ADMIN_EMAIL || 'contact@prynt.ro'; 
 
