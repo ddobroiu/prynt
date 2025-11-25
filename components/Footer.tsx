@@ -6,35 +6,7 @@ import Image from "next/image";
 import { siteConfig } from "@/lib/siteConfig";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Mail, ChevronDown, Sparkles, ArrowRight } from "lucide-react";
-
-// --- Componentă Helper pentru Acordeon pe Mobil ---
-const FooterColumn = ({ title, children }: { title: string; children: React.ReactNode }) => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    return (
-        <div className="border-b border-slate-100 lg:border-none last:border-none">
-            {/* Mobile Header */}
-            <button 
-                onClick={() => setIsOpen(!isOpen)} 
-                className="flex items-center justify-between w-full py-4 lg:py-0 lg:mb-6 text-left group"
-            >
-                <h3 className="font-bold text-slate-900 text-base lg:text-sm uppercase tracking-wider group-hover:text-indigo-600 transition-colors">{title}</h3>
-                <ChevronDown size={18} className={`text-slate-400 transition-transform lg:hidden ${isOpen ? 'rotate-180 text-indigo-600' : ''}`} />
-            </button>
-
-            {/* Content Wrapper */}
-            <div className={`
-                overflow-hidden transition-all duration-300 ease-in-out lg:block lg:opacity-100 lg:h-auto
-                ${isOpen ? 'max-h-64 opacity-100 pb-6' : 'max-h-0 opacity-0 lg:opacity-100'}
-            `}>
-                <ul className="space-y-3">
-                    {children}
-                </ul>
-            </div>
-        </div>
-    );
-};
+import { MapPin, Phone, Mail, Sparkles } from "lucide-react";
 
 export default function Footer() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -44,7 +16,6 @@ export default function Footer() {
     e.preventDefault();
     const form = e.currentTarget;
     const email = (form.querySelector('input[name="email"]') as HTMLInputElement)?.value || "";
-    
     if (!email) return;
 
     setStatus("loading");
@@ -56,7 +27,6 @@ export default function Footer() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, source: "footer" }),
       });
-
       const data = await res.json();
 
       if (res.ok) {
@@ -111,46 +81,55 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* 2. Navigation Columns */}
+          {/* 2. Navigation Columns (FĂRĂ ACORDEON - VIZIBILE DIRECT) */}
           <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-3 gap-8">
             
-            {/* PRODUSUL TĂU - AICI AM SCHIMBAT LINK-URILE */}
-            <FooterColumn title="Produse">
-                <li>
-                    <Link href="/configuratoare" className="flex items-center gap-2 font-bold text-indigo-600 hover:text-indigo-700 text-sm bg-indigo-50 px-3 py-2 rounded-lg w-fit">
-                        <Sparkles size={14} />
-                        Toate Configuratoarele
-                    </Link>
-                </li>
-                <li><Link href="/shop" className={linkClass}>Accesorii & Produse Standard</Link></li>
-                <li><Link href="/contact" className={linkClass}>Cere Ofertă Personalizată</Link></li>
-            </FooterColumn>
+            {/* Produse */}
+            <div>
+                <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-4">Produse</h3>
+                <ul className="space-y-3">
+                    <li>
+                        <Link href="/configuratoare" className="flex items-center gap-2 font-bold text-indigo-600 hover:text-indigo-700 text-sm bg-indigo-50 px-3 py-2 rounded-lg w-fit">
+                            <Sparkles size={14} />
+                            Toate Configuratoarele
+                        </Link>
+                    </li>
+                    <li><Link href="/shop" className={linkClass}>Accesorii & Produse Standard</Link></li>
+                    <li><Link href="/contact" className={linkClass}>Cere Ofertă Personalizată</Link></li>
+                </ul>
+            </div>
 
-            {/* SUPORT */}
-            <FooterColumn title="Suport Clienti">
-                <li><Link href="/urmareste-comanda" className={`${linkClass} font-medium text-slate-900`}>Urmărește Comanda</Link></li>
-                <li><Link href="/livrare" className={linkClass}>Informații Livrare</Link></li>
-                <li><Link href="/termeni" className={linkClass}>Termeni și Condiții</Link></li>
-                <li><Link href="/confidentialitate" className={linkClass}>Politica de Confidențialitate</Link></li>
-                <li><Link href="/politica-cookies" className={linkClass}>Politica Cookies</Link></li>
-                <li><Link href="/anpc" className={linkClass}>ANPC - Info Consumator</Link></li>
-            </FooterColumn>
+            {/* Suport */}
+            <div>
+                <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-4">Suport Clienti</h3>
+                <ul className="space-y-3">
+                    <li><Link href="/urmareste-comanda" className={`${linkClass} font-medium text-slate-900`}>Urmărește Comanda</Link></li>
+                    <li><Link href="/livrare" className={linkClass}>Informații Livrare</Link></li>
+                    <li><Link href="/termeni" className={linkClass}>Termeni și Condiții</Link></li>
+                    <li><Link href="/confidentialitate" className={linkClass}>Politica de Confidențialitate</Link></li>
+                    <li><Link href="/politica-cookies" className={linkClass}>Politica Cookies</Link></li>
+                    <li><Link href="/anpc" className={linkClass}>ANPC - Info Consumator</Link></li>
+                </ul>
+            </div>
 
-            {/* CONTACT */}
-            <FooterColumn title="Contact">
-                 <li className="flex items-start gap-3 text-sm text-slate-500">
-                    <MapPin className="h-4 w-4 text-indigo-500 mt-0.5 shrink-0" />
-                    <span>București, Sector 1<br/>Calea Griviței</span>
-                 </li>
-                 <li className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-indigo-500 shrink-0" />
-                    <a href="tel:+40750473111" className={linkClass}>0750 473 111</a>
-                 </li>
-                 <li className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-indigo-500 shrink-0" />
-                    <a href="mailto:contact@prynt.ro" className={linkClass}>contact@prynt.ro</a>
-                 </li>
-            </FooterColumn>
+            {/* Contact */}
+            <div>
+                 <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-4">Contact</h3>
+                 <ul className="space-y-3">
+                     <li className="flex items-start gap-3 text-sm text-slate-500">
+                        <MapPin className="h-4 w-4 text-indigo-500 mt-0.5 shrink-0" />
+                        <span>București, Sector 1<br/>Calea Griviței</span>
+                     </li>
+                     <li className="flex items-center gap-3">
+                        <Phone className="h-4 w-4 text-indigo-500 shrink-0" />
+                        <a href="tel:+40750473111" className={linkClass}>0750 473 111</a>
+                     </li>
+                     <li className="flex items-center gap-3">
+                        <Mail className="h-4 w-4 text-indigo-500 shrink-0" />
+                        <a href="mailto:contact@prynt.ro" className={linkClass}>contact@prynt.ro</a>
+                     </li>
+                 </ul>
+            </div>
 
           </div>
 

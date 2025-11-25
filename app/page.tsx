@@ -11,7 +11,7 @@ import {
 import HeroCarousel from '@/components/HeroCarousel';
 import AssistantSection from '@/components/AssistantSection';
 
-// --- NAVIGARE RAPIDĂ (ICONIȚE MODERNE) ---
+// --- NAVIGARE RAPIDĂ (Reintrodusă aici) ---
 const QUICK_NAV_ITEMS: { name: string; icon: LucideIcon; href: string; color: string; bg: string }[] = [
   { name: "Bannere", icon: FileImage, href: "/banner", color: "text-blue-600", bg: "bg-blue-50" },
   { name: "Autocolante", icon: StickyNote, href: "/autocolante", color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -21,7 +21,9 @@ const QUICK_NAV_ITEMS: { name: string; icon: LucideIcon; href: string; color: st
   { name: "Pliante", icon: Layers, href: "/pliante", color: "text-indigo-600", bg: "bg-indigo-50" },
   { name: "Rigide", icon: Box, href: "/materiale/pvc-forex", color: "text-slate-600", bg: "bg-slate-50" },
   { name: "Plexiglass", icon: Scan, href: "/materiale/plexiglass", color: "text-cyan-600", bg: "bg-cyan-50" },
+  { name: "Bond", icon: Box, href: "/materiale/alucobond", color: "text-gray-600", bg: "bg-gray-100" },
   { name: "Carton", icon: Package, href: "/materiale/carton", color: "text-amber-700", bg: "bg-amber-50" },
+  { name: "Polipropilenă", icon: Box, href: "/materiale/polipropilena", color: "text-lime-600", bg: "bg-lime-50" },
   { name: "Proiecte", icon: Flag, href: "/fonduri-pnrr", color: "text-blue-800", bg: "bg-blue-50" },
 ];
 
@@ -43,10 +45,10 @@ export default function HomePage() {
   return (
     <main className="min-h-screen flex flex-col bg-white selection:bg-indigo-100">
       
-      {/* 1. HERO (Un singur configurator pe pagină, imaginea sus pe mobil) */}
+      {/* 1. HERO */}
       <HeroCarousel />
 
-      {/* 2. STICKY NAV (Simboluri Moderne) */}
+      {/* 2. STICKY NAV (AICI, nu în Header) */}
       <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all">
         <div className="container mx-auto px-0 sm:px-4 relative group">
             

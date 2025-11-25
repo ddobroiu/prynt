@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { siteConfig } from "@/lib/siteConfig";
 import { ChevronDown, Menu, X, User } from "lucide-react";
+// 1. IMPORTĂM WIDGETUL DE CART
 import CartWidget from "./CartWidget";
 
 // --- SUB-COMPONENTS ---
@@ -41,6 +42,7 @@ const DesktopNav = () => {
               <ChevronDown size={16} className="transition-transform duration-300 group-hover:rotate-180" />
             </button>
 
+            {/* Dropdown Container */}
             <div className="absolute top-full left-1/2 -translate-x-1/2 w-56 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 ease-out z-50">
               <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-2 overflow-hidden">
                 {item.children.map((child) => (
@@ -87,7 +89,7 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
           <Link href="/" className="text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white" onClick={onClose}>
             {siteConfig.name}
           </Link>
-          <button onClick={onClose} className="p-2 -mr-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -139,13 +141,16 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 };
 
 const HeaderActions = () => {
+  // 2. Nu mai avem nevoie de useCart aici, CartWidget se ocupă de logică
   const { data: session } = useSession();
 
   return (
-    <div className="flex items-center gap-2 sm:gap-4">
+    <div className="flex items-center gap-3 sm:gap-5">
       <Link href={session?.user ? "/account" : "/login"} className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Cont">
         <User size={24} />
       </Link>
+
+      {/* 3. AICI AM ÎNLOCUIT VECHIUL LINK CU COMPONENTA NOUĂ */}
       <CartWidget />
     </div>
   );
@@ -171,21 +176,21 @@ export default function Header() {
       className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
         scrolled 
           ? "bg-white/90 dark:bg-black/90 backdrop-blur-md border-zinc-200/50 dark:border-white/10 shadow-sm py-2" 
-          : "bg-white dark:bg-black border-transparent py-3 lg:py-4"
+          : "bg-white dark:bg-black border-transparent py-4"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
         {/* Left: Mobile Toggle & Logo */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-3">
            <button 
              onClick={() => setMobileMenuOpen(true)} 
              className="lg:hidden p-2 -ml-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
              aria-label="Meniu"
            >
-            <Menu size={24} className="sm:w-7 sm:h-7" />
+            <Menu size={26} />
           </button>
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-xl sm:text-2xl font-extrabold tracking-tighter text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            <span className="text-2xl font-extrabold tracking-tighter text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
               Prynt<span className="text-indigo-600">.ro</span>
             </span>
           </Link>
