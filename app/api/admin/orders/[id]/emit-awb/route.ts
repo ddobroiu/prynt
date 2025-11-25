@@ -52,9 +52,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const shipmentId = created.id!;
     const parcels = created.parcels || [];
 
-    // Save AWB to order
+    // Optional: print label PDF (try to generate label before saving)
+    let base64: string | undefined;
+    let labelFileName: string | undefined;
     try {
-      await prisma.order.update({ where: { id: order.id }, data: { awbNumber: shipmentId, awbCarrier: 'DPD' } });
+      const r = await printExtended({ paperSize: 'A6', parcels: parcels.map((p: any) => ({ id: p.id })), format: 'pdf' });
+      base64 = r.base64;
+      if (base64) labelFileName = `DPD_${shipmentId}.pdf`;
+    } catch (e) {
+      console.warn('[emit-awb] print label failed', (e as any)?.message || e);
+    }
+
+    // Save AWB to order, include label if generated
+    try {
+      const updateData: any = { awbNumber: shipmentId, awbCarrier: 'DPD' };
+      if (base64) {
+        updateData.awbLabelBase64 = base64;
+        updateData.awbLabelFileName = labelFileName;
+      }
+      await prisma.order.update({ where: { id: order.id }, data: updateData });
       try {
         const { revalidatePath } = await import('next/cache');
         revalidatePath('/admin/orders');
@@ -64,15 +80,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }
     } catch (e) {
       console.error('DB Error saving AWB', (e as any)?.message || e);
-    }
-
-    // Optional: print label PDF
-    let base64: string | undefined;
-    try {
-      const r = await printExtended({ paperSize: 'A6', parcels: parcels.map((p: any) => ({ id: p.id })), format: 'pdf' });
-      base64 = r.base64;
-    } catch (e) {
-      console.warn('[emit-awb] print label failed', (e as any)?.message || e);
     }
 
     // Email client with AWB and label

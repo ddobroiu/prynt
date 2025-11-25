@@ -82,11 +82,16 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Salvează AWB-ul în DB dacă avem orderId
+    // Salvează AWB-ul în DB dacă avem orderId (inclusiv eticheta, dacă există)
     if (orderId) {
       try {
         const { prisma } = await import('../../../../lib/prisma');
-        await prisma.order.update({ where: { id: orderId }, data: { awbNumber: shipmentId, awbCarrier: 'DPD' } });
+        const updateData: any = { awbNumber: shipmentId, awbCarrier: 'DPD' };
+        if (labelBase64) {
+          updateData.awbLabelBase64 = labelBase64;
+          updateData.awbLabelFileName = labelFileName;
+        }
+        await prisma.order.update({ where: { id: orderId }, data: updateData });
         console.log('[AWB UPDATE] orderId:', orderId, 'awbNumber:', shipmentId, 'awbCarrier: DPD');
       } catch (e) {
         console.error('[AWB UPDATE ERROR] orderId:', orderId, 'awbNumber:', shipmentId, 'awbCarrier: DPD', 'error:', (e as any)?.message || e);

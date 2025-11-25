@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Truck, Plus, ExternalLink, Edit2, Check, X, Loader2 } from "lucide-react";
+import { Truck, Plus, ExternalLink, Edit2, Check, X, Loader2, DownloadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -9,6 +9,7 @@ export default function AdminAwbControl({ orderId, currentAwb }: { orderId: stri
   const [awb, setAwb] = useState<string | null>(currentAwb || null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [manualInput, setManualInput] = useState(currentAwb || "");
 
   const generateAwb = async () => {
@@ -67,9 +68,37 @@ export default function AdminAwbControl({ orderId, currentAwb }: { orderId: stri
           <span className="text-[10px] font-mono font-bold text-emerald-400 tracking-wide">{awb}</span>
           <button onClick={() => setIsEditing(true)} className="text-zinc-500 hover:text-white"><Edit2 size={10} /></button>
         </div>
-        <a href={`https://tracking.dpd.ro/?shipmentNumber=${awb}&language=ro`} target="_blank" className="flex items-center justify-center gap-1 text-[9px] text-indigo-300 hover:text-white hover:underline bg-indigo-500/10 py-1 rounded transition-colors">
-          <Truck size={10} /> Urmărește Livrarea
-        </a>
+        <div className="flex items-center gap-2">
+          <a href={`https://tracking.dpd.ro/?shipmentNumber=${awb}&language=ro`} target="_blank" className="flex items-center gap-1 text-[9px] text-indigo-300 hover:text-white hover:underline bg-indigo-500/10 py-1 px-2 rounded transition-colors">
+            <Truck size={10} /> Urmărește Livrarea
+          </a>
+          <button
+            disabled={downloading}
+            onClick={async () => {
+              try {
+                setDownloading(true);
+                const res = await fetch(`/api/admin/orders/${orderId}/download-awb`);
+                if (!res.ok) throw new Error('Eroare descărcare');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `DPD_${awb}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 60000);
+              } catch (e) {
+                alert('Eroare la descărcare AWB.');
+              } finally {
+                setDownloading(false);
+              }
+            }}
+            className="flex items-center gap-1 text-[9px] text-zinc-300 hover:text-white bg-zinc-800/20 py-1 px-2 rounded"
+          >
+            {downloading ? <Loader2 size={12} className="animate-spin" /> : <><DownloadCloud size={12} /> Descarcă</>}
+          </button>
+        </div>
       </div>
     );
   }

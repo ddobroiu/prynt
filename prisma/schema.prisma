@@ -98,6 +98,9 @@ model Order {
   // AWB / tracking info
   awbNumber    String?
   awbCarrier   String?
+  // AWB label stored as base64 (PDF) + filename for admin download
+  awbLabelBase64 String? @db.Text
+  awbLabelFileName String?
   
   // Status lifecycle
   status       String    @default("active") // active | canceled | fulfilled
