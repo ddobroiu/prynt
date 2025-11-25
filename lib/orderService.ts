@@ -67,6 +67,8 @@ interface MarketingInfo {
 
 // Do not instantiate Resend at module load to avoid build failures in envs without key
 const SHIPPING_FEE = 19.99;
+// Free shipping threshold (same value used in frontend `CartWidget`)
+const FREE_SHIPPING_THRESHOLD = 500;
 
 // Cache token Oblio
 let oblioTokenCache: { token: string; expiresAt: number } | null = null;
@@ -209,7 +211,8 @@ async function sendEmails(
   });
 
   const subtotal = normalized.reduce((acc, it) => acc + (Number(it.total) || 0), 0);
-  const totalComanda = subtotal + SHIPPING_FEE;
+  const shippingFeeForEmail = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  const totalComanda = subtotal + shippingFeeForEmail;
 
   function formatYesNo(v: any) {
     if (typeof v === 'boolean') return v ? 'Da' : 'Nu';
@@ -421,7 +424,7 @@ async function sendEmails(
         </ul>
 
         <div style="border-top: 1px solid #eee; margin: 16px 0; padding-top: 12px;">
-          <p style="margin: 4px 0; color: #333;">Taxă livrare: ${formatRON(SHIPPING_FEE)} RON</p>
+          <p style="margin: 4px 0; color: #333;">Taxă livrare: ${formatRON(shippingFeeForEmail)} RON</p>
           <h3 style="text-align: right; color: #111; margin: 8px 0 0;">Total Comandă: ${formatRON(totalComanda)} RON</h3>
         </div>
 
@@ -512,7 +515,7 @@ async function sendEmails(
           ${produseListHTML}
         </ul>
         <div style="border-top:1px solid #e5e7eb;margin:16px 0 0;padding-top:12px;display:flex;justify-content:space-between;align-items:center;">
-          <div class="muted" style="color:#64748b;font-size:14px;">Taxă livrare: ${formatRON(SHIPPING_FEE)} RON</div>
+          <div class="muted" style="color:#64748b;font-size:14px;">Taxă livrare: ${formatRON(shippingFeeForEmail)} RON</div>
           <div style="font-size:18px;font-weight:800;color:#0f172a;">Total: ${formatRON(totalComanda)} RON</div>
         </div>
         <div style="text-align:center;margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
@@ -651,13 +654,14 @@ export async function fulfillOrder(
       });
 
       const subtotal = normalized.reduce((s, it) => s + (Number(it.total) || 0), 0);
-      const totalComanda = subtotal + SHIPPING_FEE;
+      const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+      const totalComanda = subtotal + shippingFee;
       const saved = await appendOrder({
         paymentType,
         address,
         billing,
         items: normalized,
-        shippingFee: SHIPPING_FEE,
+        shippingFee: shippingFee,
         total: totalComanda,
         invoiceLink: invoiceLink ?? null,
         marketing,
