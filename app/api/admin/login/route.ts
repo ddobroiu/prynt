@@ -13,10 +13,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'ADMIN_PANEL_TOKEN lipsă' }, { status: 500 });
   }
 
-  // FIX: Luăm originea direct din request (ex: http://localhost:3000 sau https://prynt.ro)
-  // Astfel redirect-ul rămâne pe același domeniu de unde a venit cererea
+  // Preferăm un URL explicit din mediu în producție; dacă nu e setat, folosim origin-ul request-ului.
+  // Aceasta previne redirect-urile către `localhost:8080` când aplicația este pusă în spatele unui proxy.
   const requestUrl = new URL(req.url);
-  const base = requestUrl.origin;
+  const origin = requestUrl.origin;
+  const base = (process.env.NEXT_PUBLIC_APP_URL || process.env.PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || origin).replace(/\/$/, '');
 
   if (password !== expected) {
     return NextResponse.redirect(`${base}/admin/login?err=1`, { status: 303 });
