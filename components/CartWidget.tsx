@@ -196,15 +196,16 @@ export default function CartWidget() {
                 {/* IMAGINE PRODUS - încearcă mai multe câmpuri care pot conține URL-ul imaginii */}
                 <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50 shadow-sm group-hover:shadow-md transition-shadow">
                   {(() => {
+                    const it: any = item as any;
                     const imgSrc =
-                      item.artworkUrl ||
-                      item.image ||
-                      item.src ||
-                      item.imageUrl ||
-                      item.thumbnail ||
-                      item.metadata?.artworkUrl ||
-                      item.metadata?.artworkLink ||
-                      item.metadata?.artwork ||
+                      it.artworkUrl ||
+                      it.image ||
+                      it.src ||
+                      it.imageUrl ||
+                      it.thumbnail ||
+                      it.metadata?.artworkUrl ||
+                      it.metadata?.artworkLink ||
+                      it.metadata?.artwork ||
                       null;
 
                     if (!imgSrc) {
