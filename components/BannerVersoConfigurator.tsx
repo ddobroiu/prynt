@@ -444,7 +444,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                 
                 {/* Text Indicator */}
                 <span className="ml-3 text-sm font-medium text-gray-700">
-                    {sameGraphic ? "Identică (Față-Verso)" : "Diferită (Față & Verso)"}
+                    {sameGraphic ? "Identică (O singură față)" : "Diferită (Față & Verso)"}
                 </span>
             </label>
         </div>
@@ -645,8 +645,8 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                       <p>O echipă de designeri va crea o propunere grafică pentru tine. Vei primi pe email o simulare pentru confirmare. Cost: 
                           <strong> 
                             {input.same_graphic 
-                              ? formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_SAME) // 50 RON
-                              : formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_DIFF)} // 100 RON
+                              ? formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_SAME) 
+                              : formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_DIFF)}
                           </strong>.
                       </p>
                     </div>
