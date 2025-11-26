@@ -124,8 +124,15 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
       setUploading(true);
       const form = new FormData(); form.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: form });
-      if (!res.ok) throw new Error("Upload eșuat");
-      const data = await res.json();
+      // Try parse JSON; if response is HTML/text, surface it
+      let data: any;
+      try {
+        data = await res.json();
+      } catch (e) {
+        const text = await res.text();
+        throw new Error(text || res.statusText || 'Upload eșuat');
+      }
+      if (!res.ok) throw new Error(data?.error || 'Upload eșuat');
       setArtworkUrl(data.url);
     } catch (e: any) {
       setUploadError(e?.message ?? "Eroare la upload");

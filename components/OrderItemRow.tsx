@@ -38,14 +38,20 @@ export default function OrderItemRow({ item }: OrderItemProps) {
       // 1. Upload pe Cloudinary
       const formData = new FormData();
       formData.append("file", file);
-
       const uploadRes = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
 
-      if (!uploadRes.ok) throw new Error("Eroare la încărcarea fișierului.");
-      const uploadData = await uploadRes.json();
+      // Try to parse JSON; if the server returned HTML/text, surface it for debugging
+      let uploadData: any;
+      try {
+        uploadData = await uploadRes.json();
+      } catch (jsonErr) {
+        const text = await uploadRes.text();
+        throw new Error(text || uploadRes.statusText || 'Eroare la încărcarea fișierului.');
+      }
+      if (!uploadRes.ok) throw new Error(uploadData?.error || 'Eroare la încărcarea fișierului.');
       const artworkUrl = uploadData.url;
 
       // 2. Salvare link în Baza de Date

@@ -45,8 +45,14 @@ export default function UserGraphicsManager({ items }: UserGraphicsManagerProps)
         method: "POST",
         body: formData,
       });
-
-      const apiResponse = await res.json();
+      // Parse JSON if possible, otherwise show text body for debugging
+      let apiResponse: any;
+      try {
+        apiResponse = await res.json();
+      } catch (e) {
+        const text = await res.text();
+        throw new Error(text || res.statusText || 'Eroare upload');
+      }
       console.log("Răspuns API upload:", apiResponse);
       if (!res.ok) throw new Error(apiResponse?.error || "Eroare upload");
 
