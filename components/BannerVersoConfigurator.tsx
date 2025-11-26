@@ -349,7 +349,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       ...(!input.same_graphic && input.designOption === 'text_only' && { "Text Verso": textDesignVerso }),
       ...(!input.same_graphic && input.designOption === 'upload' && { "Grafică Verso": artworkUrlVerso }),
       
-      // Taxa pentru grafică diferită (doar dacă e încărcare proprie / text)
+      // Taxa pentru grafică diferită (doar dacă e încărcare proprie / text) - RAMANE IN METADATA
       ...(!input.same_graphic && input.designOption !== 'pro' && { "Taxă Grafică Diferită": formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.DIFF_GRAPHICS) }),
     };
 
@@ -424,6 +424,33 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       />
     </div>
   );
+
+  // NOU: Comutatorul de Grafică
+  const GraphicTypeSwitch = ({ sameGraphic, setSameGraphic }: { sameGraphic: boolean; setSameGraphic: (v: boolean) => void }) => (
+    <div className="mb-4 p-4 rounded-lg border border-gray-300 bg-white shadow-sm">
+        <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold text-gray-800">
+                Tip Grafică:
+            </span>
+            <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                    type="checkbox" 
+                    className="sr-only peer" 
+                    checked={!sameGraphic} // TRUE = Grafica Diferă
+                    onChange={(e) => setSameGraphic(!e.target.checked)} // Când este bifat, sameGraphic devine FALSE
+                />
+                {/* Switch UI */}
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                
+                {/* Text Indicator */}
+                <span className="ml-3 text-sm font-medium text-gray-700">
+                    {sameGraphic ? "Identică (Față-Verso)" : "Diferită (Față & Verso)"}
+                </span>
+            </label>
+        </div>
+    </div>
+  );
+
 
   return (
     <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
@@ -545,24 +572,12 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
               </AccordionStep>
               <AccordionStep stepNumber={3} title="Grafică" summary={summaryStep3} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
                 <div>
-                  <div className="mb-4">
-                      {/* NOU: Selector Grafică Identică / Diferită (Buton Switch) */}
-                      <p className="field-label mb-2">Tip Grafică Față și Verso</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
-                          <OptionButton 
-                              active={input.same_graphic} 
-                              onClick={() => updateInput("same_graphic", true)} 
-                              title="Grafică Identică" 
-                              subtitle={`Taxă design PRO: ${formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_SAME)}`}
-                          />
-                          <OptionButton 
-                              active={!input.same_graphic} 
-                              onClick={() => updateInput("same_graphic", false)} 
-                              title="Grafică Diferită" 
-                              subtitle={`Taxă design PRO: ${formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_DIFF)}`}
-                          />
-                      </div>
-                  </div>
+                  
+                  {/* COMUTATOR NOU PENTRU GRAFICĂ IDENTICĂ/DIFERITĂ */}
+                  <GraphicTypeSwitch 
+                      sameGraphic={input.same_graphic} 
+                      setSameGraphic={(v) => updateInput("same_graphic", v)} 
+                  />
                   
                   <div className="mb-4 border-b border-gray-200">
                     <div className="flex -mb-px">
@@ -576,7 +591,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                     <div className={`space-y-3 ${!input.same_graphic ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : ''}`}>
                       <p className={`text-sm text-gray-600 ${!input.same_graphic ? 'md:col-span-2' : ''}`}>Încarcă fișierul/fișierele tale (PDF, JPG, TIFF, etc.).</p>
                       
-                      {/* Upload Față (obligatoriu) - CASUTA GRATUITA 1 */}
+                      {/* Upload Față (obligatoriu) */}
                       <UploadSection 
                           side="Față" 
                           currentUrl={artworkUrl} 
@@ -587,7 +602,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                           checkRes={true}
                       />
                       
-                      {/* Upload Verso (condițional) - CASUTA GRATUITA 2 */}
+                      {/* Upload Verso (condițional) */}
                       {!input.same_graphic && (
                           <UploadSection 
                               side="Verso" 
@@ -600,23 +615,19 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                           />
                       )}
                       
-                      {/* Taxa pentru grafică diferită */}
-                      {!input.same_graphic && (
-                          <p className="text-xs text-gray-500 mt-2 md:col-span-2">Se aplică o taxă de procesare de {formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.DIFF_GRAPHICS)} pentru grafică diferită.</p>
-                      )}
                     </div>
                   )}
 
                   {input.designOption === 'text_only' && (
                     <div className={`space-y-3 ${!input.same_graphic ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : ''}`}>
-                      {/* Text Față (obligatoriu) - CASUTA GRATUITA 1 */}
+                      {/* Text Față (obligatoriu) */}
                       <TextOnlySection 
                           side="Față" 
                           currentText={textDesign} 
                           handleTextChange={e => setTextDesign(e.target.value)}
                       />
                       
-                      {/* Text Verso (condițional) - CASUTA GRATUITA 2 */}
+                      {/* Text Verso (condițional) */}
                       {!input.same_graphic && (
                           <TextOnlySection 
                               side="Verso" 
@@ -625,10 +636,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                           />
                       )}
                       
-                      {/* Taxa pentru grafică diferită */}
-                      {!input.same_graphic && (
-                          <p className={`text-xs text-gray-500 mt-2 ${!input.same_graphic ? 'md:col-span-2' : ''}`}>Se aplică o taxă de procesare de {formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.DIFF_GRAPHICS)} pentru texte diferite.</p>
-                      )}
                     </div>
                   )}
 
