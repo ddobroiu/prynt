@@ -84,20 +84,22 @@ export default function CartWidget() {
         </button>
       </DialogTrigger>
       
-      {/* SIDEBAR STYLING - Acum se transformă în Bottom Sheet pe mobil */}
-      <DialogContent className="
-        // MOBILE (Default: Bottom Sheet Modal)
-        fixed inset-x-0 bottom-0 w-full max-w-full h-auto max-h-[90vh] rounded-t-2xl border-t border-slate-200
-        data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom
+      {/* SIDEBAR STYLING - MODIFICAT PENTRU LĂȚIME MAI MICĂ PE MOBIL */}
+      <DialogContent className={`
+        // MOBILE (Default: Modal Centrat, Lățime restrânsă)
+        fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] 
+        w-full max-w-sm max-h-[95vh] h-auto overflow-y-auto rounded-xl border border-slate-200 
+        data-[state=open]:animate-in data-[state=open]:fade-in-90 data-[state=open]:slide-in-from-bottom-10 
+        data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-top-10
 
-        // DESKTOP (md: Override: Right Sidebar)
+        // DESKTOP (md: Override: Sidebar - Lățime mai mare, fixat pe dreapta, full height)
         md:!fixed md:!right-0 md:!left-auto md:!top-0 md:!translate-x-0 md:!translate-y-0
         md:!h-screen md:!max-w-md md:!w-full md:!rounded-none md:!border-l md:border-t-0
         md:data-[state=open]:!slide-in-from-right md:data-[state=closed]:!slide-out-to-right
         
         // COMMON STYLES
         bg-white p-0 shadow-2xl duration-300 flex flex-col gap-0 focus:outline-none z-[100] [&>button:last-child]:hidden
-      ">
+      `}>
         
         {/* HEADER EXTINS */}
         <div className="bg-white shrink-0 sticky top-0 z-20 border-b border-slate-100 shadow-sm">
@@ -201,7 +203,7 @@ export default function CartWidget() {
             items.map((item) => (
               <div key={item.id} className="flex gap-4 group animate-in fade-in slide-in-from-bottom-2 duration-500">
                 
-                {/* IMAGINE PRODUS - Am păstrat structura existentă, care este optimizată și afișează prima poză */}
+                {/* IMAGINE PRODUS */}
                 <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50 shadow-sm group-hover:shadow-md transition-shadow">
                    {item.metadata?.artworkUrl ? (
                        <Image 
