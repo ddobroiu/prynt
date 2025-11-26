@@ -3,7 +3,7 @@
 "use client";
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useCart } from "@/components/CartContext";
-import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon, PlayCircle } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon, PlayCircle, TrendingUp, Percent } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from 'next/link';
@@ -13,6 +13,7 @@ import DynamicBannerPreview from "./DynamicBannerPreview";
 import ArtworkRatioPreview from "./ArtworkRatioPreview"; 
 import { 
   calculateBannerPrice, 
+  getBannerUpsell, // <--- IMPORT NOU: Logica centralizată
   BANNER_CONSTANTS, 
   formatMoneyDisplay, 
   roundMoney,
@@ -179,6 +180,11 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
   const priceData = useMemo(() => calculateBannerPrice(input), [input]);
   const displayedTotal = priceData.finalPrice;
+
+  // --- UPSELL LOGIC (NOU: Centralizat) ---
+  const upsellOpportunity = useMemo(() => {
+    return getBannerUpsell(input);
+  }, [input]);
 
   const updateInput = <K extends keyof PriceInputBanner>(k: K, v: PriceInputBanner[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
@@ -485,7 +491,34 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                           className="input" 
                       />
                   </div>
-                  <div className="col-span-2"><NumberInput label="Cantitate" value={input.quantity} onChange={setQty} /></div>
+                  <div className="col-span-2">
+                    <NumberInput label="Cantitate" value={input.quantity} onChange={setQty} />
+                    
+                    {/* --- UPSELL ALERT (NOU: Folosește logica centralizată) --- */}
+                    {upsellOpportunity && (
+                        <div 
+                            className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors flex gap-3 items-start"
+                            onClick={() => updateInput("quantity", upsellOpportunity.requiredQty)}
+                        >
+                            <TrendingUp className="text-amber-600 w-5 h-5 mt-0.5 shrink-0" />
+                            <div>
+                                <p className="text-sm text-amber-900 font-bold">
+                                    Reducere de Volum Disponibilă!
+                                </p>
+                                <p className="text-xs text-amber-800 mt-1">
+                                    Dacă alegi <strong>{upsellOpportunity.requiredQty} buc</strong>, prețul scade la <strong>{formatMoneyDisplay(upsellOpportunity.newUnitPrice)}/buc</strong>.
+                                    <span className="block mt-0.5 font-semibold text-amber-700">
+                                        Economisești {upsellOpportunity.discountPercent}% la prețul per unitate!
+                                    </span>
+                                </p>
+                            </div>
+                            <div className="ml-auto flex flex-col justify-center items-center bg-white rounded-lg px-2 py-1 shadow-sm border border-amber-100">
+                                <Percent className="w-4 h-4 text-amber-600 mb-0.5" />
+                                <span className="text-xs font-bold text-amber-600">-{upsellOpportunity.discountPercent}%</span>
+                            </div>
+                        </div>
+                    )}
+                  </div>
                 </div>
               </AccordionStep>
               <AccordionStep stepNumber={2} title="Material & Finisaje" summary={summaryStep2} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>

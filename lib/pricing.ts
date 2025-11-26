@@ -5,6 +5,72 @@ export const roundMoney = (num: number) => Math.round(num * 100) / 100;
 export const formatMoneyDisplay = (amount: number) => 
   new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(amount);
 
+/* =========================================================================
+   HELPER NOU: UPSELL CALCULATOR (GENERIC)
+   Detectează automat următorul prag de reducere pentru produse bazate pe benzi de preț/mp.
+   ========================================================================= */
+export type UpsellResult = {
+  hasUpsell: boolean;
+  requiredQty: number;
+  discountPercent: number;
+  newUnitPrice: number;
+  totalSavings: number;
+  message: string; // Mesaj gata formatat pentru AI / UI
+} | null;
+
+export const calculateUpsellGeneric = (
+  currentTotalSqm: number,
+  sqmPerUnit: number,
+  currentQty: number,
+  currentUnitPrice: number,
+  bands: { max: number, price: number }[],
+  basePriceCalculator: (qty: number) => { finalPrice: number }
+): UpsellResult => {
+  
+  // 1. Identificăm banda curentă
+  let currentBandIndex = -1;
+  for (let i = 0; i < bands.length; i++) {
+      if (currentTotalSqm <= bands[i].max) {
+          currentBandIndex = i;
+          break;
+      }
+  }
+
+  // Dacă nu am găsit banda sau suntem deja în ultima (cea mai ieftină), nu există upsell
+  if (currentBandIndex === -1 || currentBandIndex >= bands.length - 1) return null;
+
+  // 2. Calculăm ținta pentru următorul prag
+  const thresholdSqm = bands[currentBandIndex].max;
+  // Adăugăm o mică marjă pentru a trece sigur în următoarea bandă
+  const targetSqm = thresholdSqm + 0.001; 
+  
+  const requiredQty = Math.ceil(targetSqm / sqmPerUnit);
+
+  // Dacă cantitatea necesară este egală cu cea curentă (cazuri rare la dimensiuni mari), sărim
+  if (requiredQty <= currentQty) return null;
+
+  // 3. Simulăm prețul pentru noua cantitate
+  const futurePriceData = basePriceCalculator(requiredQty);
+  const futureUnitPrice = futurePriceData.finalPrice / requiredQty;
+
+  // 4. Calculăm reducerea procentuală
+  const discountPercent = Math.round(((currentUnitPrice - futureUnitPrice) / currentUnitPrice) * 100);
+
+  // Ignorăm reducerile nesemnificative (< 2%)
+  if (discountPercent < 2) return null;
+
+  const totalSavings = (currentUnitPrice * requiredQty) - futurePriceData.finalPrice;
+
+  return {
+      hasUpsell: true,
+      requiredQty,
+      discountPercent,
+      newUnitPrice: parseFloat(futureUnitPrice.toFixed(2)),
+      totalSavings: parseFloat(totalSavings.toFixed(2)),
+      message: `Sfat: Dacă mărești cantitatea la ${requiredQty} bucăți, prețul unitar scade cu ${discountPercent}%, ajungând la ${formatMoneyDisplay(futureUnitPrice)}/buc. Economie totală estimată: ${formatMoneyDisplay(totalSavings)}.`
+  };
+};
+
 // ==========================================
 // 1. BANNER SIMPLU (FRONTLIT)
 // ==========================================
@@ -68,6 +134,25 @@ export const calculateBannerPrice = (input: PriceInputBanner) => {
   }
 
   return { finalPrice: roundMoney(finalPrice), total_sqm: roundMoney(total_sqm), pricePerSqm };
+};
+
+// --- NEW FUNCTION: UPSELL FOR BANNER ---
+export const getBannerUpsell = (input: PriceInputBanner): UpsellResult => {
+  if (input.width_cm <= 0 || input.height_cm <= 0) return null;
+  
+  const priceData = calculateBannerPrice(input);
+  const sqmPerUnit = (input.width_cm / 100) * (input.height_cm / 100);
+  const currentTotalSqm = sqmPerUnit * input.quantity;
+  const currentUnitPrice = priceData.finalPrice / input.quantity;
+
+  return calculateUpsellGeneric(
+      currentTotalSqm,
+      sqmPerUnit,
+      input.quantity,
+      currentUnitPrice,
+      BANNER_CONSTANTS.PRICES.bands,
+      (newQty) => calculateBannerPrice({ ...input, quantity: newQty })
+  );
 };
 
 // ==========================================
@@ -140,6 +225,26 @@ export const calculateBannerVersoPrice = (input: PriceInputBannerVerso) => {
 
   return { finalPrice: roundMoney(finalPrice), total_sqm: roundMoney(total_sqm), pricePerSqm, proFee, diffFee };
 };
+
+// --- NEW FUNCTION: UPSELL FOR BANNER VERSO ---
+export const getBannerVersoUpsell = (input: PriceInputBannerVerso): UpsellResult => {
+  if (input.width_cm <= 0 || input.height_cm <= 0) return null;
+
+  const priceData = calculateBannerVersoPrice(input);
+  const sqmPerUnit = (input.width_cm / 100) * (input.height_cm / 100);
+  const currentTotalSqm = sqmPerUnit * input.quantity;
+  const currentUnitPrice = priceData.finalPrice / input.quantity;
+
+  return calculateUpsellGeneric(
+      currentTotalSqm,
+      sqmPerUnit,
+      input.quantity,
+      currentUnitPrice,
+      BANNER_VERSO_CONSTANTS.PRICES.bands,
+      (newQty) => calculateBannerVersoPrice({ ...input, quantity: newQty })
+  );
+};
+
 
 // ==========================================
 // 3. POLIPROPILENA (AKYPLAC)
