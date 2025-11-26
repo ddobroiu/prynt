@@ -84,21 +84,21 @@ export default function CartWidget() {
         </button>
       </DialogTrigger>
       
-      {/* SIDEBAR STYLING - MODIFICAT PENTRU LĂȚIME MAI MICĂ PE MOBIL */}
+      {/* DIALOG CONTENT - MODIFICAT PENTRU RESPONSIVITATE CORECTĂ */}
       <DialogContent className={`
+        // COMMON STYLES
+        bg-white p-0 shadow-2xl duration-300 flex flex-col gap-0 focus:outline-none z-[100] [&>button:last-child]:hidden
+        
         // MOBILE (Default: Modal Centrat, Lățime restrânsă)
         fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] 
-        w-full max-w-sm max-h-[95vh] h-auto overflow-y-auto rounded-xl border border-slate-200 
+        w-[90vw] max-w-sm max-h-[95vh] h-auto overflow-y-auto rounded-xl border border-slate-200 
         data-[state=open]:animate-in data-[state=open]:fade-in-90 data-[state=open]:slide-in-from-bottom-10 
         data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-top-10
 
-        // DESKTOP (md: Override: Sidebar - Lățime mai mare, fixat pe dreapta, full height)
+        // PC (md: Override: Sidebar - Full-height, Complet)
         md:!fixed md:!right-0 md:!left-auto md:!top-0 md:!translate-x-0 md:!translate-y-0
         md:!h-screen md:!max-w-md md:!w-full md:!rounded-none md:!border-l md:border-t-0
         md:data-[state=open]:!slide-in-from-right md:data-[state=closed]:!slide-out-to-right
-        
-        // COMMON STYLES
-        bg-white p-0 shadow-2xl duration-300 flex flex-col gap-0 focus:outline-none z-[100] [&>button:last-child]:hidden
       `}>
         
         {/* HEADER EXTINS */}
