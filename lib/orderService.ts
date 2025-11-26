@@ -66,7 +66,8 @@ interface MarketingInfo {
 }
 
 // Do not instantiate Resend at module load to avoid build failures in envs without key
-const SHIPPING_FEE = 19.99;
+// Shipping fee set to 0 to disable delivery charge
+const SHIPPING_FEE = 0;
 // Free shipping threshold (same value used in frontend `CartWidget`)
 const FREE_SHIPPING_THRESHOLD = 500;
 
