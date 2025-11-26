@@ -76,11 +76,12 @@ export const calculateBannerPrice = (input: PriceInputBanner) => {
 export const BANNER_VERSO_CONSTANTS = {
   PRICES: {
     bands: [
-      { max: 1, price: 165 },
-      { max: 5, price: 120 },
-      { max: 20, price: 99 },
-      { max: 50, price: 75 },
-      { max: Infinity, price: 55 },
+      // Prețurile sunt 1.5x față de cele de la BANNER_CONSTANTS
+      { max: 1, price: roundMoney(100 * 1.5) },    // 150.0
+      { max: 5, price: roundMoney(75 * 1.5) },     // 112.5
+      { max: 20, price: roundMoney(60 * 1.5) },    // 90.0
+      { max: 50, price: roundMoney(45 * 1.5) },    // 67.5
+      { max: Infinity, price: roundMoney(35 * 1.5) }, // 52.5
     ],
     multipliers: {
       wind_holes: 1.10,
@@ -88,9 +89,9 @@ export const BANNER_VERSO_CONSTANTS = {
     }
   },
   FEES: {
-    PRO_SAME: 50,
-    PRO_DIFF: 100,
-    DIFF_GRAPHICS: 100,
+    PRO_SAME: 50, // Taxă Design Pro - Grafică Identică
+    PRO_DIFF: 100, // Taxă Design Pro - Grafică Diferită
+    DIFF_GRAPHICS: 100, // Taxă procesare grafică proprie diferită
   }
 };
 
@@ -111,7 +112,7 @@ export const calculateBannerVersoPrice = (input: PriceInputBannerVerso) => {
   const sqm_per_unit = (input.width_cm / 100) * (input.height_cm / 100);
   const total_sqm = roundMoney(sqm_per_unit * input.quantity);
 
-  let basePrice = 55;
+  let basePrice = BANNER_VERSO_CONSTANTS.PRICES.bands[BANNER_VERSO_CONSTANTS.PRICES.bands.length - 1].price;
   for (const band of BANNER_VERSO_CONSTANTS.PRICES.bands) {
       if (total_sqm <= band.max) {
           basePrice = band.price;

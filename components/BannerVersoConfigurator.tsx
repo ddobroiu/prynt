@@ -1,3 +1,5 @@
+// components/BannerVersoConfigurator.tsx
+
 "use client";
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useCart } from "@/components/CartContext";
@@ -10,11 +12,11 @@ import Reviews from "./Reviews";
 import DynamicBannerPreview from "./DynamicBannerPreview";
 import ArtworkRatioPreview from "./ArtworkRatioPreview"; 
 import { 
-  calculateBannerPrice, 
-  BANNER_CONSTANTS, 
+  calculateBannerVersoPrice, // MODIFICAT: Funcția Verso
+  BANNER_VERSO_CONSTANTS, // MODIFICAT: Constantele Verso
   formatMoneyDisplay, 
   roundMoney,
-  type PriceInputBanner 
+  type PriceInputBannerVerso // MODIFICAT: Tipul Verso
 } from "@/lib/pricing";
 import { QA } from "@/types";
 
@@ -43,11 +45,11 @@ const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, 
 const ProductTabs = ({ productSlug }: { productSlug: string }) => {
     const [activeTab, setActiveTab] = useState("descriere");
     const bannerFaqs: QA[] = [
-        { question: "Ce materiale sunt disponibile?", answer: "Oferim Frontlit 440g (Standard) și Frontlit 510g (Premium), ambele fiind materiale PVC durabile, special concepute pentru uz exterior." },
-        { question: "Ce finisaje sunt incluse?", answer: "Toate bannerele vin cu tiv de rezistență pe tot perimetrul și capse metalice de prindere, aplicate de obicei la o distanță de 50 cm una de cealaltă." },
-        { question: "Cum trimit grafica pentru imprimare?", answer: "Puteți încărca fișierul grafic direct în configurator, în pasul 3. Acceptăm formate precum PDF, AI, CDR, TIFF sau JPG la o rezoluție bună." },
-        { question: "Cât durează producția și livrarea?", answer: "Producția durează în mod normal 1-2 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile, în funcție de localitatea de destinație." },
-        { question: "Bannerele sunt rezistente la exterior?", answer: "Da, absolut. Materialele folosite sunt special tratate pentru a rezista la apă, vânt și radiații UV, asigurând o durată de viață îndelungată." },
+        { question: "Ce material este folosit pentru bannerele față-verso?", answer: "Folosim material tip Blockout (650g/mp), special conceput pentru a bloca lumina, asigurând vizibilitate perfectă a graficii pe ambele fețe." },
+        { question: "Care este diferența de preț față de cel cu o singură față?", answer: "Bannerele față-verso sunt calculate cu o bază de preț de aproximativ 1.5x față de cele standard, datorită materialului mai scump și procesului de imprimare mai complex." },
+        { question: "Finisajele sunt incluse în preț?", answer: "Da, tivul de rezistență perimetral și capsele metalice sunt incluse standard. Puteți opta și pentru găuri de vânt." },
+        { question: "Pot avea grafică diferită pe față și pe verso?", answer: "Da. Puteți alege să încărcați două grafici diferite sau să solicitați un design profesional separat pentru fiecare față, cu o taxă suplimentară (100 RON pentru grafică diferită)." },
+        { question: "Cât durează producția și livrarea?", answer: "Producția durează în mod normal 1-3 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile, în funcție de localitatea de destinație." },
     ];
     return (
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
@@ -59,22 +61,21 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
             <div className="p-6">
                 {activeTab === 'descriere' && (
                     <div className="prose max-w-none text-sm text-gray-600">
-                        <h3 className="text-gray-900 text-lg font-bold mb-2">Bannere Publicitare Outdoor (Frontlit)</h3>
+                        <h3 className="text-gray-900 text-lg font-bold mb-2">Bannere Publicitare Față-Verso (Blockout)</h3>
                         <p className="mb-4">
-                            <strong>Atrageți toate privirile cu bannere imprimate la rezoluție fotografică.</strong> Fie că dorești să anunți o promoție, o deschidere de magazin sau să îți faci brandul cunoscut, bannerele noastre personalizate sunt soluția ideală pentru vizibilitate maximă la un cost eficient.
+                            <strong>Vizibilitate maximă în ambele direcții de mers.</strong> Bannerele Blockout sunt realizate dintr-un material special, opac, care împiedică trecerea luminii, asigurând vizibilitate perfectă a graficii pe ambele fețe. Soluția ideală pentru expunerea perpendiculară pe sensul de mers (ex: pe stâlpi sau balcoane).
                         </p>
                         
                         <h4 className="text-gray-900 font-semibold mt-4 mb-2">Materiale & Calitate</h4>
                         <ul className="list-disc pl-5 space-y-1 mb-4">
-                            <li><strong>Frontlit 440g (Standard):</strong> Un material PVC flexibil și economic, perfect pentru campanii pe termen scurt și mediu.</li>
-                            <li><strong>Frontlit 510g (Premium):</strong> Varianta "Coated" (turnată), mult mai rezistentă la rupere și diferențe de temperatură (iarnă/vară), recomandată pentru expunere îndelungată.</li>
+                            <li><strong>Blockout 650g:</strong> Material PVC foarte gros, cu inserție neagră la interior, care blochează lumina. Imprimare la rezoluție fotografică pe ambele fețe.</li>
                         </ul>
 
-                        <h4 className="text-gray-900 font-semibold mt-4 mb-2">De ce să alegi bannerele noastre?</h4>
+                        <h4 className="text-gray-900 font-semibold mt-4 mb-2">De ce să alegi bannerele noastre față-verso?</h4>
                         <ul className="list-disc pl-5 space-y-1">
+                            <li><strong>Opacitate 100%:</strong> Grație stratului de blocare, nu veți avea probleme de 'ghosting' (vizibilitatea textului de pe partea opusă).</li>
                             <li><strong>Rezistență UV și Apă:</strong> Folosim cerneluri Eco-Solvent de ultimă generație care nu se decolorează.</li>
                             <li><strong>Finisaje Incluse:</strong> Tivul perimetral și capsele de prindere sunt incluse standard în preț.</li>
-                            <li><strong>Orice Dimensiune:</strong> Putem realiza bannere de la mici dimensiuni până la formate gigant (prin termosudare).</li>
                         </ul>
                     </div>
                 )}
@@ -129,28 +130,26 @@ type Props = { productSlug?: string; initialWidth?: number; initialHeight?: numb
 type ViewMode = 'gallery' | 'shape';
 
 /* --- MAIN COMPONENT --- */
-export default function BannerConfigurator({ productSlug, initialWidth: initW, initialHeight: initH, productImage, renderOnlyConfigurator = false }: Props) {
+export default function BannerVersoConfigurator({ productSlug, initialWidth: initW, initialHeight: initH, productImage, renderOnlyConfigurator = false }: Props) {
   const { addItem } = useCart();
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
   // --- 1. INITIALIZARE STATE DIN URL SAU DEFAULT ---
-  const [input, setInput] = useState<PriceInputBanner>(() => {
+  const [input, setInput] = useState<PriceInputBannerVerso>(() => { // FOLOSIM TIPUL VERSO
     const pW = searchParams.get("w");
     const pH = searchParams.get("h");
     const pQ = searchParams.get("q");
-    const pMat = searchParams.get("mat");
     const pWind = searchParams.get("wind");
-    const pHem = searchParams.get("hem");
+    const pSame = searchParams.get("same"); // NOU: pentru same_graphic
 
     return {
       width_cm: pW ? parseInt(pW) : (initW ?? 0),
       height_cm: pH ? parseInt(pH) : (initH ?? 0),
       quantity: pQ ? parseInt(pQ) : 1,
-      material: pMat === '510' ? "frontlit_510" : "frontlit_440",
       want_wind_holes: pWind === '1',
-      want_hem_and_grommets: pHem !== '0', // Default true, doar '0' il face false
+      same_graphic: pSame !== '0', // NOU: Default true
       designOption: "upload"
     };
   });
@@ -158,7 +157,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const [lengthText, setLengthText] = useState(input.width_cm ? String(input.width_cm) : "");
   const [heightText, setHeightText] = useState(input.height_cm ? String(input.height_cm) : "");
   
-  const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"] : ["/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp", "/products/banner/4.webp"], [productImage]);
+  const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/verso/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"] : ["/products/banner/verso/1.webp", "/products/banner/2.webp", "/products/banner/3.webp", "/products/banner/4.webp"], [productImage]);
   
   const [viewMode, setViewMode] = useState<ViewMode>('gallery');
 
@@ -168,23 +167,27 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   // --- VIDEO STATE ---
   const [videoOpen, setVideoOpen] = useState(false);
 
-  const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
+  // NOU: Stări separate pentru Față și Verso
+  const [artworkUrl, setArtworkUrl] = useState<string | null>(null); // FRONT
+  const [artworkUrlVerso, setArtworkUrlVerso] = useState<string | null>(null); // VERSO
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   
   // State pentru avertisment rezoluție
   const [lowResWarning, setLowResWarning] = useState(false);
 
-  const [textDesign, setTextDesign] = useState<string>("");
+  const [textDesign, setTextDesign] = useState<string>(""); // FRONT TEXT
+  const [textDesignVerso, setTextDesignVerso] = useState<string>(""); // VERSO TEXT
+  
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
 
-  const priceData = useMemo(() => calculateBannerPrice(input), [input]);
+  const priceData = useMemo(() => calculateBannerVersoPrice(input), [input]); // FOLOSIM CALCULATORUL VERSO
   const displayedTotal = priceData.finalPrice;
 
-  const updateInput = <K extends keyof PriceInputBanner>(k: K, v: PriceInputBanner[K]) => setInput((p) => ({ ...p, [k]: v }));
+  const updateInput = <K extends keyof PriceInputBannerVerso>(k: K, v: PriceInputBannerVerso[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
   
   const onChangeLength = (v: string) => { 
@@ -209,9 +212,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       if (input.quantity > 1) params.set("q", input.quantity.toString());
       
       // Parametrii opționali
-      if (input.material === 'frontlit_510') params.set("mat", "510");
       if (input.want_wind_holes) params.set("wind", "1");
-      if (!input.want_hem_and_grommets) params.set("hem", "0");
+      if (!input.same_graphic) params.set("same", "0"); // NOU: Păstrăm starea graficii în URL
       
       // Actualizăm URL-ul fără refresh
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
@@ -231,7 +233,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
     img.onload = () => {
         const { naturalWidth, naturalHeight } = img;
-        // 1 inch = 2.54 cm -> Calculăm DPI estimativ
         const widthInches = input.width_cm / 2.54;
         const heightInches = input.height_cm / 2.54;
         
@@ -239,7 +240,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         const dpiH = naturalHeight / heightInches;
         const avgDpi = (dpiW + dpiH) / 2;
 
-        // Dacă DPI-ul e sub 70, afișăm warning
         if (avgDpi < 70) {
             setLowResWarning(true);
         }
@@ -247,32 +247,49 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     };
   }, [input.width_cm, input.height_cm]);
   
-  const handleArtworkFileInput = async (file: File | null) => {
-    setArtworkUrl(null);
+  // MODIFICAT: Acceptă un parametru "side"
+  const handleArtworkFileInput = async (file: File | null, side: 'front' | 'verso' = 'front') => {
     setUploadError(null);
-    setLowResWarning(false);
+    setLowResWarning(false); // Warning-ul se aplică la dimensiunile totale, nu pe parte
+
+    // Reset current side URL on new attempt
+    if (side === 'front') setArtworkUrl(null); else setArtworkUrlVerso(null);
 
     if (!file) return;
     try {
-      // Verificăm rezoluția înainte de orice
-      checkResolution(file);
+      // Verificăm rezoluția (doar pentru primul fișier sau dacă nu e verso)
+      if (side === 'front' || input.same_graphic) {
+          checkResolution(file);
+      }
 
       // 1. Previzualizare Locală Imediată
       const previewUrl = URL.createObjectURL(file);
-      setArtworkUrl(previewUrl); 
-      setViewMode('gallery'); // Mutăm pe tab-ul galerie
+      if (side === 'front' || input.same_graphic) {
+          setArtworkUrl(previewUrl); 
+          setViewMode('gallery'); 
+      } else {
+          setArtworkUrlVerso(previewUrl);
+      }
 
       // 2. Upload
       setUploading(true);
       const form = new FormData();
       form.append("file", file);
+      // NOU: adăugăm side la upload
+      form.append("side", side); 
       const res = await fetch("/api/upload", { method: "POST", body: form });
-      if (!res.ok) throw new Error("Upload eșuat");
+      // FIX: Am înlocuit template literal-ul cu concatenare
+      if (!res.ok) throw new Error("Upload eșuat pentru " + (side === 'front' ? 'față' : 'verso'));
       const data = await res.json();
       
-      setArtworkUrl(data.url); 
+      if (side === 'front' || input.same_graphic) {
+          setArtworkUrl(data.url); 
+      } else {
+          setArtworkUrlVerso(data.url);
+      }
     } catch (e: any) {
-      setUploadError(e?.message ?? "Eroare la upload");
+      // FIX: Am înlocuit template literal-ul cu concatenare
+      setUploadError(e?.message ?? ("Eroare la upload pentru " + (side === 'front' ? 'față' : 'verso')));
     } finally {
       setUploading(false);
     }
@@ -289,35 +306,71 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       setTimeout(() => setErrorToast(null), 1600);
       return;
     }
+    
+    // VALIDARE GRAFICA / TEXT
+    if (input.designOption === 'upload' && !artworkUrl) {
+      setErrorToast("Te rugăm să încarci grafica pentru Față."); return;
+    }
+    if (input.designOption === 'upload' && !input.same_graphic && !artworkUrlVerso) {
+      setErrorToast("Te rugăm să încarci grafica pentru Verso."); return;
+    }
+    if (input.designOption === 'text_only' && !textDesign.trim()) {
+      setErrorToast("Te rugăm să introduci textul pentru Față."); return;
+    }
+    if (input.designOption === 'text_only' && !input.same_graphic && !textDesignVerso.trim()) {
+      setErrorToast("Te rugăm să introduci textul pentru Verso."); return;
+    }
+    
     const unitPrice = roundMoney(displayedTotal / input.quantity);
-    const uniqueId = `${productSlug ?? 'banner'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    const title = `Banner personalizat - ${input.width_cm}x${input.height_cm} cm`;
+    const uniqueId = `${productSlug ?? 'banner-verso'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const title = `Banner Față-Verso - ${input.width_cm}x${input.height_cm} cm`;
+
+    const graphicMeta = input.designOption === 'pro' 
+        ? 'Vreau grafică' 
+        : input.designOption === 'text_only' 
+        ? 'Doar text' 
+        : 'Grafică proprie';
+        
+    const graphicsDetail = input.same_graphic ? "Identică" : "Diferită";
+
+    // Build metadata object
+    const metadata: Record<string, any> = {
+      "Material": "Blockout (Față-Verso)",
+      "Finisaje": `Tiv și capse, ${input.want_wind_holes ? "cu găuri de vânt" : "fără găuri de vânt"}`,
+      "Grafică": `${graphicMeta} (${graphicsDetail})`,
+      
+      // Costul de grafică
+      ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(priceData.proFee) }),
+      
+      // Conținutul Față
+      ...(input.designOption === 'text_only' ? { "Text Față": textDesign } : { "Grafică Față": artworkUrl }),
+      
+      // Conținutul Verso (dacă nu e identic)
+      ...(!input.same_graphic && input.designOption === 'text_only' && { "Text Verso": textDesignVerso }),
+      ...(!input.same_graphic && input.designOption === 'upload' && { "Grafică Verso": artworkUrlVerso }),
+      
+      // Taxa pentru grafică diferită (doar dacă e încărcare proprie / text)
+      ...(!input.same_graphic && input.designOption !== 'pro' && { "Taxă Grafică Diferită": formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.DIFF_GRAPHICS) }),
+    };
 
     addItem({
       id: uniqueId,
-      productId: productSlug ?? "banner-generic",
-      slug: productSlug ?? "generic-banner",
+      productId: productSlug ?? "banner-verso-generic",
+      slug: productSlug ?? "generic-banner-verso",
       title,
       width: input.width_cm,
       height: input.height_cm,
       price: unitPrice,
       quantity: input.quantity,
       currency: "RON",
-      metadata: {
-        "Material": input.material === 'frontlit_510' ? "Frontlit 510g (Premium)" : "Frontlit 440g (Standard)",
-        "Finisaje": `Tiv și capse, ${input.want_wind_holes ? "cu găuri de vânt" : "fără găuri de vânt"}`,
-        "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : input.designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
-        ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(BANNER_CONSTANTS.PRO_DESIGN_FEE) }),
-        ...(input.designOption === 'text_only' && { "Text": textDesign }),
-        artworkUrl, 
-      },
+      metadata,
     });
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 1600);
   }
 
   useEffect(() => {
-    // Facem autoplay la galerie doar dacă NU avem o grafică încărcată
+    // Facem autoplay la galerie doar dacă NU avem o grafică încărcată pe față
     if (viewMode !== 'gallery' || artworkUrl) return;
     
     const id = setInterval(() => {
@@ -332,8 +385,45 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   
   const canAdd = displayedTotal > 0 && input.width_cm > 0 && input.height_cm > 0;
   const summaryStep1 = input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}x${input.height_cm}cm, ${input.quantity} buc.` : "Alege";
-  const summaryStep2 = `${input.material === 'frontlit_510' ? "Premium" : "Standard"}, ${input.want_wind_holes ? "cu găuri" : "fără găuri"}`;
-  const summaryStep3 = input.designOption === 'upload' ? 'Grafică proprie' : input.designOption === 'text_only' ? 'Doar text' : 'Design Pro';
+  const summaryStep2 = `Blockout, ${input.want_wind_holes ? "cu găuri" : "fără găuri"}`;
+  const summaryStep3 = input.designOption === 'upload' ? `Grafică proprie (${input.same_graphic ? 'Identică' : 'Diferită'})` : input.designOption === 'text_only' ? `Doar text (${input.same_graphic ? 'Identic' : 'Diferit'})` : `Design Pro (${input.same_graphic ? 'Identic' : 'Diferit'})`;
+
+  // Componentă reutilizabilă pentru Upload
+  const UploadSection = ({ side, currentUrl, handleFile, uploadError, uploading, lowResWarning, checkRes }: { side: 'Față' | 'Verso', currentUrl: string | null, handleFile: (file: File | null) => Promise<void>, uploadError: string | null, uploading: boolean, lowResWarning: boolean, checkRes: boolean }) => (
+    <div className="space-y-3 p-4 border border-gray-200 rounded-lg">
+      <p className="text-sm font-semibold text-gray-700">{side}</p>
+      <label className="flex flex-col items-center justify-center w-full h-24 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
+        <span className="flex items-center space-x-2">
+          <UploadCloud className="w-5 h-5 text-gray-600" />
+          <span className="font-medium text-gray-600">Apasă pentru a încărca</span>
+        </span>
+        <input type="file" name={`file_upload_${side}`} className="hidden" onChange={e => handleFile(e.target.files?.[0] ?? null)} />
+      </label>
+      {uploading && <p className="text-sm text-indigo-600">Se încarcă...</p>}
+      {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
+      {checkRes && lowResWarning && (
+          <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 flex items-start gap-2">
+              <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+              <span>Imaginea pare a avea o rezoluție mică. Printul poate ieși pixelat.</span>
+          </div>
+      )}
+      {currentUrl && !uploadError && (!checkRes || !lowResWarning) && <p className="text-sm text-green-600 font-semibold">Grafică {side} încărcată cu succes!</p>}
+    </div>
+  );
+  
+  // Componentă reutilizabilă pentru Text Only
+  const TextOnlySection = ({ side, currentText, handleTextChange }: { side: 'Față' | 'Verso', currentText: string, handleTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void }) => (
+    <div className="space-y-3 p-4 border border-gray-200 rounded-lg">
+      <label className="field-label">{side} - Introdu textul dorit</label>
+      <textarea 
+        className="input" 
+        rows={3} 
+        value={currentText} 
+        onChange={handleTextChange} 
+        placeholder="ex: PROMOTIE, REDUCERI, etc."
+      />
+    </div>
+  );
 
   return (
     <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
@@ -343,11 +433,10 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
-          {/* STÂNGA - ZONA VIZUALĂ */}
+          {/* STÂNGA - ZONA VIZUALĂ (Păstrată, folosește artworkUrl pentru preview) */}
           <div className="lg:sticky top-24 h-max space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
               
-              {/* Header Switch: Doar Galerie și Schiță */}
               <div className="flex border-b border-gray-100 overflow-x-auto">
                     <button 
                       onClick={() => setViewMode('gallery')}
@@ -374,14 +463,13 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                                     width={input.width_cm} 
                                     height={input.height_cm} 
                                     imageUrl={artworkUrl}
-                                    hasGrommets={input.want_hem_and_grommets}
+                                    hasGrommets={true}
                                     hasWindHoles={input.want_wind_holes}
                                 />
                             </div>
                         ) : (
-                            <img src={activeImage} alt="Banner" className="h-full w-full object-cover animate-in fade-in duration-300" />
+                            <img src={activeImage} alt="Banner Față-Verso" className="h-full w-full object-cover animate-in fade-in duration-300" />
                         )}
-                        {/* VIDEO BUTTON - VISIBLE (overlay, like BannerConfigurator) */}
                         <div className="absolute bottom-4 right-4 z-30">
                           <button
                             type="button"
@@ -401,7 +489,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                           <DynamicBannerPreview 
                               width={input.width_cm} 
                               height={input.height_cm} 
-                              hasGrommets={input.want_hem_and_grommets}
+                              hasGrommets={true}
                               hasWindHoles={input.want_wind_holes}
                               imageUrl={null} 
                           />
@@ -412,10 +500,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                   )}
               </div>
               
-              {/* GALEIE THUMBNAILS + VIDEO BUTTON */}
-                {viewMode === 'gallery' && (
+              {viewMode === 'gallery' && (
                 <div className="p-2">
-                  {/* Thumbnails */}
                   <div className="grid grid-cols-4 gap-2">
                     {galleryImages.map((src, i) => (
                       <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>
@@ -424,13 +510,13 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                 </div>
                 )}
             </div>
-            <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'banner'} /></div>
+            <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'banner-verso'} /></div>
           </div>
 
           {/* DREAPTA - CONFIGURATOR */}
           <div>
             <header className="mb-6">
-              <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Banner</h1><BannerModeSwitchInline /></div>
+              <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Banner Față-Verso</h1><BannerModeSwitchInline /></div>
               <div className="flex justify-between items-center">
                 <p className="text-gray-600">Personalizează opțiunile în 3 pași simpli.</p>
                 <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5">
@@ -447,16 +533,37 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                   <div className="md:col-span-2"><NumberInput label="Cantitate" value={input.quantity} onChange={setQty} /></div>
                 </div>
               </AccordionStep>
+              {/* Pasul 2 adaptat pentru Verso (material fix) */}
               <AccordionStep stepNumber={2} title="Material & Finisaje" summary={summaryStep2} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>
-                <label className="field-label mb-2">Material</label>
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                    <OptionButton active={input.material === "frontlit_440"} onClick={() => updateInput("material", "frontlit_440")} title="Frontlit 440g" subtitle="Standard" />
-                    <OptionButton active={input.material === "frontlit_510"} onClick={() => updateInput("material", "frontlit_510")} title="Frontlit 510g" subtitle="Premium" />
+                <p className="field-label mb-2 font-bold">Material: Blockout 650g</p>
+                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                        Bannerele Față-Verso sunt realizate exclusiv din material Blockout 650g, special conceput pentru opacitate 100%. Finisajele (tiv și capse) sunt incluse.
+                    </p>
                 </div>
                 <label className="flex items-center gap-3 py-2 cursor-pointer"><input type="checkbox" className="checkbox" checked={input.want_wind_holes} onChange={(e) => updateInput("want_wind_holes", e.target.checked)} /><span className="text-sm font-medium text-gray-700">Adaugă găuri pentru vânt</span></label>
               </AccordionStep>
               <AccordionStep stepNumber={3} title="Grafică" summary={summaryStep3} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
                 <div>
+                  <div className="mb-4">
+                      {/* NOU: Selector Grafică Identică / Diferită */}
+                      <p className="field-label mb-2">Tip Grafică Față și Verso</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                          <OptionButton 
+                              active={input.same_graphic} 
+                              onClick={() => updateInput("same_graphic", true)} 
+                              title="Grafică Identică" 
+                              subtitle={`Taxă design PRO: ${formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_SAME)}`}
+                          />
+                          <OptionButton 
+                              active={!input.same_graphic} 
+                              onClick={() => updateInput("same_graphic", false)} 
+                              title="Grafică Diferită" 
+                              subtitle={`Taxă design PRO: ${formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_DIFF)}`}
+                          />
+                      </div>
+                  </div>
+                  
                   <div className="mb-4 border-b border-gray-200">
                     <div className="flex -mb-px">
                       <TabButton active={input.designOption === 'upload'} onClick={() => updateInput("designOption", 'upload')}>Am Grafică</TabButton>
@@ -466,39 +573,75 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                   </div>
 
                   {input.designOption === 'upload' && (
-                    <div className="space-y-3">
-                      <p className="text-sm text-gray-600">Încarcă fișierul tău (PDF, JPG, TIFF, etc.).</p>
-                      <label className="flex flex-col items-center justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
-                        <span className="flex items-center space-x-2">
-                          <UploadCloud className="w-6 h-6 text-gray-600" />
-                          <span className="font-medium text-gray-600">Apasă pentru a încărca</span>
-                        </span>
-                        <input type="file" name="file_upload" className="hidden" onChange={e => handleArtworkFileInput(e.target.files?.[0] ?? null)} />
-                      </label>
-                      {uploading && <p className="text-sm text-indigo-600">Se încarcă...</p>}
-                      {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
-                      {/* AVERTISMENT REZOLUȚIE */}
-                      {lowResWarning && (
-                          <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 flex items-start gap-2">
-                              <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-                              <span>Imaginea pare a avea o rezoluție mică. Printul poate ieși pixelat.</span>
-                          </div>
+                    <div className={`space-y-3 ${!input.same_graphic ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : ''}`}>
+                      <p className={`text-sm text-gray-600 ${!input.same_graphic ? 'md:col-span-2' : ''}`}>Încarcă fișierul/fișierele tale (PDF, JPG, TIFF, etc.).</p>
+                      
+                      {/* Upload Față (obligatoriu) */}
+                      <UploadSection 
+                          side="Față" 
+                          currentUrl={artworkUrl} 
+                          handleFile={(file) => handleArtworkFileInput(file, 'front')}
+                          uploadError={uploadError} 
+                          uploading={uploading} 
+                          lowResWarning={lowResWarning} 
+                          checkRes={true}
+                      />
+                      
+                      {/* Upload Verso (condițional) */}
+                      {!input.same_graphic && (
+                          <UploadSection 
+                              side="Verso" 
+                              currentUrl={artworkUrlVerso} 
+                              handleFile={(file) => handleArtworkFileInput(file, 'verso')}
+                              uploadError={uploadError} 
+                              uploading={uploading} 
+                              lowResWarning={false} 
+                              checkRes={false}
+                          />
                       )}
-                      {artworkUrl && !uploadError && !lowResWarning && <p className="text-sm text-green-600 font-semibold">Grafică încărcată cu succes!</p>}
+                      
+                      {/* Taxa pentru grafică diferită */}
+                      {!input.same_graphic && (
+                          <p className="text-xs text-gray-500 mt-2 md:col-span-2">Se aplică o taxă de procesare de {formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.DIFF_GRAPHICS)} pentru grafică diferită.</p>
+                      )}
                     </div>
                   )}
 
                   {input.designOption === 'text_only' && (
-                    <div className="space-y-3">
-                      <label className="field-label">Introdu textul dorit</label>
-                      <textarea className="input" rows={3} value={textDesign} onChange={e => setTextDesign(e.target.value)} placeholder="ex: PROMOTIE, REDUCERI, etc."></textarea>
+                    <div className={`space-y-3 ${!input.same_graphic ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : ''}`}>
+                      {/* Text Față (obligatoriu) */}
+                      <TextOnlySection 
+                          side="Față" 
+                          currentText={textDesign} 
+                          handleTextChange={e => setTextDesign(e.target.value)}
+                      />
+                      
+                      {/* Text Verso (condițional) */}
+                      {!input.same_graphic && (
+                          <TextOnlySection 
+                              side="Verso" 
+                              currentText={textDesignVerso} 
+                              handleTextChange={e => setTextDesignVerso(e.target.value)}
+                          />
+                      )}
+                      
+                      {/* Taxa pentru grafică diferită */}
+                      {!input.same_graphic && (
+                          <p className={`text-xs text-gray-500 mt-2 ${!input.same_graphic ? 'md:col-span-2' : ''}`}>Se aplică o taxă de procesare de {formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.DIFF_GRAPHICS)} pentru texte diferite.</p>
+                      )}
                     </div>
                   )}
 
                   {input.designOption === 'pro' && (
                     <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-sm text-indigo-800">
                       <p className="font-semibold">Serviciu de Grafică Profesională</p>
-                      <p>O echipă de designeri va crea o propunere grafică pentru tine. Vei primi pe email o simulare pentru confirmare. Cost: <strong>{formatMoneyDisplay(BANNER_CONSTANTS.PRO_DESIGN_FEE)}</strong>.</p>
+                      <p>O echipă de designeri va crea o propunere grafică pentru tine. Vei primi pe email o simulare pentru confirmare. Cost: 
+                          <strong> 
+                            {input.same_graphic 
+                              ? formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_SAME) 
+                              : formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_DIFF)}
+                          </strong>.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -512,7 +655,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               <DeliveryEstimation />
             </div>
           </div>
-          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'banner'} /></div>
+          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'banner-verso'} /></div>
         </div>
       </div>
 
@@ -522,12 +665,12 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
             <button className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100" onClick={() => setDetailsOpen(false)} aria-label="Închide">
               <X size={20} className="text-gray-600" />
             </button>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Detalii Produs: Banner</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Detalii Produs: Banner Față-Verso</h3>
             <div className="prose prose-sm max-w-none">
               <h4>Materiale & Durabilitate</h4>
               <ul>
-                <li><strong>Frontlit 440g (Standard):</strong> Material PVC flexibil și rezistent, ideal pentru o gamă largă de aplicații outdoor. Imprimare la calitate foto.</li>
-                <li><strong>Frontlit 510g (Premium):</strong> O versiune mai groasă și mai durabilă, perfectă pentru utilizare pe termen lung sau în condiții meteo mai aspre.</li>
+                <li><strong>Blockout 650g:</strong> Material PVC flexibil și foarte rezistent, cu strat opac (negru) la interior, ideal pentru imprimarea față-verso fără ca imaginea de pe o parte să se vadă pe cealaltă.</li>
+                <li><strong>Imprimare Eco-Solvent:</strong> Cerneluri rezistente la UV și apă, asigurând o durată de viață îndelungată la exterior.</li>
               </ul>
               <h4>Finisaje Incluse</h4>
               <ul>
@@ -540,7 +683,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                 <li>Formate acceptate: PDF, AI, CDR, TIFF, JPG.</li>
                 <li>Rezoluție recomandată: Minimum 150 dpi la scara 1:1.</li>
                 <li>Mod de culoare: CMYK.</li>
-                <li>Vă rugăm să nu includeți semne de tăiere sau bleed.</li>
+                <li>Puteți alege ca grafica să fie **Identică** sau **Diferită** pe cele două fețe.</li>
               </ul>
             </div>
           </div>
