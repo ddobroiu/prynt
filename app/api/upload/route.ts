@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
                     data: { artworkUrl: fileUrl },
                 });
             } catch (dbErr) {
-                console.error('[upload] Failed to update orderItem:', dbErr?.message || dbErr);
+                console.error('[upload] Failed to update orderItem:', (dbErr as any)?.message || dbErr);
                 // Continue — we still return the URL to the client
             }
         }
