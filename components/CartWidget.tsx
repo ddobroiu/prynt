@@ -18,7 +18,7 @@ import { formatMoneyDisplay } from "@/lib/pricing";
 
 // CONSTANTE
 const FREE_SHIPPING_THRESHOLD = 500;
-const STANDARD_SHIPPING_COST = 20;
+const STANDARD_SHIPPING_COST = 0; // Shipping disabled — keep threshold display
 
 export default function CartWidget() {
   const { items, removeItem, updateQuantity, cartTotal, cartCount } = useCart();
@@ -84,7 +84,7 @@ export default function CartWidget() {
         </button>
       </DialogTrigger>
       
-      {/* DIALOG CONTENT - MODIFICAT PENTRU RESPONSIVITATE CORECTĂ */}
+      {/* DIALOG CONTENT - STILURI MOBILE vs. PC */}
       <DialogContent className={`
         // COMMON STYLES
         bg-white p-0 shadow-2xl duration-300 flex flex-col gap-0 focus:outline-none z-[100] [&>button:last-child]:hidden
@@ -97,8 +97,10 @@ export default function CartWidget() {
 
         // PC (md: Override: Sidebar - Full-height, Complet)
         md:!fixed md:!right-0 md:!left-auto md:!top-0 md:!translate-x-0 md:!translate-y-0
-        md:!h-screen md:!max-w-md md:!w-full md:!rounded-none md:!border-l md:border-t-0
+        md:!h-screen md:!max-w-md md:!w-full 
+        md:!rounded-none md:!border-l md:border-t-0 
         md:data-[state=open]:!slide-in-from-right md:data-[state=closed]:!slide-out-to-right
+        md:overflow-hidden // DECIZIV: Asigură că întregul container (DialogContent) nu are scroll pe PC
       `}>
         
         {/* HEADER EXTINS */}
@@ -184,7 +186,7 @@ export default function CartWidget() {
             )}
         </div>
 
-        {/* LISTA PRODUSE */}
+        {/* LISTA PRODUSE - DEVINE ZONA SCROLLABILA PE PC */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-60">
@@ -269,7 +271,7 @@ export default function CartWidget() {
           )}
         </div>
 
-        {/* FOOTER */}
+        {/* FOOTER - FIXAT LA BAZA ECRANULUI PE PC */}
         {items.length > 0 && (
             <div className="border-t border-slate-100 p-6 bg-white shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-10">
                 

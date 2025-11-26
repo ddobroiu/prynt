@@ -131,7 +131,8 @@ export default function CheckoutPage() {
     return norm.reduce((s, it) => s + Number(it.totalAmount || it.unitAmount * it.quantity || 0), 0);
   }, [items]);
 
-  const costLivrare = (items ?? []).length > 0 ? 19.99 : 0;
+  // Shipping disabled
+  const costLivrare = 0;
   const totalPlata = (items ?? []).length > 0 ? subtotal + costLivrare : 0;
   const isEmpty = isLoaded && (items ?? []).length === 0;
 

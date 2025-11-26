@@ -14,7 +14,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Coșul este gol.' }, { status: 400 });
   }
 
-  const costLivrare = 19.99;
+  // Shipping disabled
+  const costLivrare = 0;
 
   try {
     const origin =
