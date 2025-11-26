@@ -193,21 +193,45 @@ export default function CartWidget() {
             items.map((item) => (
               <div key={item.id} className="flex gap-4 group animate-in fade-in slide-in-from-bottom-2 duration-500">
                 
-                {/* IMAGINE PRODUS */}
+                {/* IMAGINE PRODUS - încearcă mai multe câmpuri care pot conține URL-ul imaginii */}
                 <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50 shadow-sm group-hover:shadow-md transition-shadow">
-                   {item.metadata?.artworkUrl ? (
-                       // Use a simple <img> fallback to avoid Next/Image external domain restrictions on mobile
-                       // Next/Image with `fill` requires domains configured; a plain img works reliably in the widget.
-                       <img
-                         src={item.metadata.artworkUrl}
-                         alt={item.title || "Produs"}
-                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                       />
-                   ) : (
-                       <div className="h-full w-full flex flex-col items-center justify-center text-slate-300 bg-slate-50">
+                  {(() => {
+                    const imgSrc =
+                      item.artworkUrl ||
+                      item.image ||
+                      item.src ||
+                      item.imageUrl ||
+                      item.thumbnail ||
+                      item.metadata?.artworkUrl ||
+                      item.metadata?.artworkLink ||
+                      item.metadata?.artwork ||
+                      null;
+
+                    if (!imgSrc) {
+                      return (
+                        <div className="h-full w-full flex flex-col items-center justify-center text-slate-300 bg-slate-50">
                           <div className="font-bold text-xs opacity-40">FOTO</div>
-                       </div>
-                   )}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <img
+                        src={imgSrc}
+                        alt={item.title || "Produs"}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          // dacă imaginea nu se încarcă, afișăm placeholderul
+                          const el = e.currentTarget as HTMLImageElement;
+                          el.onerror = null;
+                          el.src = '';
+                          el.style.objectFit = 'contain';
+                          el.style.background = '#f8fafc';
+                          el.style.display = 'none';
+                        }}
+                      />
+                    );
+                  })()}
                 </div>
 
                 {/* DETALII PRODUS */}
