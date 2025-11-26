@@ -1,5 +1,3 @@
-// components/BannerVersoConfigurator.tsx
-
 "use client";
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useCart } from "@/components/CartContext";
@@ -12,11 +10,11 @@ import Reviews from "./Reviews";
 import DynamicBannerPreview from "./DynamicBannerPreview";
 import ArtworkRatioPreview from "./ArtworkRatioPreview"; 
 import { 
-  calculateBannerVersoPrice, // MODIFICAT: Funcția Verso
-  BANNER_VERSO_CONSTANTS, // MODIFICAT: Constantele Verso
+  calculateBannerVersoPrice, 
+  BANNER_VERSO_CONSTANTS, 
   formatMoneyDisplay, 
   roundMoney,
-  type PriceInputBannerVerso // MODIFICAT: Tipul Verso
+  type PriceInputBannerVerso 
 } from "@/lib/pricing";
 import { QA } from "@/types";
 
@@ -137,19 +135,19 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   const pathname = usePathname();
 
   // --- 1. INITIALIZARE STATE DIN URL SAU DEFAULT ---
-  const [input, setInput] = useState<PriceInputBannerVerso>(() => { // FOLOSIM TIPUL VERSO
+  const [input, setInput] = useState<PriceInputBannerVerso>(() => {
     const pW = searchParams.get("w");
     const pH = searchParams.get("h");
     const pQ = searchParams.get("q");
     const pWind = searchParams.get("wind");
-    const pSame = searchParams.get("same"); // NOU: pentru same_graphic
+    const pSame = searchParams.get("same"); 
 
     return {
       width_cm: pW ? parseInt(pW) : (initW ?? 0),
       height_cm: pH ? parseInt(pH) : (initH ?? 0),
       quantity: pQ ? parseInt(pQ) : 1,
       want_wind_holes: pWind === '1',
-      same_graphic: pSame !== '0', // NOU: Default true
+      same_graphic: pSame !== '0', 
       designOption: "upload"
     };
   });
@@ -164,24 +162,24 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [activeImage, setActiveImage] = useState<string>(galleryImages[0]);
   
-  // NOU: Stări separate pentru Față și Verso
-  const [artworkUrl, setArtworkUrl] = useState<string | null>(null); // FRONT
-  const [artworkUrlVerso, setArtworkUrlVerso] = useState<string | null>(null); // VERSO
+  // --- VIDEO STATE ---
+  const [videoOpen, setVideoOpen] = useState(false);
+
+  const [artworkUrl, setArtworkUrl] = useState<string | null>(null); 
+  const [artworkUrlVerso, setArtworkUrlVerso] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  
-  // State pentru avertisment rezoluție
   const [lowResWarning, setLowResWarning] = useState(false);
 
-  const [textDesign, setTextDesign] = useState<string>(""); // FRONT TEXT
-  const [textDesignVerso, setTextDesignVerso] = useState<string>(""); // VERSO TEXT
+  const [textDesign, setTextDesign] = useState<string>(""); 
+  const [textDesignVerso, setTextDesignVerso] = useState<string>(""); 
   
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
 
-  const priceData = useMemo(() => calculateBannerVersoPrice(input), [input]); // FOLOSIM CALCULATORUL VERSO
+  const priceData = useMemo(() => calculateBannerVersoPrice(input), [input]);
   const displayedTotal = priceData.finalPrice;
 
   const updateInput = <K extends keyof PriceInputBannerVerso>(k: K, v: PriceInputBannerVerso[K]) => setInput((p) => ({ ...p, [k]: v }));
@@ -200,26 +198,20 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       if(d && parseInt(d) > 0) setViewMode('shape');
   };
 
-  // --- 2. URL SYNCHRONIZATION ---
   useEffect(() => {
     const timer = setTimeout(() => {
       const params = new URLSearchParams();
       if (input.width_cm > 0) params.set("w", input.width_cm.toString());
       if (input.height_cm > 0) params.set("h", input.height_cm.toString());
       if (input.quantity > 1) params.set("q", input.quantity.toString());
-      
-      // Parametrii opționali
       if (input.want_wind_holes) params.set("wind", "1");
-      if (!input.same_graphic) params.set("same", "0"); // NOU: Păstrăm starea graficii în URL
-      
-      // Actualizăm URL-ul fără refresh
+      if (!input.same_graphic) params.set("same", "0"); 
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    }, 500); // Debounce 500ms
+    }, 500); 
 
     return () => clearTimeout(timer);
   }, [input, pathname, router]);
 
-  // --- 3. RESOLUTION CHECK FUNCTION ---
   const checkResolution = useCallback((file: File) => {
     setLowResWarning(false);
     if (input.width_cm <= 0 || input.height_cm <= 0) return;
@@ -232,7 +224,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
         const { naturalWidth, naturalHeight } = img;
         const widthInches = input.width_cm / 2.54;
         const heightInches = input.height_cm / 2.54;
-        
         const dpiW = naturalWidth / widthInches;
         const dpiH = naturalHeight / heightInches;
         const avgDpi = (dpiW + dpiH) / 2;
@@ -244,22 +235,18 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
     };
   }, [input.width_cm, input.height_cm]);
   
-  // MODIFICAT: Acceptă un parametru "side"
   const handleArtworkFileInput = async (file: File | null, side: 'front' | 'verso' = 'front') => {
     setUploadError(null);
     setLowResWarning(false); 
 
-    // Reset current side URL on new attempt
     if (side === 'front') setArtworkUrl(null); else setArtworkUrlVerso(null);
 
     if (!file) return;
     try {
-      // Verificăm rezoluția (doar pentru primul fișier sau dacă nu e verso)
       if (side === 'front' || input.same_graphic) {
           checkResolution(file);
       }
 
-      // 1. Previzualizare Locală Imediată
       const previewUrl = URL.createObjectURL(file);
       if (side === 'front' || input.same_graphic) {
           setArtworkUrl(previewUrl); 
@@ -268,14 +255,11 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
           setArtworkUrlVerso(previewUrl);
       }
 
-      // 2. Upload
       setUploading(true);
       const form = new FormData();
       form.append("file", file);
-      // NOU: adăugăm side la upload
       form.append("side", side); 
       const res = await fetch("/api/upload", { method: "POST", body: form });
-      // FIX: Am înlocuit template literal-ul cu concatenare
       if (!res.ok) throw new Error("Upload eșuat pentru " + (side === 'front' ? 'față' : 'verso'));
       const data = await res.json();
       
@@ -285,7 +269,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
           setArtworkUrlVerso(data.url);
       }
     } catch (e: any) {
-      // FIX: Am înlocuit template literal-ul cu concatenare
       setUploadError(e?.message ?? ("Eroare la upload pentru " + (side === 'front' ? 'față' : 'verso')));
     } finally {
       setUploading(false);
@@ -293,7 +276,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   };
 
   function handleAddToCart() {
-    // VALIDARE RĂMASĂ: Dimensiuni și preț pozitiv
     if (!input.width_cm || !input.height_cm) {
       setErrorToast("Te rugăm să completezi lungimea și înălțimea.");
       setTimeout(() => setErrorToast(null), 1600);
@@ -304,23 +286,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       setTimeout(() => setErrorToast(null), 1600);
       return;
     }
-    
-    // VALIDARE ELIMINATĂ: Nu mai verificăm dacă grafica sau textul sunt încărcate/completate
-    // Această logică este eliminată conform cererii utilizatorului:
-    /*
-    if (input.designOption === 'upload' && !artworkUrl) {
-      setErrorToast("Te rugăm să încarci grafica pentru Față."); return;
-    }
-    if (input.designOption === 'upload' && !input.same_graphic && !artworkUrlVerso) {
-      setErrorToast("Te rugăm să încarci grafica pentru Verso."); return;
-    }
-    if (input.designOption === 'text_only' && !textDesign.trim()) {
-      setErrorToast("Te rugăm să introduci textul pentru Față."); return;
-    }
-    if (input.designOption === 'text_only' && !input.same_graphic && !textDesignVerso.trim()) {
-      setErrorToast("Te rugăm să introduci textul pentru Verso."); return;
-    }
-    */
     
     const unitPrice = roundMoney(displayedTotal / input.quantity);
     const uniqueId = `${productSlug ?? 'banner-verso'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -334,23 +299,15 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
         
     const graphicsDetail = input.same_graphic ? "Identică" : "Diferită";
 
-    // Build metadata object
     const metadata: Record<string, any> = {
       "Material": "Blockout (Față-Verso)",
       "Finisaje": `Tiv și capse, ${input.want_wind_holes ? "cu găuri de vânt" : "fără găuri de vânt"}`,
       "Grafică": `${graphicMeta} (${graphicsDetail})`,
       
-      // Costul de grafică
       ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(priceData.proFee) }),
-      
-      // Conținutul Față
       ...(input.designOption === 'text_only' ? { "Text Față": textDesign } : { "Grafică Față": artworkUrl }),
-      
-      // Conținutul Verso (dacă nu e identic)
       ...(!input.same_graphic && input.designOption === 'text_only' && { "Text Verso": textDesignVerso }),
       ...(!input.same_graphic && input.designOption === 'upload' && { "Grafică Verso": artworkUrlVerso }),
-      
-      // Taxa pentru grafică diferită (doar dacă e încărcare proprie / text) - RAMANE IN METADATA
       ...(!input.same_graphic && input.designOption !== 'pro' && { "Taxă Grafică Diferită": formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.DIFF_GRAPHICS) }),
     };
 
@@ -371,7 +328,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   }
 
   useEffect(() => {
-    // Facem autoplay la galerie doar dacă NU avem o grafică încărcată pe față
     if (viewMode !== 'gallery' || artworkUrl) return;
     
     const id = setInterval(() => {
@@ -389,8 +345,8 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   const summaryStep2 = `Blockout, ${input.want_wind_holes ? "cu găuri" : "fără găuri"}`;
   const summaryStep3 = input.designOption === 'upload' ? `Grafică proprie (${input.same_graphic ? 'Identică' : 'Diferită'})` : input.designOption === 'text_only' ? `Doar text (${input.same_graphic ? 'Identic' : 'Diferit'})` : `Design Pro (${input.same_graphic ? 'Identic' : 'Diferit'})`;
 
-  // Componentă reutilizabilă pentru Upload
-  const UploadSection = ({ side, currentUrl, handleFile, uploadError, uploading, lowResWarning, checkRes }: { side: 'Față' | 'Verso', currentUrl: string | null, handleFile: (file: File | null) => Promise<void>, uploadError: string | null, uploading: boolean, lowResWarning: boolean, checkRes: boolean }) => (
+  // --- HELPER COMPONENTS RENDER ---
+  const renderUploadSection = (side: 'Față' | 'Verso', currentUrl: string | null, handleFile: (f: File | null) => Promise<void>, isLowRes: boolean, doCheck: boolean) => (
     <div className="space-y-3 p-4 border border-gray-200 rounded-lg">
       <p className="text-sm font-semibold text-gray-700">{side}</p>
       <label className="flex flex-col items-center justify-center w-full h-24 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
@@ -402,18 +358,17 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       </label>
       {uploading && <p className="text-sm text-indigo-600">Se încarcă...</p>}
       {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
-      {checkRes && lowResWarning && (
+      {doCheck && isLowRes && (
           <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 flex items-start gap-2">
               <AlertTriangle size={14} className="mt-0.5 shrink-0" />
               <span>Imaginea pare a avea o rezoluție mică. Printul poate ieși pixelat.</span>
           </div>
       )}
-      {currentUrl && !uploadError && (!checkRes || !lowResWarning) && <p className="text-sm text-green-600 font-semibold">Grafică {side} încărcată cu succes!</p>}
+      {currentUrl && !uploadError && (!doCheck || !isLowRes) && <p className="text-sm text-green-600 font-semibold">Grafică {side} încărcată cu succes!</p>}
     </div>
   );
-  
-  // Componentă reutilizabilă pentru Text Only
-  const TextOnlySection = ({ side, currentText, handleTextChange }: { side: 'Față' | 'Verso', currentText: string, handleTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void }) => (
+
+  const renderTextOnlySection = (side: 'Față' | 'Verso', currentText: string, handleTextChange: (e: any) => void) => (
     <div className="space-y-3 p-4 border border-gray-200 rounded-lg">
       <label className="field-label">{side} - Introdu textul dorit</label>
       <textarea 
@@ -426,43 +381,16 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
     </div>
   );
 
-  // NOU: Comutatorul de Grafică
-  const GraphicTypeSwitch = ({ sameGraphic, setSameGraphic }: { sameGraphic: boolean; setSameGraphic: (v: boolean) => void }) => (
-    <div className="mb-4 p-4 rounded-lg border border-gray-300 bg-white shadow-sm">
-        <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-gray-800">
-                Tip Grafică:
-            </span>
-            <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                    type="checkbox" 
-                    className="sr-only peer" 
-                    checked={!sameGraphic} // TRUE = Grafica Diferă
-                    onChange={(e) => updateInput("same_graphic", !e.target.checked)} // Când este bifat, sameGraphic devine FALSE
-                />
-                {/* Switch UI */}
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                
-                {/* Text Indicator */}
-                <span className="ml-3 text-sm font-medium text-gray-700">
-                    {sameGraphic ? "Identică (O singură față)" : "Diferită (Față & Verso)"}
-                </span>
-            </label>
-        </div>
-    </div>
-  );
-
-
   return (
     <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
       <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
         Produs adăugat în coș
       </div>
-      <div className="container mx-auto px-4 py-6 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      <div className="container mx-auto px-4 py-10 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
-          {/* STÂNGA - ZONA VIZUALĂ (Păstrată, folosește artworkUrl pentru preview) */}
-          <div className="lg:sticky top-24 h-max space-y-6 lg:space-y-8">
+          {/* STÂNGA - ZONA VIZUALĂ */}
+          <div className="lg:sticky top-24 h-max space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
               
               <div className="flex border-b border-gray-100 overflow-x-auto">
@@ -472,7 +400,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                     >
                       <ImageIcon size={16} /> 
                       <span className="hidden sm:inline">Galerie</span>
-                      <span className="sm:hidden">Foto</span>
                   </button>
                     <button 
                       onClick={() => setViewMode('shape')}
@@ -480,7 +407,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                     >
                       <Ruler size={16} /> 
                       <span className="hidden sm:inline">Schiță Tehnică</span>
-                      <span className="sm:hidden">Schiță</span>
                   </button>
               </div>
 
@@ -505,33 +431,13 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                             type="button"
                             onClick={() => setVideoOpen(true)}
                             aria-label="Vezi Video Prezentare"
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-red-600 text-white text-xs sm:text-sm font-bold shadow-lg hover:bg-red-700 transform hover:-translate-y-0.5 transition-all"
+                            className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-bold shadow-lg hover:bg-red-700 transform hover:-translate-y-0.5 transition-all"
                           >
-                            <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                            <span>Video</span>
+                            <PlayCircle className="w-5 h-5 text-white" />
+                            <span>Vezi Video Prezentare</span>
                           </button>
                         </div>
                     </>
-                  )}
-                  {videoOpen && (
-                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300" onClick={() => setVideoOpen(false)}>
-                      <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10" onClick={e => e.stopPropagation()}>
-                        <button
-                          className="absolute right-4 top-4 p-2 rounded-full bg-white/20 text-white hover:bg-white/40"
-                          onClick={() => setVideoOpen(false)}
-                          aria-label="Închide video"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                        <iframe 
-                          src="https://www.youtube.com/embed/yTnqcz6RJ-4?autoplay=1&start=22&rel=0&modestbranding=1" 
-                          title="Video Prezentare Banner" 
-                          allow="autoplay; encrypted-media" 
-                          allowFullScreen
-                          className="w-full h-full rounded-2xl border-none"
-                        ></iframe>
-                      </div>
-                    </div>
                   )}
                   
                   {viewMode === 'shape' && (
@@ -551,21 +457,14 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
               </div>
               
               {viewMode === 'gallery' && (
-                <div className="p-2 grid grid-cols-4 gap-2">
-                  {galleryImages.map((src, i) => (
-                      <button 
-                          key={src} 
-                          onClick={() => { 
-                              setActiveImage(src); 
-                              setActiveIndex(i); 
-                          }} 
-                          className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}
-                      >
-                          <img src={src} alt="Thumb" className="w-full h-full object-cover" />
-                      </button>
-                  ))}
+                <div className="p-2">
+                  <div className="grid grid-cols-4 gap-2">
+                    {galleryImages.map((src, i) => (
+                      <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>
+                    ))}
+                  </div>
                 </div>
-              )}
+                )}
             </div>
             <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'banner-verso'} /></div>
           </div>
@@ -573,12 +472,9 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
           {/* DREAPTA - CONFIGURATOR */}
           <div>
             <header className="mb-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-3">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Configurator Banner Față-Verso</h1>
-                <BannerModeSwitchInline />
-              </div>
+              <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Banner Față-Verso</h1><BannerModeSwitchInline /></div>
               <div className="flex justify-between items-center">
-                <p className="text-sm sm:text-base text-gray-600">Personalizează opțiunile în 3 pași simpli.</p>
+                <p className="text-gray-600">Personalizează opțiunile în 3 pași simpli.</p>
                 <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5">
                   <Info size={16} />
                   <span className="ml-2">Detalii</span>
@@ -587,11 +483,10 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
             </header>
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4">
               <AccordionStep stepNumber={1} title="Dimensiuni & Cantitate" summary={summaryStep1} isOpen={activeStep === 1} onClick={() => setActiveStep(1)}>
-                {/* OPTIMIZARE MOBIL: Grid 2 coloane mereu pentru dimensiuni */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div><label className="field-label">Lungime (cm)</label><input type="text" inputMode="decimal" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="200" className="input" /></div>
-                  <div><label className="field-label">Înălțime (cm)</label><input type="text" inputMode="decimal" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="100" className="input" /></div>
-                  <div className="col-span-2"><NumberInput label="Cantitate" value={input.quantity} onChange={setQty} /></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div><label className="field-label">Lungime (cm)</label><input type="text" inputMode="numeric" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="200" className="input" /></div>
+                  <div><label className="field-label">Înălțime (cm)</label><input type="text" inputMode="numeric" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="100" className="input" /></div>
+                  <div className="md:col-span-2"><NumberInput label="Cantitate" value={input.quantity} onChange={setQty} /></div>
                 </div>
               </AccordionStep>
               {/* Pasul 2 adaptat pentru Verso (material fix) */}
@@ -602,22 +497,38 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                         Bannerele Față-Verso sunt realizate exclusiv din material Blockout 650g, special conceput pentru opacitate 100%. Finisajele (tiv și capse) sunt incluse.
                     </p>
                 </div>
-                <label className="flex items-center gap-3 py-2 cursor-pointer touch-manipulation">
-                    <input type="checkbox" className="checkbox w-5 h-5" checked={input.want_wind_holes} onChange={(e) => updateInput("want_wind_holes", e.target.checked)} />
-                    <span className="text-sm font-medium text-gray-700">Adaugă găuri pentru vânt</span>
-                </label>
+                <label className="flex items-center gap-3 py-2 cursor-pointer"><input type="checkbox" className="checkbox" checked={input.want_wind_holes} onChange={(e) => updateInput("want_wind_holes", e.target.checked)} /><span className="text-sm font-medium text-gray-700">Adaugă găuri pentru vânt</span></label>
               </AccordionStep>
               <AccordionStep stepNumber={3} title="Grafică" summary={summaryStep3} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
                 <div>
-                  
-                  {/* COMUTATOR NOU PENTRU GRAFICĂ IDENTICĂ/DIFERITĂ */}
-                  <GraphicTypeSwitch 
-                      sameGraphic={input.same_graphic} 
-                      setSameGraphic={(v) => updateInput("same_graphic", v)} 
-                  />
+                  <div className="mb-4">
+                      {/* NOU: Selector Grafică Identică / Diferită (Buton Switch) */}
+                      <div className="mb-4 p-4 rounded-lg border border-gray-300 bg-white shadow-sm">
+                          <div className="flex items-center justify-between">
+                              <span className="text-sm font-semibold text-gray-800">
+                                  Tip Grafică:
+                              </span>
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                  <input 
+                                      type="checkbox" 
+                                      className="sr-only peer" 
+                                      checked={!input.same_graphic} // TRUE = Grafica Diferă
+                                      onChange={(e) => updateInput("same_graphic", !e.target.checked)} // Când este bifat, sameGraphic devine FALSE
+                                  />
+                                  {/* Switch UI */}
+                                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                  
+                                  {/* Text Indicator */}
+                                  <span className="ml-3 text-sm font-medium text-gray-700">
+                                      {input.same_graphic ? "Identică (Aceeași pe ambele fețe)" : "Diferită (Fețe diferite)"}
+                                  </span>
+                              </label>
+                          </div>
+                      </div>
+                  </div>
                   
                   <div className="mb-4 border-b border-gray-200">
-                    <div className="flex -mb-px overflow-x-auto no-scrollbar">
+                    <div className="flex -mb-px">
                       <TabButton active={input.designOption === 'upload'} onClick={() => updateInput("designOption", 'upload')}>Am Grafică</TabButton>
                       <TabButton active={input.designOption === 'text_only'} onClick={() => updateInput("designOption", 'text_only')}>Doar Text</TabButton>
                       <TabButton active={input.designOption === 'pro'} onClick={() => updateInput("designOption", 'pro')}>Vreau Grafică</TabButton>
@@ -628,50 +539,18 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                     <div className={`space-y-3 ${!input.same_graphic ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : ''}`}>
                       <p className={`text-sm text-gray-600 ${!input.same_graphic ? 'md:col-span-2' : ''}`}>Încarcă fișierul/fișierele tale (PDF, JPG, TIFF, etc.).</p>
                       
-                      {/* Upload Față (obligatoriu) */}
-                      <UploadSection 
-                          side="Față" 
-                          currentUrl={artworkUrl} 
-                          handleFile={(file) => handleArtworkFileInput(file, 'front')}
-                          uploadError={uploadError} 
-                          uploading={uploading} 
-                          lowResWarning={lowResWarning} 
-                          checkRes={true}
-                      />
+                      {renderUploadSection('Față', artworkUrl, (f) => handleArtworkFileInput(f, 'front'), lowResWarning, true)}
                       
-                      {/* Upload Verso (condițional) */}
-                      {!input.same_graphic && (
-                          <UploadSection 
-                              side="Verso" 
-                              currentUrl={artworkUrlVerso} 
-                              handleFile={(file) => handleArtworkFileInput(file, 'verso')}
-                              uploadError={uploadError} 
-                              uploading={uploading} 
-                              lowResWarning={false} 
-                              checkRes={false}
-                          />
-                      )}
+                      {!input.same_graphic && renderUploadSection('Verso', artworkUrlVerso, (f) => handleArtworkFileInput(f, 'verso'), false, false)}
                       
                     </div>
                   )}
 
                   {input.designOption === 'text_only' && (
                     <div className={`space-y-3 ${!input.same_graphic ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : ''}`}>
-                      {/* Text Față (obligatoriu) */}
-                      <TextOnlySection 
-                          side="Față" 
-                          currentText={textDesign} 
-                          handleTextChange={e => setTextDesign(e.target.value)}
-                      />
+                      {renderTextOnlySection('Față', textDesign, e => setTextDesign(e.target.value))}
                       
-                      {/* Text Verso (condițional) */}
-                      {!input.same_graphic && (
-                          <TextOnlySection 
-                              side="Verso" 
-                              currentText={textDesignVerso} 
-                              handleTextChange={e => setTextDesignVerso(e.target.value)}
-                          />
-                      )}
+                      {!input.same_graphic && renderTextOnlySection('Verso', textDesignVerso, e => setTextDesignVerso(e.target.value))}
                       
                     </div>
                   )}
@@ -682,8 +561,8 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                       <p>O echipă de designeri va crea o propunere grafică pentru tine. Vei primi pe email o simulare pentru confirmare. Cost: 
                           <strong> 
                             {input.same_graphic 
-                              ? formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_SAME) // 50 RON
-                              : formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_DIFF)} // 100 RON
+                              ? formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_SAME) 
+                              : formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_DIFF)}
                           </strong>.
                       </p>
                     </div>
@@ -691,7 +570,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                 </div>
               </AccordionStep>
             </div>
-            
             <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
               <div className="flex justify-between items-center mb-2">
                 <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
@@ -706,12 +584,12 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
 
       {detailsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetailsOpen(false)}>
-          <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <button className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100 bg-gray-50" onClick={() => setDetailsOpen(false)} aria-label="Închide">
+          <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8" onClick={e => e.stopPropagation()}>
+            <button className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100" onClick={() => setDetailsOpen(false)} aria-label="Închide">
               <X size={20} className="text-gray-600" />
             </button>
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 pr-8">Detalii Produs: Banner Față-Verso</h3>
-            <div className="prose prose-sm max-w-none text-gray-600">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Detalii Produs: Banner Față-Verso</h3>
+            <div className="prose prose-sm max-w-none">
               <h4>Materiale & Durabilitate</h4>
               <ul>
                 <li><strong>Blockout 650g:</strong> Material PVC flexibil și foarte rezistent, cu strat opac (negru) la interior, ideal pentru imprimarea față-verso fără ca imaginea de pe o parte să se vadă pe cealaltă.</li>
@@ -740,7 +618,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
         <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300" onClick={() => setVideoOpen(false)}>
             <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10" onClick={e => e.stopPropagation()}>
                 <button 
-                    className="absolute top-4 right-4 p-2 rounded-full bg-white/20 text-white hover:bg-white/40"
+                    className="absolute top-4 right-4 text-white/70 hover:text-white z-20 bg-black/60 hover:bg-black/80 rounded-full p-2 transition-all backdrop-blur-sm"
                     onClick={() => setVideoOpen(false)}
                 >
                     <X size={24} />
@@ -753,7 +631,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                     frameBorder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     allowFullScreen
-                    className="w-full h-full rounded-2xl border-none"
+                    className="w-full h-full"
                 ></iframe>
             </div>
         </div>
