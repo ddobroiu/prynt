@@ -18,7 +18,7 @@ import { formatMoneyDisplay } from "@/lib/pricing";
 
 // CONSTANTE
 const FREE_SHIPPING_THRESHOLD = 500;
-const STANDARD_SHIPPING_COST = 0; // Shipping disabled — keep threshold display
+const STANDARD_SHIPPING_COST = 19.99; // Standard shipping fee when below threshold
 
 export default function CartWidget() {
   const { items, removeItem, updateQuantity, cartTotal, cartCount } = useCart();

@@ -6,7 +6,7 @@ import ReturningCustomerLogin from "@/components/ReturningCustomerLogin";
 import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../../components/CartContext";
-import { ShieldCheck, Truck, X } from "lucide-react";
+import { ShieldCheck, Truck, X, Plus, Minus } from "lucide-react";
 import CheckoutForm from "./CheckoutForm";
 import DeliveryInfo from "@/components/DeliveryInfo";
 
@@ -131,8 +131,10 @@ export default function CheckoutPage() {
     return norm.reduce((s, it) => s + Number(it.totalAmount || it.unitAmount * it.quantity || 0), 0);
   }, [items]);
 
-  // Shipping disabled
-  const costLivrare = 0;
+  // Shipping: free above threshold, otherwise standard fee
+  const FREE_SHIPPING_THRESHOLD = 500;
+  const SHIPPING_FEE = 19.99;
+  const costLivrare = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
   const totalPlata = (items ?? []).length > 0 ? subtotal + costLivrare : 0;
   const isEmpty = isLoaded && (items ?? []).length === 0;
 
@@ -486,6 +488,8 @@ function SummaryCard({
 function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemove: (id: string) => void }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
+  const { updateQuantity } = useCart();
+
   // Map chei metadata -> etichete prietenoase
   const labelForKey: Record<string, string> = {
     width: "Lățime (cm)",
@@ -622,7 +626,25 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold truncate pr-2">{title}</p>
-                  <span className="text-muted text-sm">x{qty}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="inline-flex items-center border border-white/10 rounded-lg overflow-hidden bg-white/5">
+                      <button
+                        onClick={() => updateQuantity(item.id, Math.max(1, qty - 1))}
+                        className="px-2 py-1 text-sm hover:bg-white/10"
+                        aria-label="Scade cantitate"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <div className="px-3 text-sm font-bold">{qty}</div>
+                      <button
+                        onClick={() => updateQuantity(item.id, qty + 1)}
+                        className="px-2 py-1 text-sm hover:bg-white/10"
+                        aria-label="Crește cantitate"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 {renderDetails(item)}
                 <div className="mt-1 text-sm text-muted">

@@ -14,8 +14,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Coșul este gol.' }, { status: 400 });
   }
 
-  // Shipping disabled
-  const costLivrare = 0;
+  // Shipping: free above threshold, otherwise standard fee
+  const FREE_SHIPPING_THRESHOLD = 500;
+  const SHIPPING_FEE = 19.99;
+  const subtotal = (cart ?? []).reduce((s: number, it: any) => s + (Number(it.unitAmount ?? it.price ?? 0) * Number(it.quantity ?? 1)), 0);
+  const costLivrare = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
 
   try {
     const origin =
@@ -28,13 +31,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'STRIPE_SECRET_KEY nu este setat' }, { status: 500 });
     }
     const stripe = new Stripe(secret);
+    // Avoid sending large blobs to Stripe metadata (limit 500 chars per value).
+    // Send a compact summary instead and include an address email for reference.
+    const safeCartItems = JSON.stringify((cart ?? []).map((it: any) => ({ id: it.id, name: it.name, quantity: it.quantity })));
     const metadata: Record<string, string> = {
-      cart: JSON.stringify(cart),
-      address: JSON.stringify(address),
-      billing: JSON.stringify(billing),
+      cart_count: String((cart ?? []).length),
+      subtotal: String(Math.round(subtotal * 100)),
+      cart_items: safeCartItems.length > 450 ? safeCartItems.slice(0, 450) : safeCartItems,
+      address_email: address?.email || '',
+      billing_method: billing?.method || '',
     };
-    if (marketing) {
-      try { metadata.marketing = JSON.stringify(marketing); } catch {}
+    if (marketing && typeof marketing === 'object') {
+      try {
+        const m = JSON.stringify(marketing);
+        if (m.length <= 450) metadata.marketing = m;
+      } catch {}
     }
 
     const session = await stripe.checkout.sessions.create({

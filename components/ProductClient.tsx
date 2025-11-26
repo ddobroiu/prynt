@@ -126,7 +126,7 @@ export default function ProductClient({
       </div>
 
       <div style={{ marginTop: 12 }}>
-        <DeliveryInfo shippingFrom={0} />
+        <DeliveryInfo shippingFrom={19.99} />
       </div>
     </div>
   );
