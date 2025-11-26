@@ -1,3 +1,5 @@
+// components/BannerConfigurator.tsx
+
 "use client";
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useCart } from "@/components/CartContext";
@@ -314,8 +316,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const summaryStep3 = input.designOption === 'upload' ? 'Grafică proprie' : input.designOption === 'text_only' ? 'Doar text' : 'Design Pro';
 
   return (
-    // Adaugat pb-40 pentru a face loc barei fixe pe mobil
-    <main className={renderOnlyConfigurator ? "pb-32 lg:pb-0" : "bg-gray-50 min-h-screen pb-40 lg:pb-16"}>
+    // MODIFICAT: Eliminat clasele de padding pb-32, pb-40, lg:pb-16
+    <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
       <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
         Produs adăugat în coș
       </div>
@@ -453,7 +455,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                 {/* OPTIMIZARE MOBIL: Grid 2 coloane mereu pentru dimensiuni */}
                 <div className="grid grid-cols-2 gap-4">
                   <div><label className="field-label">Lungime (cm)</label><input type="text" inputMode="decimal" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="200" className="input" /></div>
-                  <div><label className="field-label">Înălțime (cm)</label><input type="text" inputMode="decimal" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="100" className="input" /></div>
+                  <div><label className="field-label">Înălțime (cm)</label><input type="text" inputMode="decimal" value={heightText} onChange={(e) => onChangeLength(e.target.value)} placeholder="100" className="input" /></div>
                   <div className="col-span-2"><NumberInput label="Cantitate" value={input.quantity} onChange={setQty} /></div>
                 </div>
               </AccordionStep>
@@ -463,9 +465,15 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                     <OptionButton active={input.material === "frontlit_440"} onClick={() => updateInput("material", "frontlit_440")} title="Frontlit 440g" subtitle="Standard" />
                     <OptionButton active={input.material === "frontlit_510"} onClick={() => updateInput("material", "frontlit_510")} title="Frontlit 510g" subtitle="Premium" />
                 </div>
+                {/* MODIFICARE SOLICITATĂ: Informații despre finisajele standard (tiv și capse) */}
+                <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                    <p className="text-sm font-semibold text-gray-800">
+                        Finisaje Standard: Tiv perimetral și capse metalice de prindere (incluse în preț).
+                    </p>
+                </div>
                 <label className="flex items-center gap-3 py-2 cursor-pointer touch-manipulation">
                     <input type="checkbox" className="checkbox w-5 h-5" checked={input.want_wind_holes} onChange={(e) => updateInput("want_wind_holes", e.target.checked)} />
-                    <span className="text-sm font-medium text-gray-700">Adaugă găuri pentru vânt</span>
+                    <span className="text-sm font-medium text-gray-700">Adaugă găuri pentru vânt (Mesh)</span>
                 </label>
               </AccordionStep>
               <AccordionStep stepNumber={3} title="Grafică" summary={summaryStep3} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
@@ -517,28 +525,17 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               </AccordionStep>
             </div>
             
-            {/* BARĂ DE ACȚIUNE - OPTIMIZATĂ PENTRU MOBIL (FIXED) */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] lg:static lg:shadow-none lg:border-t-2 lg:bg-transparent lg:backdrop-blur-none lg:p-6 lg:mt-8 lg:rounded-2xl lg:border-gray-200 safe-area-bottom">
-              <div className="container mx-auto max-w-7xl lg:px-0">
-                  <div className="flex justify-between items-center gap-4">
-                    <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">Total estimat</span>
-                        <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-none">{formatMoneyDisplay(displayedTotal)}</p>
-                    </div>
-                    <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary flex-1 max-w-xs py-3.5 text-base font-bold shadow-lg shadow-indigo-200 active:scale-95 transition-transform">
-                        <div className="flex items-center justify-center gap-2">
-                            <ShoppingCart size={20} />
-                            <span>Adaugă</span>
-                        </div>
-                    </button>
-                  </div>
-                  <div className="mt-2 hidden lg:block">
-                     <DeliveryEstimation />
-                  </div>
+            {/* REVENIT LA BARĂ STATICĂ/STICKY */}
+            <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
+                <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
               </div>
+              <DeliveryEstimation />
             </div>
           </div>
-          <div className="lg:hidden col-span-1 pb-10"><ProductTabs productSlug={productSlug || 'banner'} /></div>
+          {/* ELIMINAT padding-ul pb-10 */}
+          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'banner'} /></div>
         </div>
       </div>
 
