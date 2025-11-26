@@ -97,91 +97,85 @@ export default function CartWidget() {
         }
       >
         
-        {/* HEADER EXTINS */}
-        <div className="bg-white shrink-0 sticky top-0 z-20 border-b border-slate-100 shadow-sm">
-            {/* Titlu + BUTON X VIZIBIL */}
-            <div className="px-6 pt-6 pb-3 flex items-center justify-between">
-                <DialogTitle className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-                    Coșul Tău <span className="text-slate-400 text-sm font-medium font-sans">({cartCount})</span>
-                </DialogTitle>
-                
-                {/* Buton Închidere Custom & Vizibil */}
-                <button 
-                  onClick={() => setIsOpen(false)} 
-                  className="p-2 bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 rounded-full transition-all duration-200 border border-transparent hover:border-red-100 group"
-                  aria-label="Închide coșul"
-                >
-                  <X size={24} className="group-hover:scale-110 transition-transform" />
-                </button>
-            </div>
+        {/* HEADER EXTINS - COMPACT: titlu + buton PDF în aceeași zonă pentru un bloc continuu */}
+        <div className="shrink-0 sticky top-0 z-20 border-b border-slate-100 bg-white">
+          <div className="px-4 pt-4 pb-3 flex items-center justify-between">
+            <DialogTitle className="text-lg md:text-xl font-extrabold text-slate-900 flex items-center gap-2">
+              Coșul Tău <span className="text-slate-500 text-sm font-medium font-sans">({cartCount})</span>
+            </DialogTitle>
 
-            {/* ZONA BUTON PDF */}
-            {items.length > 0 && (
-                <div className="px-6 pb-5">
-                    <button 
-                        onClick={exportOfferPdfServer}
-                        disabled={isGeneratingPdf}
-                        className="w-full py-3 px-4 bg-gradient-to-r from-indigo-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 text-indigo-700 border border-indigo-100 hover:border-indigo-200 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 group active:scale-95 shadow-sm"
-                    >
-                        {isGeneratingPdf ? (
-                            <span className="animate-pulse flex items-center gap-2">Se generează...</span>
-                        ) : (
-                            <>
-                                <div className="bg-white p-1 rounded-md shadow-sm">
-                                   <FileText size={16} className="text-indigo-600" /> 
-                                </div>
-                                Descarcă Ofertă PDF
-                            </>
-                        )}
-                    </button>
-                </div>
-            )}
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-full transition-all duration-200 border border-transparent hover:border-slate-200"
+              aria-label="Închide coșul"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {items.length > 0 && (
+            <div className="px-4 pb-4">
+              <button
+                onClick={exportOfferPdfServer}
+                disabled={isGeneratingPdf}
+                className="w-full py-2 px-3 bg-white text-indigo-700 border border-indigo-100 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:bg-indigo-50"
+              >
+                {isGeneratingPdf ? (
+                  <span className="animate-pulse flex items-center gap-2">Se generează...</span>
+                ) : (
+                  <>
+                    <div className="bg-indigo-50 p-1 rounded-md">
+                      <FileText size={16} className="text-indigo-600" />
+                    </div>
+                    Descarcă Ofertă PDF
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* FREE SHIPPING BAR - Stil Modernizat */}
-        <div className="px-6 py-5 bg-slate-50/50 border-b border-slate-100 shrink-0">
-            {remainingForFreeShipping > 0 ? (
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                        <div className="bg-indigo-100 p-1.5 rounded-full text-indigo-600">
-                           <Truck size={14} /> 
-                        </div>
-                        Livrare Gratuită
-                      </span>
-                      <span className="text-xs text-slate-500 font-semibold bg-slate-100 px-2 py-1 rounded-lg">
-                        încă <span className="text-slate-900">{formatMoneyDisplay(remainingForFreeShipping)}</span>
-                      </span>
-                    </div>
-                    
-                    <div className="relative h-3 w-full bg-slate-100 rounded-full overflow-hidden inner-shadow">
-                        <div 
-                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-1000 ease-out rounded-full shadow-[0_0_15px_rgba(99,102,241,0.4)]"
-                            style={{ width: `${progressPercent}%` }}
-                        >
-                           {/* Shine Effect */}
-                           <div className="absolute top-0 left-0 w-full h-full bg-white/20 animate-pulse"></div>
-                        </div>
-                    </div>
-                    <p className="text-[10px] text-center text-slate-400 mt-2 font-medium">
-                       Adaugă produse de 500 RON pentru transport 0.
-                    </p>
-                </div>
-            ) : (
-                <div className="flex items-center gap-4 text-emerald-800 bg-emerald-50/80 p-4 rounded-2xl border border-emerald-100 shadow-sm">
-                    <div className="p-2.5 bg-white rounded-full shadow-sm ring-4 ring-emerald-100">
-                        <Gift className="h-6 w-6 text-emerald-500" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-extrabold">Felicitări!</p>
-                        <p className="text-xs font-medium opacity-90">Beneficiezi de Livrare Gratuită.</p>
-                    </div>
-                </div>
-            )}
+        {/* FREE SHIPPING BAR - integrated style so it looks like a single block on mobile */}
+        <div className="px-4 py-4 border-b border-slate-100 shrink-0">
+          {remainingForFreeShipping > 0 ? (
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                  <div className="bg-indigo-100 p-1.5 rounded-full text-indigo-600">
+                    <Truck size={14} />
+                  </div>
+                  Livrare Gratuită
+                </span>
+                <span className="text-xs text-slate-600 font-semibold bg-slate-100 px-2 py-1 rounded-lg">
+                  încă <span className="text-slate-900">{formatMoneyDisplay(remainingForFreeShipping)}</span>
+                </span>
+              </div>
+
+              <div className="relative h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-700 ease-out rounded-full"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <p className="text-[11px] text-left text-slate-500 mt-2">
+                Adaugă produse de 500 RON pentru transport 0.
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 text-emerald-800 p-2">
+              <div className="p-2 bg-emerald-50 rounded-full">
+                <Gift className="h-5 w-5 text-emerald-500" />
+              </div>
+              <div>
+                <p className="text-sm font-extrabold text-slate-800">Felicitări!</p>
+                <p className="text-xs font-medium text-slate-600">Beneficiezi de Livrare Gratuită.</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* LISTA PRODUSE - DEVINE ZONA SCROLLABILA PE PC */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-white">
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-60">
               <div className="h-24 w-24 bg-slate-50 rounded-full flex items-center justify-center">
