@@ -82,16 +82,21 @@ export default function CartWidget() {
         </button>
       </DialogTrigger>
       
-      {/* DIALOG CONTENT - STILURI ADAPTATE DARK MODE */}
+      {/* DIALOG CONTENT - STILURI ADAPTATE DARK MODE SI MOBIL MODERN */}
       <DialogContent
         className={
           "p-0 shadow-2xl duration-300 flex flex-col gap-0 focus:outline-none z-50 [&>button:last-child]:hidden " +
           // CULORI EXPLICITE DARK MODE
-          "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 " +
-          // Mobile: centered modal
-          "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm max-h-[95vh] h-auto overflow-y-auto rounded-xl " +
-          // Desktop: sidebar
-          "md:fixed md:inset-y-0 md:right-0 md:left-auto md:translate-x-0 md:translate-y-0 md:h-screen md:max-w-md md:w-full md:rounded-none md:border-l md:border-t-0 md:overflow-hidden"
+          "bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 " +
+          // POZIȚIONARE MODERNĂ (SLIDE FROM RIGHT)
+          // Mobile & Desktop: Ancorat dreapta, full height
+          "fixed inset-y-0 right-0 h-full overflow-hidden " +
+          // DIMENSIUNI
+          // Mobile: 90vw (90% lățime), Desktop: max-w-md
+          "w-[90vw] md:w-full md:max-w-md " +
+          // STILURI
+          // Mobile: colțuri stânga rotunjite pentru aspect modern. Desktop: drept.
+          "rounded-l-2xl md:rounded-none"
         }
       >
         
