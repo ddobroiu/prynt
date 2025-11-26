@@ -71,7 +71,8 @@ export default function CheckoutPage() {
   const [placing, setPlacing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showEmbed, setShowEmbed] = useState(false);
-  const [createAccount, setCreateAccount] = useState(false);
+  // Default to checked for anonymous users; users can uncheck if they want.
+  const [createAccount, setCreateAccount] = useState(true);
 
   const firstInvalidRef = useRef<HTMLElement | null>(null);
 
@@ -101,6 +102,11 @@ export default function CheckoutPage() {
         }
       })
       .catch(() => {});
+  }, [session?.user]);
+
+  // If a session exists (user logged in), ensure createAccount is false.
+  useEffect(() => {
+    if (session?.user) setCreateAccount(false);
   }, [session?.user]);
 
   // Helper: normalize cart items to the shape expected by server
