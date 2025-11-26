@@ -146,8 +146,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     const pHem = searchParams.get("hem");
 
     return {
-      width_cm: pW ? parseInt(pW) : (initW ?? 0),
-      height_cm: pH ? parseInt(pH) : (initH ?? 0),
+      width_cm: pW ? parseFloat(pW) : (initW ?? 0),
+      height_cm: pH ? parseFloat(pH) : (initH ?? 0),
       quantity: pQ ? parseInt(pQ) : 1,
       material: pMat === '510' ? "frontlit_510" : "frontlit_440",
       want_wind_holes: pWind === '1',
@@ -156,6 +156,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
     };
   });
   
+  // State local pentru a permite tastarea flexibilă (ex: "10." apoi "10.5")
   const [lengthText, setLengthText] = useState(input.width_cm ? String(input.width_cm) : "");
   const [heightText, setHeightText] = useState(input.height_cm ? String(input.height_cm) : "");
   
@@ -182,17 +183,26 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const updateInput = <K extends keyof PriceInputBanner>(k: K, v: PriceInputBanner[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
   
-  const onChangeLength = (v: string) => { 
-      const d = v.replace(/\D/g, ""); 
-      setLengthText(d); 
-      updateInput("width_cm", d === "" ? 0 : parseInt(d, 10));
-      if(d && parseInt(d) > 0) setViewMode('shape');
-  };
-  const onChangeHeight = (v: string) => { 
-      const d = v.replace(/\D/g, ""); 
-      setHeightText(d); 
-      updateInput("height_cm", d === "" ? 0 : parseInt(d, 10));
-      if(d && parseInt(d) > 0) setViewMode('shape');
+  // --- FUNCTII NOI PENTRU INPUT FLEXIBIL (Decimal) ---
+  const handleDimChange = (val: string, setter: (v: string) => void, field: "width_cm" | "height_cm") => {
+      // Permite cifre și un singur punct sau virgulă (convertit în punct)
+      let v = val.replace(/,/g, '.');
+      
+      // Validăm doar caracterele permise, dar lăsăm userul să scrie (ex "10." e valid temporar)
+      if (!/^[0-9]*\.?[0-9]*$/.test(v)) {
+          return; // Ignoră caracterele invalide
+      }
+
+      setter(v); // Actualizăm UI-ul imediat
+
+      const num = parseFloat(v);
+      // Actualizăm prețul doar dacă e număr valid
+      if (!isNaN(num)) {
+          updateInput(field, num);
+          if (num > 0) setViewMode('shape');
+      } else if (v === "") {
+          updateInput(field, 0);
+      }
   };
 
   useEffect(() => {
@@ -316,7 +326,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const summaryStep3 = input.designOption === 'upload' ? 'Grafică proprie' : input.designOption === 'text_only' ? 'Doar text' : 'Design Pro';
 
   return (
-    // MODIFICAT: Eliminat clasele de padding pb-32, pb-40, lg:pb-16
     <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
       <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
         Produs adăugat în coș
@@ -454,8 +463,28 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               <AccordionStep stepNumber={1} title="Dimensiuni & Cantitate" summary={summaryStep1} isOpen={activeStep === 1} onClick={() => setActiveStep(1)}>
                 {/* OPTIMIZARE MOBIL: Grid 2 coloane mereu pentru dimensiuni */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div><label className="field-label">Lungime (cm)</label><input type="text" inputMode="decimal" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="200" className="input" /></div>
-                  <div><label className="field-label">Înălțime (cm)</label><input type="text" inputMode="decimal" value={heightText} onChange={(e) => onChangeLength(e.target.value)} placeholder="100" className="input" /></div>
+                  <div>
+                      <label className="field-label">Lungime (cm)</label>
+                      <input 
+                          type="text" 
+                          inputMode="decimal" 
+                          value={lengthText} 
+                          onChange={(e) => handleDimChange(e.target.value, setLengthText, "width_cm")} 
+                          placeholder="200" 
+                          className="input" 
+                      />
+                  </div>
+                  <div>
+                      <label className="field-label">Înălțime (cm)</label>
+                      <input 
+                          type="text" 
+                          inputMode="decimal" 
+                          value={heightText} 
+                          onChange={(e) => handleDimChange(e.target.value, setHeightText, "height_cm")} 
+                          placeholder="100" 
+                          className="input" 
+                      />
+                  </div>
                   <div className="col-span-2"><NumberInput label="Cantitate" value={input.quantity} onChange={setQty} /></div>
                 </div>
               </AccordionStep>
@@ -465,7 +494,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                     <OptionButton active={input.material === "frontlit_440"} onClick={() => updateInput("material", "frontlit_440")} title="Frontlit 440g" subtitle="Standard" />
                     <OptionButton active={input.material === "frontlit_510"} onClick={() => updateInput("material", "frontlit_510")} title="Frontlit 510g" subtitle="Premium" />
                 </div>
-                {/* MODIFICARE SOLICITATĂ: Informații despre finisajele standard (tiv și capse) */}
                 <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                     <p className="text-sm font-semibold text-gray-800">
                         Finisaje Standard: Tiv perimetral și capse metalice de prindere (incluse în preț).
@@ -525,7 +553,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               </AccordionStep>
             </div>
             
-            {/* REVENIT LA BARĂ STATICĂ/STICKY */}
+            {/* BARĂ STATICĂ/STICKY */}
             <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
               <div className="flex justify-between items-center mb-2">
                 <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
@@ -534,7 +562,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
               <DeliveryEstimation />
             </div>
           </div>
-          {/* ELIMINAT padding-ul pb-10 */}
           <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'banner'} /></div>
         </div>
       </div>
