@@ -631,7 +631,17 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
             <li key={item.id} className="py-4 flex items-start gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <p className="font-semibold truncate pr-2">{title}</p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <button
+                      onClick={() => onRemove(item.id)}
+                      className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-muted hover:bg-white/10"
+                      aria-label="Elimină"
+                      title="Elimină"
+                    >
+                      <X size={16} />
+                    </button>
+                    <p className="font-semibold truncate pr-2">{title}</p>
+                  </div>
                   <div className="flex items-center gap-2">
                     <div className="inline-flex items-center border border-white/10 rounded-lg overflow-hidden bg-white/5">
                       <button
@@ -663,16 +673,6 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
                 </div>
               </div>
 
-              <div>
-                <button
-                  onClick={() => onRemove(item.id)}
-                  className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-muted hover:bg-white/10"
-                  aria-label="Elimină"
-                  title="Elimină"
-                >
-                  <X size={16} />
-                </button>
-              </div>
             </li>
           );
         })}

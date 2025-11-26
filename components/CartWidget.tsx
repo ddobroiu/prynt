@@ -85,23 +85,17 @@ export default function CartWidget() {
       </DialogTrigger>
       
       {/* DIALOG CONTENT - STILURI MOBILE vs. PC */}
-      <DialogContent className={`
-        // COMMON STYLES
-        bg-white p-0 shadow-2xl duration-300 flex flex-col gap-0 focus:outline-none z-[100] [&>button:last-child]:hidden
-        
-        // MOBILE (Default: Modal Centrat, Lățime restrânsă)
-        fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] 
-        w-[90vw] max-w-sm max-h-[95vh] h-auto overflow-y-auto rounded-xl border border-slate-200 
-        data-[state=open]:animate-in data-[state=open]:fade-in-90 data-[state=open]:slide-in-from-bottom-10 
-        data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-top-10
-
-        // PC (md: Override: Sidebar - Full-height, Complet)
-        md:!fixed md:!right-0 md:!left-auto md:!top-0 md:!translate-x-0 md:!translate-y-0
-        md:!h-screen md:!max-w-md md:!w-full 
-        md:!rounded-none md:!border-l md:border-t-0 
-        md:data-[state=open]:!slide-in-from-right md:data-[state=closed]:!slide-out-to-right
-        md:overflow-hidden // DECIZIV: Asigură că întregul container (DialogContent) nu are scroll pe PC
-      `}>
+      <DialogContent
+        className={
+          "bg-white p-0 shadow-2xl duration-300 flex flex-col gap-0 focus:outline-none z-50 [&>button:last-child]:hidden " +
+          // Mobile: centered modal with limited height
+          "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm max-h-[95vh] h-auto overflow-y-auto rounded-xl border border-slate-200 " +
+          "data-[state=open]:animate-in data-[state=open]:fade-in-90 data-[state=open]:slide-in-from-bottom-10 " +
+          "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-top-10 " +
+          // Desktop: right-side full height cart (sidebar)
+          "md:fixed md:inset-y-0 md:right-0 md:left-auto md:translate-x-0 md:translate-y-0 md:h-screen md:max-w-md md:w-full md:rounded-none md:border-l md:border-t-0 md:overflow-hidden"
+        }
+      >
         
         {/* HEADER EXTINS */}
         <div className="bg-white shrink-0 sticky top-0 z-20 border-b border-slate-100 shadow-sm">
@@ -208,11 +202,12 @@ export default function CartWidget() {
                 {/* IMAGINE PRODUS */}
                 <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50 shadow-sm group-hover:shadow-md transition-shadow">
                    {item.metadata?.artworkUrl ? (
-                       <Image 
-                         src={item.metadata.artworkUrl} 
-                         alt={item.title || "Produs"} 
-                         fill 
-                         className="object-cover hover:scale-105 transition-transform duration-500" 
+                       // Use a simple <img> fallback to avoid Next/Image external domain restrictions on mobile
+                       // Next/Image with `fill` requires domains configured; a plain img works reliably in the widget.
+                       <img
+                         src={item.metadata.artworkUrl}
+                         alt={item.title || "Produs"}
+                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                        />
                    ) : (
                        <div className="h-full w-full flex flex-col items-center justify-center text-slate-300 bg-slate-50">
