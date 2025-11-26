@@ -17,7 +17,7 @@ if (process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_URL) {
         });
     } catch (e) {
         // continue - we'll report errors on upload
-        console.warn('[upload] cloudinary.config failed:', e?.message || e);
+        console.warn('[upload] cloudinary.config failed:', (e as any)?.message || e);
     }
 }
 
