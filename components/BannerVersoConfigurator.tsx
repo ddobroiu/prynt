@@ -250,7 +250,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   // MODIFICAT: Acceptă un parametru "side"
   const handleArtworkFileInput = async (file: File | null, side: 'front' | 'verso' = 'front') => {
     setUploadError(null);
-    setLowResWarning(false); // Warning-ul se aplică la dimensiunile totale, nu pe parte
+    setLowResWarning(false); 
 
     // Reset current side URL on new attempt
     if (side === 'front') setArtworkUrl(null); else setArtworkUrlVerso(null);
@@ -546,7 +546,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
               <AccordionStep stepNumber={3} title="Grafică" summary={summaryStep3} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
                 <div>
                   <div className="mb-4">
-                      {/* NOU: Selector Grafică Identică / Diferită */}
+                      {/* NOU: Selector Grafică Identică / Diferită (Buton Switch) */}
                       <p className="field-label mb-2">Tip Grafică Față și Verso</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
                           <OptionButton 
@@ -576,7 +576,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                     <div className={`space-y-3 ${!input.same_graphic ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : ''}`}>
                       <p className={`text-sm text-gray-600 ${!input.same_graphic ? 'md:col-span-2' : ''}`}>Încarcă fișierul/fișierele tale (PDF, JPG, TIFF, etc.).</p>
                       
-                      {/* Upload Față (obligatoriu) */}
+                      {/* Upload Față (obligatoriu) - CASUTA GRATUITA 1 */}
                       <UploadSection 
                           side="Față" 
                           currentUrl={artworkUrl} 
@@ -587,7 +587,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                           checkRes={true}
                       />
                       
-                      {/* Upload Verso (condițional) */}
+                      {/* Upload Verso (condițional) - CASUTA GRATUITA 2 */}
                       {!input.same_graphic && (
                           <UploadSection 
                               side="Verso" 
@@ -609,14 +609,14 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
 
                   {input.designOption === 'text_only' && (
                     <div className={`space-y-3 ${!input.same_graphic ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : ''}`}>
-                      {/* Text Față (obligatoriu) */}
+                      {/* Text Față (obligatoriu) - CASUTA GRATUITA 1 */}
                       <TextOnlySection 
                           side="Față" 
                           currentText={textDesign} 
                           handleTextChange={e => setTextDesign(e.target.value)}
                       />
                       
-                      {/* Text Verso (condițional) */}
+                      {/* Text Verso (condițional) - CASUTA GRATUITA 2 */}
                       {!input.same_graphic && (
                           <TextOnlySection 
                               side="Verso" 
@@ -638,8 +638,8 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                       <p>O echipă de designeri va crea o propunere grafică pentru tine. Vei primi pe email o simulare pentru confirmare. Cost: 
                           <strong> 
                             {input.same_graphic 
-                              ? formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_SAME) 
-                              : formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_DIFF)}
+                              ? formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_SAME) // 50 RON
+                              : formatMoneyDisplay(BANNER_VERSO_CONSTANTS.FEES.PRO_DIFF)} // 100 RON
                           </strong>.
                       </p>
                     </div>
