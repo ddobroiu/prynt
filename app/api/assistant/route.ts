@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 import { tools, SYSTEM_PROMPT } from '@/lib/ai-shared';
 import { executeTool } from '@/lib/ai-tool-runner';
 import { getAuthSession } from '@/lib/auth'; 
-import { prisma } from "@/lib/prisma"; // Importăm prisma
+import { prisma } from "@/lib/prisma";
 
 export const runtime = 'nodejs';
 
@@ -31,47 +31,66 @@ export async function POST(req: Request) {
     let systemContent = WEB_SYSTEM_PROMPT;
     let identifier = 'web-guest';
 
-    // --- NOU: LOGICĂ DE PRELUARE DATE SALVATE ---
     if (session?.user) {
         identifier = (session.user as any).id || session.user.email || 'web-user';
         
         try {
-            // Căutăm userul complet în DB pentru a lua adresa
+            // Extragem TOATE datele relevante (User + Ultima Adresă + Ultima Comandă pentru Billing)
             const user = await prisma.user.findUnique({
                 where: { email: session.user.email! },
                 include: {
                     addresses: {
                         take: 1,
                         orderBy: { createdAt: 'desc' }
+                    },
+                    orders: { 
+                        take: 1,
+                        orderBy: { createdAt: 'desc' },
+                        select: { billing: true }
                     }
                 }
             });
 
             let contextName = user?.name || session.user.name || "";
             let contextEmail = user?.email || "";
+            let contextPhone = user?.phone || ""; // IMPORTANT: Acum vede și telefonul
             let contextAddress = "";
+            let contextBilling = "";
 
+            // Adresa fizică
             if (user?.addresses && user.addresses.length > 0) {
                 const a = user.addresses[0];
                 contextAddress = `${a.strada_nr}, ${a.localitate}, ${a.judet}`;
             }
 
-            systemContent += `\n\nDATE CLIENT CONECTAT:
-            - Nume: ${contextName}
-            - Email: ${contextEmail}`;
-            
-            if (contextAddress) {
-                systemContent += `\n- Adresă Livrare Salvată: ${contextAddress}`;
-                systemContent += `\n\nINSTRUCȚIUNE: Când clientul vrea să finalizeze o comandă sau cere o ofertă, întreabă-l: "Păstrăm datele de livrare din cont (Email: ${contextEmail}, Adresă: ${contextAddress})?" înainte de a cere altele noi.`;
-            } else {
-                systemContent += `\n\nINSTRUCȚIUNE: Adresează-te clientului pe nume (${contextName}).`;
+            // Datele de facturare (CUI / Firmă)
+            if (user?.orders && user.orders.length > 0) {
+                const lastBill: any = user.orders[0].billing;
+                if (lastBill) {
+                    if (lastBill.cui) {
+                        contextBilling = `Firmă: ${lastBill.name || lastBill.company || lastBill.denumire_companie}, CUI: ${lastBill.cui}`;
+                    } else {
+                        contextBilling = `Persoană Fizică: ${lastBill.name || contextName}`;
+                    }
+                }
             }
 
+            systemContent += `\n\nDATE CLIENT CONECTAT:
+            - Nume: ${contextName}
+            - Email: ${contextEmail}
+            - Telefon: ${contextPhone}`;
+            
+            if (contextAddress) systemContent += `\n- Adresă Livrare Salvată: ${contextAddress}`;
+            if (contextBilling) systemContent += `\n- Date Facturare Salvate: ${contextBilling}`;
+
+            systemContent += `\n\nINSTRUCȚIUNE:
+            Dacă clientul dorește să plaseze o comandă sau o ofertă, întreabă-l politicos dacă dorește să folosească datele salvate de mai sus.
+            Nu cere din nou numărul de telefon sau adresa dacă le ai deja aici, doar cere confirmarea lor.`;
+
         } catch (e) {
-            console.warn("Eroare la preluarea datelor user din assistant:", e);
+            console.warn("Eroare date user:", e);
         }
     }
-    // ---------------------------------------------
 
     const messagesPayload = [
       { role: "system", content: systemContent },

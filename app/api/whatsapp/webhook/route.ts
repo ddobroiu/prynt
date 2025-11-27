@@ -24,7 +24,6 @@ const openai = new OpenAI({
 const conversations = new Map<string, any[]>();
 const conversationMeta = new Map<string, { name?: string }>();
 
-// ... (păstrăm funcția processWhatsAppImage neschimbată) ...
 async function processWhatsAppImage(imageId: string, fromNumber: string) {
   try {
     const token = process.env.META_API_TOKEN;
@@ -34,15 +33,18 @@ async function processWhatsAppImage(imageId: string, fromNumber: string) {
     const metaData = await metaRes.json();
     const imageUrl = metaData.url;
     if (!imageUrl) throw new Error("Nu s-a putut obține URL-ul imaginii de la Meta.");
+    
     const imgRes = await fetch(imageUrl, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const arrayBuffer = await imgRes.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    
     const localPhone = fromNumber.startsWith("40") ? "0" + fromNumber.slice(2) : fromNumber;
     let user = await prisma.user.findFirst({
         where: { OR: [{ phone: fromNumber }, { phone: localPhone }] }
     });
+    
     return new Promise<{ publicId: string; url: string }>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -53,6 +55,7 @@ async function processWhatsAppImage(imageId: string, fromNumber: string) {
         async (error, result) => {
           if (error) return reject(error);
           if (!result) return reject(new Error("Upload failed"));
+          
           if (user) {
              await prisma.userGraphic.create({
                  data: {
@@ -128,15 +131,15 @@ export async function POST(req: Request) {
 
         console.log(`📩 Mesaj de la ${from}: ${textBody}`);
 
-        // 1. Identificare Client + ADRESĂ în DB
+        // 1. Identificare Client COMPLETĂ
         let contextName = "";
         let contextEmail = "";
         let contextAddress = "";
+        let contextBilling = "";
 
         try {
             const localPhone = from.startsWith("40") ? "0" + from.slice(2) : from;
             
-            // NOU: Include și adresele, luând-o pe ultima adăugată
             const user = await prisma.user.findFirst({
                 where: {
                     OR: [
@@ -151,6 +154,11 @@ export async function POST(req: Request) {
                     addresses: {
                         take: 1,
                         orderBy: { createdAt: 'desc' }
+                    },
+                    orders: { // Luăm ultima comandă pentru a vedea cum a facturat
+                        take: 1,
+                        orderBy: { createdAt: 'desc' },
+                        select: { billing: true }
                     }
                 }
             });
@@ -158,9 +166,23 @@ export async function POST(req: Request) {
             if (user) {
                 contextName = user.name || "";
                 contextEmail = user.email || "";
+                
+                // Ultima adresă
                 if (user.addresses && user.addresses.length > 0) {
                     const a = user.addresses[0];
                     contextAddress = `${a.strada_nr}, ${a.localitate}, ${a.judet}`;
+                }
+
+                // Ultima facturare (Firmă sau PF)
+                if (user.orders && user.orders.length > 0) {
+                    const lastBill: any = user.orders[0].billing;
+                    if (lastBill) {
+                        if (lastBill.cui) {
+                            contextBilling = `Firmă: ${lastBill.name || lastBill.company || lastBill.denumire_companie}, CUI: ${lastBill.cui}`;
+                        } else {
+                            contextBilling = `Persoană Fizică: ${lastBill.name || contextName}`;
+                        }
+                    }
                 }
             }
         } catch (dbError) {
@@ -170,7 +192,6 @@ export async function POST(req: Request) {
         let history = conversations.get(from) || [];
         if (history.length > 10) history = history.slice(-10);
 
-        // Fallback nume din regex dacă nu e în DB
         if (!contextName) {
             const nameRegex = /\b(?:ma numesc|m[ăa] numesc|numele meu este|numele meu|sunt)\s+([^\n\r,!?]+)/i;
             const nameMatch = (textBody || '').match(nameRegex);
@@ -184,7 +205,7 @@ export async function POST(req: Request) {
              conversationMeta.set(from, { name: contextName });
         }
 
-        // 2. Construire Prompt cu datele salvate
+        // 2. Construire Prompt extins
         let systemContent = SYSTEM_PROMPT + "\nIMPORTANT: Clientul este pe WhatsApp. Fii concis.";
         
         if (contextName || contextEmail || contextAddress) {
@@ -192,12 +213,12 @@ export async function POST(req: Request) {
             if (contextName) systemContent += `\n- Nume: ${contextName}`;
             if (contextEmail) systemContent += `\n- Email: ${contextEmail}`;
             if (contextAddress) systemContent += `\n- Adresă Livrare: ${contextAddress}`;
+            if (contextBilling) systemContent += `\n- Date Facturare: ${contextBilling}`;
             
-            systemContent += `\n\nINSTRUCȚIUNI DE INTERACȚIUNE:
-            1. Salută clientul pe nume (dacă există).
-            2. Dacă clientul dorește să plaseze o comandă sau o ofertă, ÎNTREABĂ-L dacă dorește să folosească datele de mai sus. 
-               Exemplu: "Doriți să folosim adresa de livrare salvată (${contextAddress}) și emailul (${contextEmail})?"
-            3. Doar dacă clientul spune că vrea să schimbe datele, atunci cere detaliile noi.`;
+            systemContent += `\n\nINSTRUCȚIUNI:
+            1. Salută clientul pe nume.
+            2. Dacă vrea o ofertă sau o comandă, propune folosirea datelor existente (Livrare: ${contextAddress || 'Lipsă'}, Facturare: ${contextBilling || 'Lipsă'}).
+            3. Cere date noi doar dacă clientul dorește modificarea lor.`;
         }
 
         const messagesPayload = [
