@@ -17,18 +17,17 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const { name, email } = body;
 
-    if (!name || !email) {
-      return NextResponse.json({ error: 'Numele și emailul sunt obligatorii.' }, { status: 400 });
+    if (!name) {
+      return NextResponse.json({ error: 'Numele este obligatoriu.' }, { status: 400 });
     }
 
-    // Optional: Add more validation for email format if needed
+    // Build update payload dynamically: update name always, email only if provided
+    const updateData: any = { name };
+    if (email) updateData.email = email;
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: {
-        name,
-        email,
-      },
+      data: updateData,
     });
 
     return NextResponse.json({ success: true, user: { name: updatedUser.name, email: updatedUser.email } });
