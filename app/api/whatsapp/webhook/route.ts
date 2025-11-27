@@ -418,9 +418,21 @@ export async function POST(req: Request) {
         // -------------------------
         // 4. Trimitem răspunsul pe WhatsApp
         // -------------------------
-        if (finalReply && finalReply.trim().length > 0) {
+        // Detectăm dacă AI-ul cere județul (tag ||REQUEST: JUDET||)
+        if (finalReply && finalReply.includes("||REQUEST: JUDET||")) {
+          // Fetch județe din API
+          const res = await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/dpd/judete`);
+          const data = await res.json();
+          const judete = Array.isArray(data.judete) ? data.judete : [];
+          // Primele 5 județe ca Quick Replies
+          const options = judete.slice(0, 5).map((j: string, idx: number) => ({ id: `judet_${idx + 1}`, title: j }));
+          options.push({ id: "search_judet", title: "Caută județul" });
+          await sendWhatsAppMessage(from, finalReply.replace("||REQUEST: JUDET||", ""), options);
+        } else if (finalReply && finalReply.trim().length > 0) {
           await sendWhatsAppMessage(from, finalReply);
+        }
 
+        if (finalReply && finalReply.trim().length > 0) {
           history.push({ role: "user", content: textBody });
           history.push({ role: "assistant", content: finalReply });
           conversations.set(from, history);
