@@ -6,23 +6,15 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function PUT(req: Request) {
-  // Debugging: log incoming cookie header to verify auth cookie is sent from browser
   try {
-    const cookieHeader = (req.headers && (req as any).cookies) ? undefined : req.headers.get('cookie');
-    console.log('[PUT /api/account/details] Incoming Cookie header:', cookieHeader);
-  } catch (e) {
-    console.log('[PUT /api/account/details] Could not read cookie header', e);
-  }
+    const session = await getAuthSession();
+    // Verificăm structura sesiunii pentru a extrage corect ID-ul
+    const userId = (session?.user as any)?.id as string | undefined;
 
-  const session = await getAuthSession();
-  console.log('[PUT /api/account/details] Session object:', session ? { user: (session.user as any)?.id ? { id: (session.user as any).id, email: (session.user as any).email, name: (session.user as any).name } : null } : null);
-  const userId = (session?.user as any)?.id as string | undefined;
+    if (!userId) {
+      return NextResponse.json({ error: 'Trebuie să fii autentificat pentru a efectua această acțiune.' }, { status: 401 });
+    }
 
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-  }
-
-  try {
     const body = await req.json();
     const { name, email } = body;
 
@@ -30,22 +22,35 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Numele este obligatoriu.' }, { status: 400 });
     }
 
-    // Build update payload dynamically: update name always, email only if provided
+    // Construim obiectul de update dinamic
     const updateData: any = { name };
-    if (email) updateData.email = email;
+    
+    // Actualizăm email-ul doar dacă este trimis și este diferit de cel gol
+    if (email && email.trim() !== '') {
+        updateData.email = email;
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,
     });
 
-    return NextResponse.json({ success: true, user: { name: updatedUser.name, email: updatedUser.email } });
+    console.log(`[API Account] User updated: ${userId}`);
+
+    return NextResponse.json({ 
+        success: true, 
+        user: { 
+            name: updatedUser.name, 
+            email: updatedUser.email 
+        } 
+    });
+
   } catch (e: any) {
     console.error('[PUT /api/account/details] error', e);
-    // Handle potential duplicate email error from Prisma
+    // Gestionăm eroarea specifică Prisma pentru email duplicat
     if (e.code === 'P2002' && e.meta?.target?.includes('email')) {
-      return NextResponse.json({ error: 'Adresa de e-mail este deja folosită de alt cont.' }, { status: 409 });
+      return NextResponse.json({ error: 'Această adresă de e-mail este deja asociată altui cont.' }, { status: 409 });
     }
-    return NextResponse.json({ error: 'A apărut o eroare internă.' }, { status: 500 });
+    return NextResponse.json({ error: 'A apărut o eroare internă la salvarea datelor.' }, { status: 500 });
   }
 }
