@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link"; // Import necesar pentru link-uri
 import JudetSelector from "../../components/JudetSelector";
 import LocalitateSelector from "../../components/LocalitateSelector";
 
@@ -10,9 +11,9 @@ type Address = {
   telefon: string;
   judet: string;
   localitate: string;
-  strada_nr: string; // Folosit ca unicul câmp "Adresă" (stradă, nr., bloc, sc., etc.)
+  strada_nr: string;
   postCode?: string;
-  bloc?: string; // nefolosite în UI; păstrate pentru compatibilitate
+  bloc?: string;
   scara?: string;
   etaj?: string;
   ap?: string;
@@ -21,15 +22,15 @@ type Address = {
 
 type Billing = {
   tip_factura: "persoana_fizica" | "persoana_juridica";
-  name?: string; // nume pentru facturare (PF)
+  name?: string;
   denumire_companie?: string;
   cui?: string;
   reg_com?: string;
   judet?: string;
   localitate?: string;
-  strada_nr?: string; // unicul câmp "Adresă" pentru facturare
+  strada_nr?: string;
   postCode?: string;
-  bloc?: string; // nefolosite în UI
+  bloc?: string;
   scara?: string;
   etaj?: string;
   ap?: string;
@@ -43,6 +44,8 @@ export default function CheckoutForm({
   setBilling,
   sameAsDelivery,
   setSameAsDelivery,
+  agreedToTerms,      // Prop nou
+  setAgreedToTerms,   // Prop nou
   errors,
 }: {
   address: Address;
@@ -51,12 +54,14 @@ export default function CheckoutForm({
   setBilling: (updater: (b: Billing) => Billing) => void;
   sameAsDelivery: boolean;
   setSameAsDelivery: (v: boolean) => void;
+  agreedToTerms: boolean;                   // Tip nou
+  setAgreedToTerms: (v: boolean) => void;   // Tip nou
   errors: Record<string, string>;
 }) {
   const onAddr = (k: keyof Address, v: string) => setAddress((a) => ({ ...a, [k]: v }));
   const onBill = <K extends keyof Billing>(k: K, v: Billing[K]) => setBilling((b) => ({ ...b, [k]: v }));
 
-  // 1) Sincronizare când “aceeași adresă” este bifat – evităm bucla infinită
+  // 1) Sincronizare când “aceeași adresă” este bifat
   useEffect(() => {
     if (!sameAsDelivery) return;
     setBilling((b) => {
@@ -66,7 +71,7 @@ export default function CheckoutForm({
         b.strada_nr === address.strada_nr &&
         b.postCode === address.postCode &&
         (b.name || "") === (address.nume_prenume || "");
-      if (alreadySame) return b; // nu setează din nou => evită re-randări infinite
+      if (alreadySame) return b;
       return {
         ...b,
         name: address.nume_prenume,
@@ -78,7 +83,6 @@ export default function CheckoutForm({
     });
   }, [sameAsDelivery, address.nume_prenume, address.judet, address.localitate, address.strada_nr, address.postCode, setBilling]);
 
-  // 2) Copiere one-click când bifa e debifată (prefill fără a bloca editarea)
   function copyBillingFromDeliveryOnce() {
     setBilling((b) => ({
       ...b,
@@ -93,9 +97,9 @@ export default function CheckoutForm({
   return (
     <div className="space-y-6">
       {/* LIVRARE */}
-  <div className="card p-4">
-        <h2 className="text-xl font-bold mb-3">Date livrare</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="card p-4 border border-[--border] bg-surface rounded-xl shadow-sm">
+        <h2 className="text-xl font-bold mb-4 text-ui">Date livrare</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Field id="address.nume_prenume" label="Nume și prenume" error={errors["address.nume_prenume"]}>
             <input
               data-field="address.nume_prenume"
@@ -158,9 +162,9 @@ export default function CheckoutForm({
               placeholder="Stradă, număr, bloc, sc., etaj, ap."
             />
           </Field>
-          {/* Cod poștal pe același rând (dreapta) */}
+          
           <Field id="address.postCode" label="Cod poștal">
-            <div className="md:w-28">
+            <div className="md:w-32">
               <input
                 data-field="address.postCode"
                 className={inputCls(undefined)}
@@ -176,29 +180,29 @@ export default function CheckoutForm({
       </div>
 
       {/* FACTURARE */}
-  <div className="card p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-xl font-bold">Facturare</h2>
+      <div className="card p-4 border border-[--border] bg-surface rounded-xl shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+          <h2 className="text-xl font-bold text-ui">Facturare</h2>
 
           {billing.tip_factura === 'persoana_fizica' && (
             <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
-              <label className="flex select-none items-center gap-2 text-sm">
+              <label className="flex select-none items-center gap-2 text-sm cursor-pointer">
                 <input
                   type="checkbox"
                   checked={sameAsDelivery}
                   onChange={(e) => setSameAsDelivery(e.target.checked)}
+                  className="rounded border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800"
                 />
-                <span className="text-muted">Adresa de facturare este aceeași</span>
+                <span className="text-muted">Aceeași cu livrarea</span>
               </label>
 
               {!sameAsDelivery && (
                 <button
                   type="button"
                   onClick={copyBillingFromDeliveryOnce}
-                  className="rounded-md border border-[--border] bg-surface px-3 py-1.5 text-xs font-semibold text-ui hover:bg-white/10 transition"
-                  title="Completează câmpurile de mai jos cu adresa de livrare"
+                  className="rounded-md border border-[--border] bg-white/5 px-3 py-1.5 text-xs font-semibold text-ui hover:bg-white/10 transition"
                 >
-                  Completează automat din livrare
+                  Copiază din livrare
                 </button>
               )}
             </div>
@@ -206,14 +210,14 @@ export default function CheckoutForm({
         </div>
 
         {/* Tip facturare */}
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mb-4">
           <button
             type="button"
             onClick={() => onBill("tip_factura", "persoana_fizica")}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold border ${
+            className={`rounded-lg px-4 py-2 text-sm font-semibold border transition-colors ${
               billing.tip_factura === "persoana_fizica"
-                ? "border-emerald-500 bg-emerald-500/10"
-                : "border-white/10 bg-white/5 hover:bg-white/10"
+                ? "border-indigo-500 bg-indigo-500/10 text-indigo-400"
+                : "border-[--border] bg-white/5 hover:bg-white/10 text-muted"
             }`}
           >
             Persoană fizică
@@ -221,19 +225,19 @@ export default function CheckoutForm({
           <button
             type="button"
             onClick={() => onBill("tip_factura", "persoana_juridica")}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold border ${
+            className={`rounded-lg px-4 py-2 text-sm font-semibold border transition-colors ${
               billing.tip_factura === "persoana_juridica"
-                ? "border-emerald-500 bg-emerald-500/10"
-                : "border-white/10 bg-white/5 hover:bg-white/10"
+                ? "border-indigo-500 bg-indigo-500/10 text-indigo-400"
+                : "border-[--border] bg-white/5 hover:bg-white/10 text-muted"
             }`}
           >
             Persoană juridică
           </button>
         </div>
 
-        {/* Date companie (vizibile doar pentru juridică) */}
+        {/* Date companie */}
         {billing.tip_factura === "persoana_juridica" && (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 animate-in fade-in slide-in-from-top-2">
             <Field id="billing.cui" label="CUI/CIF" error={errors["billing.cui"]}>
               <input
                 data-field="billing.cui"
@@ -241,9 +245,18 @@ export default function CheckoutForm({
                 value={billing.cui ?? ""}
                 onChange={(e) => onBill("cui", e.target.value)}
                 autoComplete="off"
+                placeholder="RO..."
               />
             </Field>
-            <Field id="billing.denumire_companie" label="Denumire companie (opțional)">
+            <Field id="billing.reg_com" label="Reg. Com (J)">
+               <input
+                className={inputCls(undefined)}
+                value={billing.reg_com ?? ""}
+                onChange={(e) => onBill("reg_com", e.target.value)}
+                placeholder="J40/..."
+              />
+            </Field>
+            <Field id="billing.denumire_companie" label="Denumire companie">
               <input
                 className={inputCls(undefined)}
                 value={billing.denumire_companie ?? ""}
@@ -254,76 +267,94 @@ export default function CheckoutForm({
           </div>
         )}
 
-        {/* Adresă facturare (dezactivată dacă e “aceeași”) */}
-        {billing.tip_factura === 'persoana_fizica' && (
-          <>
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
-              <div className="md:col-span-2">
-                <Field id="billing.name" label="Nume pentru facturare (PF)" error={errors["billing.name"]} disabled={sameAsDelivery}>
-                  <input
-                    data-field="billing.name"
-                    className={inputCls(errors["billing.name"], sameAsDelivery)}
-                    value={billing.name ?? ""}
-                    onChange={(e) => onBill("name", e.target.value)}
-                    disabled={sameAsDelivery}
-                    autoComplete="section-billing name"
-                  />
-                </Field>
-              </div>
+        {/* Adresă facturare */}
+        {(!sameAsDelivery || billing.tip_factura === 'persoana_juridica') && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in">
+             {billing.tip_factura === 'persoana_fizica' && (
+                <div className="md:col-span-2">
+                  <Field id="billing.name" label="Nume pe factură" error={errors["billing.name"]}>
+                    <input
+                      data-field="billing.name"
+                      className={inputCls(errors["billing.name"])}
+                      value={billing.name ?? ""}
+                      onChange={(e) => onBill("name", e.target.value)}
+                      autoComplete="section-billing name"
+                    />
+                  </Field>
+                </div>
+             )}
 
-              <div data-field="billing.judet" className={` ${sameAsDelivery ? "opacity-60" : ""}`}>
+             <div data-field="billing.judet">
                 <JudetSelector
                   label="Județ (facturare)"
                   value={billing.judet ?? ""}
                   onChange={(v) => onBill("judet", v)}
-                  disabled={sameAsDelivery}
                 />
                 {errors["billing.judet"] && <p className="mt-1 text-xs text-red-400">{errors["billing.judet"]}</p>}
-              </div>
+             </div>
 
-              <div className={sameAsDelivery ? "opacity-60" : ""}>
+             <div>
                 <LocalitateSelector
                   judet={billing.judet ?? ""}
                   value={billing.localitate ?? ""}
                   onChange={(v) => onBill("localitate", v)}
                   onPostCodeChange={(pc) => onBill("postCode", pc)}
                   label="Localitate (facturare)"
-                  disabled={sameAsDelivery}
                 />
                 {errors["billing.localitate"] && <p className="mt-1 text-xs text-red-400">{errors["billing.localitate"]}</p>}
-              </div>
+             </div>
 
-              <div className="md:col-span-3">
-                <Field id="billing.strada_nr" label="Adresă (facturare)" error={errors["billing.strada_nr"]} disabled={sameAsDelivery}>
+             <div className="md:col-span-2">
+                <Field id="billing.strada_nr" label="Adresă (facturare)" error={errors["billing.strada_nr"]}>
                   <input
                     data-field="billing.strada_nr"
-                    className={inputCls(errors["billing.strada_nr"], sameAsDelivery)}
+                    className={inputCls(errors["billing.strada_nr"])}
                     value={billing.strada_nr ?? ""}
                     onChange={(e) => onBill("strada_nr", e.target.value)}
-                    disabled={sameAsDelivery}
                     autoComplete="section-billing street-address"
-                    placeholder="Stradă, număr, bloc, sc., etaj, ap."
+                    placeholder="Sediu social, stradă, număr..."
                   />
                 </Field>
-              </div>
-              <div>
-                <Field id="billing.postCode" label="Cod poștal (facturare)" disabled={sameAsDelivery}>
-                  <input
-                    data-field="billing.postCode"
-                    className={inputCls(undefined, sameAsDelivery)}
-                    value={billing.postCode ?? ""}
-                    onChange={(e) => onBill("postCode", e.target.value)}
-                    disabled={sameAsDelivery}
-                    autoComplete="postal-code"
-                    inputMode="numeric"
-                  />
-                </Field>
-              </div>
-            </div>
-
-            {/* Câmpuri suplimentare eliminate – folosim un singur câmp Adresă */}
-          </>
+             </div>
+          </div>
         )}
+      </div>
+
+      {/* --- SECȚIUNE NOUĂ: ACORDURI LEGALE --- */}
+      <div 
+        className={`card p-4 border rounded-xl shadow-sm transition-colors ${
+            errors["terms.agreement"] 
+            ? "border-red-500/50 bg-red-500/5" 
+            : "border-[--border] bg-surface"
+        }`}
+        data-field="terms.agreement"
+      >
+         <div className="flex items-start gap-3">
+            <div className="flex h-6 items-center">
+              <input
+                id="terms_agreement"
+                name="terms_agreement"
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                className="h-5 w-5 rounded border-gray-500 text-indigo-600 focus:ring-indigo-600 cursor-pointer bg-slate-800"
+              />
+            </div>
+            <div className="text-sm leading-snug">
+              <label htmlFor="terms_agreement" className="font-medium text-ui cursor-pointer select-none">
+                Sunt de acord cu prelucrarea datelor
+              </label>
+              <p className="text-muted mt-1 text-xs sm:text-sm">
+                Confirm că am citit și accept <Link href="/termeni" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline">Termenii și Condițiile</Link> și <Link href="/confidentialitate" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline">Politica de Confidențialitate</Link>. 
+                Înțeleg că datele mele (nume, telefon) pot fi utilizate pentru identificare în serviciile de suport (inclusiv automatizate).
+              </p>
+              {errors["terms.agreement"] && (
+                  <p className="mt-2 text-sm font-bold text-red-400 animate-pulse">
+                      ⚠️ {errors["terms.agreement"]}
+                  </p>
+              )}
+            </div>
+         </div>
       </div>
     </div>
   );
@@ -343,8 +374,8 @@ function Field({
   disabled?: boolean;
 }) {
   return (
-    <label htmlFor={id} className={`text-sm block ${disabled ? "opacity-60" : ""}`}>
-  <span className="mb-1 block text-ui">{label}</span>
+    <label htmlFor={id} className={`text-sm block ${disabled ? "opacity-60 pointer-events-none" : ""}`}>
+      <span className="mb-1 block font-medium text-ui">{label}</span>
       {children}
       {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
     </label>
@@ -353,8 +384,8 @@ function Field({
 
 function inputCls(hasError?: string, disabled?: boolean) {
   const base =
-    "w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 bg-surface border-[--border] text-ui focus:ring-indigo-500/40";
-  return `${base} ${hasError ? "border-red-500/70 ring-1 ring-red-500/40" : ""} ${
-    disabled ? "opacity-60" : ""
+    "w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 bg-black/20 text-white border-white/10 focus:ring-indigo-500/50 placeholder-gray-500 transition-all";
+  return `${base} ${hasError ? "border-red-500/50 ring-1 ring-red-500/20" : ""} ${
+    disabled ? "opacity-50 cursor-not-allowed" : ""
   }`;
 }

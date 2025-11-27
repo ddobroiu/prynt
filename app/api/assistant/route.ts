@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { tools, SYSTEM_PROMPT } from '@/lib/ai-shared';
 import { executeTool } from '@/lib/ai-tool-runner';
-import { getAuthSession } from '@/lib/auth'; // Importăm sesiunea
+import { getAuthSession } from '@/lib/auth'; 
 
 export const runtime = 'nodejs';
 
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Format invalid." }, { status: 400 });
     }
 
-    // --- NOU: Verificare Sesiune ---
+    // Verificare Sesiune
     const session = await getAuthSession();
     let systemContent = WEB_SYSTEM_PROMPT;
     let identifier = 'web-guest';
@@ -38,7 +38,6 @@ export async function POST(req: Request) {
             systemContent += `\n\nDiscuți cu utilizatorul autentificat: ${userName}. Adresează-te pe nume.`;
         }
     }
-    // -----------------------------
 
     // 1. Construim istoricul mesajelor
     const messagesPayload = [
@@ -62,18 +61,19 @@ export async function POST(req: Request) {
       messagesPayload.push(responseMessage as any);
 
       for (const toolCall of responseMessage.tool_calls) {
-        const fnName = toolCall.function.name;
+        // FIX: Adăugat (toolCall as any) pentru a repara eroarea de TypeScript la compilare
+        const fnName = (toolCall as any).function.name;
         let args = {};
         
         try {
-            args = JSON.parse(toolCall.function.arguments);
+            args = JSON.parse((toolCall as any).function.arguments);
         } catch (e) {
             console.warn("Eroare parsare argumente tool:", e);
         }
 
         const result = await executeTool(fnName, args, { 
             source: 'web', 
-            identifier: identifier // Folosim ID-ul real dacă e logat
+            identifier: identifier 
         });
 
         messagesPayload.push({
