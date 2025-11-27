@@ -111,6 +111,23 @@ export async function POST(req: Request) {
         const from = messageObj.from;
         const msgType = messageObj.type;
 
+        // 1. REACTIVARE AUTOMATĂ A CONVERSAȚIEI
+        // Indiferent ce trimite clientul (text sau poză), verificăm dacă e arhivată și o activăm.
+        const existingConv = await prisma.aiConversation.findFirst({
+            where: { source: 'whatsapp', identifier: from }
+        });
+
+        if (existingConv) {
+            // Dacă era finalizată (archived), o facem activă ca să apară în Inbox
+            if (existingConv.status === 'archived') {
+                await prisma.aiConversation.update({
+                    where: { id: existingConv.id },
+                    data: { status: 'active', lastMessageAt: new Date() }
+                });
+                console.log(`🔄 Conversație reactivată automat pentru ${from}`);
+            }
+        }
+
         // --- GESTIONARE IMAGINE ---
         if (msgType === "image") {
             const imageId = messageObj.image?.id;
@@ -120,8 +137,8 @@ export async function POST(req: Request) {
                 let history = conversations.get(from) || [];
                 history.push({ role: "user", content: `[SYSTEM: Userul a trimis o imagine. URL: ${uploadResult.url}]` });
                 conversations.set(from, history);
-                // Log imagine
-                await logConversation('whatsapp', from, [{role: 'user', content: `[IMAGE: ${uploadResult.url}]`}, {role: 'assistant', content: 'Confirmare primire imagine.'}]);
+                
+                await logConversation('whatsapp', from, [{role: 'user', content: `[IMAGE: ${uploadResult.url}]`}, {role: 'assistant', content: 'Confirmare primire imagine.'}], undefined);
             } else {
                 await sendWhatsAppMessage(from, "Am întâmpinat o problemă la salvarea imaginii.");
             }
@@ -135,12 +152,7 @@ export async function POST(req: Request) {
         console.log(`📩 Mesaj de la ${from}: ${textBody}`);
 
         // --- VERIFICARE DACA AI-UL ESTE PAUZAT ---
-        // Căutăm conversația existentă în DB
-        const existingConv = await prisma.aiConversation.findFirst({
-            where: { source: 'whatsapp', identifier: from }
-        });
-
-        // Daca AI-ul e pe pauză, DOAR SALVĂM mesajul userului și ne oprim.
+        // Dacă e pauzat, DOAR salvăm mesajul și ieșim. Nu răspunde robotul.
         if (existingConv && existingConv.aiPaused) {
             console.log(`⏸️ AI Pauzat pentru ${from}. Nu răspund.`);
             await prisma.aiMessage.create({
@@ -150,17 +162,19 @@ export async function POST(req: Request) {
                     content: textBody
                 }
             });
-            // Actualizăm timestamp-ul
+            // Update timestamp
             await prisma.aiConversation.update({
                 where: { id: existingConv.id },
                 data: { lastMessageAt: new Date() }
             });
-            
             return NextResponse.json({ status: "paused" });
         }
+
+        // ---------------------------------------------------------
+        // LOGICA AI STANDARD
         // ---------------------------------------------------------
 
-        // 1. Identificare Client COMPLETĂ
+        // 2. Identificare Client
         let contextName = "";
         let contextEmail = "";
         let contextAddress = "";
@@ -170,7 +184,6 @@ export async function POST(req: Request) {
 
         try {
             const localPhone = from.startsWith("40") ? "0" + from.slice(2) : from;
-            
             const user = await prisma.user.findFirst({
                 where: {
                     OR: [
@@ -180,26 +193,11 @@ export async function POST(req: Request) {
                     ]
                 },
                 select: { 
-                    id: true,
-                    name: true, 
-                    email: true,
-                    addresses: {
-                        take: 1,
-                        orderBy: { createdAt: 'desc' }
-                    },
+                    id: true, name: true, email: true,
+                    addresses: { take: 1, orderBy: { createdAt: 'desc' } },
                     orders: { 
-                        take: 5,
-                        orderBy: { createdAt: 'desc' },
-                        select: { 
-                            orderNo: true, 
-                            createdAt: true, 
-                            total: true, 
-                            status: true,
-                            billing: true,
-                            items: {
-                                select: { name: true, qty: true }
-                            }
-                        }
+                        take: 5, orderBy: { createdAt: 'desc' },
+                        select: { orderNo: true, createdAt: true, total: true, status: true, billing: true, items: { select: { name: true, qty: true } } }
                     }
                 }
             });
@@ -208,66 +206,43 @@ export async function POST(req: Request) {
                 userId = user.id;
                 contextName = user.name || "";
                 contextEmail = user.email || "";
-                
                 if (user.addresses && user.addresses.length > 0) {
                     const a = user.addresses[0];
                     contextAddress = `${a.strada_nr}, ${a.localitate}, ${a.judet}`;
                 }
-
                 if (user.orders && user.orders.length > 0) {
                     const lastBill: any = user.orders[0].billing;
                     if (lastBill) {
-                        if (lastBill.cui) {
-                            contextBilling = `Firmă: ${lastBill.name || lastBill.company || lastBill.denumire_companie}, CUI: ${lastBill.cui}`;
-                        } else {
-                            contextBilling = `Persoană Fizică: ${lastBill.name || contextName}`;
-                        }
+                        contextBilling = lastBill.cui 
+                            ? `Firmă: ${lastBill.name || lastBill.company}, CUI: ${lastBill.cui}` 
+                            : `Persoană Fizică: ${lastBill.name || contextName}`;
                     }
-                    
                     orderHistoryText = user.orders.map(o => {
                         const itemsSummary = o.items.map(i => `${i.qty}x ${i.name}`).join(', ');
-                        return `- #${o.orderNo} (${new Date(o.createdAt).toLocaleDateString('ro-RO')}: ${itemsSummary} - Status: ${o.status}`;
+                        return `- #${o.orderNo} (${new Date(o.createdAt).toLocaleDateString('ro-RO')}): ${itemsSummary} - Status: ${o.status}`;
                     }).join('\n');
                 }
             }
         } catch (dbError) {
-            console.error("Eroare identificare user DB:", dbError);
+            console.error("Eroare DB user:", dbError);
         }
 
         let history = conversations.get(from) || [];
         if (history.length > 10) history = history.slice(-10);
 
         if (!contextName) {
-            const nameRegex = /\b(?:ma numesc|m[ăa] numesc|numele meu este|numele meu|sunt)\s+([^\n\r,!?]+)/i;
-            const nameMatch = (textBody || '').match(nameRegex);
+            const nameMatch = (textBody || '').match(/\b(?:ma numesc|sunt)\s+([^\n\r,!?]+)/i);
             if (nameMatch) contextName = nameMatch[1].trim();
-            else {
-                const meta = conversationMeta.get(from);
-                if (meta?.name) contextName = meta.name;
-            }
+            else if (conversationMeta.has(from)) contextName = conversationMeta.get(from)?.name || "";
         }
-        if (contextName && !conversationMeta.has(from)) {
-             conversationMeta.set(from, { name: contextName });
-        }
+        if (contextName) conversationMeta.set(from, { name: contextName });
 
-        // 2. Construire Prompt extins
+        // 3. Prompt System
         let systemContent = SYSTEM_PROMPT + "\nIMPORTANT: Clientul este pe WhatsApp. Fii concis.";
-        
-        if (contextName || contextEmail || contextAddress) {
-            systemContent += `\n\nDATE IDENTIFICATE ÎN BAZA DE DATE:`;
-            if (contextName) systemContent += `\n- Nume: ${contextName}`;
-            if (contextEmail) systemContent += `\n- Email: ${contextEmail}`;
-            if (contextAddress) systemContent += `\n- Adresă Livrare: ${contextAddress}`;
-            if (contextBilling) systemContent += `\n- Date Facturare: ${contextBilling}`;
-            
-            if (orderHistoryText) {
-                systemContent += `\n\nISTORIC COMENZI RECENTE:\n${orderHistoryText}`;
-            }
-            
-            systemContent += `\n\nINSTRUCȚIUNI:
-            1. Salută clientul pe nume.
-            2. Folosește istoricul pentru a oferi context (ex: "Vreți să refaceți ultima comandă de bannere?").
-            3. Dacă vrea o ofertă sau o comandă, propune folosirea datelor existente.`;
+        if (contextName || orderHistoryText) {
+            systemContent += `\n\nDATE CLIENT: Nume: ${contextName || 'Necunoscut'}`;
+            if (contextAddress) systemContent += `, Adresă: ${contextAddress}`;
+            if (orderHistoryText) systemContent += `\nISTORIC COMENZI:\n${orderHistoryText}`;
         }
 
         const messagesPayload = [
@@ -276,6 +251,7 @@ export async function POST(req: Request) {
           { role: "user", content: textBody },
         ];
 
+        // 4. OpenAI Call
         const completion = await openai.chat.completions.create({
           model: "gpt-4o",
           messages: messagesPayload as any,
@@ -308,30 +284,28 @@ export async function POST(req: Request) {
           finalReply = finalCompletion.choices[0].message.content ?? "";
         }
 
-        // 3. Trimitere Mesaj WhatsApp & Salvare în DB
+        // 5. Trimitere & Salvare
         if (finalReply && finalReply.trim().length > 0) {
             let replyText = finalReply;
             if (contextName) replyText = replyText.replace(/{{\s*name\s*}}/gi, contextName);
 
             if (finalReply.includes("||REQUEST: JUDET||")) {
-              const res = await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/dpd/judete`);
-              const data = await res.json();
-              const judete = Array.isArray(data.judete) ? data.judete : [];
-              const options = judete.slice(0, 5).map((j: string, idx: number) => ({ id: `judet_${idx + 1}`, title: j }));
-              options.push({ id: "search_judet", title: "Caută județul" });
-              await sendWhatsAppMessage(from, replyText.replace("||REQUEST: JUDET||", "").trim() || "Județ?", options);
+               // Logică butoane județe...
+               const res = await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/dpd/judete`);
+               const data = await res.json();
+               const options = data.judete?.slice(0, 5).map((j: string, idx: number) => ({ id: `judet_${idx + 1}`, title: j })) || [];
+               options.push({ id: "search_judet", title: "Alt județ" });
+               await sendWhatsAppMessage(from, replyText.replace("||REQUEST: JUDET||", "").trim(), options);
             } else {
-              await sendWhatsAppMessage(from, replyText);
+               await sendWhatsAppMessage(from, replyText);
             }
 
-            // SALVARE ISTORIC ÎN DB (LOGGING)
             const msgsToLog = [
                 { role: 'user', content: textBody },
                 { role: 'assistant', content: finalReply }
             ];
-            logConversation('whatsapp', from, msgsToLog, userId).catch(err => console.error("Log Whatsapp error:", err));
+            await logConversation('whatsapp', from, msgsToLog, userId);
 
-            // Actualizare istoric local
             history.push({ role: "user", content: textBody });
             history.push({ role: "assistant", content: finalReply });
             conversations.set(from, history);
