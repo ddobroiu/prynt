@@ -15,7 +15,9 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
   console.log(`🔧 Executare tool: ${fnName}`, args);
   
   try {
-    // --- 1. CALCUL BANNER ---
+    // ============================================================
+    // 1. CALCUL PREȚ BANNER
+    // ============================================================
     if (fnName === "calculate_banner_price") {
       const hem = args.want_hem_and_grommets !== false;
       const mat = args.material?.includes("510") ? "frontlit_510" : "frontlit_440";
@@ -47,7 +49,9 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       }
     }
 
-    // --- 2. CALCUL FLYER ---
+    // ============================================================
+    // 2. CALCUL PREȚ FLYER / PRINT STANDARD
+    // ============================================================
     else if (fnName === "calculate_standard_print_price") {
       const res = calculateFlyerPrice({
         sizeKey: args.size || "A6",
@@ -59,7 +63,9 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       return { pret_total: res.finalPrice };
     }
 
-    // --- 3. VERIFICARE STATUS COMANDĂ ---
+    // ============================================================
+    // 3. VERIFICARE STATUS COMANDĂ + LINK DPD
+    // ============================================================
     else if (fnName === "check_order_status") {
       const orderNo = parseInt(args.orderNo);
       if (isNaN(orderNo)) {
@@ -81,14 +87,14 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       // Link DPD
       if (order.awbNumber) {
         const trackingUrl = `https://tracking.dpd.ro/?shipmentNumber=${order.awbNumber}&language=ro`;
-        trackingInfo = `AWB: ${order.awbNumber}. Urmărește livrarea aici: ${trackingUrl}`;
+        trackingInfo = `AWB: ${order.awbNumber}. Puteți urmări coletul pe site-ul curierului aici: ${trackingUrl}`;
       } else {
         trackingInfo = "Încă nu a fost generat un AWB.";
       }
 
-      // Explicație status
+      // Explicație status (Important: Să nu creadă clientul că e livrat dacă e doar 'completed')
       if (order.status === 'completed' || order.status === 'shipped') {
-        statusExplanation = "Statusul nostru 'Finalizat' înseamnă că am predat coletul curierului. Pentru locația exactă a coletului, folosește link-ul de mai sus.";
+        statusExplanation = "Statusul nostru 'Finalizat' înseamnă că am finalizat producția și am predat coletul curierului. Nu înseamnă că a fost livrat la dvs. Pentru locația exactă a coletului, vă rugăm să verificați link-ul de tracking de mai sus.";
       } else {
         statusExplanation = "Comanda este în curs de pregătire la noi în atelier.";
       }
@@ -96,11 +102,97 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       return {
         found: true,
         status: order.status,
-        message: `Status intern: ${order.status}.\n${statusExplanation}\n\n${trackingInfo}`
+        message: `Status intern Prynt: ${order.status}.\n${statusExplanation}\n\n${trackingInfo}`
       };
     }
 
-    // --- 4. CREARE COMANDĂ ---
+    // ============================================================
+    // 4. GENERARE OFERTĂ PDF (NOU)
+    // ============================================================
+    else if (fnName === "generate_offer") {
+      const { customer_details, items } = args;
+      const totalAmount = items.reduce(
+        (acc: number, item: any) => acc + (item.price * item.quantity), 0
+      );
+
+      // Identificăm userul (dacă există)
+      let existingUser = null;
+      if (customer_details.email) {
+          existingUser = await prisma.user.findFirst({
+              where: { email: customer_details.email }
+          });
+      }
+
+      // Determinăm următorul ID de comandă (folosit și la oferte pentru consistență)
+      const lastOrder = await prisma.order.findFirst({ orderBy: { orderNo: 'desc' } });
+      const nextOrderNo = (lastOrder?.orderNo ?? 1000) + 1; 
+
+      // Creăm o înregistrare de tip "Ofertă"
+      const offerData: any = {
+        orderNo: nextOrderNo, // Folosim secvența, dar marcat ca ofertă
+        status: "pending_verification",
+        paymentStatus: "pending",
+        paymentMethod: "oferta",
+        currency: "RON",
+        total: totalAmount,
+        userEmail: customer_details.email || `offer_${context.source}@prynt.ro`,
+        shippingAddress: {
+          name: customer_details.name,
+          phone: customer_details.phone || "-",
+          street: customer_details.address || "-",
+          city: customer_details.city || "-",
+          county: customer_details.county || "-",
+          country: "Romania",
+        },
+        billingAddress: {
+          name: customer_details.name,
+          phone: customer_details.phone || "-",
+          street: customer_details.address || "-",
+          city: customer_details.city || "-",
+          county: customer_details.county || "-",
+          country: "Romania",
+        },
+        items: {
+          create: items.map((item: any) => ({
+            name: item.title,
+            qty: Number(item.quantity) || 1,
+            unit: Number(item.price) || 0,
+            total: (Number(item.price) || 0) * (Number(item.quantity) || 1),
+            artworkUrl: null,
+            metadata: {
+              details: item.details,
+              source: `AI Offer (${context.source})`,
+            },
+          })),
+        },
+        metadata: { 
+            type: 'offer', // Marcaj critic pentru a distinge de comenzi reale
+            generatedFrom: context.source 
+        }
+      };
+
+      if (existingUser) {
+        offerData.user = { connect: { id: existingUser.id } };
+      }
+
+      const offerRecord = await prisma.order.create({ data: offerData });
+
+      // Generăm link-ul public către PDF
+      const baseUrl = process.env.NEXTAUTH_URL || "https://prynt.ro";
+      // Presupunem că ruta /api/pdf/offer acceptă parametru de query 'id' sau folosim ID-ul comenzii
+      // Adaptăm link-ul în funcție de cum e implementată ruta ta de PDF
+      const offerLink = `${baseUrl}/api/pdf/offer?id=${offerRecord.id}`;
+
+      return { 
+          success: true, 
+          link: offerLink, 
+          message: `Am generat oferta de preț (Proformă) pentru ${customer_details.name}.\n\n📄 Descarcă oferta de aici: ${offerLink}\n\nDacă totul este în regulă, confirmă și putem transforma oferta în comandă fermă!` 
+      };
+    }
+
+    // ============================================================
+    // 5. CREARE COMANDĂ FERMĂ
+    // ============================================================
     else if (fnName === "create_order") {
       const { customer_details, items } = args;
       const totalAmount = items.reduce(
@@ -113,7 +205,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       });
       const nextOrderNo = (lastOrder?.orderNo ?? 1000) + 1;
 
-      // Identificăm userul (dacă există)
+      // Identificăm userul
       let existingUser = await prisma.user.findFirst({
         where: {
           OR: [
@@ -123,7 +215,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         },
       });
 
-      // Email fallback pentru WhatsApp
+      // Email fallback
       const userEmail = customer_details.email || (context.source === 'whatsapp' ? `whatsapp_${context.identifier}@prynt.ro` : `guest_${nextOrderNo}@prynt.ro`);
       const userPhone = customer_details.phone || context.identifier;
 
@@ -172,7 +264,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
 
       const order = await prisma.order.create({ data: orderData });
 
-      // Emailuri
+      // Emailuri de confirmare
       try {
         if (order && typeof sendOrderConfirmationEmail === "function") await sendOrderConfirmationEmail(order);
         if (order && typeof sendNewOrderAdminEmail === "function") await sendNewOrderAdminEmail(order);
@@ -183,7 +275,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       return { success: true, orderId: order.id, orderNo: order.orderNo };
     }
 
-    // Fallback
+    // Fallback pentru alte tools neimplementate complet
     return { info: "Funcție neimplementată complet sau necunoscută." };
 
   } catch (e: any) {

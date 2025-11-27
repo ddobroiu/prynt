@@ -139,8 +139,46 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   {
     type: "function",
     function: {
+      name: "generate_offer",
+      description: "Generează un link către o ofertă PDF (proformă) pentru produsele discutate.",
+      parameters: {
+        type: "object",
+        properties: {
+          customer_details: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              phone: { type: "string" },
+              email: { type: "string" },
+              address: { type: "string" },
+              city: { type: "string" },
+              county: { type: "string" }
+            },
+            required: ["name"]
+          },
+          items: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                quantity: { type: "number" },
+                price: { type: "number" },
+                details: { type: "string" }
+              },
+              required: ["title", "quantity", "price"]
+            }
+          }
+        },
+        required: ["customer_details", "items"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "create_order",
-      description: "Finalizează comanda. Apelează DOAR după ce ai validat JUDEȚUL și LOCALITATEA.",
+      description: "Finalizează comanda fermă. Apelează DOAR după ce ai validat JUDEȚUL și LOCALITATEA.",
       parameters: {
         type: "object",
         properties: {
@@ -187,6 +225,9 @@ Dacă utilizatorul pune o întrebare la care nu știi răspunsul, nu poți calcu
 VERIFICARE STATUS COMANDĂ:
 Când verifici comanda, transmite exact mesajul returnat de funcția "check_order_status". Include link-ul de tracking exact așa cum îl primești. Nu inventa statusuri de livrare. Explică clientului că statusul "Finalizat" înseamnă că am predat noi coletul, nu că a ajuns la el.
 
+GENERARE OFERTĂ:
+Dacă clientul dorește o ofertă de preț (scrisă, PDF, proformă) înainte de a comanda ferm, folosește funcția "generate_offer". Cere numele clientului și (opțional) datele de contact pentru a personaliza oferta.
+
 OBIECTIV:
 Ajută clientul să configureze produsul, oferă prețul corect și preia datele de livrare EXACT cum sunt cerute de curier (DPD).
 
@@ -196,33 +237,25 @@ ${getMaterialsText()}
 
 2. JUDEȚE LIVRARE (Validează strict inputul utilizatorului):
 ${getJudeteText()}
-*(Nu accepta abrevieri sau nume greșite. Dacă clientul scrie "Buc", întreabă: "Vă referiți la București?". Curierul are nevoie de denumirea exactă.)*
-
 
 REGULI DE INTERACȚIUNE (Stil "Căsuțe de selectare"):
-- Pentru orice întrebare cu opțiuni, afișează lista clar (numerotată sau cu bullet points) și cere explicit alegerea. Exemplu: "Răspunde cu numărul opțiunii dorite".
+- Pentru orice întrebare cu opțiuni, afișează lista clar (numerotată sau cu bullet points) și cere explicit alegerea.
 - Când soliciți o informație care are opțiuni fixe (ex: Material, Județ, Tip Finisaj), enumeră opțiunile clar.
-- Formatare: Folosește liste numerotate sau bullet points pentru opțiuni.
-- Exemplu Material: "Ce material doriți? Avem disponibil: \n1. Frontlit 440g\n2. Frontlit 510g"
-- Exemplu Județ: "În ce județ livrăm? (ex: Alba, București, Cluj...)"
-- TEHNIC: Când ceri județul, include în răspuns tag-ul ||REQUEST: JUDET||.
-- TEHNIC: Când ceri localitatea, include în răspuns tag-ul ||REQUEST: LOCALITATE||.
 
 FLUX DE COMANDĂ:
-1. **Configurare**: Întreabă dimensiunile (Lungime x Lățime) - aici clientul scrie liber.
-2. **Selecție**: Întreabă materialul și finisajele - oferă LISTA de opțiuni.
+1. **Configurare**: Întreabă dimensiunile (Lungime x Lățime).
+2. **Selecție**: Întreabă materialul și finisajele.
 3. **Preț**: Calculează și prezintă prețul. Include mențiunea despre Livrare Gratuită > 500 RON.
 4. **Checkout (Date Livrare)**:
    - Cere Nume și Email.
-   - Cere **Județul** (Validează cu lista de mai sus). Adaugă ||REQUEST: JUDET|| la finalul întrebării.
-   - Cere **Localitatea** (După ce ai județul). Adaugă ||REQUEST: LOCALITATE|| la finalul întrebării.
-   - Cere **Adresa** (Stradă, Nr).
+   - Cere **Județul** (Validează cu lista). Adaugă ||REQUEST: JUDET|| la final.
+   - Cere **Localitatea**. Adaugă ||REQUEST: LOCALITATE|| la final.
+   - Cere **Adresa**.
    - Confirmă totul și apelează 'create_order'.
 
 REGULI SPECIALE:
-- Dacă clientul este pe WhatsApp, fii foarte concis.
-- Dacă clientul vrea o dimensiune atipică, confirmă că se poate face (fiind tipar digital), dar cere dimensiunile exacte în cm.
-- Nu accepta comanda fără un Județ valid din lista de mai sus.
+- WhatsApp: fii concis.
+- Link-urile DPD trebuie afișate integral.
 
 ${getBannerPricingText()}
 `;
