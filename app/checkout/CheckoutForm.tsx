@@ -44,8 +44,6 @@ export default function CheckoutForm({
   setBilling,
   sameAsDelivery,
   setSameAsDelivery,
-  agreedToTerms,
-  setAgreedToTerms,
   errors,
 }: {
   address: Address;
@@ -54,8 +52,6 @@ export default function CheckoutForm({
   setBilling: (updater: (b: Billing) => Billing) => void;
   sameAsDelivery: boolean;
   setSameAsDelivery: (v: boolean) => void;
-  agreedToTerms: boolean;
-  setAgreedToTerms: (v: boolean) => void;
   errors: Record<string, string>;
 }) {
   const onAddr = (k: keyof Address, v: string) => setAddress((a) => ({ ...a, [k]: v }));
@@ -179,21 +175,7 @@ export default function CheckoutForm({
         </div>
       </div>
 
-      {/* ACCEPT TERMENI */}
-      <div className="mt-4">
-        <label className="flex items-start gap-2 mb-4 text-sm cursor-pointer select-none opacity-90 hover:opacity-100 transition-opacity">
-          <input
-            type="checkbox"
-            checked={agreedToTerms}
-            onChange={(e) => setAgreedToTerms(e.target.checked)}
-            className="mt-1 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white"
-          />
-          <span className="text-slate-600 leading-snug text-sm">
-            Sunt de acord cu prelucrarea datelor și cu <Link href="/termeni" className="underline">Termenii și Condițiile</Link>.
-          </span>
-        </label>
-        {errors["terms.agreement"] && <p className="mt-1 text-xs text-red-400">{errors["terms.agreement"]}</p>}
-      </div>
+
 
       {/* FACTURARE */}
       <div className="card p-4 border border-[--border] bg-surface rounded-xl shadow-sm">
