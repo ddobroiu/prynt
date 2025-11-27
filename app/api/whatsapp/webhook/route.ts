@@ -181,7 +181,6 @@ export async function POST(req: Request) {
         } else if (finalReply && finalReply.includes("||REQUEST: NAME||")) {
            // Dacă AI-ul cere numele, dar noi îl avem deja în DB, îl ignorăm și continuăm conversația
            if (contextName) {
-               // Putem face un scurt-circuit aici sau lăsăm mesajul să plece doar dacă AI-ul nu și-a dat seama
                const textToSend = finalReply.replace("||REQUEST: NAME||", "").trim();
                await sendWhatsAppMessage(from, textToSend);
            } else {
