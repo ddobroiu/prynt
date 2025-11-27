@@ -39,6 +39,17 @@ const getJudeteText = () => {
   return JUDETE_LIST.join(', ');
 };
 
+// 4. Informații Generale Site (Knowledge Base Static)
+const SITE_POLICIES = `
+INFORMAȚII UTILE SITE:
+- **Transport Gratuit**: Pentru comenzi mai mari de 500 RON.
+- **Timp de producție**: De obicei 2-4 zile lucrătoare pentru majoritatea produselor (Bannere, Autocolante, Printuri).
+- **Livrare**: Se face prin curier rapid (DPD).
+- **Metode de plată**: Card Online (Stripe) sau Ramburs la curier.
+- **Grafică**: Clientul poate încărca grafica proprie sau poate solicita machetare contra cost dacă opțiunea există.
+- **Contact**: Telefon 0750.473.111, Email contact@prynt.ro.
+`;
+
 // --- 1. DEFINIREA UNELTELOR (TOOLS) ---
 export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   {
@@ -237,6 +248,9 @@ ${getMaterialsText()}
 
 2. JUDEȚE LIVRARE (Validează strict inputul utilizatorului):
 ${getJudeteText()}
+
+3. INFORMAȚII UTILE SITE:
+${SITE_POLICIES}
 
 REGULI DE INTERACȚIUNE (Stil "Căsuțe de selectare"):
 - Pentru orice întrebare cu opțiuni, afișează lista clar (numerotată sau cu bullet points) și cere explicit alegerea.

@@ -136,6 +136,7 @@ export async function POST(req: Request) {
         let contextEmail = "";
         let contextAddress = "";
         let contextBilling = "";
+        let orderHistoryText = "";
 
         try {
             const localPhone = from.startsWith("40") ? "0" + from.slice(2) : from;
@@ -155,10 +156,19 @@ export async function POST(req: Request) {
                         take: 1,
                         orderBy: { createdAt: 'desc' }
                     },
-                    orders: { // Luăm ultima comandă pentru a vedea cum a facturat
-                        take: 1,
+                    orders: { 
+                        take: 5, // ADĂUGAT: Luăm ultimele 5 comenzi pt WhatsApp
                         orderBy: { createdAt: 'desc' },
-                        select: { billing: true }
+                        select: { 
+                            orderNo: true, 
+                            createdAt: true, 
+                            total: true, 
+                            status: true,
+                            billing: true,
+                            items: {
+                                select: { name: true, qty: true }
+                            }
+                        }
                     }
                 }
             });
@@ -173,8 +183,8 @@ export async function POST(req: Request) {
                     contextAddress = `${a.strada_nr}, ${a.localitate}, ${a.judet}`;
                 }
 
-                // Ultima facturare (Firmă sau PF)
                 if (user.orders && user.orders.length > 0) {
+                    // Ultima facturare (Firmă sau PF)
                     const lastBill: any = user.orders[0].billing;
                     if (lastBill) {
                         if (lastBill.cui) {
@@ -183,6 +193,12 @@ export async function POST(req: Request) {
                             contextBilling = `Persoană Fizică: ${lastBill.name || contextName}`;
                         }
                     }
+                    
+                    // Construire istoric
+                    orderHistoryText = user.orders.map(o => {
+                        const itemsSummary = o.items.map(i => `${i.qty}x ${i.name}`).join(', ');
+                        return `- #${o.orderNo} (${new Date(o.createdAt).toLocaleDateString('ro-RO')}): ${itemsSummary} - Status: ${o.status}`;
+                    }).join('\n');
                 }
             }
         } catch (dbError) {
@@ -215,10 +231,14 @@ export async function POST(req: Request) {
             if (contextAddress) systemContent += `\n- Adresă Livrare: ${contextAddress}`;
             if (contextBilling) systemContent += `\n- Date Facturare: ${contextBilling}`;
             
+            if (orderHistoryText) {
+                systemContent += `\n\nISTORIC COMENZI RECENTE:\n${orderHistoryText}`;
+            }
+            
             systemContent += `\n\nINSTRUCȚIUNI:
             1. Salută clientul pe nume.
-            2. Dacă vrea o ofertă sau o comandă, propune folosirea datelor existente (Livrare: ${contextAddress || 'Lipsă'}, Facturare: ${contextBilling || 'Lipsă'}).
-            3. Cere date noi doar dacă clientul dorește modificarea lor.`;
+            2. Folosește istoricul pentru a oferi context (ex: "Vreți să refaceți ultima comandă de bannere?").
+            3. Dacă vrea o ofertă sau o comandă, propune folosirea datelor existente.`;
         }
 
         const messagesPayload = [

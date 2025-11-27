@@ -21,7 +21,7 @@ INSTRUCȚIUNI SPECIFICE WEB:
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    let { messages } = body;
+    let { messages, pageContext } = body; // ADĂUGAT: pageContext
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ message: "Format invalid." }, { status: 400 });
@@ -31,11 +31,18 @@ export async function POST(req: Request) {
     let systemContent = WEB_SYSTEM_PROMPT;
     let identifier = 'web-guest';
 
+    // 1. INJECTARE CONTEXT PAGINĂ CURENTĂ
+    if (pageContext) {
+        systemContent += `\n\nCONTEXT NAVIGARE CLIENT:
+        Clientul se află acum pe pagina: "${pageContext.title || 'Necunoscut'}" (URL: ${pageContext.url || '-'}).
+        Dacă clientul întreabă "cât costă" sau cere detalii, referă-te implicit la produsul de pe această pagină.`;
+    }
+
     if (session?.user) {
         identifier = (session.user as any).id || session.user.email || 'web-user';
         
         try {
-            // Extragem TOATE datele relevante (User + Ultima Adresă + Ultima Comandă pentru Billing)
+            // Extragem datele userului + ISTORIC COMENZI (Ultimele 5)
             const user = await prisma.user.findUnique({
                 where: { email: session.user.email! },
                 include: {
@@ -44,18 +51,28 @@ export async function POST(req: Request) {
                         orderBy: { createdAt: 'desc' }
                     },
                     orders: { 
-                        take: 1,
+                        take: 5, // ADĂUGAT: Luăm ultimele 5 comenzi pentru istoric
                         orderBy: { createdAt: 'desc' },
-                        select: { billing: true }
+                        select: { 
+                            orderNo: true, 
+                            createdAt: true, 
+                            total: true, 
+                            status: true,
+                            billing: true, // Pentru date facturare
+                            items: {
+                                select: { name: true, qty: true }
+                            }
+                        }
                     }
                 }
             });
 
             let contextName = user?.name || session.user.name || "";
             let contextEmail = user?.email || "";
-            let contextPhone = user?.phone || ""; // IMPORTANT: Acum vede și telefonul
+            let contextPhone = user?.phone || ""; 
             let contextAddress = "";
             let contextBilling = "";
+            let orderHistoryText = "";
 
             // Adresa fizică
             if (user?.addresses && user.addresses.length > 0) {
@@ -63,8 +80,9 @@ export async function POST(req: Request) {
                 contextAddress = `${a.strada_nr}, ${a.localitate}, ${a.judet}`;
             }
 
-            // Datele de facturare (CUI / Firmă)
+            // Procesare comenzi pentru context
             if (user?.orders && user.orders.length > 0) {
+                // 1. Date Facturare din ultima comandă
                 const lastBill: any = user.orders[0].billing;
                 if (lastBill) {
                     if (lastBill.cui) {
@@ -73,6 +91,12 @@ export async function POST(req: Request) {
                         contextBilling = `Persoană Fizică: ${lastBill.name || contextName}`;
                     }
                 }
+
+                // 2. Construire rezumat istoric
+                orderHistoryText = user.orders.map(o => {
+                    const itemsSummary = o.items.map(i => `${i.qty}x ${i.name}`).join(', ');
+                    return `- Comanda #${o.orderNo} din ${new Date(o.createdAt).toLocaleDateString('ro-RO')}: ${itemsSummary} (Total: ${o.total} RON) - Status: ${o.status}`;
+                }).join('\n');
             }
 
             systemContent += `\n\nDATE CLIENT CONECTAT:
@@ -82,6 +106,10 @@ export async function POST(req: Request) {
             
             if (contextAddress) systemContent += `\n- Adresă Livrare Salvată: ${contextAddress}`;
             if (contextBilling) systemContent += `\n- Date Facturare Salvate: ${contextBilling}`;
+            
+            if (orderHistoryText) {
+                systemContent += `\n\nISTORIC RECENT COMENZI:\n${orderHistoryText}\n(Dacă clientul întreabă de o comandă anterioară, folosește aceste informații)`;
+            }
 
             systemContent += `\n\nINSTRUCȚIUNE:
             Dacă clientul dorește să plaseze o comandă sau o ofertă, întreabă-l politicos dacă dorește să folosească datele salvate de mai sus.
