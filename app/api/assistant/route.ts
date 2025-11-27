@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import { tools, SYSTEM_PROMPT } from '@/lib/ai-shared';
 import { executeTool } from '@/lib/ai-tool-runner';
 import { getAuthSession } from '@/lib/auth'; 
+import { prisma } from "@/lib/prisma"; // Importăm prisma
 
 export const runtime = 'nodejs';
 
@@ -26,26 +27,57 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Format invalid." }, { status: 400 });
     }
 
-    // Verificare Sesiune
     const session = await getAuthSession();
     let systemContent = WEB_SYSTEM_PROMPT;
     let identifier = 'web-guest';
 
+    // --- NOU: LOGICĂ DE PRELUARE DATE SALVATE ---
     if (session?.user) {
         identifier = (session.user as any).id || session.user.email || 'web-user';
-        const userName = session.user.name;
-        if (userName) {
-            systemContent += `\n\nDiscuți cu utilizatorul autentificat: ${userName}. Adresează-te pe nume.`;
+        
+        try {
+            // Căutăm userul complet în DB pentru a lua adresa
+            const user = await prisma.user.findUnique({
+                where: { email: session.user.email! },
+                include: {
+                    addresses: {
+                        take: 1,
+                        orderBy: { createdAt: 'desc' }
+                    }
+                }
+            });
+
+            let contextName = user?.name || session.user.name || "";
+            let contextEmail = user?.email || "";
+            let contextAddress = "";
+
+            if (user?.addresses && user.addresses.length > 0) {
+                const a = user.addresses[0];
+                contextAddress = `${a.strada_nr}, ${a.localitate}, ${a.judet}`;
+            }
+
+            systemContent += `\n\nDATE CLIENT CONECTAT:
+            - Nume: ${contextName}
+            - Email: ${contextEmail}`;
+            
+            if (contextAddress) {
+                systemContent += `\n- Adresă Livrare Salvată: ${contextAddress}`;
+                systemContent += `\n\nINSTRUCȚIUNE: Când clientul vrea să finalizeze o comandă sau cere o ofertă, întreabă-l: "Păstrăm datele de livrare din cont (Email: ${contextEmail}, Adresă: ${contextAddress})?" înainte de a cere altele noi.`;
+            } else {
+                systemContent += `\n\nINSTRUCȚIUNE: Adresează-te clientului pe nume (${contextName}).`;
+            }
+
+        } catch (e) {
+            console.warn("Eroare la preluarea datelor user din assistant:", e);
         }
     }
+    // ---------------------------------------------
 
-    // 1. Construim istoricul mesajelor
     const messagesPayload = [
       { role: "system", content: systemContent },
       ...messages
     ];
 
-    // 2. Apelăm OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: messagesPayload as any,
@@ -56,20 +88,13 @@ export async function POST(req: Request) {
 
     const responseMessage = completion.choices[0].message;
 
-    // 3. Gestionăm apelurile de funcții (Tools)
     if (responseMessage.tool_calls) {
       messagesPayload.push(responseMessage as any);
 
       for (const toolCall of responseMessage.tool_calls) {
-        // FIX: Adăugat (toolCall as any) pentru a repara eroarea de TypeScript la compilare
         const fnName = (toolCall as any).function.name;
         let args = {};
-        
-        try {
-            args = JSON.parse((toolCall as any).function.arguments);
-        } catch (e) {
-            console.warn("Eroare parsare argumente tool:", e);
-        }
+        try { args = JSON.parse((toolCall as any).function.arguments); } catch (e) {}
 
         const result = await executeTool(fnName, args, { 
             source: 'web', 
