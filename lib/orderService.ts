@@ -393,7 +393,7 @@ async function sendEmails(
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Adresă Livrare / Facturare</h2>
         <p>${escapeHtml(contactAddressLine)}${address.postCode ? ', ' + escapeHtml(address.postCode) : ''}</p>
-        ${isCompanyBilling ? '' : deliveryAptHtml}
+        ${isCompany ? '' : deliveryAptHtml}
 
         <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #555; margin-top: 20px;">Detalii Facturare</h2>
         ${billingBlockAdmin}
