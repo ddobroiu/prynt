@@ -120,6 +120,8 @@ export async function POST(req: Request) {
                 let history = conversations.get(from) || [];
                 history.push({ role: "user", content: `[SYSTEM: Userul a trimis o imagine. URL: ${uploadResult.url}]` });
                 conversations.set(from, history);
+                // Log imagine
+                await logConversation('whatsapp', from, [{role: 'user', content: `[IMAGE: ${uploadResult.url}]`}, {role: 'assistant', content: 'Confirmare primire imagine.'}]);
             } else {
                 await sendWhatsAppMessage(from, "Am întâmpinat o problemă la salvarea imaginii.");
             }
@@ -131,6 +133,32 @@ export async function POST(req: Request) {
         if (!textBody) return NextResponse.json({ status: "ignored_no_text" });
 
         console.log(`📩 Mesaj de la ${from}: ${textBody}`);
+
+        // --- VERIFICARE DACA AI-UL ESTE PAUZAT ---
+        // Căutăm conversația existentă în DB
+        const existingConv = await prisma.aiConversation.findFirst({
+            where: { source: 'whatsapp', identifier: from }
+        });
+
+        // Daca AI-ul e pe pauză, DOAR SALVĂM mesajul userului și ne oprim.
+        if (existingConv && existingConv.aiPaused) {
+            console.log(`⏸️ AI Pauzat pentru ${from}. Nu răspund.`);
+            await prisma.aiMessage.create({
+                data: {
+                    conversationId: existingConv.id,
+                    role: 'user',
+                    content: textBody
+                }
+            });
+            // Actualizăm timestamp-ul
+            await prisma.aiConversation.update({
+                where: { id: existingConv.id },
+                data: { lastMessageAt: new Date() }
+            });
+            
+            return NextResponse.json({ status: "paused" });
+        }
+        // ---------------------------------------------------------
 
         // 1. Identificare Client COMPLETĂ
         let contextName = "";
@@ -160,7 +188,7 @@ export async function POST(req: Request) {
                         orderBy: { createdAt: 'desc' }
                     },
                     orders: { 
-                        take: 5, // Luăm ultimele 5 comenzi pt WhatsApp
+                        take: 5,
                         orderBy: { createdAt: 'desc' },
                         select: { 
                             orderNo: true, 
@@ -181,14 +209,12 @@ export async function POST(req: Request) {
                 contextName = user.name || "";
                 contextEmail = user.email || "";
                 
-                // Ultima adresă
                 if (user.addresses && user.addresses.length > 0) {
                     const a = user.addresses[0];
                     contextAddress = `${a.strada_nr}, ${a.localitate}, ${a.judet}`;
                 }
 
                 if (user.orders && user.orders.length > 0) {
-                    // Ultima facturare (Firmă sau PF)
                     const lastBill: any = user.orders[0].billing;
                     if (lastBill) {
                         if (lastBill.cui) {
@@ -198,7 +224,6 @@ export async function POST(req: Request) {
                         }
                     }
                     
-                    // Construire istoric
                     orderHistoryText = user.orders.map(o => {
                         const itemsSummary = o.items.map(i => `${i.qty}x ${i.name}`).join(', ');
                         return `- #${o.orderNo} (${new Date(o.createdAt).toLocaleDateString('ro-RO')}: ${itemsSummary} - Status: ${o.status}`;
@@ -285,11 +310,9 @@ export async function POST(req: Request) {
 
         // 3. Trimitere Mesaj WhatsApp & Salvare în DB
         if (finalReply && finalReply.trim().length > 0) {
-            // Curățare nume din template
             let replyText = finalReply;
             if (contextName) replyText = replyText.replace(/{{\s*name\s*}}/gi, contextName);
 
-            // Gestionare request județ (buton interactiv)
             if (finalReply.includes("||REQUEST: JUDET||")) {
               const res = await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/dpd/judete`);
               const data = await res.json();
@@ -308,7 +331,7 @@ export async function POST(req: Request) {
             ];
             logConversation('whatsapp', from, msgsToLog, userId).catch(err => console.error("Log Whatsapp error:", err));
 
-            // Actualizare istoric local pentru contextul conversației curente
+            // Actualizare istoric local
             history.push({ role: "user", content: textBody });
             history.push({ role: "assistant", content: finalReply });
             conversations.set(from, history);

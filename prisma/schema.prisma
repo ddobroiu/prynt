@@ -59,16 +59,15 @@ model Address {
   localitate   String
   strada_nr    String
   postCode     String?
-  
   // Detalii adresă
   bloc         String?
   scara        String?
   etaj         String?
   ap           String?
   interfon     String?
-  
   isDefault    Boolean  @default(false)
-  type         String?  // shipping | billing
+  type         String?
+  // shipping | billing
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -95,14 +94,12 @@ model Order {
   shippingFee  Decimal   @default(0)
   total        Decimal   @default(0)
   invoiceLink  String?
-  
   // AWB / tracking info
   awbNumber    String?
   awbCarrier   String?
   // AWB label stored as base64 (PDF) + filename for admin download
   awbLabelBase64 String? @db.Text
   awbLabelFileName String?
-  
   // Status lifecycle
   status       String    @default("active") // active | canceled | fulfilled
   canceledAt   DateTime?
@@ -120,10 +117,9 @@ model OrderItem {
   total       Decimal @default(0)
   
   // Grafică
-  artworkUrl  String? 
-  
+  artworkUrl  String?
   // Metadate pentru designOption, textDesign, etc.
-  metadata    Json?   
+  metadata    Json?
 }
 
 // NextAuth (Auth.js) tables
@@ -201,6 +197,8 @@ model AiConversation {
   hasError    Boolean     @default(false) // True dacă botul a dat fallback
   isRead      Boolean     @default(false)
   
+  aiPaused    Boolean     @default(false) // <--- CÂMP NOU PENTRU PAUZĂ AI
+  
   lastMessageAt DateTime  @default(now())
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -211,7 +209,7 @@ model AiMessage {
   conversationId String
   conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   
-  role           String         // "user" | "assistant" | "system" | "tool"
+  role           String         // "user" | "assistant" | "system" | "tool" | "admin"
   content        String         @db.Text
   
   createdAt      DateTime       @default(now())
