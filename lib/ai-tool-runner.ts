@@ -107,7 +107,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
-    // 4. GENERARE OFERTĂ PDF (NOU)
+    // 4. GENERARE OFERTĂ PDF (CU NUME CLIENT)
     // ============================================================
     else if (fnName === "generate_offer") {
       const { customer_details, items } = args;
@@ -137,7 +137,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         total: totalAmount,
         userEmail: customer_details.email || `offer_${context.source}@prynt.ro`,
         shippingAddress: {
-          name: customer_details.name,
+          name: customer_details.name, // Salvăm numele aici
           phone: customer_details.phone || "-",
           street: customer_details.address || "-",
           city: customer_details.city || "-",
@@ -145,7 +145,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           country: "Romania",
         },
         billingAddress: {
-          name: customer_details.name,
+          name: customer_details.name, // Salvăm numele și aici
           phone: customer_details.phone || "-",
           street: customer_details.address || "-",
           city: customer_details.city || "-",
@@ -167,7 +167,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         },
         metadata: { 
             type: 'offer', // Marcaj critic pentru a distinge de comenzi reale
-            generatedFrom: context.source 
+            generatedFrom: context.source,
+            clientName: customer_details.name // ADĂUGAT: Salvăm numele explicit și în metadata
         }
       };
 
@@ -179,8 +180,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
 
       // Generăm link-ul public către PDF
       const baseUrl = process.env.NEXTAUTH_URL || "https://prynt.ro";
-      // Presupunem că ruta /api/pdf/offer acceptă parametru de query 'id' sau folosim ID-ul comenzii
-      // Adaptăm link-ul în funcție de cum e implementată ruta ta de PDF
+      // Ruta /api/pdf/offer va folosi ID-ul pentru a prelua datele din DB (inclusiv numele clientului)
       const offerLink = `${baseUrl}/api/pdf/offer?id=${offerRecord.id}`;
 
       return { 
