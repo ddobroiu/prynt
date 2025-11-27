@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link"; 
 import AddressesManager from "@/components/AddressesManager";
 import ChangePasswordForm from "@/components/ChangePasswordForm";
+import AccountDetailsForm from "@/components/AccountDetailsForm";
 import SignOutButton from "@/components/SignOutButton";
 import OrderDetails from "@/components/OrderDetails";
 
@@ -180,7 +181,12 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                </div>
             )}
             {tab === 'addresses' && <div className="animate-in fade-in"><AddressesManager /></div>}
-            {tab === 'security' && <div className="animate-in fade-in"><ChangePasswordForm /></div>}
+            {tab === 'security' && (
+              <div className="animate-in fade-in space-y-6">
+                <AccountDetailsForm />
+                <ChangePasswordForm />
+              </div>
+            )}
           </main>
         </div>
       </div>
