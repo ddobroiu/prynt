@@ -168,7 +168,7 @@ export default function ChatViewer({ conversations: initialConversations }: { co
       <div className="w-1/3 min-w-[300px] border-r border-slate-200 flex flex-col bg-white h-full">
         
         {/* HEADER SIDEBAR (Fix) */}
-        <div className="shrink-0 bg-white border-b border-slate-200 z-10">
+        <div className="shrink-0 bg-white border-b border-slate-200 z-10 sticky top-0">
             {/* Tab-uri Inbox / Finalizate */}
             <div className="flex">
               <button 
