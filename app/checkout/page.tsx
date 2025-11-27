@@ -66,6 +66,11 @@ export default function CheckoutPage() {
   });
 
   const [sameAsDelivery, setSameAsDelivery] = useState(true);
+  
+  // --- NOU: State pentru Termeni și Condiții ---
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  // ---------------------------------------------
+
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("ramburs");
 
   const [placing, setPlacing] = useState(false);
@@ -177,6 +182,11 @@ export default function CheckoutPage() {
 
     if ((items ?? []).length === 0) e["cart.empty"] = "Coșul este gol";
 
+    // --- VALIDARE TERMENI ---
+    if (!agreedToTerms) {
+        e["terms.agreement"] = "Trebuie să confirmi că ești de acord cu prelucrarea datelor.";
+    }
+
     return { ok: Object.keys(e).length === 0, errs: e };
   }
 
@@ -189,6 +199,7 @@ export default function CheckoutPage() {
     const { ok, errs } = validate();
     if (!ok) {
       setErrors(errs);
+      // Scroll la primul câmp invalid (inclusiv checkbox-ul de termeni)
       const firstKey = Object.keys(errs)[0];
       const el = document.querySelector<HTMLElement>(`[data-field="${firstKey}"]`);
       if (el) {
@@ -330,6 +341,7 @@ export default function CheckoutPage() {
               {/* Login trebuie să apară deasupra secțiunii de livrare */}
               <ReturningCustomerLogin />
 
+              {/* FORMULARUL DE CHECKOUT ACTUALIZAT */}
               <CheckoutForm
                 address={address}
                 setAddress={(updater) => setAddress((prev) => updater(prev))}
@@ -337,6 +349,9 @@ export default function CheckoutPage() {
                 setBilling={(updater) => setBilling((prev) => updater(prev))}
                 sameAsDelivery={sameAsDelivery}
                 setSameAsDelivery={setSameAsDelivery}
+                // FIX: Adăugăm noile props
+                agreedToTerms={agreedToTerms}
+                setAgreedToTerms={setAgreedToTerms}
                 errors={errors}
               />
             </section>
