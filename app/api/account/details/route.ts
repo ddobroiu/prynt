@@ -6,6 +6,14 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function PUT(req: Request) {
+  // Debugging: log incoming cookie header to verify auth cookie is sent from browser
+  try {
+    const cookieHeader = (req.headers && (req as any).cookies) ? undefined : req.headers.get('cookie');
+    console.log('[PUT /api/account/details] Incoming Cookie header:', cookieHeader);
+  } catch (e) {
+    console.log('[PUT /api/account/details] Could not read cookie header', e);
+  }
+
   const session = await getAuthSession();
   const userId = (session?.user as any)?.id as string | undefined;
 
