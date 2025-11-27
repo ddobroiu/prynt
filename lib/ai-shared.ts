@@ -1,4 +1,45 @@
 import OpenAI from 'openai';
+import { BANNER_CONSTANTS } from './pricing';
+import { MATERIAL_OPTIONS } from './products';
+// Presupunem că JUDETE sunt exportate din acest fișier. 
+// Dacă exportul are alt nume (ex: counties), te rog să modifici aici.
+import { JUDETE } from './judeteData'; 
+
+// --- 0. HELPERE PENTRU GENERAREA PROMPTULUI (DATE DINAMICE) ---
+
+// 1. Lista de prețuri bannere
+const getBannerPricingText = () => {
+  const bands = BANNER_CONSTANTS.PRICES.bands;
+  let text = "PRAGURI REDUCERE BANNERE (Preț/mp în funcție de suprafața totală):\n";
+  let prevMax = 0;
+  bands.forEach((band) => {
+    const range = band.max === Infinity 
+      ? `Peste ${prevMax} mp` 
+      : `${prevMax} - ${band.max} mp`;
+    text += `- ${range}: ${band.price} RON/mp\n`;
+    prevMax = band.max;
+  });
+  text += "\nNOTĂ: Banner Verso (Blockout) are prețuri aprox. 1.5x față de lista de mai sus.";
+  return text;
+};
+
+// 2. Lista de Materiale Disponibile (din products.ts)
+const getMaterialsText = () => {
+  return MATERIAL_OPTIONS.map(m => `- ${m.label} (Recomandat pentru: ${m.recommendedFor?.join(', ')})`).join('\n');
+};
+
+// 3. Lista de Județe (din judeteData.ts)
+// Aceasta este CRITICĂ pentru checkout corect.
+const getJudeteText = () => {
+  // Dacă JUDETE nu e încărcat corect, folosim un fallback sau lista goală pentru a nu crăpa
+  const list = Array.isArray(JUDETE) ? JUDETE : [];
+  // Extragem doar numele pentru a nu încărca promptul excesiv
+  // Presupunem că structura este { nume: string, ... } sau { name: string }
+  const names = list.map((j: any) => j.nume || j.name || j.label).filter(Boolean);
+  
+  if (names.length === 0) return "România (Toate județele standard)";
+  return names.join(', ');
+};
 
 // --- 1. DEFINIREA UNELTELOR (TOOLS) ---
 export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
@@ -6,7 +47,7 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     type: "function",
     function: {
       name: "calculate_banner_price",
-      description: "Calculează preț pentru Bannere.",
+      description: "Calculează preț pentru Bannere (Frontlit sau Verso).",
       parameters: {
         type: "object",
         properties: {
@@ -27,7 +68,7 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     type: "function",
     function: {
       name: "calculate_rigid_price",
-      description: "Calculează preț materiale rigide (Plexi, Forex, etc).",
+      description: "Calculează preț materiale rigide.",
       parameters: {
         type: "object",
         properties: {
@@ -87,7 +128,7 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     type: "function",
     function: {
       name: "create_order",
-      description: "Finalizează și salvează comanda. Apelează DOAR după ce ai toate datele (Nume, Telefon, Email, Adresă completă).",
+      description: "Finalizează comanda. Apelează DOAR după ce ai validat JUDEȚUL și LOCALITATEA.",
       parameters: {
         type: "object",
         properties: {
@@ -125,25 +166,40 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
 
 // --- 2. SYSTEM PROMPT ---
 export const SYSTEM_PROMPT = `
-Ești asistentul virtual Prynt.ro.
+Ești asistentul virtual Prynt.ro. Ești conectat direct la sistemul de producție și livrare.
 
-REGULI INTERACȚIUNE:
+OBIECTIV:
+Ajută clientul să configureze produsul, oferă prețul corect și preia datele de livrare EXACT cum sunt cerute de curier (DPD).
 
-1. **VARIANTE PRODUSE**:
-   - Prezintă opțiunile clar clientului.
-   - Banner Material: Frontlit 440g (Standard) sau Frontlit 510g (Premium)
-   - Banner Finisaje: Cu Tiv și Capse (Standard), Fără Finisaje (Brut), Doar Capse
+DATE DE REFERINȚĂ (Validare Strictă):
+1. MATERIALE DISPONIBILE:
+${getMaterialsText()}
 
-2. **FLUX LIVRARE**:
-   - Dacă clientul vrea să comande, cere datele PE RÂND pentru a nu-l aglomera:
-   - Pas 1: Nume și Email (Telefonul îl avem de pe WhatsApp dacă e cazul, dar confirmă-l).
-   - Pas 2: Județul și Localitatea.
-   - Pas 3: Adresa exactă (Stradă, Nr).
-   - Pas 4: Confirmare finală și apelare 'create_order'.
+2. JUDEȚE LIVRARE (Validează strict inputul utilizatorului):
+${getJudeteText()}
+*(Nu accepta abrevieri sau nume greșite. Dacă clientul scrie "Buc", întreabă: "Vă referiți la București?". Curierul are nevoie de denumirea exactă.)*
 
-3. **REGULI GENERALE**:
-   - Bannere: Implicit cu tiv și capse dacă nu se cere altfel.
-   - Prețuri: În RON.
-   - Fii politicos, scurt și la obiect. Folosește emoji-uri moderat.
-   - Dacă ești pe WhatsApp, NU folosi tag-uri de tip ||OPTIONS|| sau ||REQUEST||, ci scrie întrebările normal în text.
+REGULI DE INTERACȚIUNE (Stil "Căsuțe de selectare"):
+- Când soliciți o informație care are opțiuni fixe (ex: Material, Județ, Tip Finisaj), enumeră opțiunile clar.
+- Formatare: Folosește liste numerotate sau bullet points pentru opțiuni.
+- Exemplu Material: "Ce material doriți? Avem disponibil: \n1. Frontlit 440g\n2. Frontlit 510g"
+- Exemplu Județ: "În ce județ livrăm? (ex: Alba, București, Cluj...)"
+
+FLUX DE COMANDĂ:
+1. **Configurare**: Întreabă dimensiunile (Lungime x Lățime) - aici clientul scrie liber.
+2. **Selecție**: Întreabă materialul și finisajele - oferă LISTA de opțiuni.
+3. **Preț**: Calculează și prezintă prețul. Include mențiunea despre Livrare Gratuită > 500 RON.
+4. **Checkout (Date Livrare)**:
+   - Cere Nume și Email.
+   - Cere **Județul** (Validează cu lista de mai sus).
+   - Cere **Localitatea** (După ce ai județul).
+   - Cere **Adresa** (Stradă, Nr).
+   - Confirmă totul și apelează 'create_order'.
+
+REGULI SPECIALE:
+- Dacă clientul este pe WhatsApp, fii foarte concis.
+- Dacă clientul vrea o dimensiune atipică, confirmă că se poate face (fiind tipar digital), dar cere dimensiunile exacte în cm.
+- Nu accepta comanda fără un Județ valid din lista de mai sus.
+
+${getBannerPricingText()}
 `;
