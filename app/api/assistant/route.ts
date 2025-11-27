@@ -4,6 +4,7 @@ import { tools, SYSTEM_PROMPT } from '@/lib/ai-shared';
 import { executeTool } from '@/lib/ai-tool-runner';
 import { getAuthSession } from '@/lib/auth'; 
 import { prisma } from "@/lib/prisma";
+import { logConversation } from "@/lib/chat-logger";
 
 export const runtime = 'nodejs';
 
@@ -21,7 +22,7 @@ INSTRUCȚIUNI SPECIFICE WEB:
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    let { messages, pageContext } = body; // ADĂUGAT: pageContext
+    let { messages, pageContext } = body;
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ message: "Format invalid." }, { status: 400 });
@@ -51,14 +52,14 @@ export async function POST(req: Request) {
                         orderBy: { createdAt: 'desc' }
                     },
                     orders: { 
-                        take: 5, // ADĂUGAT: Luăm ultimele 5 comenzi pentru istoric
+                        take: 5,
                         orderBy: { createdAt: 'desc' },
                         select: { 
                             orderNo: true, 
                             createdAt: true, 
                             total: true, 
                             status: true,
-                            billing: true, // Pentru date facturare
+                            billing: true,
                             items: {
                                 select: { name: true, qty: true }
                             }
@@ -95,7 +96,7 @@ export async function POST(req: Request) {
                 // 2. Construire rezumat istoric
                 orderHistoryText = user.orders.map(o => {
                     const itemsSummary = o.items.map(i => `${i.qty}x ${i.name}`).join(', ');
-                    return `- Comanda #${o.orderNo} din ${new Date(o.createdAt).toLocaleDateString('ro-RO')}: ${itemsSummary} (Total: ${o.total} RON) - Status: ${o.status}`;
+                    return `- Comanda #${o.orderNo} din ${new Date(o.createdAt).toLocaleDateString('ro-RO')}: ${itemsSummary} (Total: ${Number(o.total)} RON) - Status: ${o.status}`;
                 }).join('\n');
             }
 
@@ -125,6 +126,7 @@ export async function POST(req: Request) {
       ...messages
     ];
 
+    // Primul apel OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: messagesPayload as any,
@@ -134,6 +136,7 @@ export async function POST(req: Request) {
     });
 
     const responseMessage = completion.choices[0].message;
+    let finalReply = responseMessage.content;
 
     if (responseMessage.tool_calls) {
       messagesPayload.push(responseMessage as any);
@@ -161,10 +164,22 @@ export async function POST(req: Request) {
         messages: messagesPayload as any,
       });
 
-      return NextResponse.json({ message: finalRes.choices[0].message.content });
+      finalReply = finalRes.choices[0].message.content;
     }
 
-    return NextResponse.json({ message: responseMessage.content });
+    // --- LOGARE CONVERSAȚIE ---
+    const lastUserMessage = messages[messages.length - 1];
+    if (lastUserMessage && lastUserMessage.role === 'user') {
+        const msgsToLog = [
+            { role: 'user', content: lastUserMessage.content },
+            { role: 'assistant', content: finalReply || "" }
+        ];
+        // Logăm asincron (fire & forget)
+        const userIdToLog = session?.user ? (session.user as any).id : undefined;
+        logConversation('web', identifier, msgsToLog, userIdToLog).catch(err => console.error("Log error:", err));
+    }
+
+    return NextResponse.json({ message: finalReply });
 
   } catch (error: any) {
     console.error("Eroare API Assistant:", error);

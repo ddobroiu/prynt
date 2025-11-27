@@ -92,7 +92,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         trackingInfo = "Încă nu a fost generat un AWB.";
       }
 
-      // Explicație status
+      // Explicație status (Important: Să nu creadă clientul că e livrat dacă e doar 'completed')
       if (order.status === 'completed' || order.status === 'shipped') {
         statusExplanation = "Statusul nostru 'Finalizat' înseamnă că am finalizat producția și am predat coletul curierului. Nu înseamnă că a fost livrat la dvs. Pentru locația exactă a coletului, vă rugăm să verificați link-ul de tracking de mai sus.";
       } else {
@@ -123,32 +123,30 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           });
       }
 
-      // Determinăm următorul ID de comandă
+      // Determinăm următorul ID de comandă (folosit și la oferte pentru consistență)
       const lastOrder = await prisma.order.findFirst({ orderBy: { orderNo: 'desc' } });
       const nextOrderNo = (lastOrder?.orderNo ?? 1000) + 1; 
 
       // Creăm o înregistrare de tip "Ofertă"
       const offerData: any = {
-        orderNo: nextOrderNo,
+        orderNo: nextOrderNo, // Folosim secvența, dar marcat ca ofertă
         status: "pending_verification",
         paymentStatus: "pending",
-        // FIX: Eliminat paymentMethod, păstrat doar paymentType
-        paymentType: "Card", 
+        paymentMethod: "oferta",
+        paymentType: "Card",
         currency: "RON",
         total: totalAmount,
         userEmail: customer_details.email || `offer_${context.source}@prynt.ro`,
-        // FIX: Redenumit shippingAddress -> address conform schemei Prisma
-        address: {
-          name: customer_details.name,
+        shippingAddress: {
+          name: customer_details.name, // Salvăm numele aici
           phone: customer_details.phone || "-",
           street: customer_details.address || "-",
           city: customer_details.city || "-",
           county: customer_details.county || "-",
           country: "Romania",
         },
-        // FIX: Redenumit billingAddress -> billing conform schemei Prisma
-        billing: {
-          name: customer_details.name,
+        billingAddress: {
+          name: customer_details.name, // Salvăm numele și aici
           phone: customer_details.phone || "-",
           street: customer_details.address || "-",
           city: customer_details.city || "-",
@@ -169,9 +167,9 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           })),
         },
         metadata: { 
-            type: 'offer',
+            type: 'offer', // Marcaj critic pentru a distinge de comenzi reale
             generatedFrom: context.source,
-            clientName: customer_details.name
+            clientName: customer_details.name // ADĂUGAT: Salvăm numele explicit și în metadata
         }
       };
 
@@ -181,7 +179,9 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
 
       const offerRecord = await prisma.order.create({ data: offerData });
 
+      // Generăm link-ul public către PDF
       const baseUrl = process.env.NEXTAUTH_URL || "https://prynt.ro";
+      // Ruta /api/pdf/offer va folosi ID-ul pentru a prelua datele din DB (inclusiv numele clientului)
       const offerLink = `${baseUrl}/api/pdf/offer?id=${offerRecord.id}`;
 
       return { 
@@ -216,6 +216,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         },
       });
 
+      // Email fallback
       const userEmail = customer_details.email || (context.source === 'whatsapp' ? `whatsapp_${context.identifier}@prynt.ro` : `guest_${nextOrderNo}@prynt.ro`);
       const userPhone = customer_details.phone || context.identifier;
 
@@ -223,13 +224,11 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         orderNo: nextOrderNo,
         status: "pending_verification",
         paymentStatus: "pending",
-        // FIX: paymentMethod -> paymentType (Required in Schema)
-        paymentType: "Ramburs", 
+        paymentMethod: "ramburs",
         currency: "RON",
         total: totalAmount,
         userEmail: userEmail,
-        // FIX: shippingAddress -> address
-        address: {
+        shippingAddress: {
           name: customer_details.name,
           phone: userPhone,
           street: customer_details.address,
@@ -237,8 +236,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           county: customer_details.county,
           country: "Romania",
         },
-        // FIX: billingAddress -> billing
-        billing: {
+        billingAddress: {
           name: customer_details.name,
           phone: userPhone,
           street: customer_details.address,
@@ -267,6 +265,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
 
       const order = await prisma.order.create({ data: orderData });
 
+      // Emailuri de confirmare
       try {
         if (order && typeof sendOrderConfirmationEmail === "function") await sendOrderConfirmationEmail(order);
         if (order && typeof sendNewOrderAdminEmail === "function") await sendNewOrderAdminEmail(order);
@@ -277,6 +276,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       return { success: true, orderId: order.id, orderNo: order.orderNo };
     }
 
+    // Fallback pentru alte tools neimplementate complet
     return { info: "Funcție neimplementată complet sau necunoscută." };
 
   } catch (e: any) {

@@ -24,6 +24,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   graphics      UserGraphic[]
   reviews       Review[]
+  aiConversations AiConversation[] // Relație nouă pentru chat history
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -121,7 +122,7 @@ model OrderItem {
   // Grafică
   artworkUrl  String? 
   
-  // MODIFICAT: Metadate pentru designOption, textDesign, etc.
+  // Metadate pentru designOption, textDesign, etc.
   metadata    Json?   
 }
 
@@ -182,4 +183,36 @@ model Review {
   productSlug String   // ex: "banner"
    
   @@index([productSlug])
+}
+
+// --- MODELE NOI PENTRU ISTORIC CHAT ---
+
+model AiConversation {
+  id          String      @id @default(cuid())
+  source      String      // "web" | "whatsapp"
+  identifier  String      // SessionID (Web) sau Telefon (WhatsApp)
+  
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id])
+
+  messages    AiMessage[]
+  
+  // Flaguri pentru Admin
+  hasError    Boolean     @default(false) // True dacă botul a dat fallback
+  isRead      Boolean     @default(false)
+  
+  lastMessageAt DateTime  @default(now())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model AiMessage {
+  id             String         @id @default(cuid())
+  conversationId String
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  role           String         // "user" | "assistant" | "system" | "tool"
+  content        String         @db.Text
+  
+  createdAt      DateTime       @default(now())
 }

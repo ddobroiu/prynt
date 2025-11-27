@@ -4,6 +4,7 @@ import { tools, SYSTEM_PROMPT } from "@/lib/ai-shared";
 import { executeTool } from "@/lib/ai-tool-runner";
 import { sendWhatsAppMessage } from "@/lib/whatsapp-utils";
 import { prisma } from "@/lib/prisma";
+import { logConversation } from "@/lib/chat-logger";
 import { v2 as cloudinary } from 'cloudinary';
 
 export const runtime = "nodejs";
@@ -137,6 +138,7 @@ export async function POST(req: Request) {
         let contextAddress = "";
         let contextBilling = "";
         let orderHistoryText = "";
+        let userId: string | undefined = undefined;
 
         try {
             const localPhone = from.startsWith("40") ? "0" + from.slice(2) : from;
@@ -150,6 +152,7 @@ export async function POST(req: Request) {
                     ]
                 },
                 select: { 
+                    id: true,
                     name: true, 
                     email: true,
                     addresses: {
@@ -157,7 +160,7 @@ export async function POST(req: Request) {
                         orderBy: { createdAt: 'desc' }
                     },
                     orders: { 
-                        take: 5, // ADĂUGAT: Luăm ultimele 5 comenzi pt WhatsApp
+                        take: 5, // Luăm ultimele 5 comenzi pt WhatsApp
                         orderBy: { createdAt: 'desc' },
                         select: { 
                             orderNo: true, 
@@ -174,6 +177,7 @@ export async function POST(req: Request) {
             });
 
             if (user) {
+                userId = user.id;
                 contextName = user.name || "";
                 contextEmail = user.email || "";
                 
@@ -197,7 +201,7 @@ export async function POST(req: Request) {
                     // Construire istoric
                     orderHistoryText = user.orders.map(o => {
                         const itemsSummary = o.items.map(i => `${i.qty}x ${i.name}`).join(', ');
-                        return `- #${o.orderNo} (${new Date(o.createdAt).toLocaleDateString('ro-RO')}): ${itemsSummary} - Status: ${o.status}`;
+                        return `- #${o.orderNo} (${new Date(o.createdAt).toLocaleDateString('ro-RO')}: ${itemsSummary} - Status: ${o.status}`;
                     }).join('\n');
                 }
             }
@@ -279,23 +283,35 @@ export async function POST(req: Request) {
           finalReply = finalCompletion.choices[0].message.content ?? "";
         }
 
-        if (finalReply && finalReply.includes("||REQUEST: JUDET||")) {
-          const res = await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/dpd/judete`);
-          const data = await res.json();
-          const judete = Array.isArray(data.judete) ? data.judete : [];
-          const options = judete.slice(0, 5).map((j: string, idx: number) => ({ id: `judet_${idx + 1}`, title: j }));
-          options.push({ id: "search_judet", title: "Caută județul" });
-          await sendWhatsAppMessage(from, finalReply.replace("||REQUEST: JUDET||", "").trim() || "Județ?", options);
-        } else if (finalReply && finalReply.trim().length > 0) {
-          let replyText = finalReply;
-          if (contextName) replyText = replyText.replace(/{{\s*name\s*}}/gi, contextName);
-          await sendWhatsAppMessage(from, replyText);
-        }
-
+        // 3. Trimitere Mesaj WhatsApp & Salvare în DB
         if (finalReply && finalReply.trim().length > 0) {
-          history.push({ role: "user", content: textBody });
-          history.push({ role: "assistant", content: finalReply });
-          conversations.set(from, history);
+            // Curățare nume din template
+            let replyText = finalReply;
+            if (contextName) replyText = replyText.replace(/{{\s*name\s*}}/gi, contextName);
+
+            // Gestionare request județ (buton interactiv)
+            if (finalReply.includes("||REQUEST: JUDET||")) {
+              const res = await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/dpd/judete`);
+              const data = await res.json();
+              const judete = Array.isArray(data.judete) ? data.judete : [];
+              const options = judete.slice(0, 5).map((j: string, idx: number) => ({ id: `judet_${idx + 1}`, title: j }));
+              options.push({ id: "search_judet", title: "Caută județul" });
+              await sendWhatsAppMessage(from, replyText.replace("||REQUEST: JUDET||", "").trim() || "Județ?", options);
+            } else {
+              await sendWhatsAppMessage(from, replyText);
+            }
+
+            // SALVARE ISTORIC ÎN DB (LOGGING)
+            const msgsToLog = [
+                { role: 'user', content: textBody },
+                { role: 'assistant', content: finalReply }
+            ];
+            logConversation('whatsapp', from, msgsToLog, userId).catch(err => console.error("Log Whatsapp error:", err));
+
+            // Actualizare istoric local pentru contextul conversației curente
+            history.push({ role: "user", content: textBody });
+            history.push({ role: "assistant", content: finalReply });
+            conversations.set(from, history);
         }
 
         return NextResponse.json({ status: "success" });
