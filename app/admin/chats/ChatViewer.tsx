@@ -166,46 +166,46 @@ export default function ChatViewer({ conversations: initialConversations }: { co
       
       {/* ==================== SIDEBAR (Lista Conversații) ==================== */}
       <div className="w-1/3 min-w-[300px] border-r border-slate-200 flex flex-col bg-white h-full">
-        
-        {/* LISTA (Scrollabilă) cu HEADER sticky în interior */}
-        <div className="flex-1 overflow-y-auto">
-          {/* HEADER SIDEBAR (Fix în interiorul scrollului) */}
-          <div className="shrink-0 bg-white border-b border-slate-200 z-30 sticky top-0">
-            {/* Tab-uri Inbox / Finalizate */}
-            <div className="flex">
-              <button 
-                onClick={() => setActiveTab('active')}
-                className={`flex-1 py-4 text-sm font-bold border-b-2 transition-colors flex justify-center items-center gap-2
-                  ${activeTab === 'active' ? 'border-slate-800 text-slate-800 bg-slate-50' : 'border-transparent text-slate-400 hover:bg-slate-50'}
-                `}
-              >
-                📥 Inbox 
-                {activeCount > 0 && <span className="bg-slate-800 text-white text-[10px] px-1.5 py-0.5 rounded-full">{activeCount}</span>}
-              </button>
-              <button 
-                onClick={() => setActiveTab('archived')}
-                className={`flex-1 py-4 text-sm font-bold border-b-2 transition-colors
-                  ${activeTab === 'archived' ? 'border-slate-800 text-slate-800 bg-slate-50' : 'border-transparent text-slate-400 hover:bg-slate-50'}
-                `}
-              >
-                ✅ Finalizate
-              </button>
-            </div>
-
-            {/* Filtre Sursă */}
-            <div className="p-2 flex gap-2 justify-center bg-slate-50">
-              <button onClick={() => setFilterSource('all')} className={`px-3 py-1 text-xs rounded border ${filterSource === 'all' ? 'bg-white border-slate-400 font-bold' : 'border-transparent text-slate-500'}`}>Toate</button>
-              <button onClick={() => setFilterSource('whatsapp')} className={`px-3 py-1 text-xs rounded border ${filterSource === 'whatsapp' ? 'bg-green-100 border-green-300 text-green-800 font-bold' : 'border-transparent text-slate-500'}`}>WhatsApp</button>
-              <button onClick={() => setFilterSource('web')} className={`px-3 py-1 text-xs rounded border ${filterSource === 'web' ? 'bg-blue-100 border-blue-300 text-blue-800 font-bold' : 'border-transparent text-slate-500'}`}>Web</button>
-            </div>
+        {/* HEADER SIDEBAR (Fix, rămâne vizibil) */}
+        <div className="shrink-0 bg-white border-b border-slate-200 z-30">
+          {/* Tab-uri Inbox / Finalizate */}
+          <div className="flex">
+            <button 
+              onClick={() => setActiveTab('active')}
+              className={`flex-1 py-4 text-sm font-bold border-b-2 transition-colors flex justify-center items-center gap-2
+                ${activeTab === 'active' ? 'border-slate-800 text-slate-800 bg-slate-50' : 'border-transparent text-slate-400 hover:bg-slate-50'}
+              `}
+            >
+              📥 Inbox 
+              {activeCount > 0 && <span className="bg-slate-800 text-white text-[10px] px-1.5 py-0.5 rounded-full">{activeCount}</span>}
+            </button>
+            <button 
+              onClick={() => setActiveTab('archived')}
+              className={`flex-1 py-4 text-sm font-bold border-b-2 transition-colors
+                ${activeTab === 'archived' ? 'border-slate-800 text-slate-800 bg-slate-50' : 'border-transparent text-slate-400 hover:bg-slate-50'}
+              `}
+            >
+              ✅ Finalizate
+            </button>
           </div>
+
+          {/* Filtre Sursă */}
+          <div className="p-2 flex gap-2 justify-center bg-slate-50">
+            <button onClick={() => setFilterSource('all')} className={`px-3 py-1 text-xs rounded border ${filterSource === 'all' ? 'bg-white border-slate-400 font-bold' : 'border-transparent text-slate-500'}`}>Toate</button>
+            <button onClick={() => setFilterSource('whatsapp')} className={`px-3 py-1 text-xs rounded border ${filterSource === 'whatsapp' ? 'bg-green-100 border-green-300 text-green-800 font-bold' : 'border-transparent text-slate-500'}`}>WhatsApp</button>
+            <button onClick={() => setFilterSource('web')} className={`px-3 py-1 text-xs rounded border ${filterSource === 'web' ? 'bg-blue-100 border-blue-300 text-blue-800 font-bold' : 'border-transparent text-slate-500'}`}>Web</button>
+          </div>
+        </div>
+
+        {/* LISTA (Scrollabilă) */}
+        <div className="flex-1 overflow-y-auto">
           {filteredList.length === 0 ? (
-             <div className="p-10 text-center text-slate-400 text-xs flex flex-col items-center">
-                <span className="text-3xl mb-2 opacity-30">📭</span>
-                <p>Nicio conversație aici.</p>
-             </div>
+            <div className="p-10 text-center text-slate-400 text-xs flex flex-col items-center">
+              <span className="text-3xl mb-2 opacity-30">📭</span>
+              <p>Nicio conversație aici.</p>
+            </div>
           ) : (
-             filteredList.map(conv => {
+            filteredList.map(conv => {
                 const isWhatsapp = conv.source === 'whatsapp';
                 const isSelected = conv.id === selectedId;
                 const lastMsg = conv.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null;
