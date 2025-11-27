@@ -6,13 +6,13 @@ import ReturningCustomerLogin from "@/components/ReturningCustomerLogin";
 import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../../components/CartContext";
-import { ShieldCheck, Truck, X, Plus, Minus } from "lucide-react";
+import { ShieldCheck, Truck, X, Plus, Minus, CreditCard, Banknote, Building2 } from "lucide-react";
 import CheckoutForm from "./CheckoutForm";
 import DeliveryInfo from "@/components/DeliveryInfo";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-type PaymentMethod = "ramburs" | "card";
+type PaymentMethod = "ramburs" | "card" | "op"; // Adăugat tip 'op'
 
 type Address = {
   nume_prenume: string;
@@ -47,9 +47,8 @@ type Billing = {
 };
 
 export default function CheckoutPage() {
-  // Use CartProvider hook (items shape: title, price, quantity, metadata...)
   const { data: session } = useSession();
-  const { items = [], removeItem, isLoaded, total } = useCart();
+  const { items = [], removeItem, isLoaded } = useCart();
 
   const [address, setAddress] = useState<Address>({
     nume_prenume: "",
@@ -66,22 +65,17 @@ export default function CheckoutPage() {
   });
 
   const [sameAsDelivery, setSameAsDelivery] = useState(true);
-  
-  // --- NOU: State pentru Termeni și Condiții ---
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  // ---------------------------------------------
-
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("ramburs");
 
   const [placing, setPlacing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showEmbed, setShowEmbed] = useState(false);
-  // Default to checked for anonymous users; users can uncheck if they want.
   const [createAccount, setCreateAccount] = useState(true);
 
   const firstInvalidRef = useRef<HTMLElement | null>(null);
 
-  // Prefill address (returning customer) when logged in
+  // Prefill address
   useEffect(() => {
     const alreadyFilled = address?.nume_prenume || address?.email || address?.telefon || address?.judet || address?.localitate || address?.strada_nr;
     if (!session?.user || alreadyFilled) return;
@@ -91,7 +85,7 @@ export default function CheckoutPage() {
       .catch(() => {});
   }, [session?.user]);
 
-  // Prefill billing from last order
+  // Prefill billing
   useEffect(() => {
     if (!session?.user) return;
     const emptyBilling = !billing.cui && !billing.denumire_companie && !billing.judet && !billing.localitate && !billing.strada_nr;
@@ -109,12 +103,10 @@ export default function CheckoutPage() {
       .catch(() => {});
   }, [session?.user]);
 
-  // If a session exists (user logged in), ensure createAccount is false.
   useEffect(() => {
     if (session?.user) setCreateAccount(false);
   }, [session?.user]);
 
-  // Helper: normalize cart items to the shape expected by server
   function normalizeCart(cart: any[]) {
     return (cart ?? []).map((it) => {
       const quantity = Number(it.quantity ?? 1) || 1;
@@ -136,28 +128,19 @@ export default function CheckoutPage() {
     });
   }
 
-  // subtotal fallback: compute robustly from items (use normalized)
   const subtotal = useMemo(() => {
     const norm = normalizeCart(items);
     return norm.reduce((s, it) => s + Number(it.totalAmount || it.unitAmount * it.quantity || 0), 0);
   }, [items]);
 
-  // Shipping: free above threshold, otherwise standard fee
   const FREE_SHIPPING_THRESHOLD = 500;
   const SHIPPING_FEE = 19.99;
   const costLivrare = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
   const totalPlata = (items ?? []).length > 0 ? subtotal + costLivrare : 0;
   const isEmpty = isLoaded && (items ?? []).length === 0;
 
-  const fmt = new Intl.NumberFormat("ro-RO", {
-    style: "currency",
-    currency: "RON",
-    maximumFractionDigits: 2,
-  }).format;
-
   function validate(): { ok: boolean; errs: Record<string, string> } {
     const e: Record<string, string> = {};
-
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const telRe = /^[0-9+()\-\s]{7,}$/;
 
@@ -174,18 +157,12 @@ export default function CheckoutPage() {
 
     if (!sameAsDelivery && billing.tip_factura === 'persoana_fizica') {
       if (!billing.judet) e["billing.judet"] = "Alege județul (facturare)";
-      if (!billing.localitate?.trim())
-        e["billing.localitate"] = "Localitate facturare obligatorie";
-      if (!billing.strada_nr?.trim())
-        e["billing.strada_nr"] = "Stradă și număr facturare obligatorii";
+      if (!billing.localitate?.trim()) e["billing.localitate"] = "Localitate facturare obligatorie";
+      if (!billing.strada_nr?.trim()) e["billing.strada_nr"] = "Stradă și număr facturare obligatorii";
     }
 
     if ((items ?? []).length === 0) e["cart.empty"] = "Coșul este gol";
-
-    // --- VALIDARE TERMENI ---
-    if (!agreedToTerms) {
-        e["terms.agreement"] = "Trebuie să confirmi că ești de acord cu prelucrarea datelor.";
-    }
+    if (!agreedToTerms) e["terms.agreement"] = "Trebuie să confirmi că ești de acord cu prelucrarea datelor.";
 
     return { ok: Object.keys(e).length === 0, errs: e };
   }
@@ -199,7 +176,6 @@ export default function CheckoutPage() {
     const { ok, errs } = validate();
     if (!ok) {
       setErrors(errs);
-      // Scroll la primul câmp invalid (inclusiv checkbox-ul de termeni)
       const firstKey = Object.keys(errs)[0];
       const el = document.querySelector<HTMLElement>(`[data-field="${firstKey}"]`);
       if (el) {
@@ -210,10 +186,7 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Normalized cart (robust)
     const normalizedCart = normalizeCart(items);
-
-    // Capture simple marketing info (UTM, referrer)
     const url = typeof window !== 'undefined' ? new URL(window.location.href) : null;
     const params = url ? Object.fromEntries(url.searchParams.entries()) : {} as any;
     const marketing = {
@@ -251,10 +224,12 @@ export default function CheckoutPage() {
       },
       marketing,
       createAccount: createAccount && !session?.user,
+      paymentMethod: paymentMethod === 'op' ? 'OP' : paymentMethod === 'ramburs' ? 'Ramburs' : 'Card', // Mapping pentru backend
     };
 
     try {
-      if (paymentMethod === "ramburs") {
+      // Ramburs SAU OP - trimitem direct la server
+      if (paymentMethod === "ramburs" || paymentMethod === "op") {
         const res = await fetch("/api/order/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -264,14 +239,18 @@ export default function CheckoutPage() {
         if (!res.ok || !data?.success) {
           throw new Error(data?.message || "Eroare la crearea comenzii.");
         }
-        // Redirect cu număr comandă pentru afișare pe pagina de succes
+        
+        // Redirect cu params pentru success page (o=orderNo, pm=paymentMethod)
         const o = Number(data?.orderNo);
-        const q = Number.isFinite(o) && o > 0 ? `?o=${o}` : "";
-        window.location.href = `/checkout/success${q}`;
+        const qOrder = Number.isFinite(o) && o > 0 ? `o=${o}` : "";
+        const qPm = `pm=${paymentMethod === 'op' ? 'OP' : 'Ramburs'}`;
+        const query = [qOrder, qPm].filter(Boolean).join('&');
+        
+        window.location.href = `/checkout/success?${query}`;
         return;
       }
 
-      // Card: send normalizedCart to Stripe session endpoint
+      // Card: Stripe session
       const res = await fetch("/api/stripe/checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -286,7 +265,6 @@ export default function CheckoutPage() {
       const stripe = await stripePromise;
       if (!stripe) throw new Error("Stripe nu a putut fi inițializat.");
       const embeddedCheckout = await stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret });
-      // Așteptăm ca elementul #stripe-embedded să existe (render după setShowEmbed)
       setTimeout(() => {
         const host = document.getElementById('stripe-embedded');
         if (host) embeddedCheckout.mount('#stripe-embedded');
@@ -322,8 +300,6 @@ export default function CheckoutPage() {
                 subtotal={subtotal}
                 shipping={costLivrare}
                 total={totalPlata}
-                paymentMethod={paymentMethod}
-                setPaymentMethod={setPaymentMethod}
                 onPlaceOrder={placeOrder}
                 placing={placing}
                 county={address.judet}
@@ -332,16 +308,13 @@ export default function CheckoutPage() {
                 createAccount={createAccount}
                 setCreateAccount={setCreateAccount}
                 isLoggedIn={!!session?.user}
+                paymentMethod={paymentMethod} // Pass pt button label
               />
             </aside>
 
             <section className={`order-2 lg:order-1 lg:col-span-2 space-y-6`}>
               <CartItems items={items} onRemove={removeItem} />
-
-              {/* Login trebuie să apară deasupra secțiunii de livrare */}
               <ReturningCustomerLogin />
-
-              {/* FORMULARUL DE CHECKOUT ACTUALIZAT */}
               <CheckoutForm
                 address={address}
                 setAddress={(updater) => setAddress((prev) => updater(prev))}
@@ -349,11 +322,67 @@ export default function CheckoutPage() {
                 setBilling={(updater) => setBilling((prev) => updater(prev))}
                 sameAsDelivery={sameAsDelivery}
                 setSameAsDelivery={setSameAsDelivery}
-                // FIX: Adăugăm noile props
                 agreedToTerms={agreedToTerms}
                 setAgreedToTerms={setAgreedToTerms}
                 errors={errors}
               />
+
+              {/* SECȚIUNE METODĂ DE PLATĂ (Actualizată) */}
+              <div className="card p-4 border border-[--border] bg-surface rounded-xl shadow-sm">
+                <h2 className="text-xl font-bold mb-4 text-ui">Metodă de plată</h2>
+                <div className="space-y-3">
+                    
+                    {/* Ramburs */}
+                    <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentMethod === 'ramburs' ? 'border-indigo-500 bg-indigo-500/10' : 'border-[--border] hover:bg-white/5'}`}>
+                        <div className="mt-1">
+                            <input type="radio" name="payment" value="ramburs" checked={paymentMethod === 'ramburs'} onChange={() => setPaymentMethod('ramburs')} className="h-4 w-4 border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800" />
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Banknote size={18} className="text-emerald-400" />
+                                <span className="font-bold text-ui">Ramburs (Plata la livrare)</span>
+                            </div>
+                            <div className="text-xs text-muted">Plătești curierului numerar când ajunge coletul.</div>
+                        </div>
+                    </label>
+
+                    {/* Card */}
+                    <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-indigo-500 bg-indigo-500/10' : 'border-[--border] hover:bg-white/5'}`}>
+                        <div className="mt-1">
+                            <input type="radio" name="payment" value="card" checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} className="h-4 w-4 border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800" />
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                                <CreditCard size={18} className="text-blue-400" />
+                                <span className="font-bold text-ui">Card Online (Securizat)</span>
+                            </div>
+                            <div className="text-xs text-muted">Plătești online prin Stripe. Siguranță garantată.</div>
+                        </div>
+                    </label>
+
+                    {/* Transfer Bancar (OP) - NOU */}
+                    <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentMethod === 'op' ? 'border-indigo-500 bg-indigo-500/10' : 'border-[--border] hover:bg-white/5'}`}>
+                        <div className="mt-1">
+                            <input type="radio" name="payment" value="op" checked={paymentMethod === 'op'} onChange={() => setPaymentMethod('op')} className="h-4 w-4 border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800" />
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Building2 size={18} className="text-amber-400" />
+                                <span className="font-bold text-ui">Transfer Bancar (OP)</span>
+                            </div>
+                            <div className="text-xs text-muted">
+                                Vei primi factura și datele bancare pe email. Comanda intră în producție după confirmarea plății.
+                            </div>
+                            {paymentMethod === 'op' && (
+                                <div className="mt-3 p-3 bg-blue-900/30 border border-blue-500/30 rounded text-xs text-blue-200 animate-in fade-in">
+                                    <p><strong>Notă:</strong> Pentru o procesare rapidă, te rugăm să ne trimiți dovada plății pe email la <u>contact@prynt.ro</u> după plasarea comenzii.</p>
+                                </div>
+                            )}
+                        </div>
+                    </label>
+                </div>
+              </div>
+
             </section>
           </div>
         )}
@@ -367,10 +396,7 @@ function EmptyCart() {
     <div className="rounded-2xl border card-bg p-8 text-center text-ui">
       <h2 className="text-xl font-bold mb-2">Coșul tău este gol</h2>
       <p className="text-muted mb-6">Adaugă produse pentru a continua.</p>
-      <a
-        href="/"
-        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 transition"
-      >
+      <a href="/" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 transition">
         Continuă cumpărăturile
       </a>
     </div>
@@ -381,8 +407,6 @@ function SummaryCard({
   subtotal,
   shipping,
   total,
-  paymentMethod,
-  setPaymentMethod,
   onPlaceOrder,
   placing,
   county,
@@ -391,12 +415,11 @@ function SummaryCard({
   createAccount,
   setCreateAccount,
   isLoggedIn,
+  paymentMethod,
 }: {
   subtotal: number;
   shipping: number;
   total: number;
-  paymentMethod: "ramburs" | "card";
-  setPaymentMethod: (v: "ramburs" | "card") => void;
   onPlaceOrder: () => void;
   placing: boolean;
   county?: string;
@@ -405,8 +428,16 @@ function SummaryCard({
   createAccount: boolean;
   setCreateAccount: (v: boolean) => void;
   isLoggedIn: boolean;
+  paymentMethod: PaymentMethod;
 }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
+
+  const btnLabel = useMemo(() => {
+      if (placing) return "Se procesează...";
+      if (paymentMethod === 'card') return "Plătește";
+      if (paymentMethod === 'op') return "Trimite comanda (OP)";
+      return "Plasează comanda";
+  }, [paymentMethod, placing]);
 
   return (
     <div className="lg:sticky lg:top-6 rounded-2xl border card-bg p-5 text-ui">
@@ -438,40 +469,23 @@ function SummaryCard({
               type="checkbox"
               checked={createAccount}
               onChange={(e) => setCreateAccount(e.target.checked)}
+              className="mt-0.5 rounded border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800"
             />
             <span className="text-ui leading-snug">
               Creează un cont cu acest email și parolă generată automat (trimisă pe email). O vei putea schimba ulterior.
             </span>
           </label>
         )}
-        <div className="mb-3 flex gap-3">
-          <button
-            onClick={() => setPaymentMethod("ramburs")}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold border ${
-              paymentMethod === "ramburs" ? "border-emerald-500 bg-emerald-500/10" : "border-white/10 bg-white/5 hover:bg-white/10"
-            }`}
-          >
-            Ramburs
-          </button>
-          <button
-            onClick={() => setPaymentMethod("card")}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold border ${
-              paymentMethod === "card" ? "border-emerald-500 bg-emerald-500/10" : "border-white/10 bg-white/5 hover:bg-white/10"
-            }`}
-          >
-            Card online
-          </button>
-        </div>
 
         {!showEmbed && (
           <button
             type="button"
             onClick={onPlaceOrder}
             disabled={placing}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition disabled:opacity-60"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-500 transition disabled:opacity-60 shadow-lg shadow-indigo-900/20"
           >
-            <ShieldCheck size={16} />
-            {placing ? "Se procesează..." : paymentMethod === 'card' ? 'Plătește' : 'Plasează comanda'}
+            <ShieldCheck size={18} />
+            {btnLabel}
           </button>
         )}
 
@@ -488,18 +502,13 @@ function SummaryCard({
               >
                 Anulează plata
               </button>
-              <a
-                href="/"
-                className="flex-1 inline-flex items-center justify-center rounded-md border border-emerald-500/50 bg-emerald-600/20 px-3 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-600/30"
-              >
-                Mergi la Shop
-              </a>
             </div>
           </div>
         )}
 
-        <p className="mt-2 text-[11px] text-muted text-center">
-          Plata cu cardul este securizată. Pentru ramburs, plătești la curier.
+        <p className="mt-3 text-[11px] text-muted text-center leading-relaxed opacity-70">
+          Prin plasarea comenzii, ești de acord cu <Link href="/termeni" className="underline hover:text-white">Termenii</Link>. <br/>
+          Plata cu cardul este securizată prin Stripe.
         </p>
       </div>
     </div>
@@ -508,34 +517,17 @@ function SummaryCard({
 
 function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemove: (id: string) => void }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
-
   const { updateQuantity } = useCart();
 
-  // Map chei metadata -> etichete prietenoase
+  // Helper labels...
   const labelForKey: Record<string, string> = {
-    width: "Lățime (cm)",
-    height: "Înălțime (cm)",
-    width_cm: "Lățime (cm)",
-    height_cm: "Înălțime (cm)",
-    totalSqm: "Suprafață totală (m²)",
-    sqmPerUnit: "m²/buc",
-    pricePerSqm: "Preț pe m² (RON)",
-    materialId: "Material",
-    material: "Material",
-    laminated: "Laminare",
-    designOption: "Grafică",
-    proDesignFee: "Taxă grafică Pro (RON)",
-    want_adhesive: "Adeziv",
-    want_hem_and_grommets: "Tiv și capse",
-    want_wind_holes: "Găuri pentru vânt",
-    shape_diecut: "Tăiere la contur",
-    productType: "Tip panou",
-    thickness_mm: "Grosime (mm)",
-    sameGraphicFrontBack: "Aceeași grafică față/spate",
-    framed: "Șasiu",
-    sizeKey: "Dimensiune preset",
-    mode: "Mod canvas",
-    orderNotes: "Observații",
+    width: "Lățime (cm)", height: "Înălțime (cm)", width_cm: "Lățime (cm)", height_cm: "Înălțime (cm)",
+    totalSqm: "Suprafață totală (m²)", sqmPerUnit: "m²/buc", pricePerSqm: "Preț pe m² (RON)",
+    materialId: "Material", material: "Material", laminated: "Laminare", designOption: "Grafică",
+    proDesignFee: "Taxă grafică Pro (RON)", want_adhesive: "Adeziv", want_hem_and_grommets: "Tiv și capse",
+    want_wind_holes: "Găuri pentru vânt", shape_diecut: "Tăiere la contur", productType: "Tip panou",
+    thickness_mm: "Grosime (mm)", sameGraphicFrontBack: "Aceeași grafică față/spate", framed: "Șasiu",
+    sizeKey: "Dimensiune preset", mode: "Mod canvas", orderNotes: "Observații",
   };
 
   function formatYesNo(v: any) {
@@ -563,9 +555,7 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
 
     const width = item.width ?? item.width_cm ?? meta.width_cm ?? meta.width;
     const height = item.height ?? item.height_cm ?? meta.height_cm ?? meta.height;
-    if (width || height) {
-      details.push({ label: "Dimensiune", value: `${width ?? "—"} x ${height ?? "—"} cm` });
-    }
+    if (width || height) details.push({ label: "Dimensiune", value: `${width ?? "—"} x ${height ?? "—"} cm` });
 
     const isFonduri = (item?.slug === 'fonduri-eu') || (item?.productId === 'fonduri-eu');
     if (isFonduri && typeof meta.selectedReadable === 'string' && meta.selectedReadable.trim().length > 0) {
@@ -574,50 +564,23 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
 
     const knownKeys = Object.keys(labelForKey).filter((k) => meta[k] !== undefined);
     knownKeys.forEach((k) => {
-      if (k === 'proDesignFee') {
-        const num = Number(meta[k]);
-        if (!isFinite(num) || num <= 0) return;
-      }
-      const label = labelForKey[k];
-      const val = prettyValue(k, meta[k]);
-      details.push({ label, value: val });
+      if (k === 'proDesignFee') { const num = Number(meta[k]); if (!isFinite(num) || num <= 0) return; }
+      details.push({ label: labelForKey[k], value: prettyValue(k, meta[k]) });
     });
 
     ["sqmPerUnit", "totalSqm", "pricePerSqm"].forEach((k) => {
-      if (!knownKeys.includes(k) && meta[k] !== undefined) {
-        const label = (labelForKey as any)[k] || k;
-        details.push({ label, value: String(meta[k]) });
-      }
+      if (!knownKeys.includes(k) && meta[k] !== undefined) details.push({ label: (labelForKey as any)[k] || k, value: String(meta[k]) });
     });
 
-    const exclude = new Set([
-      "price",
-      "totalAmount",
-      "qty",
-      "quantity",
-      "artwork",
-      "artworkUrl",
-      "artworkLink",
-      "text",
-      "textDesign",
-      "selectedReadable",
-      "selections",
-      "title",
-      "name",
-    ]);
-    Object.keys(meta)
-      .filter((k) => !knownKeys.includes(k) && !exclude.has(k))
-      .forEach((k) => {
-        const v = meta[k];
-        if (k === 'proDesignFee') {
-          const num = Number(v);
-          if (!isFinite(num) || num <= 0) return;
-        }
-        if (v === null || v === undefined) return;
-        if (typeof v === 'number' && v === 0) return;
-        if (typeof v === 'string' && v.trim() === '') return;
-        details.push({ label: k, value: String(v) });
-      });
+    const exclude = new Set(["price", "totalAmount", "qty", "quantity", "artwork", "artworkUrl", "artworkLink", "text", "textDesign", "selectedReadable", "selections", "title", "name"]);
+    Object.keys(meta).filter((k) => !knownKeys.includes(k) && !exclude.has(k)).forEach((k) => {
+      const v = meta[k];
+      if (k === 'proDesignFee') { const num = Number(v); if (!isFinite(num) || num <= 0) return; }
+      if (v === null || v === undefined) return;
+      if (typeof v === 'number' && v === 0) return;
+      if (typeof v === 'string' && v.trim() === '') return;
+      details.push({ label: k, value: String(v) });
+    });
 
     if (details.length === 0) return null;
 
@@ -647,47 +610,25 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
-                    <button
-                      onClick={() => onRemove(item.id)}
-                      className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-muted hover:bg-white/10"
-                      aria-label="Elimină"
-                      title="Elimină"
-                    >
-                      <X size={16} />
-                    </button>
+                    <button onClick={() => onRemove(item.id)} className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-muted hover:bg-white/10"><X size={16} /></button>
                     <p className="font-semibold truncate pr-2">{title}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="inline-flex items-center border border-white/10 rounded-lg overflow-hidden bg-white/5">
-                      <button
-                        onClick={() => updateQuantity(item.id, Math.max(1, qty - 1))}
-                        className="px-2 py-1 text-sm hover:bg-white/10"
-                        aria-label="Scade cantitate"
-                      >
-                        <Minus size={14} />
-                      </button>
+                      <button onClick={() => updateQuantity(item.id, Math.max(1, qty - 1))} className="px-2 py-1 text-sm hover:bg-white/10"><Minus size={14} /></button>
                       <div className="px-3 text-sm font-bold">{qty}</div>
-                      <button
-                        onClick={() => updateQuantity(item.id, qty + 1)}
-                        className="px-2 py-1 text-sm hover:bg-white/10"
-                        aria-label="Crește cantitate"
-                      >
-                        <Plus size={14} />
-                      </button>
+                      <button onClick={() => updateQuantity(item.id, qty + 1)} className="px-2 py-1 text-sm hover:bg-white/10"><Plus size={14} /></button>
                     </div>
                   </div>
                 </div>
                 {renderDetails(item)}
                 <div className="mt-1 text-sm text-muted">
                   <div className="mt-2">
-                    <div className="text-xs text-muted">
-                      {unit > 0 ? `Preț unitar: ${fmt(unit)}` : "Preț unitar: —"}
-                    </div>
+                    <div className="text-xs text-muted">{unit > 0 ? `Preț unitar: ${fmt(unit)}` : "Preț unitar: —"}</div>
                     <div className="text-sm text-muted mt-1">{fmt(Number(lineTotal))}</div>
                   </div>
                 </div>
               </div>
-
             </li>
           );
         })}

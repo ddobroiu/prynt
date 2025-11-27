@@ -112,20 +112,61 @@ export async function sendPasswordResetEmail(to: string, token: string) {
 export async function sendOrderConfirmationEmail(order: any) {
   const orderIdShort = order.id.slice(-6).toUpperCase();
   const viewUrl = `${APP_URL}/account/orders/${order.id}`;
+  
+  // Verificăm dacă metoda de plată este OP (Ordin de Plată)
+  const isOP = order.paymentType === 'OP' || order.paymentMethod === 'OP';
+  
+  const bankDetailsHtml = isOP ? `
+    <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 16px; margin: 24px 0;">
+      <h3 style="margin-top:0; color: #0369a1; font-size: 16px;">Instrucțiuni de Plată (Ordin de Plată)</h3>
+      <p style="font-size: 14px; margin-bottom: 12px; color: #444;">Te rugăm să efectuezi plata în contul de mai jos. Comanda va fi procesată după confirmarea plății.</p>
+      
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+        <tr>
+          <td style="padding: 4px 0; color: #666;">Banca:</td>
+          <td style="padding: 4px 0; font-weight: bold; color: #111;">Revolut Bank</td>
+        </tr>
+        <tr>
+          <td style="padding: 4px 0; color: #666;">Beneficiar:</td>
+          <td style="padding: 4px 0; font-weight: bold; color: #111;">CULOAREA DIN VIATA SA SRL</td>
+        </tr>
+        <tr>
+          <td style="padding: 4px 0; color: #666;">IBAN:</td>
+          <td style="padding: 4px 0; font-weight: bold; color: #111; background-color: #fff; padding: 2px 4px; border-radius: 4px;">RO61REVO0000389950240012</td>
+        </tr>
+        <tr>
+          <td style="padding: 4px 0; color: #666;">SWIFT/BIC:</td>
+          <td style="padding: 4px 0; font-weight: bold; color: #111;">REVOROBB</td>
+        </tr>
+        <tr>
+          <td style="padding: 4px 0; color: #666;">Detalii plată:</td>
+          <td style="padding: 4px 0; font-weight: bold; color: #d946ef;">Comanda #${order.orderNo || orderIdShort}</td>
+        </tr>
+      </table>
+      
+      <p style="font-size: 13px; margin-top: 12px; color: #0369a1; border-top: 1px solid #bae6fd; padding-top: 8px;">
+        <strong>Important:</strong> Pentru o procesare rapidă, te rugăm să trimiți dovada plății (OP-ul) pe email la adresa <a href="mailto:contact@prynt.ro" style="color: #0369a1; text-decoration: underline;">contact@prynt.ro</a>.
+      </p>
+    </div>
+  ` : '';
 
   const html = getHtmlTemplate({
     title: `Comanda #${orderIdShort} a fost înregistrată!`,
-    message: `Salut! Îți mulțumim pentru comandă. Am primit solicitarea ta în valoare de ${order.total} ${order.currency}. Te vom notifica imediat ce expediem produsele.`,
+    message: `Salut! Îți mulțumim pentru comandă. Am primit solicitarea ta în valoare de ${order.total} ${order.currency}. 
+              ${isOP ? 'Te rugăm să efectuezi plata conform instrucțiunilor de mai jos.' : 'Te vom notifica imediat ce expediem produsele.'}`,
     buttonText: "Vezi detalii comandă",
     buttonUrl: viewUrl,
     footerText: "Mulțumim că ai ales Prynt.ro!"
   });
 
+  // Inserăm blocul cu datele bancare înainte de buton
+  const finalHtml = html.replace('<div style="text-align: center; margin: 30px 0;">', `${bankDetailsHtml}<div style="text-align: center; margin: 30px 0;">`);
+
   await resend.emails.send({
     from: 'Prynt Comenzi <no-reply@prynt.ro>',
     to: order.userEmail,
     subject: `Confirmare Comandă #${orderIdShort}`,
-    html,
+    html: finalHtml,
   });
 }
 
@@ -138,7 +179,7 @@ export async function sendNewOrderAdminEmail(order: any) {
 
   const html = getHtmlTemplate({
     title: "Comandă Nouă!",
-    message: `O nouă comandă (#${orderIdShort}) a fost plasată prin asistentul virtual sau site. Client: ${order.shippingAddress?.name}. Total: ${order.total} ${order.currency}.`,
+    message: `O nouă comandă (#${orderIdShort}) a fost plasată prin asistentul virtual sau site. Client: ${order.shippingAddress?.name}. Total: ${order.total} ${order.currency}. Metodă plată: ${order.paymentType || 'N/A'}`,
     buttonText: "Gestionează în Admin",
     buttonUrl: adminUrl,
     footerText: "Notificare internă sistem."
@@ -156,15 +197,7 @@ export async function sendNewOrderAdminEmail(order: any) {
 export async function sendContactFormEmail(data: { name: string; email: string; phone?: string; message: string }) {
   const { name, email, phone, message } = data;
   
-  // NOTĂ IMPORTANTĂ PENTRU RESEND:
-  // 1. Dacă ai domeniul 'prynt.ro' VERIFICAT în panoul Resend (DNS records), lasă linia de mai jos așa:
   const fromEmail = 'Prynt Contact <no-reply@prynt.ro>';
-  
-  // 2. Dacă NU ai domeniul verificat încă (ești în Testing), TREBUIE să folosești linia de mai jos 
-  // și poți trimite emailuri DOAR către adresa ta de login Resend:
-  // const fromEmail = 'onboarding@resend.dev';
-
-  // Adresa unde vrei să primești mesajele de contact
   const adminEmail = 'contact@prynt.ro';
 
   const html = getHtmlTemplate({
@@ -175,7 +208,6 @@ export async function sendContactFormEmail(data: { name: string; email: string; 
     footerText: `Telefon client: ${phone || 'Nespecificat'}`
   });
 
-  // Inserăm mesajul clientului în template-ul HTML pentru a fi vizibil clar
   const contentHtml = html.replace(
       '<p class="text">', 
       `<p class="text">
@@ -188,7 +220,7 @@ export async function sendContactFormEmail(data: { name: string; email: string; 
     const result = await resend.emails.send({
       from: fromEmail,
       to: adminEmail,
-      replyTo: email, // Când dai Reply din Gmail, se va duce către client
+      replyTo: email,
       subject: `[Contact] Mesaj nou de la ${name}`,
       html: contentHtml,
     });
