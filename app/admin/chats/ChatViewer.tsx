@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Message = {
   id: string;
   role: string;
   content: string;
-  createdAt: string; // Modificat din Date în string
+  createdAt: string; 
 };
 
 type User = {
@@ -20,18 +21,37 @@ type Conversation = {
   source: string;
   identifier: string;
   hasError: boolean;
-  lastMessageAt: string; // Modificat din Date în string
+  lastMessageAt: string; 
   messages: Message[];
   user: User | null;
 };
 
-export default function ChatViewer({ conversations }: { conversations: Conversation[] }) {
+export default function ChatViewer({ conversations: initialConversations }: { conversations: Conversation[] }) {
+  const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'error' | 'whatsapp' | 'web'>('all');
+  
+  // State pentru zona de scriere
+  const [inputText, setInputText] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const selectedConversation = conversations.find(c => c.id === selectedId);
 
-  // Filtrare logică
+  // Scroll automat la ultimul mesaj
+  useEffect(() => {
+    if (selectedConversation && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedId, selectedConversation?.messages.length]);
+
+  // Sincronizare când se primesc date noi de la server
+  useEffect(() => {
+    setConversations(initialConversations);
+  }, [initialConversations]);
+
   const filteredList = conversations.filter(c => {
     if (filter === 'error') return c.hasError;
     if (filter === 'whatsapp') return c.source === 'whatsapp';
@@ -45,12 +65,64 @@ export default function ChatViewer({ conversations }: { conversations: Conversat
     });
   };
 
+  const handleSendMessage = async () => {
+    if (!inputText.trim() || !selectedId || isSending) return;
+
+    setIsSending(true);
+    try {
+      // Apelăm endpoint-ul creat anterior
+      const res = await fetch('/api/admin/chats/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId: selectedId,
+          message: inputText
+        })
+      });
+
+      if (!res.ok) throw new Error('Eroare la trimitere');
+
+      const newMessageData = await res.json();
+
+      // Actualizăm interfața local
+      setConversations(prev => prev.map(conv => {
+        if (conv.id === selectedId) {
+          return {
+            ...conv,
+            lastMessageAt: new Date().toISOString(),
+            messages: [...conv.messages, {
+              ...newMessageData,
+              createdAt: new Date().toISOString()
+            }]
+          };
+        }
+        return conv;
+      }));
+
+      setInputText("");
+      router.refresh(); // Refresh la server components pentru consistență
+
+    } catch (err) {
+      console.error(err);
+      alert("Nu s-a putut trimite mesajul.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   return (
     <div className="flex h-full">
       {/* SIDEBAR LISTA */}
-      <div className="w-1/3 border-r border-slate-200 flex flex-col bg-slate-50">
+      <div className="w-1/3 border-r border-slate-200 flex flex-col bg-slate-50 h-[calc(100vh-64px)]">
         {/* Filtre */}
-        <div className="p-3 border-b border-slate-200 flex gap-2 overflow-x-auto">
+        <div className="p-3 border-b border-slate-200 flex gap-2 overflow-x-auto shrink-0">
           <button 
             onClick={() => setFilter('all')}
             className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${filter === 'all' ? 'bg-slate-800 text-white' : 'bg-white text-slate-600 border'}`}
@@ -78,7 +150,6 @@ export default function ChatViewer({ conversations }: { conversations: Conversat
             const hasError = conv.hasError;
             const isSelected = conv.id === selectedId;
 
-            // Extragem ultimul mesaj cu verificare de siguranță
             const lastMsgContent = conv.messages.length > 0 
                 ? (conv.messages[conv.messages.length - 1].content || "") 
                 : "Fără mesaje";
@@ -129,11 +200,11 @@ export default function ChatViewer({ conversations }: { conversations: Conversat
       </div>
 
       {/* ZONA DE CHAT (DREAPTA) */}
-      <div className="w-2/3 flex flex-col bg-white">
+      <div className="w-2/3 flex flex-col bg-white h-[calc(100vh-64px)]">
         {selectedConversation ? (
           <>
             {/* Header Chat */}
-            <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+            <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 shrink-0">
               <div>
                 <h2 className="font-bold text-lg text-slate-800">
                   {selectedConversation.user?.name || selectedConversation.identifier}
@@ -153,30 +224,63 @@ export default function ChatViewer({ conversations }: { conversations: Conversat
             {/* Mesaje */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50">
               {selectedConversation.messages.map((msg) => {
+                const isAdmin = msg.role === 'admin';
                 const isBot = msg.role === 'assistant';
                 const isSystem = msg.role === 'system' || msg.role === 'tool';
                 
-                if (isSystem) return null; // Ascundem mesajele interne pentru claritate
+                if (isSystem) return null; 
+
+                // Adminul (tu) și Botul apar în stânga, Userul în dreapta
+                const alignLeft = isAdmin || isBot;
 
                 return (
-                  <div key={msg.id} className={`flex ${isBot ? 'justify-start' : 'justify-end'}`}>
+                  <div key={msg.id} className={`flex ${alignLeft ? 'justify-start' : 'justify-end'}`}>
                     <div 
                       className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
-                        isBot 
-                          ? 'bg-white border border-slate-200 text-slate-700 rounded-tl-none' 
-                          : 'bg-slate-800 text-white rounded-tr-none'
+                        isAdmin 
+                          ? 'bg-blue-50 border border-blue-200 text-blue-900 rounded-tl-none' // Stil Operator Uman
+                          : isBot 
+                            ? 'bg-white border border-slate-200 text-slate-700 rounded-tl-none' // Stil Bot
+                            : 'bg-slate-800 text-white rounded-tr-none' // Stil User
                       }`}
                     >
+                      {isAdmin && (
+                        <div className="text-[10px] font-bold text-blue-600 mb-1 uppercase tracking-wider">
+                          Operator Uman
+                        </div>
+                      )}
                       <div className="whitespace-pre-wrap leading-relaxed">
                         {msg.content}
                       </div>
-                      <div className={`text-[10px] mt-1 text-right ${isBot ? 'text-slate-400' : 'text-slate-400'}`}>
+                      <div className="text-[10px] mt-1 text-right text-slate-400">
                         {formatDate(msg.createdAt).split(',')[1]}
                       </div>
                     </div>
                   </div>
                 );
               })}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* ZONA DE INPUT (Footer) - Aici scrii tu */}
+            <div className="p-4 bg-white border-t border-slate-200 shrink-0">
+              <div className="flex gap-2 items-end">
+                <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Scrie un mesaj... (Enter pentru a trimite)"
+                  className="flex-1 min-h-[44px] max-h-[120px] p-3 border border-slate-300 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
+                  rows={1}
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={isSending || !inputText.trim()}
+                  className="h-[44px] px-6 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isSending ? '...' : 'Trimite'}
+                </button>
+              </div>
             </div>
           </>
         ) : (
