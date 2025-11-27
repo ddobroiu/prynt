@@ -6,7 +6,7 @@ type Message = {
   id: string;
   role: string;
   content: string;
-  createdAt: Date;
+  createdAt: string; // Modificat din Date în string
 };
 
 type User = {
@@ -20,7 +20,7 @@ type Conversation = {
   source: string;
   identifier: string;
   hasError: boolean;
-  lastMessageAt: Date;
+  lastMessageAt: string; // Modificat din Date în string
   messages: Message[];
   user: User | null;
 };
@@ -39,8 +39,8 @@ export default function ChatViewer({ conversations }: { conversations: Conversat
     return true;
   });
 
-  const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleString('ro-RO', { 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('ro-RO', { 
       month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
     });
   };
@@ -78,6 +78,11 @@ export default function ChatViewer({ conversations }: { conversations: Conversat
             const hasError = conv.hasError;
             const isSelected = conv.id === selectedId;
 
+            // Extragem ultimul mesaj cu verificare de siguranță
+            const lastMsgContent = conv.messages.length > 0 
+                ? (conv.messages[conv.messages.length - 1].content || "") 
+                : "Fără mesaje";
+
             return (
               <div 
                 key={conv.id}
@@ -104,7 +109,7 @@ export default function ChatViewer({ conversations }: { conversations: Conversat
                 </div>
                 
                 <div className="text-xs text-slate-500 truncate mb-1">
-                  {conv.messages[conv.messages.length - 1]?.content.substring(0, 40)}...
+                  {lastMsgContent.substring(0, 40)}...
                 </div>
 
                 {hasError && (
@@ -166,7 +171,7 @@ export default function ChatViewer({ conversations }: { conversations: Conversat
                         {msg.content}
                       </div>
                       <div className={`text-[10px] mt-1 text-right ${isBot ? 'text-slate-400' : 'text-slate-400'}`}>
-                        {new Date(msg.createdAt).toLocaleTimeString('ro-RO', {hour: '2-digit', minute:'2-digit'})}
+                        {formatDate(msg.createdAt).split(',')[1]}
                       </div>
                     </div>
                   </div>

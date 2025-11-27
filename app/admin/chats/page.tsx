@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminChatsPage() {
   // Extragem conversațiile, incluzând mesajele și datele userului (dacă există)
-  const conversations = await prisma.aiConversation.findMany({
+  const rawConversations = await prisma.aiConversation.findMany({
     orderBy: { lastMessageAt: 'desc' },
     take: 50, // Ultimele 50 de conversații active
     include: {
@@ -22,6 +22,18 @@ export default async function AdminChatsPage() {
       }
     }
   });
+
+  // Serializăm datele pentru a evita erorile de tip "Date object" în Client Component
+  const conversations = rawConversations.map(conv => ({
+    ...conv,
+    lastMessageAt: conv.lastMessageAt.toISOString(),
+    createdAt: conv.createdAt.toISOString(),
+    updatedAt: conv.updatedAt.toISOString(),
+    messages: conv.messages.map(msg => ({
+      ...msg,
+      createdAt: msg.createdAt.toISOString()
+    }))
+  }));
 
   return (
     <div className="p-6 h-[calc(100vh-64px)] overflow-hidden flex flex-col">
