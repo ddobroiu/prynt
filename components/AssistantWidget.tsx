@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Loader2, X, MessageSquare, ChevronDown, MapPin } from "lucide-react";
-// Importăm componentele existente pentru a păstra consistența cu Checkout-ul
+// Importăm componentele existente
 import JudetSelector from "./JudetSelector";
 import LocalitateSelector from "./LocalitateSelector";
 
@@ -71,7 +71,7 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
       }
     }
 
-    // Parsăm și liste numerotate simple din text (fallback)
+    // Parsăm și liste numerotate simple din text (fallback pentru detecție automată)
     if (suggestions.length === 0) {
         const lines = cleanText.split('\n');
         lines.forEach(line => {
@@ -127,7 +127,7 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
     }
   };
 
-  // Handler pentru selecția Județului (folosește componenta din Checkout)
+  // Handler pentru selecția Județului
   const handleJudetSelect = (val: string) => {
       if (!val) return;
       setSelectedJudet(val);
@@ -148,7 +148,7 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
     return (
       <button 
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full shadow-xl transition-all hover:scale-105"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full shadow-xl transition-all hover:scale-105 animate-[fadeIn_0.3s_ease-out]"
       >
         <MessageSquare size={24} />
         <span className="font-semibold hidden sm:inline">Asistent</span>
@@ -158,7 +158,7 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
 
   const containerClasses = embedded 
     ? "w-full h-[600px] bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col overflow-hidden relative"
-    : "fixed bottom-6 right-6 z-50 w-[90vw] sm:w-[380px] h-[550px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300";
+    : "fixed bottom-6 right-6 z-50 w-[90vw] sm:w-[380px] h-[550px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden animate-[fadeIn_0.3s_ease-out]";
 
   return (
     <div className={containerClasses}>
@@ -190,7 +190,7 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
             
             {/* Butoane (Chips) pentru Opțiuni */}
             {msg.role === 'assistant' && msg.suggestions && msg.suggestions.length > 0 && idx === messages.length - 1 && !isLoading && inputMode === 'text' && (
-               <div className="flex flex-wrap gap-2 pl-10 animate-in fade-in slide-in-from-top-2 duration-300">
+               <div className="flex flex-wrap gap-2 pl-10 animate-[fadeIn_0.3s_ease-out]">
                   {msg.suggestions.map((option, i) => (
                     <button 
                         key={i} 
@@ -241,7 +241,7 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
 
         {/* MOD 2: Selector Județ */}
         {inputMode === "judet" && (
-            <div className="w-full animate-in slide-in-from-bottom-2 fade-in duration-300">
+            <div className="w-full animate-[fadeIn_0.3s_ease-out]">
                 <p className="text-xs text-gray-500 mb-1 ml-1 font-medium flex items-center gap-1"><MapPin size={12}/> Selectează Județul:</p>
                 <div className="border rounded-xl overflow-hidden bg-gray-50 p-1">
                     <JudetSelector 
@@ -254,7 +254,7 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
 
         {/* MOD 3: Selector Localitate */}
         {inputMode === "localitate" && (
-            <div className="w-full animate-in slide-in-from-bottom-2 fade-in duration-300">
+            <div className="w-full animate-[fadeIn_0.3s_ease-out]">
                 <p className="text-xs text-gray-500 mb-1 ml-1 font-medium flex items-center gap-1"><MapPin size={12}/> Selectează Localitatea:</p>
                 {selectedJudet ? (
                     <div className="border rounded-xl overflow-hidden bg-gray-50 p-1">

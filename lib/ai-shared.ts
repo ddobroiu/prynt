@@ -1,9 +1,15 @@
 import OpenAI from 'openai';
 import { BANNER_CONSTANTS } from './pricing';
 import { MATERIAL_OPTIONS } from './products';
-// Presupunem că JUDETE sunt exportate din acest fișier. 
-// Dacă exportul are alt nume (ex: counties), te rog să modifici aici.
-import { JUDETE } from './judeteData'; 
+
+// --- LISTA JUDEȚE (Embeded direct pentru a evita erori de import) ---
+const JUDETE_LIST = [
+  "Alba", "Arad", "Arges", "Bacau", "Bihor", "Bistrita-Nasaud", "Botosani", "Brasov", "Braila",
+  "Bucuresti", "Buzau", "Caras-Severin", "Calarasi", "Cluj", "Constanta", "Covasna", "Dambovita",
+  "Dolj", "Galati", "Giurgiu", "Gorj", "Harghita", "Hunedoara", "Ialomita", "Iasi", "Ilfov",
+  "Maramures", "Mehedinti", "Mures", "Neamt", "Olt", "Prahova", "Satu Mare", "Salaj", "Sibiu",
+  "Suceava", "Teleorman", "Timis", "Tulcea", "Vaslui", "Valcea", "Vrancea"
+];
 
 // --- 0. HELPERE PENTRU GENERAREA PROMPTULUI (DATE DINAMICE) ---
 
@@ -28,17 +34,9 @@ const getMaterialsText = () => {
   return MATERIAL_OPTIONS.map(m => `- ${m.label} (Recomandat pentru: ${m.recommendedFor?.join(', ')})`).join('\n');
 };
 
-// 3. Lista de Județe (din judeteData.ts)
-// Aceasta este CRITICĂ pentru checkout corect.
+// 3. Lista de Județe
 const getJudeteText = () => {
-  // Dacă JUDETE nu e încărcat corect, folosim un fallback sau lista goală pentru a nu crăpa
-  const list = Array.isArray(JUDETE) ? JUDETE : [];
-  // Extragem doar numele pentru a nu încărca promptul excesiv
-  // Presupunem că structura este { nume: string, ... } sau { name: string }
-  const names = list.map((j: any) => j.nume || j.name || j.label).filter(Boolean);
-  
-  if (names.length === 0) return "România (Toate județele standard)";
-  return names.join(', ');
+  return JUDETE_LIST.join(', ');
 };
 
 // --- 1. DEFINIREA UNELTELOR (TOOLS) ---
@@ -184,6 +182,8 @@ REGULI DE INTERACȚIUNE (Stil "Căsuțe de selectare"):
 - Formatare: Folosește liste numerotate sau bullet points pentru opțiuni.
 - Exemplu Material: "Ce material doriți? Avem disponibil: \n1. Frontlit 440g\n2. Frontlit 510g"
 - Exemplu Județ: "În ce județ livrăm? (ex: Alba, București, Cluj...)"
+- TEHNIC: Când ceri județul, include în răspuns tag-ul ||REQUEST: JUDET||.
+- TEHNIC: Când ceri localitatea, include în răspuns tag-ul ||REQUEST: LOCALITATE||.
 
 FLUX DE COMANDĂ:
 1. **Configurare**: Întreabă dimensiunile (Lungime x Lățime) - aici clientul scrie liber.
@@ -191,8 +191,8 @@ FLUX DE COMANDĂ:
 3. **Preț**: Calculează și prezintă prețul. Include mențiunea despre Livrare Gratuită > 500 RON.
 4. **Checkout (Date Livrare)**:
    - Cere Nume și Email.
-   - Cere **Județul** (Validează cu lista de mai sus).
-   - Cere **Localitatea** (După ce ai județul).
+   - Cere **Județul** (Validează cu lista de mai sus). Adaugă ||REQUEST: JUDET|| la finalul întrebării.
+   - Cere **Localitatea** (După ce ai județul). Adaugă ||REQUEST: LOCALITATE|| la finalul întrebării.
    - Cere **Adresa** (Stradă, Nr).
    - Confirmă totul și apelează 'create_order'.
 
