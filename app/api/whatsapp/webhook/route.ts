@@ -75,7 +75,8 @@ async function sendWhatsAppMessage(to: string, text: string, options?: { id: str
   } else {
     // Mesaj simplu text
     payload.type = "text";
-    payload.text = { preview_url: true, body: text }; // Changed preview_url to true for tracking links
+    // MODIFICARE: preview_url: true pentru ca link-ul DPD să aibă preview
+    payload.text = { preview_url: true, body: text };
   }
 
   try {
@@ -177,7 +178,7 @@ export async function POST(req: Request) {
             role: "system",
             content:
               SYSTEM_PROMPT +
-              "\nIMPORTANT: Clientul este pe WhatsApp. Fii concis. Nu folosi tag-uri speciale de Web. Oferă link-uri complete de tracking.",
+              "\nIMPORTANT: Clientul este pe WhatsApp. Fii concis. Nu folosi tag-uri speciale de Web. Dacă oferi un link de tracking, asigură-te că este complet.",
           },
           ...history,
           { role: "user", content: textBody },
@@ -280,7 +281,7 @@ export async function POST(req: Request) {
                 result = { pret_total: res.finalPrice };
               }
 
-              // --- CHECK STATUS (NOU) ---
+              // --- NOUL TOOL: CHECK STATUS ---
               else if (fnName === "check_order_status") {
                 const orderNo = parseInt(args.orderNo);
                 if (isNaN(orderNo)) {
@@ -332,7 +333,7 @@ export async function POST(req: Request) {
                 };
               }
 
-              // --- CREARE COMANDĂ ---
+              // --- CREARE COMANDĂ (COMPLET) ---
               else if (fnName === "create_order") {
                 const { customer_details, items } = args;
                 const totalAmount = items.reduce(
