@@ -15,6 +15,7 @@ export async function PUT(req: Request) {
   }
 
   const session = await getAuthSession();
+  console.log('[PUT /api/account/details] Session object:', session ? { user: (session.user as any)?.id ? { id: (session.user as any).id, email: (session.user as any).email, name: (session.user as any).name } : null } : null);
   const userId = (session?.user as any)?.id as string | undefined;
 
   if (!userId) {
