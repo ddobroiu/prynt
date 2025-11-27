@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { tools, SYSTEM_PROMPT } from '@/lib/ai-shared';
 import { executeTool } from '@/lib/ai-tool-runner';
+import { getAuthSession } from '@/lib/auth'; // Importăm sesiunea
 
-export const runtime = 'nodejs'; // Asigurăm compatibilitatea
+export const runtime = 'nodejs';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Definim prompt-ul specific pentru Web (păstrăm instrucțiunile de UI)
 const WEB_SYSTEM_PROMPT = SYSTEM_PROMPT + `
 INSTRUCȚIUNI SPECIFICE WEB:
 - Când întrebi detalii tehnice, NU scrie variantele în text. Folosește tag-ul ||OPTIONS: [...]||.
@@ -26,9 +26,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Format invalid." }, { status: 400 });
     }
 
-    // 1. Construim istoricul mesajelor cu prompt-ul de sistem specific Web
+    // --- NOU: Verificare Sesiune ---
+    const session = await getAuthSession();
+    let systemContent = WEB_SYSTEM_PROMPT;
+    let identifier = 'web-guest';
+
+    if (session?.user) {
+        identifier = (session.user as any).id || session.user.email || 'web-user';
+        const userName = session.user.name;
+        if (userName) {
+            systemContent += `\n\nDiscuți cu utilizatorul autentificat: ${userName}. Adresează-te pe nume.`;
+        }
+    }
+    // -----------------------------
+
+    // 1. Construim istoricul mesajelor
     const messagesPayload = [
-      { role: "system", content: WEB_SYSTEM_PROMPT },
+      { role: "system", content: systemContent },
       ...messages
     ];
 
@@ -57,11 +71,9 @@ export async function POST(req: Request) {
             console.warn("Eroare parsare argumente tool:", e);
         }
 
-        // Aici apelăm logica centralizată din ai-tool-runner
-        // Folosim identifier: 'web-guest' sau un session ID dacă e disponibil
         const result = await executeTool(fnName, args, { 
             source: 'web', 
-            identifier: 'web-guest' 
+            identifier: identifier // Folosim ID-ul real dacă e logat
         });
 
         messagesPayload.push({
@@ -72,7 +84,6 @@ export async function POST(req: Request) {
         });
       }
 
-      // 4. Obținem răspunsul final după executarea tool-urilor
       const finalRes = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: messagesPayload as any,
@@ -81,7 +92,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: finalRes.choices[0].message.content });
     }
 
-    // Dacă nu a fost niciun tool call, returnăm mesajul simplu
     return NextResponse.json({ message: responseMessage.content });
 
   } catch (error: any) {

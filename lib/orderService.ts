@@ -7,19 +7,17 @@ import bcrypt from 'bcryptjs';
 type AnyRecord = Record<string, any>;
 
 interface CartItem {
-  // support multiple incoming shapes (legacy/current)
   id?: string;
   name?: string;
   title?: string;
   slug?: string;
   quantity?: number;
-  unitAmount?: number; // preferred by some handlers (RON)
-  price?: number; // alternative unit price field
-  totalAmount?: number; // optional precomputed line total
-  artworkUrl?: string; // direct artwork url
-  textDesign?: string; // text content for text-only graphic
+  unitAmount?: number; 
+  price?: number; 
+  totalAmount?: number;
+  artworkUrl?: string; 
+  textDesign?: string; 
   metadata?: AnyRecord;
-  // Posibile câmpuri top-level din frontend
   designOption?: string; 
 }
 
@@ -41,6 +39,9 @@ interface Billing {
   tip_factura: 'persoana_fizica' | 'companie' | 'persoana_juridica';
   cui?: string;
   name?: string;
+  email?: string; // Adăugat opțional
+  telefon?: string;
+  phone?: string;
   judet?: string;
   localitate?: string;
   strada_nr?: string;
@@ -60,15 +61,12 @@ interface MarketingInfo {
   utmTerm?: string;
   gclid?: string;
   fbclid?: string;
-  referrer?: string; // full referrer url
-  landingPage?: string; // path + query
+  referrer?: string; 
+  landingPage?: string; 
   userAgent?: string;
 }
 
-// Do not instantiate Resend at module load to avoid build failures in envs without key
-// Standard shipping fee (applies when subtotal < FREE_SHIPPING_THRESHOLD)
 const SHIPPING_FEE = 19.99;
-// Free shipping threshold (same value used in frontend `CartWidget`)
 const FREE_SHIPPING_THRESHOLD = 500;
 
 // Cache token Oblio
@@ -135,7 +133,6 @@ function buildAddressLine(
   return [s, l, j].filter(Boolean).join(', ');
 }
 
-// Apel Oblio – încercăm mai multe endpoint-uri cunoscute
 async function createOblioInvoice(payload: any, token: string) {
   const endpoints = [
     'https://www.oblio.eu/api/invoices',
@@ -176,12 +173,6 @@ function normalizeCUI(input?: string): { primary?: string; alternate?: string } 
   return { primary, alternate };
 }
 
-/**
- * sendEmails
- * - Acceptă cart ca array de CartItem (flexibil)
- * - Include link-ul graficii (artworkUrl) sau textul trimis (textDesign) în emailuri
- * - Loghează răspunsul de la Resend pentru debugging
- */
 async function sendEmails(
   address: Address,
   billing: Billing,
@@ -193,19 +184,11 @@ async function sendEmails(
   createdPassword?: string,
   orderId?: string
 ) {
-  // Normalize cart for totals and for listing in emails
   const normalized = cart.map((raw) => {
     const qty = Number(raw.quantity ?? 1) || 1;
-    const unit =
-      Number(raw.unitAmount ?? raw.price ?? (raw.metadata?.price ?? 0)) || 0;
-    const total =
-      Number(raw.totalAmount ?? (unit > 0 ? unit * qty : raw.metadata?.totalAmount ?? 0)) || 0;
-    const artwork =
-      raw.artworkUrl ??
-      raw.metadata?.artworkUrl ??
-      raw.metadata?.artworkLink ??
-      raw.metadata?.artwork ??
-      null;
+    const unit = Number(raw.unitAmount ?? raw.price ?? (raw.metadata?.price ?? 0)) || 0;
+    const total = Number(raw.totalAmount ?? (unit > 0 ? unit * qty : raw.metadata?.totalAmount ?? 0)) || 0;
+    const artwork = raw.artworkUrl ?? raw.metadata?.artworkUrl ?? raw.metadata?.artworkLink ?? raw.metadata?.artwork ?? null;
     const textDesign = raw.textDesign ?? raw.metadata?.textDesign ?? raw.metadata?.text ?? null;
     const name = raw.name ?? raw.title ?? raw.metadata?.title ?? raw.slug ?? 'Produs';
     return { ...raw, name, qty, unit, total, artwork, textDesign, rawMetadata: raw.metadata ?? {} };
@@ -261,13 +244,11 @@ async function sendEmails(
 
   function buildDetailsHTML(item: AnyRecord) {
     const details: string[] = [];
-    // width/height if present at top-level or metadata
     const width = item.width ?? item.width_cm ?? item.rawMetadata?.width_cm ?? item.rawMetadata?.width;
     const height = item.height ?? item.height_cm ?? item.rawMetadata?.height_cm ?? item.rawMetadata?.height;
     if (width || height) {
       details.push(`<div><strong>Dimensiune:</strong> ${escapeHtml(String(width || '—'))} x ${escapeHtml(String(height || '—'))} cm</div>`);
     }
-    // List known metadata keys
     const meta = item.rawMetadata || {};
     const knownKeys = Object.keys(labelForKey).filter((k) => meta[k] !== undefined);
     knownKeys.forEach((k) => {
@@ -275,29 +256,13 @@ async function sendEmails(
       const val = prettyValue(k, meta[k]);
       details.push(`<div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(val)}</div>`);
     });
-    // If sqm/prices are at top-level in metadata
     ['sqmPerUnit', 'totalSqm', 'pricePerSqm'].forEach((k) => {
       if (!knownKeys.includes(k) && meta[k] !== undefined) {
         const label = labelForKey[k] || k;
         details.push(`<div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(String(meta[k]))}</div>`);
       }
     });
-    // Fallback other keys (exclude noisy/duplicate ones)
-    const exclude = new Set([
-      'price',
-      'totalAmount',
-      'qty',
-      'quantity',
-      'artwork',
-      'artworkUrl',
-      'artworkLink',
-      'text',
-      'textDesign',
-      'selectedReadable',
-      'selections',
-      'title',
-      'name',
-    ]);
+    const exclude = new Set(['price', 'totalAmount', 'qty', 'quantity', 'artwork', 'artworkUrl', 'artworkLink', 'text', 'textDesign', 'selectedReadable', 'selections', 'title', 'name']);
     const leftovers = Object.keys(meta).filter((k) => !knownKeys.includes(k) && !exclude.has(k));
     leftovers.forEach((k) => {
       const v = meta[k];
@@ -546,41 +511,30 @@ async function sendEmails(
   }
 }
 
-/**
- * Procesează comanda NON‑BLOCANT și cu MINIM de date cerute în UI:
- * - Acceptă cart cu forme diferite (normalizăm local)
- * - Emailuri se trimit oricum; dacă factura nu iese, nu blocăm comanda
- */
 export async function fulfillOrder(
   orderData: { address: Address; billing: Billing; cart: CartItem[]; marketing?: MarketingInfo; createAccount?: boolean; userId?: string | null },
   paymentType: 'Ramburs' | 'Card'
 ): Promise<{ invoiceLink: string | null; orderNo?: number; orderId?: string; createdPassword?: string }> {
   const { address, billing, cart, marketing } = orderData;
-  let createdPassword: string | undefined;
+
+  // FIX CRITIC 1: Asigurăm că email-ul există în billing pentru a putea fi găsit în AccountPage
+  if (!billing.email && address.email) {
+      (billing as any).email = address.email;
+  }
 
   let invoiceLink: string | null = null;
-
-  // Adresă de facturare din câmpurile disponibile (sau livrare ca fallback)
   const billingAddressLine = buildAddressLine(
     { judet: (billing as any).judet, localitate: (billing as any).localitate, strada_nr: (billing as any).strada_nr },
     { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr }
   );
 
-  // Normalize products into Oblio expected shape (name, price, quantity)
   const products = (cart ?? []).map((item) => {
     const name = item.name ?? item.title ?? item.slug ?? 'Produs';
     const quantity = Number(item.quantity ?? 1) || 1;
     const unitAmount = Number(item.unitAmount ?? item.price ?? item.metadata?.price ?? 0) || 0;
-    return {
-      name,
-      price: unitAmount,
-      measuringUnitName: 'buc',
-      vatName: 'S',
-      quantity,
-    };
+    return { name, price: unitAmount, measuringUnitName: 'buc', vatName: 'S', quantity };
   });
 
-  // Emitere automată Oblio
   const billingTip = (billing as any)?.tip_factura;
   const shouldTryOblio = billingTip === 'persoana_fizica';
 
@@ -588,7 +542,6 @@ export async function fulfillOrder(
     try {
       const token = await getOblioAccessToken();
       const clientName = (billing as any)?.name || address.nume_prenume;
-      // Normalize CUI if present
       const cuiRaw = (billing as any)?.cui;
       const cuiNormalized = normalizeCUI(cuiRaw);
       let clientCif: string | undefined = cuiNormalized.primary || cuiNormalized.alternate;
@@ -625,86 +578,20 @@ export async function fulfillOrder(
     invoiceLink = null; 
   }
 
-  // Emailuri – întotdeauna; sendEmails este tolerant la forma cart-ului
-  try {
-    // 1) Persist order (append-only). Normalize minimal for listing
+  let createdPassword: string | undefined;
+  let finalUserId = orderData.userId || null;
+
+  // FIX CRITIC 2: Creăm contul ÎNAINTE de a salva comanda, pentru a avea userId valid
+  if (orderData.createAccount && !finalUserId) {
     try {
-      const normalized = (cart ?? []).map((raw) => {
-        const qty = Number(raw.quantity ?? 1) || 1;
-        const unit = Number((raw as any).unitAmount ?? (raw as any).price ?? (raw as any)?.metadata?.price ?? 0) || 0;
-        const total = Number((raw as any).totalAmount ?? (unit > 0 ? unit * qty : (raw as any)?.metadata?.totalAmount ?? 0)) || 0;
-        const name = (raw as any).name ?? (raw as any).title ?? (raw as any).slug ?? (raw as any)?.metadata?.title ?? 'Produs';
-        
-        // --- FIX AICI: Preluare corectă link și metadata pentru salvare ---
-        const artworkUrl = raw.artworkUrl ?? raw.metadata?.artworkUrl ?? null;
-        const textDesign = raw.textDesign ?? raw.metadata?.textDesign ?? null;
-        const designOption = raw.designOption ?? raw.metadata?.designOption ?? null;
-
-        return { 
-            name, 
-            qty, 
-            unit, 
-            total, 
-            artworkUrl,
-            metadata: {
-                ...(raw.metadata || {}),
-                textDesign,
-                designOption
-            }
-        };
-      });
-
-      const subtotal = normalized.reduce((s, it) => s + (Number(it.total) || 0), 0);
-      const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-      const totalComanda = subtotal + shippingFee;
-      const saved = await appendOrder({
-        paymentType,
-        address,
-        billing,
-        items: normalized,
-        shippingFee: shippingFee,
-        total: totalComanda,
-        invoiceLink: invoiceLink ?? null,
-        marketing,
-        userId: orderData.userId || null,
-      });
-      
-      // Creează cont dacă este cerut și nu există deja
-      if (orderData.createAccount) {
-        try {
-          const existing = await prisma.user.findUnique({ where: { email: address.email } });
-            if (!existing) {
-              const rawPass = generateRandomPassword();
-              const hash = await bcrypt.hash(rawPass, 10);
-              await prisma.user.create({
-                data: {
-                  email: address.email,
-                  name: address.nume_prenume || undefined,
-                  passwordHash: hash,
-                  phone: address.telefon || undefined,
-                },
-              });
-              createdPassword = rawPass;
-            }
-        } catch (e: any) {
-          console.warn('[OrderService] Creare cont eșuat:', e?.message || e);
-        }
-      }
-      // Trimite emailurile cu numărul comenzii în subiect
-      await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing, saved.orderNo, createdPassword, saved.id);
-      return { invoiceLink, orderNo: saved.orderNo, orderId: saved.id, createdPassword };
-    } catch (e: any) {
-      console.warn('[OrderService] Salvare comandă a eșuat (non-blocant):', e?.message || e);
-    }
-    
-    // Fallback dacă salvarea eșuează
-    if (orderData.createAccount) {
-      try {
-        const existing = await prisma.user.findUnique({ where: { email: address.email } });
-        if (!existing) {
+      const existing = await prisma.user.findUnique({ where: { email: address.email } });
+      if (existing) {
+          finalUserId = existing.id;
+          console.log('[OrderService] User existent găsit, asignăm comanda la:', finalUserId);
+      } else {
           const rawPass = generateRandomPassword();
           const hash = await bcrypt.hash(rawPass, 10);
-          await prisma.user.create({
+          const newUser = await prisma.user.create({
             data: {
               email: address.email,
               name: address.nume_prenume || undefined,
@@ -713,15 +600,59 @@ export async function fulfillOrder(
             },
           });
           createdPassword = rawPass;
-        }
-      } catch (e: any) {
-        console.warn('[OrderService] Creare cont eșuat (salvare eșuată):', e?.message || e);
+          finalUserId = newUser.id;
+          console.log('[OrderService] User nou creat, asignăm comanda la:', finalUserId);
       }
+    } catch (e: any) {
+      console.warn('[OrderService] Eroare la crearea/verificarea contului:', e?.message || e);
     }
-    await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing, undefined, createdPassword, undefined);
-  } catch (e: any) {
-    console.error('[OrderService] Eroare trimitere emailuri:', e?.message || e);
   }
+
+  try {
+    const normalized = (cart ?? []).map((raw) => {
+      const qty = Number(raw.quantity ?? 1) || 1;
+      const unit = Number((raw as any).unitAmount ?? (raw as any).price ?? (raw as any)?.metadata?.price ?? 0) || 0;
+      const total = Number((raw as any).totalAmount ?? (unit > 0 ? unit * qty : (raw as any)?.metadata?.totalAmount ?? 0)) || 0;
+      const name = (raw as any).name ?? (raw as any).title ?? (raw as any).slug ?? (raw as any)?.metadata?.title ?? 'Produs';
+      const artworkUrl = raw.artworkUrl ?? raw.metadata?.artworkUrl ?? null;
+      const textDesign = raw.textDesign ?? raw.metadata?.textDesign ?? null;
+      const designOption = raw.designOption ?? raw.metadata?.designOption ?? null;
+
+      return { 
+          name, 
+          qty, 
+          unit, 
+          total, 
+          artworkUrl,
+          metadata: { ...(raw.metadata || {}), textDesign, designOption }
+      };
+    });
+
+    const subtotal = normalized.reduce((s, it) => s + (Number(it.total) || 0), 0);
+    const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+    const totalComanda = subtotal + shippingFee;
+    
+    // Salvăm comanda cu ID-ul final (fie cel din sesiune, fie cel tocmai creat)
+    const saved = await appendOrder({
+      paymentType,
+      address,
+      billing, // Conține acum și email-ul
+      items: normalized,
+      shippingFee: shippingFee,
+      total: totalComanda,
+      invoiceLink: invoiceLink ?? null,
+      marketing,
+      userId: finalUserId, 
+    });
+    
+    await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing, saved.orderNo, createdPassword, saved.id);
+    return { invoiceLink, orderNo: saved.orderNo, orderId: saved.id, createdPassword };
+  } catch (e: any) {
+    console.warn('[OrderService] Salvare comandă a eșuat:', e?.message || e);
+  }
+  
+  // În cazul puțin probabil în care salvarea eșuează dar vrem să trimitem email de confirmare manuală
+  await sendEmails(address, billing, cart, invoiceLink, paymentType, marketing, undefined, createdPassword, undefined);
   return { invoiceLink, createdPassword };
 }
 
@@ -734,5 +665,4 @@ function generateRandomPassword(): string {
   return out;
 }
 
-// Export helpers so other server handlers can reuse Oblio flow (admin invoice creation)
 export { getOblioAccessToken, createOblioInvoice };
