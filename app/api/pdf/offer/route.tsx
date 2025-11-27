@@ -69,11 +69,9 @@ function OfferDocument({ name, items, shipping }: { name?: string; items: any[];
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    // Items: [{ name, quantity, unitAmount }], shipping: number
     const items = Array.isArray(body.items) ? body.items : [];
     const shipping = typeof body.shipping === 'number' ? body.shipping : Number(body.shipping) || 0;
 
-    // Try to get logged in user name via NextAuth
     let name: string | undefined = undefined;
     try {
       const session = await getAuthSession();
@@ -83,13 +81,21 @@ export async function POST(req: Request) {
       // ignore
     }
 
-    // If payload includes customer_details.name prefer it
     if (body.customer_details?.name) name = body.customer_details.name;
 
     const doc = <OfferDocument name={name} items={items} shipping={shipping} />;
     const buffer = await pdf(doc).toBuffer();
 
-    return new NextResponse(buffer, { status: 200, headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': 'attachment; filename=oferta.pdf' } });
+    // FIX: Adăugat "as any" pentru a rezolva eroarea de TypeScript la build
+    // (NextResponse are definiții stricte pentru BodyInit, dar acceptă buffer la runtime)
+    return new NextResponse(buffer as any, { 
+        status: 200, 
+        headers: { 
+            'Content-Type': 'application/pdf', 
+            'Content-Disposition': 'attachment; filename=oferta.pdf' 
+        } 
+    });
+
   } catch (e: any) {
     console.error('PDF Offer Error', e);
     return NextResponse.json({ ok: false, message: e?.message || 'Eroare generare PDF' }, { status: 500 });
