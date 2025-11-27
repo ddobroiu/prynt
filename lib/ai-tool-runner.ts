@@ -133,6 +133,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         status: "pending_verification",
         paymentStatus: "pending",
         paymentMethod: "oferta",
+        paymentType: "Card",
         currency: "RON",
         total: totalAmount,
         userEmail: customer_details.email || `offer_${context.source}@prynt.ro`,

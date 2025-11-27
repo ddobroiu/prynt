@@ -15,6 +15,8 @@ const openai = new OpenAI({
 
 // Stocare temporară conversații (în memorie)
 const conversations = new Map<string, any[]>();
+// Metadate conversație (ex: numele clientului)
+const conversationMeta = new Map<string, { name?: string }>();
 
 // ============================
 //  1. GET – Verificare Webhook (Meta)
@@ -60,6 +62,18 @@ export async function POST(req: Request) {
         // 1. Gestionare istoric
         let history = conversations.get(from) || [];
         if (history.length > 10) history = history.slice(-10);
+
+        // Extragem automat numele dintr-un mesaj tipic (ex: "Mă numesc Ion Popescu" / "Numele meu este...")
+        const nameRegex = /\b(?:ma numesc|m[ăa] numesc|numele meu este|numele meu|sunt)\s+([^\n\r,!?]+)/i;
+        const nameMatch = (textBody || '').match(nameRegex);
+        if (nameMatch) {
+          const detected = nameMatch[1].trim();
+          const existing = conversationMeta.get(from) || {};
+          existing.name = detected;
+          conversationMeta.set(from, existing);
+          // Adăugăm în istoric un semnal scurt pentru AI
+          history.push({ role: 'user', content: `NAME_DETECTED: ${detected}` });
+        }
 
         const messagesPayload = [
           {
@@ -115,16 +129,25 @@ export async function POST(req: Request) {
         }
 
         // 4. Trimitem răspunsul pe WhatsApp
-        // Detectăm dacă AI-ul cere județul pentru a oferi butoane
+        // Prioritate: JUDET (buttoane) -> REQUEST NAME -> mesaje obișnuite
         if (finalReply && finalReply.includes("||REQUEST: JUDET||")) {
           const res = await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/dpd/judete`);
           const data = await res.json();
           const judete = Array.isArray(data.judete) ? data.judete : [];
           const options = judete.slice(0, 5).map((j: string, idx: number) => ({ id: `judet_${idx + 1}`, title: j }));
           options.push({ id: "search_judet", title: "Caută județul" });
-          await sendWhatsAppMessage(from, finalReply.replace("||REQUEST: JUDET||", ""), options);
+          const textToSend = finalReply.replace("||REQUEST: JUDET||", "").trim();
+          await sendWhatsAppMessage(from, textToSend || "În ce județ doriți livrarea?", options);
+        } else if (finalReply && finalReply.includes("||REQUEST: NAME||")) {
+          // Cerem explicit numele clientului
+          const textToSend = finalReply.replace("||REQUEST: NAME||", "").trim() || "Cu ce nume să emitem oferta?";
+          await sendWhatsAppMessage(from, textToSend);
         } else if (finalReply && finalReply.trim().length > 0) {
-          await sendWhatsAppMessage(from, finalReply);
+          // Înlocuim placeholder-ul {{name}} cu numele detectat (dacă există)
+          const meta = conversationMeta.get(from) || {};
+          let replyText = finalReply;
+          if (meta.name) replyText = replyText.replace(/{{\s*name\s*}}/gi, meta.name);
+          await sendWhatsAppMessage(from, replyText);
         }
 
         // Actualizăm istoricul

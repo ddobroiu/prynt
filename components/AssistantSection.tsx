@@ -113,7 +113,7 @@ export default function AssistantSection() {
               <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
                   {/* Buton WhatsApp - VERDE */}
                   <a 
-                    href="https://wa.me/40722369658" 
+                    href="https://wa.me/40750259955" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold transition-all shadow-xl shadow-green-200 hover:shadow-2xl hover:-translate-y-1"
