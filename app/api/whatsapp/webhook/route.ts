@@ -75,7 +75,7 @@ async function sendWhatsAppMessage(to: string, text: string, options?: { id: str
   } else {
     // Mesaj simplu text
     payload.type = "text";
-    payload.text = { preview_url: false, body: text };
+    payload.text = { preview_url: true, body: text }; // Changed preview_url to true for tracking links
   }
 
   try {
@@ -177,7 +177,7 @@ export async function POST(req: Request) {
             role: "system",
             content:
               SYSTEM_PROMPT +
-              "\nIMPORTANT: Clientul este pe WhatsApp. Fii concis. Nu folosi tag-uri speciale de Web.",
+              "\nIMPORTANT: Clientul este pe WhatsApp. Fii concis. Nu folosi tag-uri speciale de Web. Oferă link-uri complete de tracking.",
           },
           ...history,
           { role: "user", content: textBody },
@@ -199,7 +199,7 @@ export async function POST(req: Request) {
 
         // -------------------------
         // 3. Tool calls (calcule / comenzi)
-// -------------------------
+        // -------------------------
         if (responseMessage.tool_calls) {
           messagesPayload.push(responseMessage);
 
@@ -280,7 +280,7 @@ export async function POST(req: Request) {
                 result = { pret_total: res.finalPrice };
               }
 
-              // --- NOUL TOOL: CHECK STATUS ---
+              // --- CHECK STATUS (NOU) ---
               else if (fnName === "check_order_status") {
                 const orderNo = parseInt(args.orderNo);
                 if (isNaN(orderNo)) {
@@ -295,16 +295,27 @@ export async function POST(req: Request) {
                         result = { found: false, message: "Comanda nu a fost găsită." };
                     } else {
                         let trackingInfo = "";
+                        let statusExplanation = "";
+
+                        // Link DPD
                         if (order.awbNumber) {
-                            trackingInfo = `AWB: ${order.awbNumber}. Puteți urmări coletul pe site-ul curierului (${order.awbCarrier || 'DPD'}).`;
+                            const trackingUrl = `https://tracking.dpd.ro/?shipmentNumber=${order.awbNumber}&language=ro`;
+                            trackingInfo = `AWB: ${order.awbNumber}. Urmărește livrarea aici: ${trackingUrl}`;
                         } else {
                             trackingInfo = "Încă nu a fost generat un AWB.";
                         }
+
+                        // Explicație status
+                        if (order.status === 'completed' || order.status === 'shipped') {
+                             statusExplanation = "Statusul nostru 'Finalizat' înseamnă că am predat coletul curierului. Pentru locația exactă a coletului, folosește link-ul de mai sus.";
+                        } else {
+                             statusExplanation = "Comanda este în curs de pregătire la noi în atelier.";
+                        }
+
                         result = { 
                             found: true, 
                             status: order.status, 
-                            tracking: trackingInfo,
-                            message: `Statusul comenzii #${orderNo} este: ${order.status}. ${trackingInfo}`
+                            message: `Status intern: ${order.status}.\n${statusExplanation}\n\n${trackingInfo}`
                         };
                     }
                 }

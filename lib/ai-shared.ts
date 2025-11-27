@@ -126,7 +126,7 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     type: "function",
     function: {
       name: "check_order_status",
-      description: "Verifică statusul unei comenzi și oferă AWB-ul dacă există.",
+      description: "Verifică statusul unei comenzi și returnează link-ul de tracking DPD.",
       parameters: {
         type: "object",
         properties: {
@@ -185,10 +185,7 @@ Dacă utilizatorul pune o întrebare la care nu știi răspunsul, nu poți calcu
 "Pentru detalii specifice sau nelămuriri, ne puteți contacta la telefon **0750.473.111** sau pe email la **contact@prynt.ro**."
 
 VERIFICARE STATUS COMANDĂ:
-Dacă clientul întreabă de statusul comenzii, cere-i numărul comenzii și folosește funcția "check_order_status".
-
-REGULĂ IMPORTANTĂ:
-La orice întrebare cu opțiuni (material, județ, finisaj, etc.), afișează mereu lista de variante (numerotată sau cu bullet points) și cere explicit răspunsul cu alegerea. Exemplu: "Răspunde cu numărul opțiunii dorite" sau "Alege una din variantele de mai jos". Nu lăsa clientul să scrie liber dacă există opțiuni.
+Când verifici comanda, transmite exact mesajul returnat de funcția "check_order_status". Include link-ul de tracking exact așa cum îl primești. Nu inventa statusuri de livrare. Explică clientului că statusul "Finalizat" înseamnă că am predat noi coletul, nu că a ajuns la el.
 
 OBIECTIV:
 Ajută clientul să configureze produsul, oferă prețul corect și preia datele de livrare EXACT cum sunt cerute de curier (DPD).

@@ -5,17 +5,14 @@ import { sendOrderConfirmationEmail, sendNewOrderAdminEmail } from "@/lib/email"
 import { 
   calculateBannerPrice, 
   calculateBannerVersoPrice,
-  // Alte importuri rămân la fel, dar ne asigurăm că sunt importate funcțiile necesare
   calculateFlyerPrice,
 } from '@/lib/pricing';
-// Importăm logica comună
 import { tools, SYSTEM_PROMPT } from '@/lib/ai-shared';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Adăugăm instrucțiuni specifice pentru WEB (unde avem butoane și dropdown-uri)
 const WEB_SYSTEM_PROMPT = SYSTEM_PROMPT + `
 INSTRUCȚIUNI SPECIFICE WEB:
 - Când întrebi detalii tehnice, NU scrie variantele în text. Folosește tag-ul ||OPTIONS: [...]||.
@@ -73,7 +70,6 @@ export async function POST(req: Request) {
                  const res = calculateFlyerPrice({ sizeKey: args.size || "A6", quantity: args.quantity, twoSided: args.two_sided ?? true, paperWeightKey: "135", designOption: "upload" });
                  result = JSON.stringify({ pret_total: res.finalPrice });
             }
-            // ... poți adăuga restul calculelor aici (rigid, roll) la fel ca înainte ...
             else if (fnName === "calculate_rigid_price") {
                 result = JSON.stringify({ pret_total: 100, info: "Calcul rigid (mock)" });
             }
@@ -81,7 +77,7 @@ export async function POST(req: Request) {
                 result = JSON.stringify({ pret_total: 100, info: "Calcul roll (mock)" });
             }
 
-            // --- NOUL TOOL: CHECK STATUS ---
+            // --- CHECK STATUS (MODIFICAT) ---
             else if (fnName === "check_order_status") {
                 const orderNo = parseInt(args.orderNo);
                 if (isNaN(orderNo)) {
@@ -96,16 +92,27 @@ export async function POST(req: Request) {
                         result = JSON.stringify({ found: false, message: "Comanda nu a fost găsită." });
                     } else {
                         let trackingInfo = "";
+                        let statusExplanation = "";
+
+                        // Link DPD
                         if (order.awbNumber) {
-                            trackingInfo = `AWB: ${order.awbNumber}. Puteți urmări coletul pe site-ul curierului (${order.awbCarrier || 'DPD'}).`;
+                            const trackingUrl = `https://tracking.dpd.ro/?shipmentNumber=${order.awbNumber}&language=ro`;
+                            trackingInfo = `AWB: ${order.awbNumber}. Puteți urmări livrarea curierului aici: ${trackingUrl}`;
                         } else {
                             trackingInfo = "Încă nu a fost generat un AWB.";
                         }
+
+                        // Explicație status
+                        if (order.status === 'completed' || order.status === 'shipped') {
+                             statusExplanation = "Acest status ('Finalizat/Shipped') indică faptul că noi am terminat producția și am predat coletul curierului. Pentru stadiul actual al livrării, verificați link-ul DPD de mai sus.";
+                        } else {
+                             statusExplanation = "Comanda este în curs de procesare în atelierul nostru.";
+                        }
+
                         result = JSON.stringify({ 
                             found: true, 
                             status: order.status, 
-                            tracking: trackingInfo,
-                            message: `Statusul comenzii #${orderNo} este: ${order.status}. ${trackingInfo}`
+                            message: `Statusul intern Prynt: ${order.status}. ${statusExplanation} \n\nDetalii livrare: ${trackingInfo}`
                         });
                     }
                 }
@@ -182,7 +189,7 @@ export async function POST(req: Request) {
 
         } catch (e: any) {
             console.error("Tool Error:", e);
-            result = JSON.stringify({ error: "Eroare la procesarea cererii: " + e.message });
+            result = JSON.stringify({ error: "Eroare: " + e.message });
         }
 
         messagesPayload.push({ tool_call_id: tc.id ?? tc.tool_call_id ?? null, role: "tool", name: fnName, content: result });
