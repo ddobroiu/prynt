@@ -6,13 +6,16 @@ import ReturningCustomerLogin from "@/components/ReturningCustomerLogin";
 import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../../components/CartContext";
-import { ShieldCheck, Truck, X, Plus, Minus, CreditCard, Banknote, Building2 } from "lucide-react";
+import { ShieldCheck, Truck, X, Plus, Minus, CreditCard, Banknote, Building2, MapPin, AlertCircle } from "lucide-react";
 import CheckoutForm from "./CheckoutForm";
 import DeliveryInfo from "@/components/DeliveryInfo";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-type PaymentMethod = "ramburs" | "card" | "op"; // Adăugat tip 'op'
+// --- CONFIGURARE LIMITE ---
+const MAX_RAMBURS_LIMIT = 500; // Limita peste care dispare plata ramburs
+
+type PaymentMethod = "ramburs" | "card" | "op";
 
 type Address = {
   nume_prenume: string;
@@ -139,6 +142,17 @@ export default function CheckoutPage() {
   const totalPlata = (items ?? []).length > 0 ? subtotal + costLivrare : 0;
   const isEmpty = isLoaded && (items ?? []).length === 0;
 
+  // --- LOGICĂ NOUĂ: VERIFICARE LIMITĂ RAMBURS ---
+  const isRambursDisabled = totalPlata > MAX_RAMBURS_LIMIT;
+
+  // Dacă totalul depășește limita și utilizatorul avea selectat "Ramburs", mutăm automat pe "Card"
+  useEffect(() => {
+    if (isRambursDisabled && paymentMethod === 'ramburs') {
+      setPaymentMethod('card');
+    }
+  }, [isRambursDisabled, paymentMethod]);
+  // ----------------------------------------------
+
   function validate(): { ok: boolean; errs: Record<string, string> } {
     const e: Record<string, string> = {};
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -163,6 +177,12 @@ export default function CheckoutPage() {
 
     if ((items ?? []).length === 0) e["cart.empty"] = "Coșul este gol";
     if (!agreedToTerms) e["terms.agreement"] = "Trebuie să confirmi că ești de acord cu prelucrarea datelor.";
+
+    // Validare extra pentru Ramburs (safety check)
+    if (paymentMethod === 'ramburs' && isRambursDisabled) {
+       setPaymentMethod('card'); // Auto-switch
+       return { ok: true, errs: {} }; // Allow retry logic to handle rendering
+    }
 
     return { ok: Object.keys(e).length === 0, errs: e };
   }
@@ -224,11 +244,10 @@ export default function CheckoutPage() {
       },
       marketing,
       createAccount: createAccount && !session?.user,
-      paymentMethod: paymentMethod === 'op' ? 'OP' : paymentMethod === 'ramburs' ? 'Ramburs' : 'Card', // Mapping pentru backend
+      paymentMethod: paymentMethod === 'op' ? 'OP' : paymentMethod === 'ramburs' ? 'Ramburs' : 'Card',
     };
 
     try {
-      // Ramburs SAU OP - trimitem direct la server
       if (paymentMethod === "ramburs" || paymentMethod === "op") {
         const res = await fetch("/api/order/create", {
           method: "POST",
@@ -240,7 +259,6 @@ export default function CheckoutPage() {
           throw new Error(data?.message || "Eroare la crearea comenzii.");
         }
         
-        // Redirect cu params pentru success page (o=orderNo, pm=paymentMethod)
         const o = Number(data?.orderNo);
         const qOrder = Number.isFinite(o) && o > 0 ? `o=${o}` : "";
         const qPm = `pm=${paymentMethod === 'op' ? 'OP' : 'Ramburs'}`;
@@ -250,7 +268,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Card: Stripe session
+      // Card
       const res = await fetch("/api/stripe/checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -281,40 +299,20 @@ export default function CheckoutPage() {
   return (
     <main className="bg-ui min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Coșul tău</h1>
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Finalizare Comandă</h1>
+          <p className="text-muted text-sm mt-1">Completează detaliile pentru a plasa comanda.</p>
         </div>
 
         {isEmpty ? (
           <EmptyCart />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <aside className="order-1 lg:order-2 lg:col-span-1">
-              <a
-                href="/"
-                className="mb-3 inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 transition"
-              >
-                Continuă cumpărăturile
-              </a>
-              <SummaryCard
-                subtotal={subtotal}
-                shipping={costLivrare}
-                total={totalPlata}
-                onPlaceOrder={placeOrder}
-                placing={placing}
-                county={address.judet}
-                showEmbed={showEmbed}
-                setShowEmbed={setShowEmbed}
-                createAccount={createAccount}
-                setCreateAccount={setCreateAccount}
-                isLoggedIn={!!session?.user}
-                paymentMethod={paymentMethod} // Pass pt button label
-              />
-            </aside>
-
-            <section className={`order-2 lg:order-1 lg:col-span-2 space-y-6`}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <section className="lg:col-span-2 space-y-6">
               <CartItems items={items} onRemove={removeItem} />
               <ReturningCustomerLogin />
+              
               <CheckoutForm
                 address={address}
                 setAddress={(updater) => setAddress((prev) => updater(prev))}
@@ -327,27 +325,55 @@ export default function CheckoutPage() {
                 errors={errors}
               />
 
-              {/* SECȚIUNE METODĂ DE PLATĂ (Actualizată) */}
-              <div className="card p-4 border border-[--border] bg-surface rounded-xl shadow-sm">
+              {/* SECȚIUNE METODĂ DE PLATĂ */}
+              <div className="card p-5 border border-[--border] bg-surface rounded-xl shadow-sm">
                 <h2 className="text-xl font-bold mb-4 text-ui">Metodă de plată</h2>
                 <div className="space-y-3">
                     
-                    {/* Ramburs */}
-                    <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentMethod === 'ramburs' ? 'border-indigo-500 bg-indigo-500/10' : 'border-[--border] hover:bg-white/5'}`}>
+                    {/* Ramburs - DEZACTIVAT PESTE LIMITĂ */}
+                    <label className={`flex items-start gap-3 p-4 rounded-lg border transition-all relative
+                        ${isRambursDisabled 
+                            ? 'border-red-500/30 bg-red-500/5 opacity-80 cursor-not-allowed' 
+                            : paymentMethod === 'ramburs' 
+                                ? 'border-indigo-500 bg-indigo-500/10 ring-1 ring-indigo-500/30 cursor-pointer' 
+                                : 'border-[--border] hover:bg-white/5 cursor-pointer'
+                        }
+                    `}>
                         <div className="mt-1">
-                            <input type="radio" name="payment" value="ramburs" checked={paymentMethod === 'ramburs'} onChange={() => setPaymentMethod('ramburs')} className="h-4 w-4 border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800" />
+                            <input 
+                                type="radio" 
+                                name="payment" 
+                                value="ramburs" 
+                                checked={paymentMethod === 'ramburs'} 
+                                onChange={() => !isRambursDisabled && setPaymentMethod('ramburs')} 
+                                disabled={isRambursDisabled}
+                                className="h-4 w-4 border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800 disabled:opacity-50" 
+                            />
                         </div>
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                                <Banknote size={18} className="text-emerald-400" />
-                                <span className="font-bold text-ui">Ramburs (Plata la livrare)</span>
+                                <Banknote size={18} className={isRambursDisabled ? "text-gray-500" : "text-emerald-400"} />
+                                <span className={`font-bold ${isRambursDisabled ? "text-muted line-through decoration-red-500" : "text-ui"}`}>
+                                    Ramburs (Plata la livrare)
+                                </span>
                             </div>
-                            <div className="text-xs text-muted">Plătești curierului numerar când ajunge coletul.</div>
+                            <div className="text-xs text-muted">
+                                {isRambursDisabled 
+                                    ? "Indisponibil pentru comenzi." 
+                                    : "Plătești curierului numerar când ajunge coletul."
+                                }
+                            </div>
+                            {isRambursDisabled && (
+                                <div className="mt-2 flex items-start gap-2 text-xs text-red-400 font-medium bg-red-500/10 p-2 rounded">
+                                    <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                                    <span>Pentru comenzi peste {MAX_RAMBURS_LIMIT} RON, plata ramburs nu este disponibilă. Te rugăm să achiți cu Cardul sau prin OP.</span>
+                                </div>
+                            )}
                         </div>
                     </label>
 
                     {/* Card */}
-                    <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-indigo-500 bg-indigo-500/10' : 'border-[--border] hover:bg-white/5'}`}>
+                    <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-indigo-500 bg-indigo-500/10 ring-1 ring-indigo-500/30' : 'border-[--border] hover:bg-white/5'}`}>
                         <div className="mt-1">
                             <input type="radio" name="payment" value="card" checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} className="h-4 w-4 border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800" />
                         </div>
@@ -360,8 +386,8 @@ export default function CheckoutPage() {
                         </div>
                     </label>
 
-                    {/* Transfer Bancar (OP) - NOU */}
-                    <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentMethod === 'op' ? 'border-indigo-500 bg-indigo-500/10' : 'border-[--border] hover:bg-white/5'}`}>
+                    {/* Transfer Bancar (OP) */}
+                    <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentMethod === 'op' ? 'border-indigo-500 bg-indigo-500/10 ring-1 ring-indigo-500/30' : 'border-[--border] hover:bg-white/5'}`}>
                         <div className="mt-1">
                             <input type="radio" name="payment" value="op" checked={paymentMethod === 'op'} onChange={() => setPaymentMethod('op')} className="h-4 w-4 border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800" />
                         </div>
@@ -382,8 +408,32 @@ export default function CheckoutPage() {
                     </label>
                 </div>
               </div>
-
             </section>
+
+            <aside className="lg:col-span-1 lg:sticky lg:top-6 space-y-4">
+              <SummaryCard
+                subtotal={subtotal}
+                shipping={costLivrare}
+                total={totalPlata}
+                onPlaceOrder={placeOrder}
+                placing={placing}
+                county={address.judet}
+                addressPreview={address}
+                showEmbed={showEmbed}
+                setShowEmbed={setShowEmbed}
+                createAccount={createAccount}
+                setCreateAccount={setCreateAccount}
+                isLoggedIn={!!session?.user}
+                paymentMethod={paymentMethod}
+              />
+              
+              <div className="text-center">
+                <a href="/" className="text-sm text-muted hover:text-white underline decoration-dotted">
+                  Continuă cumpărăturile
+                </a>
+              </div>
+            </aside>
+
           </div>
         )}
       </div>
@@ -393,11 +443,14 @@ export default function CheckoutPage() {
 
 function EmptyCart() {
   return (
-    <div className="rounded-2xl border card-bg p-8 text-center text-ui">
+    <div className="rounded-2xl border card-bg p-12 text-center text-ui max-w-lg mx-auto">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-4">
+        <Truck size={32} className="text-muted" opacity={0.5} />
+      </div>
       <h2 className="text-xl font-bold mb-2">Coșul tău este gol</h2>
-      <p className="text-muted mb-6">Adaugă produse pentru a continua.</p>
-      <a href="/" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 transition">
-        Continuă cumpărăturile
+      <p className="text-muted mb-8">Nu ai adăugat încă niciun produs.</p>
+      <a href="/" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-8 py-3 font-semibold text-white hover:bg-indigo-500 transition shadow-lg shadow-indigo-900/20">
+        Mergi la Magazin
       </a>
     </div>
   );
@@ -410,6 +463,7 @@ function SummaryCard({
   onPlaceOrder,
   placing,
   county,
+  addressPreview,
   showEmbed,
   setShowEmbed,
   createAccount,
@@ -423,6 +477,7 @@ function SummaryCard({
   onPlaceOrder: () => void;
   placing: boolean;
   county?: string;
+  addressPreview?: Address;
   showEmbed: boolean;
   setShowEmbed: (v: boolean) => void;
   createAccount: boolean;
@@ -434,17 +489,33 @@ function SummaryCard({
 
   const btnLabel = useMemo(() => {
       if (placing) return "Se procesează...";
-      if (paymentMethod === 'card') return "Plătește";
+      if (paymentMethod === 'card') return `Plătește ${fmt(total)}`;
       if (paymentMethod === 'op') return "Trimite comanda (OP)";
       return "Plasează comanda";
-  }, [paymentMethod, placing]);
+  }, [paymentMethod, placing, total]);
 
   return (
-    <div className="lg:sticky lg:top-6 rounded-2xl border card-bg p-5 text-ui">
-      <h2 className="text-xl font-bold mb-4">Sumar comandă</h2>
+    <div className="rounded-2xl border card-bg p-6 text-ui shadow-xl shadow-black/10">
+      <h2 className="text-lg font-bold mb-5 flex items-center gap-2 border-b border-white/10 pb-4">
+        Sumar comandă
+      </h2>
+
+      {addressPreview?.localitate && (
+        <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/5 text-xs text-muted animate-in fade-in">
+            <div className="flex items-start gap-2">
+                <MapPin size={14} className="mt-0.5 text-indigo-400 shrink-0" />
+                <div>
+                    <span className="block font-semibold text-white mb-0.5">Livrare către:</span>
+                    <span className="block">{addressPreview.nume_prenume || "Nume..."}</span>
+                    <span className="block opacity-80">{addressPreview.localitate}, {addressPreview.judet}</span>
+                </div>
+            </div>
+        </div>
+      )}
 
       <div className="space-y-3 text-sm">
         <DeliveryInfo county={county} variant="text" size="xs" showCod={false} showShippingFrom={false} />
+        
         <div className="flex items-center justify-between">
           <span className="text-muted">Produse</span>
           <span className="font-semibold">{fmt(subtotal)}</span>
@@ -454,17 +525,18 @@ function SummaryCard({
             <Truck size={16} className="text-muted" />
             Livrare
           </span>
-          <span className="font-semibold">{fmt(shipping)}</span>
+          <span className="font-semibold text-emerald-400">{shipping === 0 ? "Gratuit" : fmt(shipping)}</span>
         </div>
-        <div className="flex items-center justify-between border-t border-white/10 pt-3">
-          <span className="text-ui font-semibold">Total</span>
-          <span className="text-2xl font-extrabold">{fmt(total)}</span>
+        
+        <div className="flex items-center justify-between border-t border-white/10 pt-4 mt-2">
+          <span className="text-lg font-bold text-white">Total</span>
+          <span className="text-2xl font-extrabold text-white">{fmt(total)}</span>
         </div>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-6">
         {!isLoggedIn && (
-          <label className="flex items-start gap-2 mb-4 text-xs cursor-pointer select-none">
+          <label className="flex items-start gap-2 mb-4 text-xs cursor-pointer select-none opacity-80 hover:opacity-100 transition-opacity">
             <input
               type="checkbox"
               checked={createAccount}
@@ -472,7 +544,7 @@ function SummaryCard({
               className="mt-0.5 rounded border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800"
             />
             <span className="text-ui leading-snug">
-              Creează un cont cu acest email și parolă generată automat (trimisă pe email). O vei putea schimba ulterior.
+              Vreau cont nou (parola vine pe email).
             </span>
           </label>
         )}
@@ -482,9 +554,9 @@ function SummaryCard({
             type="button"
             onClick={onPlaceOrder}
             disabled={placing}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-500 transition disabled:opacity-60 shadow-lg shadow-indigo-900/20"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-4 text-base font-bold text-white hover:bg-indigo-500 transition disabled:opacity-60 shadow-lg shadow-indigo-900/20 active:scale-[0.98]"
           >
-            <ShieldCheck size={18} />
+            <ShieldCheck size={20} />
             {btnLabel}
           </button>
         )}
@@ -500,15 +572,14 @@ function SummaryCard({
                 onClick={() => setShowEmbed(false)}
                 className="flex-1 inline-flex items-center justify-center rounded-md border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20"
               >
-                Anulează plata
+                Anulează
               </button>
             </div>
           </div>
         )}
 
-        <p className="mt-3 text-[11px] text-muted text-center leading-relaxed opacity-70">
-          Prin plasarea comenzii, ești de acord cu <Link href="/termeni" className="underline hover:text-white">Termenii</Link>. <br/>
-          Plata cu cardul este securizată prin Stripe.
+        <p className="mt-4 text-[10px] text-muted text-center leading-relaxed opacity-60">
+          Prin plasarea comenzii, confirmi că ai citit și ești de acord cu <Link href="/termeni" className="underline hover:text-white">Termenii și Condițiile</Link>.
         </p>
       </div>
     </div>
@@ -519,7 +590,6 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
   const { updateQuantity } = useCart();
 
-  // Helper labels...
   const labelForKey: Record<string, string> = {
     width: "Lățime (cm)", height: "Înălțime (cm)", width_cm: "Lățime (cm)", height_cm: "Înălțime (cm)",
     totalSqm: "Suprafață totală (m²)", sqmPerUnit: "m²/buc", pricePerSqm: "Preț pe m² (RON)",
@@ -598,7 +668,10 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
 
   return (
     <div className="rounded-2xl border card-bg p-4 text-ui">
-      <h2 className="text-xl font-bold mb-4">Produsele tale</h2>
+      <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+        <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs">1</span>
+        Produse în coș
+      </h2>
       <ul className="divide-y divide-white/10">
         {(items ?? []).map((item) => {
           const title = item.title ?? item.name ?? item.slug ?? 'Produs';
@@ -610,7 +683,7 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
-                    <button onClick={() => onRemove(item.id)} className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-muted hover:bg-white/10"><X size={16} /></button>
+                    <button onClick={() => onRemove(item.id)} className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-muted hover:bg-white/10 transition"><X size={16} /></button>
                     <p className="font-semibold truncate pr-2">{title}</p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -622,11 +695,8 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
                   </div>
                 </div>
                 {renderDetails(item)}
-                <div className="mt-1 text-sm text-muted">
-                  <div className="mt-2">
-                    <div className="text-xs text-muted">{unit > 0 ? `Preț unitar: ${fmt(unit)}` : "Preț unitar: —"}</div>
-                    <div className="text-sm text-muted mt-1">{fmt(Number(lineTotal))}</div>
-                  </div>
+                <div className="mt-2 text-right">
+                    <div className="text-sm font-medium text-ui">{fmt(Number(lineTotal))}</div>
                 </div>
               </div>
             </li>
