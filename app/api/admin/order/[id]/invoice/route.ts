@@ -66,12 +66,27 @@ export async function POST(req: Request, ctx: any) {
             quantity: Number(it.qty || it.quantity || 1) || 1,
           }));
 
-          const client = {
-            name: orderBilling.name || orderBilling.cui || orderAddress?.nume_prenume || orderAddress?.name || 'Client',
+          // Determinare nume client: Denumire Companie -> Nume Factura -> Nume Livrare -> Client
+          const clientName = orderBilling.denumire_companie || orderBilling.name || orderBilling.cui || orderAddress?.nume_prenume || orderAddress?.name || 'Client';
+
+          const client: any = {
+            name: clientName,
             address: orderBilling.strada_nr || orderAddress?.strada_nr || '',
             email: orderBilling.email || orderAddress?.email,
             phone: orderBilling.telefon || orderBilling.phone || orderAddress?.telefon,
           };
+
+          // Adaugare CIF/CUI daca exista
+          if (orderBilling.cui) {
+            let cui = String(orderBilling.cui).trim().toUpperCase();
+            if (!cui.startsWith('RO')) cui = `RO${cui}`;
+            client.cif = cui;
+          }
+          
+          // Adaugare Reg Com daca exista
+          if (orderBilling.reg_com) {
+            client.rc = orderBilling.reg_com;
+          }
 
           const payload = {
             cif: process.env.OBLIO_CIF_FIRMA,

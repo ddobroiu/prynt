@@ -35,11 +35,14 @@ interface Address {
   ap?: string;
   interfon?: string;
 }
+
 interface Billing {
   tip_factura: 'persoana_fizica' | 'companie' | 'persoana_juridica';
   cui?: string;
+  reg_com?: string; // Adăugat pentru persoane juridice
+  denumire_companie?: string; // Adăugat pentru persoane juridice
   name?: string;
-  email?: string; // Adăugat opțional
+  email?: string;
   telefon?: string;
   phone?: string;
   judet?: string;
@@ -287,12 +290,12 @@ async function sendEmails(
     })
     .join('');
 
-  const isCompanyBilling = (billing && (billing as any).tip_factura && (billing as any).tip_factura !== 'persoana_fizica' && ((billing as any).cui || (billing as any).name));
-  const contactName = isCompanyBilling ? ((billing as any).name || (billing as any).cui || address.nume_prenume) : (address.nume_prenume || (billing as any).name || '');
-  const contactEmail = isCompanyBilling ? ((billing as any).email || address.email) : (address.email || (billing as any).email || '');
-  const contactPhone = isCompanyBilling ? ((billing as any).telefon || (billing as any).phone || address.telefon) : (address.telefon || (billing as any).telefon || '');
-  const contactAddressLine = isCompanyBilling
-    ? buildAddressLine({ judet: (billing as any).judet, localitate: (billing as any).localitate, strada_nr: (billing as any).strada_nr }, { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr })
+  const isCompany = billing && (billing.tip_factura === 'persoana_juridica' || billing.tip_factura === 'companie');
+  const contactName = isCompany ? (billing.denumire_companie || billing.name || billing.cui || address.nume_prenume) : (address.nume_prenume || billing.name || '');
+  const contactEmail = isCompany ? (billing.email || address.email) : (address.email || billing.email || '');
+  const contactPhone = isCompany ? (billing.telefon || billing.phone || address.telefon) : (address.telefon || billing.telefon || '');
+  const contactAddressLine = isCompany
+    ? buildAddressLine({ judet: billing.judet, localitate: billing.localitate, strada_nr: billing.strada_nr }, { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr })
     : buildAddressLine({ judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr }, { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr });
 
   let actionButtons = '';
@@ -361,11 +364,22 @@ async function sendEmails(
     : '';
   const invoiceBlock = invoiceLink
     ? `<p style="text-align: center; margin-top: 20px;"><a href="${invoiceLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Vezi Factura Oblio</a></p>`
-    : `<p style=\"text-align:center;margin-top:20px;color:#b54708\">Factura va fi emisă manual în Oblio (client: ${escapeHtml(billing.cui || billing.name || address.nume_prenume)}).</p>`;
+    : `<p style=\"text-align:center;margin-top:20px;color:#b54708\">Factura va fi emisă manual în Oblio (client: ${escapeHtml(isCompany ? (billing.denumire_companie || billing.cui) : (billing.name || address.nume_prenume))}).</p>`;
 
-  const billingBlockAdmin = (billing.tip_factura !== 'persoana_fizica')
-    ? `<p><strong>Tip:</strong> Companie</p><p><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
-    : `<p><strong>Tip:</strong> Persoană Fizică</p><p><strong>Nume Factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`;
+  let billingBlockAdmin = '';
+  if (isCompany) {
+      billingBlockAdmin = `
+        <p><strong>Tip:</strong> Companie</p>
+        <p><strong>Companie:</strong> ${escapeHtml(billing.denumire_companie ?? '')}</p>
+        <p><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>
+        ${billing.reg_com ? `<p><strong>Reg. Com:</strong> ${escapeHtml(billing.reg_com)}</p>` : ''}
+      `;
+  } else {
+      billingBlockAdmin = `
+        <p><strong>Tip:</strong> Persoană Fizică</p>
+        <p><strong>Nume Factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>
+      `;
+  }
 
   const adminHtml = `
     <div style="font-family: sans-serif; padding: 20px; background-color: #f4f4f4;">
@@ -433,9 +447,20 @@ async function sendEmails(
   const clientAptHtml = (address.bloc || address.scara || address.etaj || address.ap || address.interfon)
     ? `<p class="muted" style="margin:4px 0 0;color:#64748b;font-size:13px">${escapeHtml(apartmentLineText(address))}</p>`
     : '';
-  const billingBlockClient = (billing.tip_factura !== 'persoana_fizica')
-    ? `<p style="margin:0;color:#111"><strong>Tip:</strong> Companie</p><p style="margin:4px 0 0;color:#111"><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>`
-    : `<p style="margin:0;color:#111"><strong>Tip:</strong> Persoană fizică</p><p style="margin:4px 0 0;color:#111"><strong>Nume factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>`;
+  
+  let billingBlockClient = '';
+  if (isCompany) {
+      billingBlockClient = `
+        <p style="margin:0;color:#111"><strong>Tip:</strong> Companie</p>
+        <p style="margin:4px 0 0;color:#111"><strong>Companie:</strong> ${escapeHtml(billing.denumire_companie ?? '')}</p>
+        <p style="margin:2px 0 0;color:#111"><strong>CUI:</strong> ${escapeHtml(billing.cui ?? '')}</p>
+      `;
+  } else {
+      billingBlockClient = `
+        <p style="margin:0;color:#111"><strong>Tip:</strong> Persoană fizică</p>
+        <p style="margin:4px 0 0;color:#111"><strong>Nume factură:</strong> ${escapeHtml(billing.name ?? address.nume_prenume)}</p>
+      `;
+  }
 
   const clientHtml = `
   <!DOCTYPE html>
@@ -473,7 +498,11 @@ async function sendEmails(
               <p style="margin:0;color:#111;font-weight:600;">${escapeHtml(contactName)}</p>
               <p class="muted" style="margin:2px 0 0;color:#64748b;font-size:13px">${escapeHtml(contactEmail)} • ${escapeHtml(contactPhone)}</p>
               <p style="margin:6px 0 0;color:#111">${escapeHtml(contactAddressLine)}${address.postCode ? ', ' + escapeHtml(address.postCode) : ''}</p>
-              ${isCompanyBilling ? '' : clientAptHtml}
+              ${isCompany ? '' : clientAptHtml}
+            </div>
+             <div class="col" style="flex:1;min-width:0;background:#f8fafc;padding:12px;border-radius:8px;">
+                <h3 style="margin:0 0 8px;color:#0f172a;font-size:14px;text-transform:uppercase;letter-spacing:.04em;">Date Factură</h3>
+                ${billingBlockClient}
             </div>
         </div>
         <h3 style="margin:16px 0 8px;color:#0f172a;font-size:14px;text-transform:uppercase;letter-spacing:.04em;">Produse</h3>
@@ -524,7 +553,7 @@ export async function fulfillOrder(
 
   let invoiceLink: string | null = null;
   const billingAddressLine = buildAddressLine(
-    { judet: (billing as any).judet, localitate: (billing as any).localitate, strada_nr: (billing as any).strada_nr },
+    { judet: billing.judet, localitate: billing.localitate, strada_nr: billing.strada_nr },
     { judet: address.judet, localitate: address.localitate, strada_nr: address.strada_nr }
   );
 
@@ -535,14 +564,21 @@ export async function fulfillOrder(
     return { name, price: unitAmount, measuringUnitName: 'buc', vatName: 'S', quantity };
   });
 
-  const billingTip = (billing as any)?.tip_factura;
-  const shouldTryOblio = billingTip === 'persoana_fizica';
+  const billingTip = billing?.tip_factura;
+  // MODIFICARE: Permitem și persoane juridice/companii
+  const shouldTryOblio = billingTip === 'persoana_fizica' || billingTip === 'persoana_juridica' || billingTip === 'companie';
 
   if (shouldTryOblio) {
     try {
       const token = await getOblioAccessToken();
-      const clientName = (billing as any)?.name || address.nume_prenume;
-      const cuiRaw = (billing as any)?.cui;
+      
+      // Selectăm numele corect în funcție de tip
+      let clientName = billing.name || address.nume_prenume;
+      if (billingTip === 'persoana_juridica' || billingTip === 'companie') {
+          clientName = billing.denumire_companie || billing.name || billing.cui || address.nume_prenume;
+      }
+
+      const cuiRaw = billing.cui;
       const cuiNormalized = normalizeCUI(cuiRaw);
       let clientCif: string | undefined = cuiNormalized.primary || cuiNormalized.alternate;
       if (clientCif && !clientCif.toUpperCase().startsWith('RO')) clientCif = `RO${clientCif}`;
@@ -550,10 +586,12 @@ export async function fulfillOrder(
       const client: any = {
         name: clientName,
         address: billingAddressLine,
-        email: (billing as any)?.email || address.email,
-        phone: (billing as any)?.telefon || address.telefon,
+        email: billing.email || address.email,
+        phone: billing.telefon || address.telefon,
       };
       if (clientCif) client.cif = clientCif;
+      // Adaugăm Reg Com dacă există
+      if (billing.reg_com) client.rc = billing.reg_com;
 
       const basePayload: any = {
         cif: process.env.OBLIO_CIF_FIRMA,
@@ -636,7 +674,7 @@ export async function fulfillOrder(
     const saved = await appendOrder({
       paymentType,
       address,
-      billing, // Conține acum și email-ul
+      billing, // Conține acum și email-ul și datele firmei
       items: normalized,
       shippingFee: shippingFee,
       total: totalComanda,
