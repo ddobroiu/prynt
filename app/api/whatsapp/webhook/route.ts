@@ -280,6 +280,36 @@ export async function POST(req: Request) {
                 result = { pret_total: res.finalPrice };
               }
 
+              // --- NOUL TOOL: CHECK STATUS ---
+              else if (fnName === "check_order_status") {
+                const orderNo = parseInt(args.orderNo);
+                if (isNaN(orderNo)) {
+                    result = { error: "Numărul comenzii trebuie să fie numeric." };
+                } else {
+                    const order = await prisma.order.findUnique({
+                        where: { orderNo: orderNo },
+                        select: { status: true, awbNumber: true, awbCarrier: true }
+                    });
+
+                    if (!order) {
+                        result = { found: false, message: "Comanda nu a fost găsită." };
+                    } else {
+                        let trackingInfo = "";
+                        if (order.awbNumber) {
+                            trackingInfo = `AWB: ${order.awbNumber}. Puteți urmări coletul pe site-ul curierului (${order.awbCarrier || 'DPD'}).`;
+                        } else {
+                            trackingInfo = "Încă nu a fost generat un AWB.";
+                        }
+                        result = { 
+                            found: true, 
+                            status: order.status, 
+                            tracking: trackingInfo,
+                            message: `Statusul comenzii #${orderNo} este: ${order.status}. ${trackingInfo}`
+                        };
+                    }
+                }
+              }
+
               // --- ALTE CALCULE (fallback simplu) ---
               else if (
                 fnName === "calculate_rigid_price" ||

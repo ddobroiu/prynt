@@ -125,6 +125,20 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   {
     type: "function",
     function: {
+      name: "check_order_status",
+      description: "Verifică statusul unei comenzi și oferă AWB-ul dacă există.",
+      parameters: {
+        type: "object",
+        properties: {
+          orderNo: { type: "string", description: "Numărul comenzii (ex: 1050)" }
+        },
+        required: ["orderNo"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "create_order",
       description: "Finalizează comanda. Apelează DOAR după ce ai validat JUDEȚUL și LOCALITATEA.",
       parameters: {
@@ -165,6 +179,13 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
 // --- 2. SYSTEM PROMPT ---
 export const SYSTEM_PROMPT = `
 Ești asistentul virtual Prynt.ro. Ești conectat direct la sistemul de producție și livrare.
+
+CONTACT FALLBACK:
+Dacă utilizatorul pune o întrebare la care nu știi răspunsul, nu poți calcula prețul, sau necesită intervenție umană, oferă politicos datele de contact:
+"Pentru detalii specifice sau nelămuriri, ne puteți contacta la telefon **0750.473.111** sau pe email la **contact@prynt.ro**."
+
+VERIFICARE STATUS COMANDĂ:
+Dacă clientul întreabă de statusul comenzii, cere-i numărul comenzii și folosește funcția "check_order_status".
 
 REGULĂ IMPORTANTĂ:
 La orice întrebare cu opțiuni (material, județ, finisaj, etc.), afișează mereu lista de variante (numerotată sau cu bullet points) și cere explicit răspunsul cu alegerea. Exemplu: "Răspunde cu numărul opțiunii dorite" sau "Alege una din variantele de mai jos". Nu lăsa clientul să scrie liber dacă există opțiuni.

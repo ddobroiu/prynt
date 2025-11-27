@@ -81,6 +81,36 @@ export async function POST(req: Request) {
                 result = JSON.stringify({ pret_total: 100, info: "Calcul roll (mock)" });
             }
 
+            // --- NOUL TOOL: CHECK STATUS ---
+            else if (fnName === "check_order_status") {
+                const orderNo = parseInt(args.orderNo);
+                if (isNaN(orderNo)) {
+                    result = JSON.stringify({ error: "Numărul comenzii trebuie să fie numeric." });
+                } else {
+                    const order = await prisma.order.findUnique({
+                        where: { orderNo: orderNo },
+                        select: { status: true, awbNumber: true, awbCarrier: true }
+                    });
+
+                    if (!order) {
+                        result = JSON.stringify({ found: false, message: "Comanda nu a fost găsită." });
+                    } else {
+                        let trackingInfo = "";
+                        if (order.awbNumber) {
+                            trackingInfo = `AWB: ${order.awbNumber}. Puteți urmări coletul pe site-ul curierului (${order.awbCarrier || 'DPD'}).`;
+                        } else {
+                            trackingInfo = "Încă nu a fost generat un AWB.";
+                        }
+                        result = JSON.stringify({ 
+                            found: true, 
+                            status: order.status, 
+                            tracking: trackingInfo,
+                            message: `Statusul comenzii #${orderNo} este: ${order.status}. ${trackingInfo}`
+                        });
+                    }
+                }
+            }
+
             // --- CREARE COMANDĂ ---
             else if (fnName === "create_order") {
                 const { customer_details, items } = args;
@@ -152,7 +182,7 @@ export async function POST(req: Request) {
 
         } catch (e: any) {
             console.error("Tool Error:", e);
-            result = JSON.stringify({ error: "Eroare la procesarea comenzii: " + e.message });
+            result = JSON.stringify({ error: "Eroare la procesarea cererii: " + e.message });
         }
 
         messagesPayload.push({ tool_call_id: tc.id ?? tc.tool_call_id ?? null, role: "tool", name: fnName, content: result });
