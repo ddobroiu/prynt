@@ -69,7 +69,6 @@ export default function CheckoutPage() {
 
   const [sameAsDelivery, setSameAsDelivery] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("ramburs");
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const [placing, setPlacing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -317,8 +316,6 @@ export default function CheckoutPage() {
                 setBilling={(updater) => setBilling((prev) => updater(prev))}
                 sameAsDelivery={sameAsDelivery}
                 setSameAsDelivery={setSameAsDelivery}
-                agreedToTerms={agreedToTerms}
-                setAgreedToTerms={setAgreedToTerms}
                 errors={errors}
               />
 
