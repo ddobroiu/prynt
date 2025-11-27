@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthSession } from '@/lib/auth';
 import {
   Document,
   Page,
@@ -305,5 +306,61 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("PDF Error:", error);
     return NextResponse.json({ error: "Eroare server." }, { status: 500 });
+  }
+}
+
+// --- API HANDLER (POST) - generează PDF din payload (folosit de CartWidget) ---
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { items, shipping } = body as any;
+
+    // If user is logged in, try to prefill billing/shipping with session data
+    const session = await getAuthSession();
+    const sessionName = (session?.user as any)?.name;
+    const sessionEmail = (session?.user as any)?.email;
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: 'Items invalid or empty.' }, { status: 400 });
+    }
+
+    // Construim un obiect order temporar compatibil cu OfferDocument
+    const now = new Date();
+    const order = {
+      id: `tmp_${now.getTime()}`,
+      orderNo: `OF${now.getTime()}`,
+      createdAt: now.toISOString(),
+      billing: {
+        name: sessionName || undefined,
+        email: sessionEmail || undefined,
+      },
+      address: {
+        name: sessionName || undefined,
+        email: sessionEmail || undefined,
+      },
+      items: items.map((it: any, idx: number) => ({
+        id: it.id || `i${idx}`,
+        name: it.name || it.title || 'Produs',
+        qty: Number(it.quantity || it.qty || 1),
+        unit: Number(it.unitAmount || it.unit || it.price || 0),
+        total: Number(it.totalAmount || it.total || (it.unitAmount || it.unit || it.price || 0) * (it.quantity || it.qty || 1)),
+      })),
+      total: items.reduce((acc: number, it: any) => acc + (Number(it.totalAmount || it.total || ((it.unitAmount || it.unit || it.price || 0) * (it.quantity || it.qty || 1))) || 0), 0) + (Number(shipping || 0) || 0),
+    };
+
+    // Render PDF and return as attachment
+    const nodeStream = await renderToStream(<OfferDocument order={order} />);
+    const webStream = Readable.toWeb(nodeStream as any);
+
+    return new NextResponse(webStream as any, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="oferta-prynt-${new Date().toLocaleDateString('ro-RO')}.pdf"`,
+      },
+    });
+
+  } catch (error) {
+    console.error('PDF POST Error:', error);
+    return NextResponse.json({ error: 'Eroare la generarea PDF-ului.' }, { status: 500 });
   }
 }
