@@ -364,7 +364,7 @@ async function sendEmails(
     : '';
   const invoiceBlock = invoiceLink
     ? `<p style="text-align: center; margin-top: 20px;"><a href="${invoiceLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Vezi Factura Oblio</a></p>`
-    : `<p style=\"text-align:center;margin-top:20px;color:#b54708\">Factura va fi emisă manual în Oblio (client: ${escapeHtml(isCompany ? (billing.denumire_companie || billing.cui) : (billing.name || address.nume_prenume))}).</p>`;
+    : `<p style=\"text-align:center;margin-top:20px;color:#b54708\">Factura va fi emisă manual în Oblio (client: ${escapeHtml(String(isCompany ? (billing.denumire_companie ?? billing.cui ?? '') : (billing.name ?? address.nume_prenume ?? '')))}).</p>`;
 
   let billingBlockAdmin = '';
   if (isCompany) {

@@ -68,7 +68,6 @@ export default function CheckoutPage() {
   });
 
   const [sameAsDelivery, setSameAsDelivery] = useState(true);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("ramburs");
 
   const [placing, setPlacing] = useState(false);
@@ -173,7 +172,8 @@ export default function CheckoutPage() {
     }
 
     if ((items ?? []).length === 0) e["cart.empty"] = "Coșul este gol";
-    if (!agreedToTerms) e["terms.agreement"] = "Trebuie să confirmi că ești de acord cu prelucrarea datelor.";
+    
+    // Eliminat validare agreedToTerms
 
     if (paymentMethod === 'ramburs' && isRambursDisabled) {
        setPaymentMethod('card'); 
@@ -316,8 +316,6 @@ export default function CheckoutPage() {
                 setBilling={(updater) => setBilling((prev) => updater(prev))}
                 sameAsDelivery={sameAsDelivery}
                 setSameAsDelivery={setSameAsDelivery}
-                agreedToTerms={agreedToTerms}
-                setAgreedToTerms={setAgreedToTerms}
                 errors={errors}
               />
 
