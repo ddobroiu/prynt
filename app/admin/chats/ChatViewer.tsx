@@ -167,8 +167,10 @@ export default function ChatViewer({ conversations: initialConversations }: { co
       {/* ==================== SIDEBAR (Lista Conversații) ==================== */}
       <div className="w-1/3 min-w-[300px] border-r border-slate-200 flex flex-col bg-white h-full">
         
-        {/* HEADER SIDEBAR (Fix) */}
-        <div className="shrink-0 bg-white border-b border-slate-200 z-10 sticky top-0">
+        {/* LISTA (Scrollabilă) cu HEADER sticky în interior */}
+        <div className="flex-1 overflow-y-auto">
+          {/* HEADER SIDEBAR (Fix în interiorul scrollului) */}
+          <div className="shrink-0 bg-white border-b border-slate-200 z-30 sticky top-0">
             {/* Tab-uri Inbox / Finalizate */}
             <div className="flex">
               <button 
@@ -196,10 +198,7 @@ export default function ChatViewer({ conversations: initialConversations }: { co
               <button onClick={() => setFilterSource('whatsapp')} className={`px-3 py-1 text-xs rounded border ${filterSource === 'whatsapp' ? 'bg-green-100 border-green-300 text-green-800 font-bold' : 'border-transparent text-slate-500'}`}>WhatsApp</button>
               <button onClick={() => setFilterSource('web')} className={`px-3 py-1 text-xs rounded border ${filterSource === 'web' ? 'bg-blue-100 border-blue-300 text-blue-800 font-bold' : 'border-transparent text-slate-500'}`}>Web</button>
             </div>
-        </div>
-
-        {/* LISTA (Scrollabilă) */}
-        <div className="flex-1 overflow-y-auto">
+          </div>
           {filteredList.length === 0 ? (
              <div className="p-10 text-center text-slate-400 text-xs flex flex-col items-center">
                 <span className="text-3xl mb-2 opacity-30">📭</span>
