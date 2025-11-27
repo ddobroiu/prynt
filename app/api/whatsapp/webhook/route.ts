@@ -41,10 +41,41 @@ const conversations = new Map<string, any[]>();
 // ============================
 //  HELPER: Trimite mesaj pe WhatsApp
 // ============================
-async function sendWhatsAppMessage(to: string, text: string) {
+/**
+ * Trimite mesaj pe WhatsApp. Dacă options este definit, trimite Quick Replies (interactive buttons).
+ * @param to - numărul destinatarului
+ * @param text - textul principal
+ * @param options - array de opțiuni pentru Quick Replies (ex: [{id: '1', title: 'Frontlit 440g'}])
+ */
+async function sendWhatsAppMessage(to: string, text: string, options?: { id: string, title: string }[]) {
   if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
     console.error("WHATSAPP_TOKEN sau PHONE_NUMBER_ID lipsă din .env");
     return;
+  }
+
+  let payload: any = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: to,
+  };
+
+  if (options && options.length > 0) {
+    // Quick Replies (Reply Buttons)
+    payload.type = "interactive";
+    payload.interactive = {
+      type: "button",
+      body: { text },
+      action: {
+        buttons: options.map(opt => ({
+          type: "reply",
+          reply: { id: opt.id, title: opt.title }
+        }))
+      }
+    };
+  } else {
+    // Mesaj simplu text
+    payload.type = "text";
+    payload.text = { preview_url: false, body: text };
   }
 
   try {
@@ -56,13 +87,7 @@ async function sendWhatsAppMessage(to: string, text: string) {
           Authorization: `Bearer ${WHATSAPP_TOKEN}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          recipient_type: "individual",
-          to: to,
-          type: "text",
-          text: { preview_url: false, body: text },
-        }),
+        body: JSON.stringify(payload),
       }
     );
     const data = await res.json();
