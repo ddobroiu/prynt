@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link"; // Import necesar pentru link-uri
+import Link from "next/link"; 
 import JudetSelector from "../../components/JudetSelector";
 import LocalitateSelector from "../../components/LocalitateSelector";
 
@@ -44,8 +44,6 @@ export default function CheckoutForm({
   setBilling,
   sameAsDelivery,
   setSameAsDelivery,
-  agreedToTerms,      // Prop nou
-  setAgreedToTerms,   // Prop nou
   errors,
 }: {
   address: Address;
@@ -54,8 +52,6 @@ export default function CheckoutForm({
   setBilling: (updater: (b: Billing) => Billing) => void;
   sameAsDelivery: boolean;
   setSameAsDelivery: (v: boolean) => void;
-  agreedToTerms: boolean;                   // Tip nou
-  setAgreedToTerms: (v: boolean) => void;   // Tip nou
   errors: Record<string, string>;
 }) {
   const onAddr = (k: keyof Address, v: string) => setAddress((a) => ({ ...a, [k]: v }));
@@ -318,43 +314,6 @@ export default function CheckoutForm({
              </div>
           </div>
         )}
-      </div>
-
-      {/* --- SECȚIUNE NOUĂ: ACORDURI LEGALE --- */}
-      <div 
-        className={`card p-4 border rounded-xl shadow-sm transition-colors ${
-            errors["terms.agreement"] 
-            ? "border-red-500/50 bg-red-500/5" 
-            : "border-[--border] bg-surface"
-        }`}
-        data-field="terms.agreement"
-      >
-         <div className="flex items-start gap-3">
-            <div className="flex h-6 items-center">
-              <input
-                id="terms_agreement"
-                name="terms_agreement"
-                type="checkbox"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="h-5 w-5 rounded border-gray-500 text-indigo-600 focus:ring-indigo-600 cursor-pointer bg-slate-800"
-              />
-            </div>
-            <div className="text-sm leading-snug">
-              <label htmlFor="terms_agreement" className="font-medium text-ui cursor-pointer select-none">
-                Sunt de acord cu prelucrarea datelor
-              </label>
-              <p className="text-muted mt-1 text-xs sm:text-sm">
-                Confirm că am citit și accept <Link href="/termeni" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline">Termenii și Condițiile</Link> și <Link href="/confidentialitate" target="_blank" className="text-indigo-400 hover:text-indigo-300 underline">Politica de Confidențialitate</Link>. 
-                Înțeleg că datele mele (nume, telefon) pot fi utilizate pentru identificare în serviciile de suport (inclusiv automatizate).
-              </p>
-              {errors["terms.agreement"] && (
-                  <p className="mt-2 text-sm font-bold text-red-400 animate-pulse">
-                      ⚠️ {errors["terms.agreement"]}
-                  </p>
-              )}
-            </div>
-         </div>
       </div>
     </div>
   );

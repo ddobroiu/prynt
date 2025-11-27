@@ -6,14 +6,14 @@ import ReturningCustomerLogin from "@/components/ReturningCustomerLogin";
 import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../../components/CartContext";
-import { ShieldCheck, Truck, X, Plus, Minus, CreditCard, Banknote, Building2, MapPin, AlertCircle } from "lucide-react";
+import { ShieldCheck, Truck, X, Plus, Minus, CreditCard, Banknote, Building2, MapPin, AlertCircle, Package } from "lucide-react";
 import CheckoutForm from "./CheckoutForm";
 import DeliveryInfo from "@/components/DeliveryInfo";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 // --- CONFIGURARE LIMITE ---
-const MAX_RAMBURS_LIMIT = 500; // Limita peste care dispare plata ramburs
+const MAX_RAMBURS_LIMIT = 500; 
 
 type PaymentMethod = "ramburs" | "card" | "op";
 
@@ -142,16 +142,13 @@ export default function CheckoutPage() {
   const totalPlata = (items ?? []).length > 0 ? subtotal + costLivrare : 0;
   const isEmpty = isLoaded && (items ?? []).length === 0;
 
-  // --- LOGICĂ NOUĂ: VERIFICARE LIMITĂ RAMBURS ---
   const isRambursDisabled = totalPlata > MAX_RAMBURS_LIMIT;
 
-  // Dacă totalul depășește limita și utilizatorul avea selectat "Ramburs", mutăm automat pe "Card"
   useEffect(() => {
     if (isRambursDisabled && paymentMethod === 'ramburs') {
       setPaymentMethod('card');
     }
   }, [isRambursDisabled, paymentMethod]);
-  // ----------------------------------------------
 
   function validate(): { ok: boolean; errs: Record<string, string> } {
     const e: Record<string, string> = {};
@@ -178,10 +175,9 @@ export default function CheckoutPage() {
     if ((items ?? []).length === 0) e["cart.empty"] = "Coșul este gol";
     if (!agreedToTerms) e["terms.agreement"] = "Trebuie să confirmi că ești de acord cu prelucrarea datelor.";
 
-    // Validare extra pentru Ramburs (safety check)
     if (paymentMethod === 'ramburs' && isRambursDisabled) {
-       setPaymentMethod('card'); // Auto-switch
-       return { ok: true, errs: {} }; // Allow retry logic to handle rendering
+       setPaymentMethod('card'); 
+       return { ok: true, errs: {} }; 
     }
 
     return { ok: Object.keys(e).length === 0, errs: e };
@@ -330,7 +326,7 @@ export default function CheckoutPage() {
                 <h2 className="text-xl font-bold mb-4 text-ui">Metodă de plată</h2>
                 <div className="space-y-3">
                     
-                    {/* Ramburs - DEZACTIVAT PESTE LIMITĂ */}
+                    {/* Ramburs */}
                     <label className={`flex items-start gap-3 p-4 rounded-lg border transition-all relative
                         ${isRambursDisabled 
                             ? 'border-red-500/30 bg-red-500/5 opacity-80 cursor-not-allowed' 
@@ -495,19 +491,25 @@ function SummaryCard({
   }, [paymentMethod, placing, total]);
 
   return (
-    <div className="rounded-2xl border card-bg p-6 text-ui shadow-xl shadow-black/10">
-      <h2 className="text-lg font-bold mb-5 flex items-center gap-2 border-b border-white/10 pb-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-800 shadow-xl shadow-slate-200/50">
+      <h2 className="text-lg font-bold mb-6 flex items-center gap-2 border-b border-slate-100 pb-4 text-slate-900">
         Sumar comandă
       </h2>
 
+      {/* Preview Livrare - FIXAT PENTRU VIZIBILITATE */}
       {addressPreview?.localitate && (
-        <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/5 text-xs text-muted animate-in fade-in">
-            <div className="flex items-start gap-2">
-                <MapPin size={14} className="mt-0.5 text-indigo-400 shrink-0" />
+        <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110 opacity-50"></div>
+            <div className="relative z-10 flex items-start gap-3">
+                <div className="p-2 bg-white rounded-full shadow-sm border border-slate-100 text-indigo-600">
+                    <MapPin size={16} />
+                </div>
                 <div>
-                    <span className="block font-semibold text-white mb-0.5">Livrare către:</span>
-                    <span className="block">{addressPreview.nume_prenume || "Nume..."}</span>
-                    <span className="block opacity-80">{addressPreview.localitate}, {addressPreview.judet}</span>
+                    <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Livrare către:</span>
+                    <span className="block font-semibold text-slate-800 text-sm">{addressPreview.nume_prenume || "Nume..."}</span>
+                    <span className="block text-sm text-slate-600 leading-snug mt-0.5">
+                        {addressPreview.localitate}, {addressPreview.judet}
+                    </span>
                 </div>
             </div>
         </div>
@@ -517,20 +519,20 @@ function SummaryCard({
         <DeliveryInfo county={county} variant="text" size="xs" showCod={false} showShippingFrom={false} />
         
         <div className="flex items-center justify-between">
-          <span className="text-muted">Produse</span>
-          <span className="font-semibold">{fmt(subtotal)}</span>
+          <span className="text-slate-500">Produse</span>
+          <span className="font-semibold text-slate-900">{fmt(subtotal)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-muted">
-            <Truck size={16} className="text-muted" />
+          <span className="flex items-center gap-2 text-slate-500">
+            <Truck size={16} className="text-slate-400" />
             Livrare
           </span>
-          <span className="font-semibold text-emerald-400">{shipping === 0 ? "Gratuit" : fmt(shipping)}</span>
+          <span className="font-semibold text-emerald-600">{shipping === 0 ? "Gratuit" : fmt(shipping)}</span>
         </div>
         
-        <div className="flex items-center justify-between border-t border-white/10 pt-4 mt-2">
-          <span className="text-lg font-bold text-white">Total</span>
-          <span className="text-2xl font-extrabold text-white">{fmt(total)}</span>
+        <div className="flex items-center justify-between border-t border-dashed border-slate-200 pt-4 mt-4">
+          <span className="text-lg font-bold text-slate-700">Total</span>
+          <span className="text-2xl font-extrabold text-indigo-600">{fmt(total)}</span>
         </div>
       </div>
 
@@ -541,9 +543,9 @@ function SummaryCard({
               type="checkbox"
               checked={createAccount}
               onChange={(e) => setCreateAccount(e.target.checked)}
-              className="mt-0.5 rounded border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800"
+              className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white"
             />
-            <span className="text-ui leading-snug">
+            <span className="text-slate-600 leading-snug">
               Vreau cont nou (parola vine pe email).
             </span>
           </label>
@@ -554,7 +556,7 @@ function SummaryCard({
             type="button"
             onClick={onPlaceOrder}
             disabled={placing}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-4 text-base font-bold text-white hover:bg-indigo-500 transition disabled:opacity-60 shadow-lg shadow-indigo-900/20 active:scale-[0.98]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-4 text-base font-bold text-white hover:bg-indigo-500 transition disabled:opacity-60 shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
           >
             <ShieldCheck size={20} />
             {btnLabel}
@@ -563,14 +565,14 @@ function SummaryCard({
 
         {showEmbed && (
           <div className="mt-4 space-y-3">
-            <div className="text-sm font-semibold text-ui">Finalizează plata în siguranță</div>
-            <div id="stripe-embedded" className="rounded-lg border border-white/10 bg-white/5 p-3" />
-            <div className="text-center text-xs text-muted">După finalizare revenim la confirmare.</div>
+            <div className="text-sm font-semibold text-slate-700">Finalizează plata în siguranță</div>
+            <div id="stripe-embedded" className="rounded-lg border border-slate-200 bg-white p-3" />
+            <div className="text-center text-xs text-slate-500">După finalizare revenim la confirmare.</div>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setShowEmbed(false)}
-                className="flex-1 inline-flex items-center justify-center rounded-md border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20"
+                className="flex-1 inline-flex items-center justify-center rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
               >
                 Anulează
               </button>
@@ -578,8 +580,8 @@ function SummaryCard({
           </div>
         )}
 
-        <p className="mt-4 text-[10px] text-muted text-center leading-relaxed opacity-60">
-          Prin plasarea comenzii, confirmi că ai citit și ești de acord cu <Link href="/termeni" className="underline hover:text-white">Termenii și Condițiile</Link>.
+        <p className="mt-4 text-[10px] text-slate-400 text-center leading-relaxed">
+          Prin plasarea comenzii, confirmi că ai citit și ești de acord cu <Link href="/termeni" className="underline hover:text-indigo-600">Termenii și Condițiile</Link>.
         </p>
       </div>
     </div>
@@ -669,7 +671,7 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
   return (
     <div className="rounded-2xl border card-bg p-4 text-ui">
       <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-        <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs">1</span>
+        <Package size={20} className="text-indigo-400" />
         Produse în coș
       </h2>
       <ul className="divide-y divide-white/10">
