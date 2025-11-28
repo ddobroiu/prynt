@@ -7,6 +7,7 @@ import { siteConfig } from "@/lib/siteConfig";
 import { ChevronDown, Menu, X, User, LogOut, Package, Settings, MapPin, CreditCard, Heart, ShieldCheck } from "lucide-react";
 // 1. IMPORTĂM WIDGETUL DE CART
 import CartWidget from "./CartWidget";
+import SearchBox from "./SearchBox";
 
 // --- SUB-COMPONENTS ---
 
@@ -323,9 +324,12 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Center: Desktop Nav */}
-        <div className="hidden lg:block">
+        {/* Center: Desktop Nav & Search */}
+        <div className="hidden lg:flex items-center gap-8">
           <DesktopNav />
+          <div className="w-80">
+            <SearchBox placeholder="Caută produse..." />
+          </div>
         </div>
 
         {/* Right: Actions */}

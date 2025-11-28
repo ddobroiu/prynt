@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { PRODUCTS } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
+import SearchBox from "@/components/SearchBox";
 import { Search, Filter, X, SlidersHorizontal } from "lucide-react";
 
 // --- CONFIGURARE PREȚURI DE PORNIRE ---
@@ -103,25 +104,16 @@ export default function ShopPage() {
           <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
             
             {/* 1. Căutare */}
-            <div className="relative w-full lg:w-1/3">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-zinc-400" />
-              </div>
-              <input
-                type="text"
+            <div className="w-full lg:w-1/3">
+              <SearchBox 
                 placeholder="Caută (ex: Banner, Autocolant...)"
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 border-transparent focus:bg-white dark:focus:bg-black focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm outline-none"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full"
+                onSelect={(result) => {
+                  // When user selects from dropdown, navigate to product
+                  const categoryPath = result.category === "bannere" ? "banner" : result.category;
+                  window.location.href = `/${categoryPath}/${result.slug}`;
+                }}
               />
-              {searchTerm && (
-                <button 
-                  onClick={() => setSearchTerm("")}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600"
-                >
-                  <X size={16} />
-                </button>
-              )}
             </div>
 
             {/* 2. Categorii (Desktop Pills) */}
