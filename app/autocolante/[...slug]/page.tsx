@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import ProductJsonLd from "@/components/ProductJsonLd";
 import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
 import type { Product } from "@/lib/products";
@@ -46,13 +47,14 @@ export default async function Page({ params }: Props) {
       <ProductJsonLd product={(product as Product)} url={url} />
       
       <main className="min-h-screen bg-gray-50">
-        <AutocolanteConfigurator 
-          productSlug={product.slug ?? product.routeSlug}
-          initialWidth={initialWidth ?? undefined}
-          initialHeight={initialHeight ?? undefined}
-        />
+        <Suspense fallback={<div className="h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>}>
+          <AutocolanteConfigurator 
+            productSlug={product.slug ?? product.routeSlug}
+            initialWidth={initialWidth ?? undefined}
+            initialHeight={initialHeight ?? undefined}
+          />
+        </Suspense>
 
-        {/* SECȚIUNEA SEO PENTRU LANDING PAGES */}
         {product.contentHtml && (
            <section className="py-16 bg-white border-t border-gray-100">
              <div className="container mx-auto px-4 max-w-4xl">
