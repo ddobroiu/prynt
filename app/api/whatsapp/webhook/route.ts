@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { tools, SYSTEM_PROMPT } from "@/lib/ai-shared";
 import { executeTool } from "@/lib/ai-tool-runner";
-// Am adăugat noile funcții pentru butoane în import
 import { sendWhatsAppMessage, sendInteractiveButtons, sendYesNoQuestion } from "@/lib/whatsapp-utils";
 import { prisma } from "@/lib/prisma";
 import { logConversation } from "@/lib/chat-logger";
@@ -313,7 +312,8 @@ export async function POST(req: Request) {
                const data = await res.json();
                const options = data.judete?.slice(0, 5).map((j: string, idx: number) => ({ id: `judet_${idx + 1}`, title: j })) || [];
                options.push({ id: "search_judet", title: "Alt județ" });
-               await sendWhatsAppMessage(from, replyText.replace("||REQUEST: JUDET||", "").trim(), options);
+               // AICI AM CORECTAT: FOLOSIM sendInteractiveButtons PENTRU OPȚIUNI
+               await sendInteractiveButtons(from, replyText.replace("||REQUEST: JUDET||", "").trim(), options);
             } 
             // Caz 2: Întrebări de tip "Da/Nu" detectate în textul AI-ului
             // Dacă AI-ul întreabă "Dorești...", "Vrei să...", "Confirm?"
