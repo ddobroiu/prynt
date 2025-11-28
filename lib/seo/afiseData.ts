@@ -313,5 +313,713 @@ export const AFISE_SEO_DATA: Record<string, LandingInfo> = {
     seoDescription: "Informare comunitară cu afișe oficiale. Formate mari pentru vizibilitate.",
     images: ["/products/afise/1.webp"],
     contentHtml: `<h2>Știri pentru toți</h2><p>Anunțuri oficiale sau evenimente locale.</p><p>Text clar și autoritate. Print pentru primării sau instituții.</p><ul><li>Design oficial</li><li>Rezistență mare</li><li>Livrare publică</li></ul>`
+  },
+
+  // --- MAI MULTE EVENIMENTE ---
+  "targ": {
+    key: "targ",
+    title: "Afișe Târg & Expoziții Commerciale",
+    shortDescription: "Postere pentru târguri de produse, expoziții industriale sau agricole.",
+    seoTitle: "Afise Targ | Print Business Expo | Prynt",
+    seoDescription: "Atrage vizitatori la standul tău cu afișe profesionale. Formate pentru panouri mari.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Expune-te la târg</h2><p>Târgurile sunt locuri ideale pentru networking și vânzări.</p><p>Afișe care evidențiază produsele sau serviciile tale. Rezistente la trafic intens.</p><ul><li>Formate expo</li><li>Hârtie groasă</li><li>Print rapid</li></ul>`
+  },
+  "bazar": {
+    key: "bazar",
+    title: "Afișe Bazar & Vânzare Stradală",
+    shortDescription: "Postere pentru bazare comunitare, vânzări de garaj sau evenimente locale.",
+    seoTitle: "Afise Bazar | Print Local | Prynt",
+    seoDescription: "Anunță bazarul tău cu afișe colorate. Atractivă pentru familii.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Bazarul comunității</h2><p>De la haine second-hand la produse artizanale, fă cunoscut evenimentul.</p><p>Culori vii pentru a atrage trecătorii. Print economic pentru evenimente mici.</p><ul><li>Design simplu</li><li>Culori atractive</li><li>Livrare locală</li></ul>`
+  },
+  "concurs": {
+    key: "concurs",
+    title: "Afișe Concurs & Competiții",
+    shortDescription: "Postere pentru concursuri muzicale, sportive sau de talente.",
+    seoTitle: "Afise Concurs | Print Competitie | Prynt",
+    seoDescription: "Mobilizează participanți cu afișe dinamice. Premii și reguli vizibile.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Concursul tău popular</h2><p>Afișe care stârnesc entuziasm și înscriere.</p><p>Detalii despre premii și deadline-uri. Rezistente pentru expunere lungă.</p><ul><li>Design energetic</li><li>Text motivant</li><li>Print de calitate</li></ul>`
+  },
+  "spectacol": {
+    key: "spectacol",
+    title: "Afișe Spectacol & Show-uri",
+    shortDescription: "Postere pentru spectacole de magie, circ sau evenimente distractive.",
+    seoTitle: "Afise Spectacol | Print Entertainment | Prynt",
+    seoDescription: "Fă spectacolul magic cu afișe captivante. Culori pentru familie.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Spectacolul familiei</h2><p>De la circ la comedie, afișele trebuie să fie distractive.</p><p>Imagini colorate și texte catchy. Materiale pentru exterior.</p><ul><li>Culori vii</li><li>Rezistență vreme</li><li>Impact vizual</li></ul>`
+  },
+  "bal": {
+    key: "bal",
+    title: "Afișe Bal & Dans",
+    shortDescription: "Postere pentru baluri școlare, evenimente dansante sau petreceri tematice.",
+    seoTitle: "Afise Bal | Print Dance Party | Prynt",
+    seoDescription: "Invită la dans cu afișe elegante. Muzică și dans în design.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Balul visurilor</h2><p>Afișe care transmit romantism și eleganță.</p><p>Culori pastel pentru evenimente speciale. Print pentru săli de bal.</p><ul><li>Design romantic</li><li>Hârtie premium</li><li>Livrare elegantă</li></ul>`
+  },
+  "aniversare": {
+    key: "aniversare",
+    title: "Afișe Aniversare & Sărbători Personale",
+    shortDescription: "Postere pentru aniversări, zile de naștere sau evenimente familiale.",
+    seoTitle: "Afise Aniversare | Print Personal | Prynt",
+    seoDescription: "Sărbătorește cu afișe personalizate. Culori festive pentru familie.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Aniversarea ta specială</h2><p>Fă ziua memorabilă cu afișe distractive.</p><p>Poze personale și mesaje afectuoase. Print rapid pentru surprize.</p><ul><li>Personalizare foto</li><li>Culori festive</li><li>Livrare rapidă</li></ul>`
+  },
+  "nunta": {
+    key: "nunta",
+    title: "Afișe Nuntă & Evenimente Matrimoniale",
+    shortDescription: "Postere pentru nunți, logodne sau evenimente romantice.",
+    seoTitle: "Afise Nunta | Print Wedding | Prynt",
+    seoDescription: "Anunță nunta cu afișe elegante. Detalii despre ceremonie și petrecere.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Nunta visurilor</h2><p>Afișe care reflectă iubirea și fericirea.</p><p>Designuri romantice cu flori și inimi. Materiale de calitate pentru amintiri.</p><ul><li>Culori romantice</li><li>Hârtie artă</li><li>Print profesional</li></ul>`
+  },
+  "botez": {
+    key: "botez",
+    title: "Afișe Botez & Evenimente Religioase Familiale",
+    shortDescription: "Postere pentru botezuri, cumetrii sau evenimente creștine.",
+    seoTitle: "Afise Botez | Print Religious | Prynt",
+    seoDescription: "Sărbătorește botezul cu afișe respectuoase. Simboluri religioase.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Botezul copilului</h2><p>Afișe care transmit bucurie spirituală.</p><p>Culori sobrie cu accente aurii. Print pentru biserici sau case.</p><ul><li>Design spiritual</li><li>Culori aurii</li><li>Livrare respectuoasă</li></ul>`
+  },
+  "comemorare": {
+    key: "comemorare",
+    title: "Afișe Comemorare & Evenimente Memoriale",
+    shortDescription: "Postere pentru comemorări, funeralii sau evenimente de amintire.",
+    seoTitle: "Afise Comemorare | Print Memorial | Prynt",
+    seoDescription: "Onorează memoria cu afișe respectuoase. Culori sobrie pentru evenimente triste.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Comemorarea dragilor</h2><p>Afișe care transmit respect și amintire.</p><p>Text simplu și imagini memoriale. Materiale durabile pentru exterior.</p><ul><li>Culori sobrie</li><li>Text respectuos</li><li>Print de calitate</li></ul>`
+  },
+
+  // --- MAI MULTE AFACERI ---
+  "discount": {
+    key: "discount",
+    title: "Afișe Discount & Reduceri",
+    shortDescription: "Postere pentru campanii de discount, solduri sau reduceri speciale.",
+    seoTitle: "Afise Discount | Print Sale | Prynt",
+    seoDescription: "Atrage cumpărători cu afișe de discount. Procente mari vizibile.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Discounturi atractive</h2><p>Fă vânzările să explodeze cu oferte vizibile.</p><p>Culori roșii pentru urgență. Print economic pentru campanii frecvente.</p><ul><li>Culori contrastante</li><li>Text mare</li><li>Livrare rapidă</li></ul>`
+  },
+  "promotie": {
+    key: "promotie",
+    title: "Afișe Promoție & Campanii Marketing",
+    shortDescription: "Postere pentru promoții de lansare, evenimente speciale sau branding.",
+    seoTitle: "Afise Promotie | Print Marketing | Prynt",
+    seoDescription: "Promovează-ți produsele cu afișe creative. Designuri pentru impact.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Promoția perfectă</h2><p>Afișe care convertesc privitorii în clienți.</p><p>Elemente grafice atractive. Rezistente pentru expunere lungă.</p><ul><li>Design creativ</li><li>Hârtie de calitate</li><li>Consultanță marketing</li></ul>`
+  },
+  "publicitate": {
+    key: "publicitate",
+    title: "Afișe Publicitate & Reclamă",
+    shortDescription: "Postere generale pentru publicitate comercială sau servicii.",
+    seoTitle: "Afise Publicitate | Print Ad | Prynt",
+    seoDescription: "Fă reclamă eficientă cu afișe stradale. Vizibilitate maximă.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Publicitatea străzii</h2><p>Afișele stradale sunt cea mai directă formă de reclamă.</p><p>Mesaje clare și logo vizibil. Materiale pentru toate vremurile.</p><ul><li>Logo prominent</li><li>Rezistență vreme</li><li>Tiraje mari</li></ul>`
+  },
+  "firma": {
+    key: "firma",
+    title: "Afișe Firmă & Branding Corporate",
+    shortDescription: "Postere pentru promovarea firmei, logo sau identitate vizuală.",
+    seoTitle: "Afise Firma | Print Corporate | Prynt",
+    seoDescription: "Construieste imaginea firmei cu afișe profesionale. Culori brand.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Firma ta vizibilă</h2><p>Afișe care reflectă profesionalismul tău.</p><p>Respectarea paletei de culori. Print pentru birouri sau evenimente.</p><ul><li>Culori brand</li><li>Design consistent</li><li>Hârtie premium</li></ul>`
+  },
+  "startup": {
+    key: "startup",
+    title: "Afișe Startup & Lansare Business",
+    shortDescription: "Postere pentru startup-uri, idei noi sau afaceri în devenire.",
+    seoTitle: "Afise Startup | Print New Business | Prynt",
+    seoDescription: "Lansează-ți startup-ul cu afișe inovative. Design modern.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Startup-ul viitorului</h2><p>Afișe care transmit inovație și energie.</p><p>Culori moderne și texte catchy. Print pentru incubatoare sau evenimente tech.</p><ul><li>Design modern</li><li>Culori vibrante</li><li>Print digital</li></ul>`
+  },
+  "franciza": {
+    key: "franciza",
+    title: "Afișe Franciză & Extindere Business",
+    shortDescription: "Postere pentru francize, expansiune sau recrutare parteneri.",
+    seoTitle: "Afise Franciza | Print Franchise | Prynt",
+    seoDescription: "Atrage francizați cu afișe profesionale. Detalii despre oportunități.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Franciza de succes</h2><p>Afișe care prezintă avantajele francizei.</p><p>Text informativ și logo. Rezistente pentru expunere îndelungată.</p><ul><li>Text detaliat</li><li>Hârtie groasă</li><li>Livrare națională</li></ul>`
+  },
+
+  // --- MAI MULTE SERVICII ---
+  "reparatii": {
+    key: "reparatii",
+    title: "Afișe Reparații & Service",
+    shortDescription: "Postere pentru servicii de reparații: auto, electrocasnice, construcții.",
+    seoTitle: "Afise Reparatii | Print Service | Prynt",
+    seoDescription: "Atrage clienți pentru reparații cu afișe de încredere. Contact clar.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Reparațiile tale de încredere</h2><p>Afișe care transmit profesionalism și rapiditate.</p><p>Detalii despre servicii și prețuri. Print pentru ateliere sau magazine.</p><ul><li>Contact vizibil</li><li>Text simplu</li><li>Livrare locală</li></ul>`
+  },
+  "instalatii": {
+    key: "instalatii",
+    title: "Afișe Instalații & Montaj",
+    shortDescription: "Postere pentru instalații sanitare, electrice sau construcții.",
+    seoTitle: "Afise Instalatii | Print Installation | Prynt",
+    seoDescription: "Promovează serviciile de instalații cu afișe clare. Specializări vizibile.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Instalații profesionale</h2><p>Afișe pentru electricieni, plumbieri sau constructori.</p><p>Logo și specializări. Rezistente la șantier.</p><ul><li>Design robust</li><li>Hârtie rezistentă</li><li>Print outdoor</li></ul>`
+  },
+  "curatenie": {
+    key: "curatenie",
+    title: "Afișe Curățenie & Menaj",
+    shortDescription: "Postere pentru servicii de curățenie casă, birou sau industrială.",
+    seoTitle: "Afise Curatenie | Print Cleaning | Prynt",
+    seoDescription: "Atrage clienți pentru curățenie cu afișe curate. Culori proaspete.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Curățenie impecabilă</h2><p>Afișe care transmit igienă și profesionalism.</p><p>Culori albastre și verzi. Print pentru firme de menaj.</p><ul><li>Culori proaspete</li><li>Text simplu</li><li>Livrare rapidă</li></ul>`
+  },
+  "transport": {
+    key: "transport",
+    title: "Afișe Transport & Livrare",
+    shortDescription: "Postere pentru servicii de transport, mutări sau livrări.",
+    seoTitle: "Afise Transport | Print Delivery | Prynt",
+    seoDescription: "Promovează transportul cu afișe de încredere. Zone de acoperire.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Transport sigur</h2><p>Afișe pentru firme de mutări sau livrări.</p><p>Detalii despre servicii și tarife. Rezistente pentru vehicule.</p><ul><li>Design practic</li><li>Hârtie groasă</li><li>Print rezistent</li></ul>`
+  },
+  "consultanta": {
+    key: "consultanta",
+    title: "Afișe Consultanță & Expertiză",
+    shortDescription: "Postere pentru consultanți: financiar, juridic, afaceri.",
+    seoTitle: "Afise Consultanta | Print Expert | Prynt",
+    seoDescription: "Atrage clienți pentru consultanță cu afișe profesionale. Experiență vizibilă.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Consultanța expertă</h2><p>Afișe care transmit încredere și cunoștințe.</p><p>Text informativ și logo. Print pentru birouri.</p><ul><li>Design profesional</li><li>Hârtie premium</li><li>Livrare corporate</li></ul>`
+  },
+  "avocat": {
+    key: "avocat",
+    title: "Afișe Avocat & Servicii Juridice",
+    shortDescription: "Postere pentru avocați, notari sau servicii legale.",
+    seoTitle: "Afise Avocat | Print Legal | Prynt",
+    seoDescription: "Promovează serviciile juridice cu afișe de încredere. Specializări clare.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Avocatul tău de încredere</h2><p>Afișe pentru cabinete juridice.</p><p>Detalii despre domenii și contact. Culori serioase.</p><ul><li>Culori sobrie</li><li>Text detaliat</li><li>Print profesional</li></ul>`
+  },
+  "medic": {
+    key: "medic",
+    title: "Afișe Medic & Servicii Medicale",
+    shortDescription: "Postere pentru medici, clinici sau servicii de sănătate privată.",
+    seoTitle: "Afise Medic | Print Health | Prynt",
+    seoDescription: "Atrage pacienți cu afișe de încredere. Specializări medicale.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Sănătatea ta importantă</h2><p>Afișe pentru cabinete medicale.</p><p>Culori calmante și logo. Print pentru spitale sau clinici.</p><ul><li>Culori calmante</li><li>Hârtie igienică</li><li>Livrare medicală</li></ul>`
+  },
+
+  // --- MAI MULTE EDUCAȚIE ---
+  "universitate": {
+    key: "universitate",
+    title: "Afișe Universitate & Admitere",
+    shortDescription: "Postere pentru universități, facultăți sau evenimente academice.",
+    seoTitle: "Afise Universitate | Print Academic | Prynt",
+    seoDescription: "Promovează universitatea cu afișe prestigioase. Detalii despre programe.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Universitatea viitorului</h2><p>Afișe pentru admitere și evenimente.</p><p>Culori instituționale. Print pentru campusuri.</p><ul><li>Design academic</li><li>Hârtie de calitate</li><li>Livrare universitară</li></ul>`
+  },
+  "facultate": {
+    key: "facultate",
+    title: "Afișe Facultate & Specializări",
+    shortDescription: "Postere pentru facultăți specifice: medicină, inginerie etc.",
+    seoTitle: "Afise Facultate | Print University | Prynt",
+    seoDescription: "Atrage studenți cu afișe informative. Programe detaliate.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Facultatea ta ideală</h2><p>Afișe pentru specializări diverse.</p><p>Text detaliat și logo. Rezistente pentru holuri.</p><ul><li>Text informativ</li><li>Hârtie groasă</li><li>Print academic</li></ul>`
+  },
+  "liceu": {
+    key: "liceu",
+    title: "Afișe Liceu & Învățământ Secundar",
+    shortDescription: "Postere pentru licee, evenimente școlare sau admitere.",
+    seoTitle: "Afise Liceu | Print School | Prynt",
+    seoDescription: "Promovează liceul cu afișe pentru elevi. Activități extracurriculare.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Liceul viitorului</h2><p>Afișe pentru școli secundare.</p><p>Culori dinamice. Print pentru elevi.</p><ul><li>Design tineresc</li><li>Culori vii</li><li>Livrare școlară</li></ul>`
+  },
+  "gimnaziu": {
+    key: "gimnaziu",
+    title: "Afișe Gimnaziu & Școală Medie",
+    shortDescription: "Postere pentru gimnazii, evenimente pentru copii sau părinți.",
+    seoTitle: "Afise Gimnaziu | Print Middle School | Prynt",
+    seoDescription: "Anunță evenimente școlare cu afișe familiale. Culori prietenoase.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Gimnaziul comunității</h2><p>Afișe pentru școli medii.</p><p>Culori calde. Print pentru familii.</p><ul><li>Culori prietenoase</li><li>Text simplu</li><li>Livrare locală</li></ul>`
+  },
+  "gradinita": {
+    key: "gradinita",
+    title: "Afișe Grădiniță & Educație Timpurie",
+    shortDescription: "Postere pentru grădinițe, evenimente pentru copii mici.",
+    seoTitle: "Afise Gradinita | Print Preschool | Prynt",
+    seoDescription: "Atrage părinți cu afișe colorate. Activități distractive.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Grădinița copiilor</h2><p>Afișe pentru educație timpurie.</p><p>Culori primare. Print pentru copii.</p><ul><li>Culori primare</li><li>Design distractiv</li><li>Livrare familială</li></ul>`
+  },
+  "afterschool": {
+    key: "afterschool",
+    title: "Afișe Afterschool & Activități Extracurriculare",
+    shortDescription: "Postere pentru programe afterschool, hobby-uri sau sport.",
+    seoTitle: "Afise Afterschool | Print Extracurricular | Prynt",
+    seoDescription: "Promovează activități pentru copii cu afișe distractive. Programe detaliate.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Afterschool distractiv</h2><p>Afișe pentru hobby-uri și sport.</p><p>Culori vii. Print pentru centre comunitare.</p><ul><li>Design energetic</li><li>Culori vii</li><li>Livrare locală</li></ul>`
+  },
+  "meditatii": {
+    key: "meditatii",
+    title: "Afișe Meditații & Întăriri Școlare",
+    shortDescription: "Postere pentru profesori particulari sau centre de meditații.",
+    seoTitle: "Afise Meditatii | Print Tutoring | Prynt",
+    seoDescription: "Atrage elevi pentru meditații cu afișe de încredere. Materii vizibile.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Meditații de succes</h2><p>Afișe pentru ajutor școlar.</p><p>Detalii despre materii și prețuri. Print pentru școli.</p><ul><li>Text informativ</li><li>Hârtie ieftină</li><li>Livrare rapidă</li></ul>`
+  },
+  "examene": {
+    key: "examene",
+    title: "Afișe Examene & Teste",
+    shortDescription: "Postere pentru pregătire examene, cursuri intensive sau simulări.",
+    seoTitle: "Afise Examene | Print Test Prep | Prynt",
+    seoDescription: "Anunță sesiuni de pregătire cu afișe motivate. Date și locații.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Examenele tale de succes</h2><p>Afișe pentru pregătire intensivă.</p><p>Culori motivate. Print pentru centre de testare.</p><ul><li>Design motivant</li><li>Text clar</li><li>Livrare urgentă</li></ul>`
+  },
+
+  // --- MAI MULTE IMOBILIARE ---
+  "teren": {
+    key: "teren",
+    title: "Afișe Teren & Proprietăți Rurale",
+    shortDescription: "Postere pentru vânzare terenuri agricole sau construcții.",
+    seoTitle: "Afise Teren | Print Land | Prynt",
+    seoDescription: "Vinde terenuri cu afișe detaliate. Suprafețe și prețuri vizibile.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Terenul perfect</h2><p>Afișe pentru proprietăți rurale.</p><p>Detalii despre locație și utilități. Rezistente la vreme.</p><ul><li>Hârtie rezistentă</li><li>Text detaliat</li><li>Livrare rurală</li></ul>`
+  },
+  "birou": {
+    key: "birou",
+    title: "Afișe Birou & Spații de Lucru",
+    shortDescription: "Postere pentru închiriere birouri sau spații comerciale.",
+    seoTitle: "Afise Birou | Print Office | Prynt",
+    seoDescription: "Atrage chiriași cu afișe profesionale. Facilități vizibile.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Biroul tău ideal</h2><p>Afișe pentru spații de lucru.</p><p>Detalii despre suprafață și echipamente. Print pentru centre business.</p><ul><li>Design corporate</li><li>Hârtie premium</li><li>Livrare urbană</li></ul>`
+  },
+  "spatiu-comercial": {
+    key: "spatiu-comercial",
+    title: "Afișe Spațiu Comercial & Magazine",
+    shortDescription: "Postere pentru închiriere spații retail sau comerciale.",
+    seoTitle: "Afise Spatiu Comercial | Print Retail | Prynt",
+    seoDescription: "Vinde sau închiriază spații comerciale cu afișe atractive. Locații prime.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Spațiul comercial perfect</h2><p>Afișe pentru magazine sau birouri.</p><p>Poze și detalii. Rezistente pentru vitrine.</p><ul><li>Poze incluse</li><li>Hârtie groasă</li><li>Livrare comercială</li></ul>`
+  },
+  "depozit": {
+    key: "depozit",
+    title: "Afișe Depozit & Spații Industriale",
+    shortDescription: "Postere pentru depozite, hale sau spații logistice.",
+    seoTitle: "Afise Depozit | Print Warehouse | Prynt",
+    seoDescription: "Promovează depozite cu afișe funcționale. Capacități vizibile.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Depozitul tău sigur</h2><p>Afișe pentru spații industriale.</p><p>Detalii tehnice. Print rezistent.</p><ul><li>Design funcțional</li><li>Hârtie durabilă</li><li>Livrare industrială</li></ul>`
+  },
+  "garaj": {
+    key: "garaj",
+    title: "Afișe Garaj & Parcări",
+    shortDescription: "Postere pentru închiriere garaje sau locuri de parcare.",
+    seoTitle: "Afise Garaj | Print Parking | Prynt",
+    seoDescription: "Atrage șoferi cu afișe simple. Prețuri și locații.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Garajul tău convenabil</h2><p>Afișe pentru parcări private.</p><p>Text simplu. Print pentru blocuri.</p><ul><li>Text concis</li><li>Hârtie ieftină</li><li>Livrare locală</li></ul>`
+  },
+
+  // --- MAI MULTE PERSONALE ---
+  "schimb": {
+    key: "schimb",
+    title: "Afișe Schimb & Troc",
+    shortDescription: "Postere pentru schimb de obiecte, cărți sau servicii.",
+    seoTitle: "Afise Schimb | Print Swap | Prynt",
+    seoDescription: "Facilitează schimburi cu afișe comunitare. Obiecte vizibile.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Schimbă cu succes</h2><p>Afișe pentru troc comunitar.</p><p>Detalii despre ce oferi. Print pentru centre locale.</p><ul><li>Text simplu</li><li>Culori neutre</li><li>Livrare rapidă</li></ul>`
+  },
+  "donatie": {
+    key: "donatie",
+    title: "Afișe Donație & Ajutor Umanitar",
+    shortDescription: "Postere pentru campanii de donații, sânge sau ajutor.",
+    seoTitle: "Afise Donatie | Print Charity | Prynt",
+    seoDescription: "Încurajează donațiile cu afișe emoționale. Cauză vizibilă.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Donația ta contează</h2><p>Afișe pentru campanii umanitare.</p><p>Culori calde. Print pentru ONG-uri.</p><ul><li>Design emoțional</li><li>Culori calde</li><li>Livrare urgentă</li></ul>`
+  },
+  "voluntariat": {
+    key: "voluntariat",
+    title: "Afișe Voluntariat & Implicare Comunitară",
+    shortDescription: "Postere pentru recrutare voluntari sau evenimente sociale.",
+    seoTitle: "Afise Voluntariat | Print Community | Prynt",
+    seoDescription: "Atrage voluntari cu afișe motivate. Activități detaliate.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Voluntariatul tău valoros</h2><p>Afișe pentru implicare socială.</p><p>Text motivant. Print pentru organizații.</p><ul><li>Design pozitiv</li><li>Culori vii</li><li>Livrare comunitară</li></ul>`
+  },
+  "adoptie": {
+    key: "adoptie",
+    title: "Afișe Adoptie & Animale",
+    shortDescription: "Postere pentru adopție animale sau familii adoptive.",
+    seoTitle: "Afise Adoptie | Print Adoption | Prynt",
+    seoDescription: "Promovează adopția cu afișe drăguțe. Poze de animale.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Adoptă un prieten</h2><p>Afișe pentru animale fără stăpân.</p><p>Poze și descrieri. Print pentru adăposturi.</p><ul><li>Poze animale</li><li>Culori calde</li><li>Livrare locală</li></ul>`
+  },
+
+  // --- MAI MULTE SEZONALE ---
+  "revelion": {
+    key: "revelion",
+    title: "Afișe Revelion & An Nou",
+    shortDescription: "Postere pentru petreceri de Revelion sau evenimente de sfârșit de an.",
+    seoTitle: "Afise Revelion | Print New Year | Prynt",
+    seoDescription: "Sărbătorește Anul Nou cu afișe festive. Confetti și stele.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Revelionul perfect</h2><p>Afișe pentru petreceri de sfârșit de an.</p><p>Culori aurii și argintii. Print pentru cluburi.</p><ul><li>Culori festive</li><li>Hârtie lucioasă</li><li>Livrare sezonieră</li></ul>`
+  },
+  "ziua-mamei": {
+    key: "ziua-mamei",
+    title: "Afișe Ziua Mamei & Sărbători Familiale",
+    shortDescription: "Postere pentru evenimente dedicate mamelor sau familiei.",
+    seoTitle: "Afise Ziua Mamei | Print Family | Prynt",
+    seoDescription: "Cinstește mamele cu afișe afectuoase. Flori și inimi.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Ziua mamei speciale</h2><p>Afișe pentru sărbători familiale.</p><p>Culori pastel. Print pentru restaurante.</p><ul><li>Culori pastel</li><li>Design afectuos</li><li>Livrare rapidă</li></ul>`
+  },
+  "ziua-tatalui": {
+    key: "ziua-tatalui",
+    title: "Afișe Ziua Tatălui & Evenimente Masculine",
+    shortDescription: "Postere pentru sărbători dedicate taților sau evenimente pentru bărbați.",
+    seoTitle: "Afise Ziua Tatalui | Print Dad | Prynt",
+    seoDescription: "Sărbătorește tații cu afișe puternice. Culori masculine.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Ziua tatălui puternic</h2><p>Afișe pentru evenimente dedicate.</p><p>Culori închise. Print pentru baruri.</p><ul><li>Culori masculine</li><li>Design puternic</li><li>Livrare locală</li></ul>`
+  },
+  "ziua-copiilor": {
+    key: "ziua-copiilor",
+    title: "Afișe Ziua Copiilor & Evenimente pentru Familie",
+    shortDescription: "Postere pentru sărbători dedicate copiilor sau evenimente familiale.",
+    seoTitle: "Afise Ziua Copiilor | Print Kids | Prynt",
+    seoDescription: "Distrați copiii cu afișe colorate. Baloane și jucării.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Ziua copiilor veseli</h2><p>Afișe pentru sărbători familiale.</p><p>Culori primare. Print pentru parcuri.</p><ul><li>Culori vii</li><li>Design distractiv</li><li>Livrare comunitară</li></ul>`
+  },
+  "valentine": {
+    key: "valentine",
+    title: "Afișe Valentine & Ziua Îndrăgostiților",
+    shortDescription: "Postere pentru evenimente romantice sau sărbători de iubire.",
+    seoTitle: "Afise Valentine | Print Love | Prynt",
+    seoDescription: "Sărbătorește iubirea cu afișe romantice. Inimi și trandafiri.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Valentine romantic</h2><p>Afișe pentru evenimente de iubire.</p><p>Culori roșii. Print pentru restaurante.</p><ul><li>Culori roșii</li><li>Design romantic</li><li>Livrare rapidă</li></ul>`
+  },
+  "martisor": {
+    key: "martisor",
+    title: "Afișe Mărțișor & Primăvară",
+    shortDescription: "Postere pentru sărbători tradiționale românești sau evenimente de primăvară.",
+    seoTitle: "Afise Martisor | Print Traditional | Prynt",
+    seoDescription: "Sărbătorește tradiția cu afișe colorate. Alb și roșu.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Mărțișor tradițional</h2><p>Afișe pentru sărbători populare.</p><p>Culori tradiționale. Print pentru evenimente culturale.</p><ul><li>Culori tradiționale</li><li>Design cultural</li><li>Livrare locală</li></ul>`
+  },
+  "ziua-nationala": {
+    key: "ziua-nationala",
+    title: "Afișe Ziua Națională & Patriotism",
+    shortDescription: "Postere pentru sărbători naționale sau evenimente patriotice.",
+    seoTitle: "Afise Ziua Nationala | Print Patriotic | Prynt",
+    seoDescription: "Cinstește țara cu afișe naționale. Tricolor și simboluri.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Ziua națională mândră</h2><p>Afișe pentru sărbători oficiale.</p><p>Culori naționale. Print pentru instituții.</p><ul><li>Culori tricolor</li><li>Design oficial</li><li>Livrare publică</li></ul>`
+  },
+
+  // --- MAI MULTE SPORT ---
+  "fotbal": {
+    key: "fotbal",
+    title: "Afișe Fotbal & Meciuri",
+    shortDescription: "Postere pentru meciuri de fotbal, campionate sau evenimente sportive.",
+    seoTitle: "Afise Fotbal | Print Soccer | Prynt",
+    seoDescription: "Mobilizează suporterii cu afișe de fotbal. Logo echipă și date.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Fotbalul pasiunii</h2><p>Afișe pentru meciuri și campionate.</p><p>Culori echipă. Print pentru stadioane.</p><ul><li>Culori echipă</li><li>Design dinamic</li><li>Livrare sportivă</li></ul>`
+  },
+  "baschet": {
+    key: "baschet",
+    title: "Afișe Baschet & Competiții",
+    shortDescription: "Postere pentru meciuri de baschet sau evenimente atletice.",
+    seoTitle: "Afise Baschet | Print Basketball | Prynt",
+    seoDescription: "Atrage fani cu afișe atletice. Coșuri și mingi.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Baschetul energiei</h2><p>Afișe pentru sporturi de echipă.</p><p>Culori vii. Print pentru săli sportive.</p><ul><li>Culori atletice</li><li>Design energetic</li><li>Livrare rapidă</li></ul>`
+  },
+  "volei": {
+    key: "volei",
+    title: "Afișe Volei & Sporturi de Echipă",
+    shortDescription: "Postere pentru meciuri de volei sau evenimente comunitare.",
+    seoTitle: "Afise Volei | Print Volleyball | Prynt",
+    seoDescription: "Promovează voleiul cu afișe distractive. Plajă sau sală.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Voleiul distractiv</h2><p>Afișe pentru sporturi populare.</p><p>Culori primare. Print pentru școli.</p><ul><li>Culori vii</li><li>Design simplu</li><li>Livrare locală</li></ul>`
+  },
+  "handbal": {
+    key: "handbal",
+    title: "Afișe Handbal & Campionate",
+    shortDescription: "Postere pentru meciuri de handbal sau evenimente sportive naționale.",
+    seoTitle: "Afise Handbal | Print Handball | Prynt",
+    seoDescription: "Mobilizează pentru handbal cu afișe puternice. Minge și poartă.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Handbalul național</h2><p>Afișe pentru sporturi de echipă.</p><p>Culori naționale. Print pentru săli.</p><ul><li>Culori echipă</li><li>Design puternic</li><li>Livrare sportivă</li></ul>`
+  },
+  "atletism": {
+    key: "atletism",
+    title: "Afișe Atletism & Competiții Individuale",
+    shortDescription: "Postere pentru evenimente atletice, maratoane sau concursuri.",
+    seoTitle: "Afise Atletism | Print Athletics | Prynt",
+    seoDescription: "Încurajează sportivi cu afișe motivate. Trasee și premii.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Atletismul vitezei</h2><p>Afișe pentru competiții individuale.</p><p>Culori dinamice. Print pentru evenimente outdoor.</p><ul><li>Culori vii</li><li>Design motivant</li><li>Livrare rapidă</li></ul>`
+  },
+  "gimnastica": {
+    key: "gimnastica",
+    title: "Afișe Gimnastică & Sporturi Artistice",
+    shortDescription: "Postere pentru gimnastică, dans sau sporturi elegante.",
+    seoTitle: "Afise Gimnastica | Print Gymnastics | Prynt",
+    seoDescription: "Promovează eleganța cu afișe artistice. Acrobații și grație.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Gimnastica artistică</h2><p>Afișe pentru sporturi de grație.</p><p>Culori pastel. Print pentru săli de sport.</p><ul><li>Culori elegante</li><li>Design artistic</li><li>Livrare profesională</li></ul>`
+  },
+
+  // --- MAI MULTE MUZICĂ ---
+  "jazz": {
+    key: "jazz",
+    title: "Afișe Jazz & Muzică Improvizată",
+    shortDescription: "Postere pentru concerte de jazz sau evenimente muzicale relaxate.",
+    seoTitle: "Afise Jazz | Print Music | Prynt",
+    seoDescription: "Atrage melomani cu afișe sofisticate. Note muzicale și instrumente.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Jazz-ul sofisticat</h2><p>Afișe pentru muzică instrumentală.</p><p>Culori calde. Print pentru cluburi.</p><ul><li>Culori calde</li><li>Design muzical</li><li>Livrare artistică</li></ul>`
+  },
+  "rock": {
+    key: "rock",
+    title: "Afișe Rock & Muzică Rock",
+    shortDescription: "Postere pentru concerte rock, festivaluri sau evenimente energetice.",
+    seoTitle: "Afise Rock | Print Rock Music | Prynt",
+    seoDescription: "Energizează cu afișe rock. Chitare și amplificatoare.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Rock-ul rebel</h2><p>Afișe pentru muzică puternică.</p><p>Culori întunecate. Print pentru festivaluri.</p><ul><li>Culori întunecate</li><li>Design energetic</li><li>Livrare rock</li></ul>`
+  },
+  "pop": {
+    key: "pop",
+    title: "Afișe Pop & Muzică Populară",
+    shortDescription: "Postere pentru concerte pop, evenimente mainstream sau familie.",
+    seoTitle: "Afise Pop | Print Pop Music | Prynt",
+    seoDescription: "Distrați cu afișe pop. Culori vii și stele.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Pop-ul distractiv</h2><p>Afișe pentru muzică populară.</p><p>Culori vii. Print pentru evenimente mari.</p><ul><li>Culori vii</li><li>Design catchy</li><li>Livrare populară</li></ul>`
+  },
+  "folk": {
+    key: "folk",
+    title: "Afișe Folk & Muzică Tradițională",
+    shortDescription: "Postere pentru muzică folk, tradițională sau evenimente culturale.",
+    seoTitle: "Afise Folk | Print Traditional Music | Prynt",
+    seoDescription: "Cinstește tradiția cu afișe folclorice. Instrumente populare.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Folk-ul autentic</h2><p>Afișe pentru muzică tradițională.</p><p>Culori naturale. Print pentru evenimente culturale.</p><ul><li>Culori naturale</li><li>Design tradițional</li><li>Livrare locală</li></ul>`
+  },
+  "opera": {
+    key: "opera",
+    title: "Afișe Operă & Muzică Clasică",
+    shortDescription: "Postere pentru spectacole de operă sau concerte clasice.",
+    seoTitle: "Afise Opera | Print Classical | Prynt",
+    seoDescription: "Eleganță clasică cu afișe sofisticate. Note și instrumente clasice.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Opera măreață</h2><p>Afișe pentru muzică clasică.</p><p>Culori aurii. Print pentru teatre.</p><ul><li>Culori aurii</li><li>Design elegant</li><li>Livrare culturală</li></ul>`
+  },
+  "balet": {
+    key: "balet",
+    title: "Afișe Balet & Dans Clasic",
+    shortDescription: "Postere pentru spectacole de balet sau evenimente de dans.",
+    seoTitle: "Afise Balet | Print Ballet | Prynt",
+    seoDescription: "Grație artistică cu afișe delicate. Tutu și poziții de balet.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Baletul grațios</h2><p>Afișe pentru dans clasic.</p><p>Culori pastel. Print pentru săli de spectacol.</p><ul><li>Culori delicate</li><li>Design artistic</li><li>Livrare elegantă</li></ul>`
+  },
+
+  // --- MAI MULTE TEHNOLOGIE ȘI ARTĂ ---
+  "conferinta-tech": {
+    key: "conferinta-tech",
+    title: "Afișe Conferință Tech & IT",
+    shortDescription: "Postere pentru conferințe de tehnologie, hackathoni sau evenimente digitale.",
+    seoTitle: "Afise Conferinta Tech | Print Technology | Prynt",
+    seoDescription: "Inovează cu afișe tech. Cod, gadgeturi și culori moderne.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Tech-ul viitorului</h2><p>Afișe pentru evenimente digitale.</p><p>Culori high-tech. Print pentru startup-uri.</p><ul><li>Culori moderne</li><li>Design inovativ</li><li>Livrare rapidă</li></ul>`
+  },
+  "hackathon": {
+    key: "hackathon",
+    title: "Afișe Hackathon & Competiții Programare",
+    shortDescription: "Postere pentru hackathoni, concursuri de coding sau evenimente tech.",
+    seoTitle: "Afise Hackathon | Print Coding | Prynt",
+    seoDescription: "Atrage developeri cu afișe creative. Cod și laptopuri.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Hackathon-ul inovator</h2><p>Afișe pentru competiții tech.</p><p>Culori digitale. Print pentru universități.</p><ul><li>Culori digitale</li><li>Design creativ</li><li>Livrare tech</li></ul>`
+  },
+  "startup-pitch": {
+    key: "startup-pitch",
+    title: "Afișe Startup Pitch & Investiții",
+    shortDescription: "Postere pentru evenimente de pitching startup-uri sau investiții.",
+    seoTitle: "Afise Startup Pitch | Print Investment | Prynt",
+    seoDescription: "Prezintă idei cu afișe profesionale. Grafice și statistici.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Pitch-ul de succes</h2><p>Afișe pentru prezentări business.</p><p>Culori corporate. Print pentru incubatoare.</p><ul><li>Culori profesionale</li><li>Design grafic</li><li>Livrare business</li></ul>`
+  },
+  "pictura": {
+    key: "pictura",
+    title: "Afișe Pictură & Expoziții Artistice",
+    shortDescription: "Postere pentru expoziții de pictură sau evenimente de artă vizuală.",
+    seoTitle: "Afise Pictura | Print Art | Prynt",
+    seoDescription: "Inspiră cu afișe artistice. Culori vibrante și pensule.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Pictura expresivă</h2><p>Afișe pentru artă vizuală.</p><p>Culori vii. Print pentru galerii.</p><ul><li>Culori artistice</li><li>Design creativ</li><li>Livrare artistică</li></ul>`
+  },
+  "sculptura": {
+    key: "sculptura",
+    title: "Afișe Sculptură & Artă 3D",
+    shortDescription: "Postere pentru expoziții de sculptură sau instalații artistice.",
+    seoTitle: "Afise Sculptura | Print Sculpture | Prynt",
+    seoDescription: "Prezintă forme 3D cu afișe sofisticate. Materiale și texturi.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Sculptura dimensională</h2><p>Afișe pentru artă tridimensională.</p><p>Culori neutre. Print pentru muzee.</p><ul><li>Culori sofisticate</li><li>Design minimalist</li><li>Livrare culturală</li></ul>`
+  },
+  "fotografie": {
+    key: "fotografie",
+    title: "Afișe Fotografie & Expoziții Vizuale",
+    shortDescription: "Postere pentru expoziții foto, concursuri sau evenimente vizuale.",
+    seoTitle: "Afise Fotografie | Print Photo | Prynt",
+    seoDescription: "Capturează atenția cu afișe foto. Imagini de impact.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Fotografia captivantă</h2><p>Afișe pentru artă fotografică.</p><p>Print de înaltă calitate. Culori reale.</p><ul><li>Rezoluție înaltă</li><li>Culori fidele</li><li>Livrare artistică</li></ul>`
+  },
+  "film": {
+    key: "film",
+    title: "Afișe Film & Proiecții Cinematografice",
+    shortDescription: "Postere pentru proiecții de film, festivaluri cinematografice sau evenimente media.",
+    seoTitle: "Afise Film | Print Cinema | Prynt",
+    seoDescription: "Promovează filme cu afișe dramatice. Cadre și actori.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Filmul cinematic</h2><p>Afișe pentru evenimente media.</p><p>Culori contrastante. Print pentru cinematografe.</p><ul><li>Culori dramatice</li><li>Design cinematic</li><li>Livrare media</li></ul>`
+  },
+
+  // --- MAI MULTE SĂNĂTATE ȘI MEDIU ---
+  "vaccin": {
+    key: "vaccin",
+    title: "Afișe Vaccin & Campanii de Imunizare",
+    shortDescription: "Postere pentru campanii de vaccinare sau evenimente medicale.",
+    seoTitle: "Afise Vaccin | Print Health Campaign | Prynt",
+    seoDescription: "Informare medicală cu afișe de încredere. Simboluri de sănătate.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Vaccinarea protectoare</h2><p>Afișe pentru sănătate publică.</p><p>Culori calmante. Print pentru centre medicale.</p><ul><li>Culori calmante</li><li>Text informativ</li><li>Livrare medicală</li></ul>`
+  },
+  "donare-sange": {
+    key: "donare-sange",
+    title: "Afișe Donare Sânge & Campanii Umanitare",
+    shortDescription: "Postere pentru evenimente de donare sânge sau campanii de salvare vieți.",
+    seoTitle: "Afise Donare Sange | Print Blood Donation | Prynt",
+    seoDescription: "Salvează vieți cu afișe motivate. Picături de sânge și inimi.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Donarea de sânge</h2><p>Afișe pentru acte umanitare.</p><p>Culori roșii. Print pentru spitale.</p><ul><li>Culori roșii</li><li>Design emoțional</li><li>Livrare urgentă</li></ul>`
+  },
+  "campanie-preventie": {
+    key: "campanie-preventie",
+    title: "Afișe Campanie Prevenție & Educație Sănătate",
+    shortDescription: "Postere pentru prevenție boli, sănătate mintală sau educație medicală.",
+    seoTitle: "Afise Campanie Preventie | Print Prevention | Prynt",
+    seoDescription: "Educație preventivă cu afișe clare. Simboluri de sănătate.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Prevenția sănătoasă</h2><p>Afișe pentru educație medicală.</p><p>Culori pozitive. Print pentru comunități.</p><ul><li>Culori pozitive</li><li>Text educativ</li><li>Livrare publică</li></ul>`
+  },
+  "fitness": {
+    key: "fitness",
+    title: "Afișe Fitness & Sănătate Fizică",
+    shortDescription: "Postere pentru săli de fitness, evenimente sportive sau promovare sănătate.",
+    seoTitle: "Afise Fitness | Print Gym | Prynt",
+    seoDescription: "Motivați pentru fitness cu afișe atletice. Mușchi și echipamente.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Fitness-ul energic</h2><p>Afișe pentru sănătate fizică.</p><p>Culori vii. Print pentru săli de sport.</p><ul><li>Culori atletice</li><li>Design motivant</li><li>Livrare fitness</li></ul>`
+  },
+  "yoga": {
+    key: "yoga",
+    title: "Afișe Yoga & Meditație",
+    shortDescription: "Postere pentru clase de yoga, meditație sau evenimente de wellness.",
+    seoTitle: "Afise Yoga | Print Wellness | Prynt",
+    seoDescription: "Relaxare cu afișe calmante. Poziții yoga și natură.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Yoga-ul liniștit</h2><p>Afișe pentru wellness.</p><p>Culori naturale. Print pentru centre wellness.</p><ul><li>Culori calmante</li><li>Design natural</li><li>Livrare relaxată</li></ul>`
+  },
+  "ecologie": {
+    key: "ecologie",
+    title: "Afișe Ecologie & Protecția Mediului",
+    shortDescription: "Postere pentru campanii ecologice, reciclare sau evenimente de mediu.",
+    seoTitle: "Afise Ecologie | Print Environment | Prynt",
+    seoDescription: "Salvează planeta cu afișe verzi. Frunze și simboluri ecologice.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Ecologia vitală</h2><p>Afișe pentru mediu.</p><p>Culori verzi. Print pentru campanii.</p><ul><li>Culori verzi</li><li>Design natural</li><li>Livrare ecologică</li></ul>`
+  },
+  "reciclare": {
+    key: "reciclare",
+    title: "Afișe Reciclare & Gestionare Deșeuri",
+    shortDescription: "Postere pentru programe de reciclare sau educație ecologică.",
+    seoTitle: "Afise Reciclare | Print Recycling | Prynt",
+    seoDescription: "Încurajează reciclarea cu afișe informative. Simboluri de reciclare.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Reciclarea responsabilă</h2><p>Afișe pentru deșeuri.</p><p>Culori reciclate. Print pentru comunități.</p><ul><li>Culori reciclate</li><li>Text educativ</li><li>Livrare locală</li></ul>`
+  },
+  "protejarea-mediului": {
+    key: "protejarea-mediului",
+    title: "Afișe Protejarea Mediului & Sustenabilitate",
+    shortDescription: "Postere pentru evenimente de mediu, conservare sau dezvoltare durabilă.",
+    seoTitle: "Afise Protejarea Mediului | Print Sustainability | Prynt",
+    seoDescription: "Promovează sustenabilitatea cu afișe inspirate. Pământ și natură.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Protejarea planetei</h2><p>Afișe pentru mediu.</p><p>Culori naturale. Print pentru ONG-uri.</p><ul><li>Culori naturale</li><li>Design inspirat</li><li>Livrare ecologică</li></ul>`
+  },
+
+  // --- MAI MULTE CARITATE ȘI COMUNITATE ---
+  "fundatie": {
+    key: "fundatie",
+    title: "Afișe Fundație & Organizații Non-Profit",
+    shortDescription: "Postere pentru fundații, asociații sau evenimente caritabile.",
+    seoTitle: "Afise Fundatie | Print Charity | Prynt",
+    seoDescription: "Ajută comunitatea cu afișe de încredere. Logo fundație și misiune.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Fundația dedicată</h2><p>Afișe pentru organizații non-profit.</p><p>Culori calde. Print pentru evenimente caritabile.</p><ul><li>Culori calde</li><li>Design de încredere</li><li>Livrare comunitară</li></ul>`
+  },
+  "ong": {
+    key: "ong",
+    title: "Afișe ONG & Proiecte Sociale",
+    shortDescription: "Postere pentru ONG-uri, proiecte sociale sau evenimente comunitare.",
+    seoTitle: "Afise ONG | Print Social | Prynt",
+    seoDescription: "Implică comunitatea cu afișe pozitive. Simboluri de ajutor.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>ONG-ul activ</h2><p>Afișe pentru proiecte sociale.</p><p>Culori pozitive. Print pentru campanii.</p><ul><li>Culori pozitive</li><li>Design comunitar</li><li>Livrare socială</li></ul>`
+  },
+  "ajutor-umanitar": {
+    key: "ajutor-umanitar",
+    title: "Afișe Ajutor Umanitar & Crize",
+    shortDescription: "Postere pentru campanii de ajutor în crize, dezastre sau nevoi urgente.",
+    seoTitle: "Afise Ajutor Umanitar | Print Humanitarian | Prynt",
+    seoDescription: "Mobilizează ajutor cu afișe emoționale. Simboluri de solidaritate.",
+    images: ["/products/afise/1.webp"],
+    contentHtml: `<h2>Ajutorul umanitar</h2><p>Afișe pentru crize.</p><p>Culori urgente. Print pentru campanii de urgență.</p><ul><li>Culori urgente</li><li>Design emoțional</li><li>Livrare rapidă</li></ul>`
   }
 };
