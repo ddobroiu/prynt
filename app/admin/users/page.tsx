@@ -114,30 +114,30 @@ export default async function UsersPage() {
   const averageValue = totalUsers > 0 ? stats.totalSpentGlobal / totalUsers : 0;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-2 p-4 md:p-8 bg-gray-50/50 min-h-screen">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-2 p-3 sm:p-4 md:p-8 bg-gray-50/50 min-h-screen pb-safe">
       
       {/* Header */}
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Clienți</h1>
-          <p className="text-gray-500 mt-1">Gestionează baza de date cu clienți.</p>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Clienți</h1>
+          <p className="text-gray-500 mt-1 text-sm sm:text-base">Gestionează baza de date cu clienți.</p>
         </div>
       </div>
 
       {/* Statistici Cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
         {/* Total Clienți */}
-        <div className="relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm border border-gray-200">
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-white p-4 sm:p-5 shadow-sm border border-gray-200 touch-manipulation">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">Total Clienți</p>
-              <h3 className="mt-2 text-2xl font-bold text-gray-900">{totalUsers}</h3>
+              <p className="text-xs sm:text-sm font-medium text-gray-500">Total Clienți</p>
+              <h3 className="mt-2 text-xl sm:text-2xl font-bold text-gray-900">{totalUsers}</h3>
             </div>
-            <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
-              <Users size={20} />
+            <div className="p-1.5 sm:p-2 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+              <Users size={18} className="sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-2 text-xs">
+          <div className="mt-3 sm:mt-4 flex items-center gap-2 text-xs">
             <span className="flex items-center text-emerald-700 font-medium bg-emerald-50 px-1.5 py-0.5 rounded">
               +{stats.newToday}
             </span>
@@ -146,33 +146,33 @@ export default async function UsersPage() {
         </div>
 
         {/* Valoare Totală Clienți */}
-        <div className="relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm border border-gray-200">
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-white p-4 sm:p-5 shadow-sm border border-gray-200 touch-manipulation">
            <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">Valoare Portofoliu</p>
-              <h3 className="mt-2 text-2xl font-bold text-gray-900">{fmtRON(stats.totalSpentGlobal)}</h3>
+              <p className="text-xs sm:text-sm font-medium text-gray-500">Valoare Portofoliu</p>
+              <h3 className="mt-2 text-xl sm:text-2xl font-bold text-gray-900">{fmtRON(stats.totalSpentGlobal)}</h3>
             </div>
-            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
-              <Wallet size={20} />
+            <div className="p-1.5 sm:p-2 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+              <Wallet size={18} className="sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4 text-xs text-gray-500">
+          <div className="mt-3 sm:mt-4 text-xs text-gray-500">
             Suma totală a comenzilor (fără anulate)
           </div>
         </div>
 
         {/* Medie per Client */}
-        <div className="relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm border border-gray-200">
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-white p-4 sm:p-5 shadow-sm border border-gray-200 touch-manipulation">
            <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">Valoare Medie / Client</p>
-              <h3 className="mt-2 text-2xl font-bold text-gray-900">{fmtRON(averageValue)}</h3>
+              <p className="text-xs sm:text-sm font-medium text-gray-500">Valoare Medie / Client</p>
+              <h3 className="mt-2 text-xl sm:text-2xl font-bold text-gray-900">{fmtRON(averageValue)}</h3>
             </div>
-            <div className="p-2 rounded-lg bg-amber-50 text-amber-600">
-              <UserPlus size={20} />
+            <div className="p-1.5 sm:p-2 rounded-lg bg-amber-50 text-amber-600 shrink-0">
+              <UserPlus size={18} className="sm:w-5 sm:h-5" />
             </div>
           </div>
-           <div className="mt-4 text-xs text-gray-500">
+           <div className="mt-3 sm:mt-4 text-xs text-gray-500">
             Venit mediu generat de un client
           </div>
         </div>
