@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react"; // <--- IMPORT OBLIGATORIU
 import ProductJsonLd from "@/components/ProductJsonLd";
 import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import BannerConfigurator from "@/components/BannerConfigurator";
 
-type Props = { params: Promise<{ slug?: string[] }> };
+type Props = { params?: Promise<{ slug?: string[] }> };
 
 export async function generateStaticParams() {
   const slugs = getAllProductSlugsByCategory("banner");
@@ -46,13 +47,20 @@ export default async function Page({ params }: Props) {
       <ProductJsonLd product={(product as Product)} url={url} />
       
       <main className="min-h-screen bg-gray-50">
-        <BannerConfigurator 
-          productSlug={product.slug ?? product.routeSlug} 
-          initialWidth={initialWidth ?? undefined}
-          initialHeight={initialHeight ?? undefined}
-        />
+        {/* FIX: Suspense este necesar pentru useSearchParams din BannerConfigurator */}
+        <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+        }>
+          <BannerConfigurator 
+            productSlug={product.slug ?? product.routeSlug} 
+            initialWidth={initialWidth ?? undefined}
+            initialHeight={initialHeight ?? undefined}
+          />
+        </Suspense>
 
-        {/* SECȚIUNEA SEO PENTRU LANDING PAGES */}
+        {/* SECȚIUNEA SEO PENTRU LANDING PAGES (Reintrodusă pentru magazin-second-hand etc.) */}
         {product.contentHtml && (
            <section className="py-16 bg-white border-t border-gray-100">
              <div className="container mx-auto px-4 max-w-4xl">
