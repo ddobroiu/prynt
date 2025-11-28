@@ -82,34 +82,32 @@ export default function CartWidget() {
         </button>
       </DialogTrigger>
       
-      {/* DIALOG CONTENT - STILURI ADAPTATE DARK MODE SI MOBIL MODERN */}
+      {/* DIALOG CONTENT - FIXAT PENTRU SIDEBAR DREAPTA */}
       <DialogContent
         className={
-          "p-0 shadow-2xl duration-300 flex flex-col gap-0 focus:outline-none z-50 [&>button:last-child]:hidden " +
-          // CULORI EXPLICITE DARK MODE
+          // RESETARE POZIȚIONARE DEFAULT (Centrat) -> FORȚARE SIDEBAR
+          "!fixed !right-0 !left-auto !top-0 !bottom-0 !translate-x-0 !translate-y-0 " +
+          // DIMENSIUNI ȘI LAYOUT
+          "h-[100dvh] w-full md:max-w-md flex flex-col p-0 gap-0 shadow-2xl z-50 focus:outline-none " +
+          // STILURI VIZUALE
           "bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 " +
-          // POZIȚIONARE MODERNĂ (SLIDE FROM RIGHT)
-          // Mobile & Desktop: Ancorat dreapta, full height
-          "fixed inset-y-0 right-0 h-full overflow-hidden " +
-          // DIMENSIUNI
-          // Mobile: 90vw (90% lățime), Desktop: max-w-md
-          "w-[90vw] md:w-full md:max-w-md " +
-          // STILURI
-          // Mobile: colțuri stânga rotunjite pentru aspect modern. Desktop: drept.
-          "rounded-l-2xl md:rounded-none"
+          // ANIMAȚII
+          "duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right " +
+          // ASCUNDE BUTONUL DEFAULT DE ÎNCHIDERE AL DIALOGULUI (Îl avem pe al nostru custom)
+          "[&>button:last-child]:hidden"
         }
       >
         
-        {/* HEADER */}
-        <div className="shrink-0 sticky top-0 z-20 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <div className="px-4 pt-4 pb-3 flex items-center justify-between">
-            <DialogTitle className="text-lg md:text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+        {/* HEADER - FIX (Nu se mișcă la scroll) */}
+        <div className="shrink-0 z-20 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <div className="px-4 py-3 flex items-center justify-between">
+            <DialogTitle className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
               Coșul Tău <span className="text-slate-500 dark:text-slate-400 text-sm font-medium font-sans">({cartCount})</span>
             </DialogTitle>
 
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-all duration-200"
+              className="p-2 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all duration-200"
               aria-label="Închide coșul"
             >
               <X size={20} />
@@ -117,19 +115,17 @@ export default function CartWidget() {
           </div>
 
           {items.length > 0 && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-3">
               <button
                 onClick={exportOfferPdfServer}
                 disabled={isGeneratingPdf}
-                className="w-full py-2 px-3 bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:bg-indigo-50 dark:hover:bg-slate-700"
+                className="w-full py-2 px-3 bg-slate-50 dark:bg-slate-800/50 text-indigo-700 dark:text-indigo-300 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold uppercase tracking-wide transition-all flex items-center justify-center gap-2 hover:bg-indigo-50 dark:hover:bg-slate-700"
               >
                 {isGeneratingPdf ? (
-                  <span className="animate-pulse flex items-center gap-2">Se generează...</span>
+                  <span className="animate-pulse">Se generează...</span>
                 ) : (
                   <>
-                    <div className="bg-indigo-50 dark:bg-indigo-900/50 p-1 rounded-md">
-                      <FileText size={16} className="text-indigo-600 dark:text-indigo-400" />
-                    </div>
+                    <FileText size={14} />
                     Descarcă Ofertă PDF
                   </>
                 )}
@@ -138,66 +134,58 @@ export default function CartWidget() {
           )}
         </div>
 
-        {/* FREE SHIPPING BAR */}
-        <div className="px-4 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">
-          {remainingForFreeShipping > 0 ? (
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                  <div className="bg-indigo-100 dark:bg-indigo-900/50 p-1.5 rounded-full text-indigo-600 dark:text-indigo-400">
-                    <Truck size={14} />
-                  </div>
-                  Livrare Gratuită
-                </span>
-                <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg">
-                  încă <span className="text-slate-900 dark:text-white">{formatMoneyDisplay(remainingForFreeShipping)}</span>
-                </span>
-              </div>
-
-              <div className="relative h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div
-                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-700 ease-out rounded-full"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-              <p className="text-[11px] text-left text-slate-500 dark:text-slate-400 mt-2">
-                Adaugă produse de 500 RON pentru transport 0.
-              </p>
-            </div>
-          ) : (
-            <div className="flex items-center gap-4 text-emerald-800 dark:text-emerald-300 p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-              <div className="p-2 bg-emerald-100 dark:bg-emerald-800/50 rounded-full">
-                <Gift className="h-5 w-5 text-emerald-600 dark:text-emerald-300" />
-              </div>
+        {/* FREE SHIPPING BAR - FIX */}
+        {items.length > 0 && (
+          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-slate-50/50 dark:bg-slate-900/50">
+            {remainingForFreeShipping > 0 ? (
               <div>
-                <p className="text-sm font-extrabold">Felicitări!</p>
-                <p className="text-xs font-medium opacity-90">Beneficiezi de Livrare Gratuită.</p>
-              </div>
-            </div>
-          )}
-        </div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Truck size={12} className="text-indigo-600" />
+                    Livrare Gratuită
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-semibold">
+                    încă <span className="text-indigo-600 dark:text-indigo-400">{formatMoneyDisplay(remainingForFreeShipping)}</span>
+                  </span>
+                </div>
 
-        {/* LISTA PRODUSE */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-white dark:bg-slate-900">
+                <div className="relative h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div
+                    className="absolute top-0 left-0 h-full bg-indigo-500 transition-all duration-700 ease-out rounded-full"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 text-xs font-bold justify-center">
+                <Gift size={14} />
+                Beneficiezi de Livrare Gratuită!
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* LISTA PRODUSE - SCROLLABILĂ (Ocupă tot spațiul rămas) */}
+        <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4 bg-white dark:bg-slate-900 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-60">
-              <div className="h-24 w-24 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center">
-                 <ShoppingCart className="h-10 w-10 text-slate-300 dark:text-slate-600" />
+              <div className="h-20 w-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center">
+                 <ShoppingCart className="h-8 w-8 text-slate-400 dark:text-slate-500" />
               </div>
               <div className="space-y-1">
-                <p className="text-xl font-bold text-slate-900 dark:text-white">Coșul este gol</p>
+                <p className="text-lg font-bold text-slate-900 dark:text-white">Coșul este gol</p>
                 <p className="text-slate-500 dark:text-slate-400 text-sm">Nu ai adăugat încă niciun produs.</p>
               </div>
-              <Button onClick={() => setIsOpen(false)} variant="outline" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400 text-slate-700 dark:text-slate-300">
+              <Button onClick={() => setIsOpen(false)} variant="outline" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
                 Continuă Cumpărăturile
               </Button>
             </div>
           ) : (
             items.map((item) => (
-              <div key={item.id} className="flex gap-4 group animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <div key={item.id} className="flex gap-3 group animate-in fade-in slide-in-from-bottom-2 duration-500">
                 
                 {/* IMAGINE PRODUS */}
-                <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 shadow-sm">
+                <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                   {(() => {
                     const it: any = item as any;
                     const imgSrc =
@@ -207,7 +195,7 @@ export default function CartWidget() {
                     if (!imgSrc) {
                       return (
                         <div className="h-full w-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800">
-                          <div className="font-bold text-xs opacity-40">FOTO</div>
+                          <span className="text-[10px] font-bold">NO IMG</span>
                         </div>
                       );
                     }
@@ -216,7 +204,7 @@ export default function CartWidget() {
                       <img
                         src={imgSrc}
                         alt={item.title || "Produs"}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover"
                         onError={(e) => {
                           const el = e.currentTarget as HTMLImageElement;
                           el.onerror = null;
@@ -228,27 +216,27 @@ export default function CartWidget() {
                 </div>
 
                 {/* DETALII PRODUS */}
-                <div className="flex flex-1 flex-col justify-between py-1">
+                <div className="flex flex-1 flex-col justify-between py-0.5">
                   <div>
                     <div className="flex justify-between items-start gap-2">
-                        <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2 leading-snug hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2 leading-tight hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
                           <Link href={`/${item.slug || 'shop'}`} onClick={() => setIsOpen(false)}>
                             {item.title}
                           </Link>
                         </h3>
-                        <button onClick={() => removeItem(item.id)} className="text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1 -mr-2">
-                            <Trash2 className="h-4 w-4" />
+                        <button onClick={() => removeItem(item.id)} className="text-slate-400 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                            <Trash2 size={16} />
                         </button>
                     </div>
                     
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                      {item.width && item.height ? `${item.width} x ${item.height} cm` : ''}
-                    </p>
-                    
-                    {/* Metadata Chips */}
-                    <div className="flex flex-wrap gap-1 mt-2">
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                       {item.width && item.height && (
+                         <span className="text-[10px] text-slate-500 font-medium bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                           {item.width}x{item.height}cm
+                         </span>
+                       )}
                        {item.metadata?.Material && (
-                         <span className="text-[10px] px-1.5 py-0.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded text-slate-500 dark:text-slate-400">
+                         <span className="text-[10px] text-slate-500 font-medium bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded truncate max-w-[100px]">
                            {item.metadata.Material}
                          </span>
                        )}
@@ -256,24 +244,24 @@ export default function CartWidget() {
                   </div>
                   
                   {/* CONTROALE CANTITATE & PREȚ */}
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 shadow-sm h-8">
+                  <div className="flex items-end justify-between mt-2">
+                    <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 h-7">
                       <button 
                         onClick={() => updateQuantity(item.id, item.quantity - 1)} 
-                        className="px-2.5 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-l-lg transition-colors disabled:opacity-30" 
+                        className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-500 hover:text-indigo-600 rounded-l-md transition-colors disabled:opacity-30" 
                         disabled={item.quantity <= 1}
                       >
-                        <Minus className="h-3 w-3" />
+                        <Minus size={12} />
                       </button>
-                      <span className="w-8 text-center text-xs font-bold text-slate-900 dark:text-white">{item.quantity}</span>
+                      <span className="w-6 text-center text-xs font-bold text-slate-900 dark:text-white">{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(item.id, item.quantity + 1)} 
-                        className="px-2.5 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-r-lg transition-colors"
+                        className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-500 hover:text-indigo-600 rounded-r-md transition-colors"
                       >
-                        <Plus className="h-3 w-3" />
+                        <Plus size={12} />
                       </button>
                     </div>
-                    <p className="font-bold text-sm text-slate-900 dark:text-white">{formatMoneyDisplay(item.price * item.quantity)}</p>
+                    <p className="font-bold text-sm text-indigo-700 dark:text-indigo-400">{formatMoneyDisplay(item.price * item.quantity)}</p>
                   </div>
                 </div>
               </div>
@@ -281,26 +269,22 @@ export default function CartWidget() {
           )}
         </div>
 
-        {/* FOOTER */}
+        {/* FOOTER - FIX (Butoane mereu vizibile jos) */}
         {items.length > 0 && (
-            <div className="border-t border-slate-100 dark:border-slate-800 p-6 bg-white dark:bg-slate-900 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-10">
+            <div className="border-t border-slate-100 dark:border-slate-800 p-4 pb-safe bg-white dark:bg-slate-900 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
                 
                 {/* TOTALURI */}
-                <div className="space-y-2 mb-5">
-                  <div className="flex justify-between items-center text-sm text-slate-500 dark:text-slate-400">
-                      <p>Subtotal produse</p>
-                      <p className="font-medium text-slate-700 dark:text-slate-300">{formatMoneyDisplay(cartTotal)}</p>
-                  </div>
-                  <div className="h-px bg-slate-100 dark:bg-slate-800 w-full my-1"></div>
-                  <div className="flex justify-between items-center">
-                      <p className="text-base font-bold text-slate-900 dark:text-white">Total estimat</p>
-                      <p className="text-xl font-extrabold text-indigo-700 dark:text-indigo-400">{formatMoneyDisplay(cartTotal)}</p>
-                  </div>
+                <div className="flex justify-between items-end mb-4">
+                    <div>
+                      <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total Estimat</p>
+                      <p className="text-[10px] text-slate-400">(TVA inclus)</p>
+                    </div>
+                    <p className="text-2xl font-extrabold text-slate-900 dark:text-white">{formatMoneyDisplay(cartTotal)}</p>
                 </div>
                 
                 {/* BUTOANE ACȚIUNE */}
                 <div className="grid gap-3">
-                  <Button asChild className="w-full h-14 text-base font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200 dark:shadow-none rounded-xl transition-all hover:scale-[1.01]">
+                  <Button asChild className="w-full h-12 text-base font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200/50 dark:shadow-none rounded-xl transition-all">
                       <Link href="/checkout" onClick={() => setIsOpen(false)}>
                         Finalizează Comanda <ArrowRight className="ml-2 h-5 w-5" />
                       </Link>
@@ -308,7 +292,7 @@ export default function CartWidget() {
                   
                   <button 
                     onClick={() => setIsOpen(false)}
-                    className="w-full py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors flex items-center justify-center gap-1"
                   >
                     <ChevronLeft size={16} /> Continuă Cumpărăturile
                   </button>
