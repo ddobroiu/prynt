@@ -17,6 +17,7 @@ model User {
   phone         String?
   passwordHash  String?   // hash pentru autentificare cu parolă (Credentials Provider)
   emailVerified DateTime?
+  stripeCustomerId String? @unique // Stripe customer ID pentru saved payment methods
   addresses     Address[]
   orders        Order[]
   accounts      Account[]
