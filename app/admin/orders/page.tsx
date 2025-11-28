@@ -65,12 +65,12 @@ export default async function OrdersPage() {
   const averageValue = totalOrders ? totals.totalValue / totalOrders : 0;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-2">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-2">
       {/* Header Pagina */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 sm:gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard Comenzi</h1>
-          <p className="text-zinc-400 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Dashboard Comenzi</h1>
+          <p className="text-zinc-400 mt-1 text-sm sm:text-base">
             Monitorizare în timp real și gestionare comenzi.
           </p>
         </div>
@@ -83,19 +83,19 @@ export default async function OrdersPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 xl:grid-cols-4">
         {/* Card Total Comenzi */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-sm hover:bg-white/[0.05] transition-colors group">
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-white/3 p-4 sm:p-5 shadow-sm hover:bg-white/5 transition-colors group touch-manipulation">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-zinc-400">Total Comenzi</p>
-              <h3 className="mt-2 text-2xl font-bold text-white">{totalOrders}</h3>
+              <p className="text-xs sm:text-sm font-medium text-zinc-400">Total Comenzi</p>
+              <h3 className="mt-1 sm:mt-2 text-xl sm:text-2xl font-bold text-white">{totalOrders}</h3>
             </div>
-            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-500/20 transition-colors">
-              <ShoppingBag size={20} />
+            <div className="p-1.5 sm:p-2 rounded-lg bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-500/20 transition-colors">
+              <ShoppingBag size={18} className="sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-2 text-xs">
+          <div className="mt-3 sm:mt-4 flex items-center gap-2 text-xs">
             <span className="flex items-center text-emerald-400 font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded">
               +{totals.last24h}
             </span>
@@ -104,34 +104,34 @@ export default async function OrdersPage() {
         </div>
 
         {/* Card Venituri */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-sm hover:bg-white/[0.05] transition-colors group">
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-white/3 p-4 sm:p-5 shadow-sm hover:bg-white/5 transition-colors group touch-manipulation">
            <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-zinc-400">Venit Total</p>
-              <h3 className="mt-2 text-2xl font-bold text-white">{fmtRON(totals.totalValue)}</h3>
+              <p className="text-xs sm:text-sm font-medium text-zinc-400">Venit Total</p>
+              <h3 className="mt-1 sm:mt-2 text-xl sm:text-2xl font-bold text-white">{fmtRON(totals.totalValue)}</h3>
             </div>
-            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500/20 transition-colors">
-              <TrendingUp size={20} />
+            <div className="p-1.5 sm:p-2 rounded-lg bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500/20 transition-colors">
+              <TrendingUp size={18} className="sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-2 text-xs">
+          <div className="mt-3 sm:mt-4 flex items-center gap-2 text-xs">
             <span className="text-zinc-500">Medie:</span>
             <span className="text-white font-mono">{fmtRON(averageValue)}</span>
           </div>
         </div>
 
         {/* Card In Lucru */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-sm hover:bg-white/[0.05] transition-colors group">
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-white/3 p-4 sm:p-5 shadow-sm hover:bg-white/5 transition-colors group touch-manipulation">
            <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-zinc-400">În Prelucrare</p>
-              <h3 className="mt-2 text-2xl font-bold text-white">{totals.in_progress}</h3>
+              <p className="text-xs sm:text-sm font-medium text-zinc-400">În Prelucrare</p>
+              <h3 className="mt-1 sm:mt-2 text-xl sm:text-2xl font-bold text-white">{totals.in_progress}</h3>
             </div>
-            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 group-hover:bg-amber-500/20 transition-colors">
-              <AlertCircle size={20} />
+            <div className="p-1.5 sm:p-2 rounded-lg bg-amber-500/10 text-amber-400 group-hover:bg-amber-500/20 transition-colors">
+              <AlertCircle size={18} className="sm:w-5 sm:h-5" />
             </div>
           </div>
-           <div className="mt-4 w-full bg-white/5 rounded-full h-1.5">
+           <div className="mt-3 sm:mt-4 w-full bg-white/5 rounded-full h-1.5">
              <div 
                className="bg-amber-500 h-1.5 rounded-full transition-all duration-500" 
                style={{ width: `${Math.min((totals.in_progress / (totalOrders || 1)) * 100, 100)}%` }} 
@@ -140,17 +140,17 @@ export default async function OrdersPage() {
         </div>
 
         {/* Card Finalizate */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-sm hover:bg-white/[0.05] transition-colors group">
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 bg-white/3 p-4 sm:p-5 shadow-sm hover:bg-white/5 transition-colors group touch-manipulation">
            <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-zinc-400">Finalizate</p>
-              <h3 className="mt-2 text-2xl font-bold text-white">{totals.fulfilled}</h3>
+              <p className="text-xs sm:text-sm font-medium text-zinc-400">Finalizate</p>
+              <h3 className="mt-1 sm:mt-2 text-xl sm:text-2xl font-bold text-white">{totals.fulfilled}</h3>
             </div>
-            <div className="p-2 rounded-lg bg-zinc-500/10 text-zinc-400 group-hover:bg-zinc-500/20 transition-colors">
-              <CheckCircle2 size={20} />
+            <div className="p-1.5 sm:p-2 rounded-lg bg-zinc-500/10 text-zinc-400 group-hover:bg-zinc-500/20 transition-colors">
+              <CheckCircle2 size={18} className="sm:w-5 sm:h-5" />
             </div>
           </div>
-           <div className="mt-4 flex items-center gap-2 text-xs">
+           <div className="mt-3 sm:mt-4 flex items-center gap-2 text-xs">
             <span className="text-rose-400">{totals.canceled} anulate</span>
             <span className="text-zinc-600">•</span>
             <span className="text-zinc-500">Rată succes {((totals.fulfilled / (totalOrders || 1)) * 100).toFixed(0)}%</span>
@@ -159,8 +159,7 @@ export default async function OrdersPage() {
       </div>
 
       {/* Orders Dashboard Component - Tabelul Principal */}
-      {/* FIX: Am adăugat prop-ul initialOrders */}
-      <div className="rounded-3xl border border-white/10 bg-black/20 backdrop-blur-sm overflow-hidden">
+      <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-black/20 backdrop-blur-sm overflow-hidden">
         <OrdersDashboard initialOrders={allOrders as any[]} />
       </div>
     </div>

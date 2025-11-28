@@ -31,9 +31,10 @@ export default function AdminSidebar() {
       {/* Mobile Toggle Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-50 p-2.5 bg-zinc-900/80 backdrop-blur-md border border-white/10 rounded-xl text-white lg:hidden shadow-xl"
+        className="fixed top-4 left-4 z-50 p-3 bg-zinc-900/90 backdrop-blur-md border border-white/10 rounded-xl text-white lg:hidden shadow-xl min-w-11 min-h-11 flex items-center justify-center touch-manipulation active:scale-95 transition-transform"
+        aria-label={isOpen ? "Închide meniul" : "Deschide meniul"}
       >
-        {isOpen ? <X size={22} /> : <Menu size={22} />}
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
       {/* Mobile Backdrop */}
@@ -46,11 +47,11 @@ export default function AdminSidebar() {
 
       {/* Sidebar Container */}
       <aside 
-        className={`fixed top-0 left-0 h-full w-72 bg-[#09090b]/95 backdrop-blur-xl border-r border-white/10 z-50 transition-transform duration-300 ease-out lg:translate-x-0 ${
+        className={`fixed top-0 left-0 h-full w-[280px] sm:w-72 bg-[#09090b]/95 backdrop-blur-xl border-r border-white/10 z-50 transition-transform duration-300 ease-out lg:translate-x-0 safe-area-inset-left ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex flex-col h-full p-6">
+        <div className="flex flex-col h-full p-4 sm:p-6 pb-safe">
           {/* Logo Area */}
           <div className="mb-10 px-2 flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
@@ -67,7 +68,7 @@ export default function AdminSidebar() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1.5">
+          <nav className="flex-1 space-y-2 overflow-y-auto">
             {menuItems.map((item) => {
               const isActive = pathname.startsWith(item.href);
               const Icon = item.icon;
@@ -77,12 +78,12 @@ export default function AdminSidebar() {
                   key={item.label}
                   href={item.disabled ? "#" : item.href}
                   onClick={() => setIsOpen(false)}
-                  className={`group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  className={`group flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-200 min-h-12 touch-manipulation ${
                     item.disabled 
                       ? "opacity-40 cursor-not-allowed text-zinc-500 hover:bg-transparent"
                       : isActive
                         ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/40"
-                        : "text-zinc-400 hover:text-white hover:bg-white/5"
+                        : "text-zinc-400 hover:text-white hover:bg-white/5 active:bg-white/10"
                   }`}
                 >
                   <Icon size={18} className={isActive ? "text-white" : "text-zinc-500 group-hover:text-indigo-400 transition-colors"} />
@@ -98,10 +99,10 @@ export default function AdminSidebar() {
           </nav>
 
           {/* Footer Actions */}
-          <div className="mt-auto pt-6 border-t border-white/5 space-y-2">
+          <div className="mt-auto pt-4 sm:pt-6 border-t border-white/5 space-y-2">
             <Link 
               href="/"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors group"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all group min-h-12 touch-manipulation active:bg-white/10"
             >
               <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
               Înapoi la Site
@@ -112,7 +113,7 @@ export default function AdminSidebar() {
                <form action="/api/auth/signout" method="POST">
                   <button 
                     type="submit"
-                    className="w-full flex items-center gap-3 text-sm font-medium text-red-400 hover:text-red-300 transition-colors text-left"
+                    className="w-full flex items-center gap-3 text-sm font-medium text-red-400 hover:text-red-300 transition-colors text-left min-h-10 touch-manipulation"
                   >
                     <LogOut size={18} />
                     Delogare
