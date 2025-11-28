@@ -3,7 +3,6 @@ import ProductJsonLd from "@/components/ProductJsonLd";
 import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import BannerConfigurator from "@/components/BannerConfigurator";
-import ArticleJsonLd from "@/components/ArticleJsonLd"; // Opțional, pentru conținut bogat
 
 type Props = { params: Promise<{ slug?: string[] }> };
 
@@ -36,7 +35,6 @@ export default async function Page({ params }: Props) {
   const slugParts: string[] = resolved?.slug ?? [];
   const joinedSlug = slugParts.join("/");
 
-  // Aici, resolveProduct va aduce acum datele din landingData dacă există!
   const { product, initialWidth, initialHeight } = await resolveProductForRequestedSlug(String(joinedSlug), "banner");
 
   if (!product) return notFound();
@@ -48,14 +46,13 @@ export default async function Page({ params }: Props) {
       <ProductJsonLd product={(product as Product)} url={url} />
       
       <main className="min-h-screen bg-gray-50">
-        {/* Configuratorul primește datele (imaginea poate fi cea specifică din landing) */}
         <BannerConfigurator 
           productSlug={product.slug ?? product.routeSlug} 
           initialWidth={initialWidth ?? undefined}
           initialHeight={initialHeight ?? undefined}
         />
 
-        {/* SECȚIUNEA SEO DE NIȘĂ (nouă) */}
+        {/* SECȚIUNEA SEO PENTRU LANDING PAGES */}
         {product.contentHtml && (
            <section className="py-16 bg-white border-t border-gray-100">
              <div className="container mx-auto px-4 max-w-4xl">
