@@ -94,7 +94,7 @@ export default function Footer() {
                             Toate Configuratoarele
                         </Link>
                     </li>
-                    <li><Link href="/shop" className={linkClass}>Accesorii & Produse Standard</Link></li>
+                    <li><Link href="/shop" className={linkClass}>SHOP</Link></li>
                     <li><Link href="/contact" className={linkClass}>Cere Ofertă Personalizată</Link></li>
                 </ul>
             </div>
@@ -108,7 +108,6 @@ export default function Footer() {
                     <li><Link href="/termeni" className={linkClass}>Termeni și Condiții</Link></li>
                     <li><Link href="/confidentialitate" className={linkClass}>Politica de Confidențialitate</Link></li>
                     <li><Link href="/politica-cookies" className={linkClass}>Politica Cookies</Link></li>
-                    <li><Link href="/anpc" className={linkClass}>ANPC - Info Consumator</Link></li>
                 </ul>
             </div>
 
