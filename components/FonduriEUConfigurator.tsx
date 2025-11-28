@@ -1,10 +1,12 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
-import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, FileText } from "lucide-react";
+import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
+import SmartNewsletterPopup from "./SmartNewsletterPopup";
+import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture";
 import { QA } from "@/types";
 import { 
   calculateFonduriEUPrice, 

@@ -1,10 +1,12 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
-import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
+import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
+import SmartNewsletterPopup from "./SmartNewsletterPopup";
+import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture";
 import { QA } from "@/types";
 import {
   calculateFlyerPrice,
@@ -91,12 +93,24 @@ export default function FlyerConfigurator({ productSlug, productImage }: Props) 
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>('');
   
   // Starea pentru gestionarea pașilor (fixul principal)
   const [activeStep, setActiveStep] = useState(1);
 
   const priceData = useMemo(() => calculateFlyerPrice({ sizeKey, quantity, twoSided, paperWeightKey, designOption } as PriceInputFlyer), [sizeKey, quantity, twoSided, paperWeightKey, designOption]);
   const displayedTotal = priceData.finalPrice;
+
+  // Auto-capture abandoned carts
+  const cartData = useMemo(() => ({
+    configuratorId: 'flayere',
+    email: userEmail,
+    configuration: { sizeKey, quantity, twoSided, paperWeightKey, designOption, artworkUrl },
+    price: displayedTotal,
+    quantity: quantity
+  }), [userEmail, sizeKey, quantity, twoSided, paperWeightKey, designOption, artworkUrl, displayedTotal]);
+
+  useUserActivityTracking(cartData);
 
   const handleArtworkFileInput = async (file: File | null) => {
     setArtworkUrl(null); setUploadError(null);
@@ -241,6 +255,12 @@ export default function FlyerConfigurator({ productSlug, productImage }: Props) 
           </div>
         </div>
       )}
+
+      {/* Smart Newsletter Popup */}
+      <SmartNewsletterPopup 
+        onSubscribe={(email) => setUserEmail(email)}
+        delay={30}
+      />
     </main>
   );
 }

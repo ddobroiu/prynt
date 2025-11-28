@@ -10,7 +10,9 @@ import Link from 'next/link';
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
 import DynamicBannerPreview from "./DynamicBannerPreview";
-import ArtworkRatioPreview from "./ArtworkRatioPreview"; 
+import ArtworkRatioPreview from "./ArtworkRatioPreview";
+import SmartNewsletterPopup from "./SmartNewsletterPopup";
+import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture"; 
 import { 
   calculateBannerVersoPrice, 
   getBannerVersoUpsell, // <--- IMPORT NOU
@@ -181,9 +183,21 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
+  const [userEmail, setUserEmail] = useState<string>('');
 
   const priceData = useMemo(() => calculateBannerVersoPrice(input), [input]);
   const displayedTotal = priceData.finalPrice;
+
+  // Auto-capture abandoned carts
+  const cartData = useMemo(() => ({
+    configuratorId: 'banner-verso',
+    email: userEmail,
+    configuration: { ...input, artworkUrl, textDesign, artworkUrlVerso, textDesignVerso },
+    price: displayedTotal,
+    quantity: input.quantity
+  }), [userEmail, input, artworkUrl, textDesign, artworkUrlVerso, textDesignVerso, displayedTotal]);
+
+  useUserActivityTracking(cartData);
 
   // --- UPSELL LOGIC (NOU) ---
   const upsellOpportunity = useMemo(() => {
@@ -672,6 +686,12 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
             </div>
         </div>
       )}
+
+      {/* Smart Newsletter Popup */}
+      <SmartNewsletterPopup 
+        onSubscribe={(email) => setUserEmail(email)}
+        delay={30}
+      />
     </main>
   );
 }

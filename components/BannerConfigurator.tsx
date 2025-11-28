@@ -10,7 +10,9 @@ import Link from 'next/link';
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
 import DynamicBannerPreview from "./DynamicBannerPreview";
-import ArtworkRatioPreview from "./ArtworkRatioPreview"; 
+import ArtworkRatioPreview from "./ArtworkRatioPreview";
+import SmartNewsletterPopup from "./SmartNewsletterPopup";
+import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture"; 
 import { 
   calculateBannerPrice, 
   getBannerUpsell, // <--- IMPORT NOU: Logica centralizată
@@ -182,19 +184,20 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
   // Email marketing hooks
   const [userEmail, setUserEmail] = useState<string>("");
-  useAbandonedCart({ 
-    configuratorId: 'banner', 
-    email: userEmail,
-    cartData: {
-      input,
-      artworkUrl,
-      textDesign,
-      priceData: useMemo(() => calculateBannerPrice(input), [input])
-    }
-  });
-
+  
   const priceData = useMemo(() => calculateBannerPrice(input), [input]);
   const displayedTotal = priceData.finalPrice;
+
+  // Auto-capture abandoned carts
+  const cartData = useMemo(() => ({
+    configuratorId: 'banner',
+    email: userEmail,
+    configuration: { ...input, artworkUrl, textDesign },
+    price: displayedTotal,
+    quantity: input.quantity
+  }), [userEmail, input, artworkUrl, textDesign, displayedTotal]);
+
+  useUserActivityTracking(cartData);
 
   // --- UPSELL LOGIC (NOU: Centralizat) ---
   const upsellOpportunity = useMemo(() => {
@@ -644,13 +647,11 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
       )}
 
       {/* Newsletter Section */}
-      <div className="bg-linear-to-br from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-6 mt-8">
-        <NewsletterSignup 
-          configuratorId="banner"
-          source="configurator"
-          compact={true}
-        />
-      </div>
+      {/* Smart Newsletter Popup */}
+      <SmartNewsletterPopup 
+        onSubscribe={(email) => setUserEmail(email)}
+        delay={30}
+      />
     </main>
   );
 }

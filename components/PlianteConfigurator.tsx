@@ -6,6 +6,8 @@ import DeliveryEstimation from "./DeliveryEstimation";
 import { QA } from "@/types";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
+import SmartNewsletterPopup from "./SmartNewsletterPopup";
+import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture";
 import { 
   calculatePliantePrice, 
   PLIANTE_CONSTANTS, 

@@ -1,10 +1,12 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
-import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
+import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
+import SmartNewsletterPopup from "./SmartNewsletterPopup";
+import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture";
 import { QA } from "@/types";
 import { 
     calculatePosterPrice, 
@@ -105,6 +107,7 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
+  const [userEmail, setUserEmail] = useState<string>('');
 
   // Helper: Check validity of material for current size
   function isMaterialVisibleForSize(mKey: string, sKey: string) {
@@ -126,6 +129,17 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
   // Pricing Calculation
   const priceData = useMemo(() => calculatePosterPrice({ size, material, quantity, designOption }), [size, material, quantity, designOption]);
   const displayedTotal = priceData.finalPrice;
+
+  // Auto-capture abandoned carts
+  const cartData = useMemo(() => ({
+    configuratorId: 'afise',
+    email: userEmail,
+    configuration: { size, material, quantity, designOption, artworkUrl },
+    price: displayedTotal,
+    quantity: quantity
+  }), [userEmail, size, material, quantity, designOption, artworkUrl, displayedTotal]);
+
+  useUserActivityTracking(cartData);
 
   const handleArtworkFileInput = async (file: File | null) => {
     setArtworkUrl(null);
@@ -290,6 +304,12 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
           </div>
         </div>
       )}
+
+      {/* Smart Newsletter Popup */}
+      <SmartNewsletterPopup 
+        onSubscribe={(email) => setUserEmail(email)}
+        delay={30}
+      />
     </main>
   );
 }

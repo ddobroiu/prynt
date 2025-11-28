@@ -6,6 +6,8 @@ import DeliveryEstimation from "./DeliveryEstimation";
 import { usePathname, useRouter } from "next/navigation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
+import SmartNewsletterPopup from "./SmartNewsletterPopup";
+import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture";
 import { QA } from "@/types";
 import { 
   calculateAutocolantePrice, 
@@ -131,10 +133,22 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
+  const [userEmail, setUserEmail] = useState<string>('');
 
   // Pricing
   const priceData = useMemo(() => calculateAutocolantePrice(input), [input]);
   const displayedTotal = priceData.finalPrice;
+
+  // Auto-capture abandoned carts
+  const cartData = useMemo(() => ({
+    configuratorId: 'autocolante',
+    email: userEmail,
+    configuration: { ...input, artworkUrl, textDesign },
+    price: displayedTotal,
+    quantity: input.quantity
+  }), [userEmail, input, artworkUrl, textDesign, displayedTotal]);
+
+  useUserActivityTracking(cartData);
 
   const updateInput = <K extends keyof PriceInputAutocolante>(k: K, v: PriceInputAutocolante[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(10, Math.floor(v))); // Min 10
@@ -322,6 +336,12 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
           </div>
         </div>
       )}
+
+      {/* Smart Newsletter Popup */}
+      <SmartNewsletterPopup 
+        onSubscribe={(email) => setUserEmail(email)}
+        delay={30}
+      />
     </main>
   );
 }

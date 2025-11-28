@@ -5,6 +5,8 @@ import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadC
 import DeliveryEstimation from "./DeliveryEstimation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
+import SmartNewsletterPopup from "./SmartNewsletterPopup";
+import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture";
 import { QA } from "@/types";
 import { 
   calculateCanvasPrice, 
@@ -107,10 +109,22 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
+  const [userEmail, setUserEmail] = useState<string>('');
 
   // Pricing
   const priceData = useMemo(() => calculateCanvasPrice(input), [input]);
   const displayedTotal = priceData.finalPrice;
+
+  // Auto-capture abandoned carts
+  const cartData = useMemo(() => ({
+    configuratorId: 'canvas',
+    email: userEmail,
+    configuration: input,
+    price: displayedTotal,
+    quantity: input.quantity
+  }), [userEmail, input, displayedTotal]);
+
+  useUserActivityTracking(cartData);
 
   const updateInput = <K extends keyof PriceInputCanvas>(k: K, v: PriceInputCanvas[K]) => setInput((p) => ({ ...p, [k]: v }));
   const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v)));
@@ -252,6 +266,25 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
               </AccordionStep>
             </div>
             <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
+              {/* Optional email input for abandoned cart recovery */}
+              {!userEmail && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800 mb-2 font-medium">
+                    💾 Salvează configurația (opțional)
+                  </p>
+                  <input
+                    type="email"
+                    placeholder="Email-ul tău pentru salvare automată..."
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-blue-600 mt-1">
+                    Configurația va fi salvată automat. Primeați și un cod de reducere 10%! 🎁
+                  </p>
+                </div>
+              )}
+              
               <div className="flex justify-between items-center mb-2">
                 <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
                 <button onClick={handleAddToCart} disabled={!input.width_cm || !input.height_cm} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
@@ -277,6 +310,12 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
           </div>
         </div>
       )}
+
+      {/* Smart Newsletter Popup */}
+      <SmartNewsletterPopup 
+        onSubscribe={(email) => setUserEmail(email)}
+        delay={30}
+      />
     </main>
   );
 }
