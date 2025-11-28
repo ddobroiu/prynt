@@ -42,6 +42,7 @@ export async function GET() {
     { url: `${base}/configuratoare`, priority: 0.6, lastmod: formatDateISO(new Date()) },
     // Blog și info
     { url: `${base}/blog`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/livrare`, priority: 0.6, lastmod: formatDateISO(new Date()) },
     { url: `${base}/contact`, priority: 0.6, lastmod: formatDateISO(new Date()) },
     { url: `${base}/urmareste-comanda`, priority: 0.5, lastmod: formatDateISO(new Date()) },
     // Legal și utilitate
