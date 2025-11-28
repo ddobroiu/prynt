@@ -1,6 +1,15 @@
 // lib/seoTemplates.ts
 // Small helper to generate SEO title/description for products when not provided.
-export function generateSeoForProduct(p: any) {
+export type ProductForSeo = {
+  slug?: string;
+  routeSlug?: string;
+  id?: string | number;
+  title?: string;
+  metadata?: { category?: string };
+  tags?: string[];
+};
+
+export function generateSeoForProduct(p: ProductForSeo) {
   const slug = String(p.slug ?? p.routeSlug ?? p.id ?? "").replace(/-/g, " ");
   const title = String((p.title ?? slug) || "").trim();
   const category = String(p?.metadata?.category ?? "").toLowerCase();

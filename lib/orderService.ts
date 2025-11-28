@@ -4,7 +4,7 @@ import { appendOrder } from './orderStore';
 import { prisma } from './prisma';
 import bcrypt from 'bcryptjs';
 
-type AnyRecord = Record<string, any>;
+type AnyRecord = Record<string, unknown>;
 
 interface CartItem {
   id?: string;
@@ -136,14 +136,14 @@ function buildAddressLine(
   return [s, l, j].filter(Boolean).join(', ');
 }
 
-async function createOblioInvoice(payload: any, token: string) {
+async function createOblioInvoice(payload: unknown, token: string) {
   const endpoints = [
     'https://www.oblio.eu/api/invoices',
     'https://www.oblio.eu/api/invoice',
     'https://www.oblio.eu/api/1.0/invoices',
     'https://www.oblio.eu/api/docs/invoice',
   ];
-  let lastErr: any = null;
+  let lastErr: unknown = null;
   for (const url of endpoints) {
     try {
       const resp = await fetch(url, {
