@@ -1,71 +1,101 @@
 // lib/landingData.ts
-import { BANNER_SEO_DATA } from "./seo/bannerData"; // <--- IMPORT NOU
+// Catalog data-driven pentru landing pages.
+// Acesta centralizează toate datele SEO din modulele specifice.
 
-// Catalog data-driven pentru landing pages. Add / extend entries here.
+import { BANNER_SEO_DATA } from "./seo/bannerData";
+import { AUTOCOLANTE_SEO_DATA } from "./seo/autocolanteData";
+import { AFISE_SEO_DATA } from "./seo/afiseData";
+import { CANVAS_SEO_DATA } from "./seo/canvasData";
+import { PLIANTE_SEO_DATA } from "./seo/plianteData";
+import { TAPET_SEO_DATA } from "./seo/tapetData";
+import { 
+  PVC_FOREX_DATA, 
+  PLEXIGLASS_DATA, 
+  ALUCOBOND_DATA, 
+  POLIPROPILENA_DATA, 
+  CARTON_DATA 
+} from "./seo/materialeRigideData";
+import { BANNER_VERSO_DATA } from "./seo/bannerVersoData";
+import { FONDURI_DATA } from "./seo/fonduriData";
+
+// --- TIPURI ---
 export type LandingInfo = {
-  key: string; 
-  title: string; 
-  shortDescription: string; 
+  key: string; // keyword (ex: 'frizerie', 'vulcanizare')
+  title: string; // H1
+  shortDescription: string; // visible short intro
   seoTitle?: string;
   seoDescription?: string;
-  images?: string[]; 
-  contentHtml?: string; 
-  productRouteSlug?: string; 
+  images?: string[]; // paths under /public
+  contentHtml?: string; // rich server-rendered HTML (SEO)
+  productRouteSlug?: string; // optional link to PRODUCTS routeSlug (dacă diferă de cheia categoriei)
   metadata?: Record<string, any>;
 };
 
+// Allow either a direct LandingInfo or a grouped map of LandingInfo entries
 export type LandingGroup = Record<string, LandingInfo>;
 export type LandingCatalog = Record<string, Record<string, LandingInfo | LandingGroup>>;
 
+// --- CATALOGUL PRINCIPAL ---
 export const LANDING_CATALOG: LandingCatalog = {
-  // Aici injectăm datele masive din fișierul separat
-  bannere: BANNER_SEO_DATA as any, 
+  // 1. Bannere
+  bannere: BANNER_SEO_DATA as any,
 
-  // Păstrăm restul categoriilor (dacă vrei să le muți și pe ele, putem face fișiere separate)
-  pliante: {
-      materiale_rigide: {
-        // ... păstrează conținutul existent pentru materiale rigide
-        plexiglass: {
-          key: "plexiglass",
-          title: "Configurator Plexiglass — print și debitare la comandă",
-          shortDescription: "Configurează plexiglass alb, grosimi variate, print UV.",
-          seoTitle: "Plexiglass alb | print UV & debitare | Prynt",
-          seoDescription: "Comandă plexiglass alb, grosimi 2–5 mm, print UV.",
-          images: ["/images/landing/plexiglass-1.jpg"],
-          productRouteSlug: "plexiglass",
-          contentHtml: `<h2>Plexiglass alb — configurare rapidă</h2><p>Livrare rapidă, preț instant.</p>`
-        },
-        // ... restul materialelor
-      },
-      // ... păstrează frizerie, vulcanizare etc. dacă existau aici
-  },
+  // 2. Autocolante
+  autocolante: AUTOCOLANTE_SEO_DATA as any,
+
+  // 3. Afișe
+  afise: AFISE_SEO_DATA as any,
+
+  // 4. Canvas
+  canvas: CANVAS_SEO_DATA as any,
+
+  // 5. Pliante & Flyere
+  pliante: PLIANTE_SEO_DATA as any,
+  flayere: PLIANTE_SEO_DATA as any, // Alias: folosim aceleași date și pentru /flayere/...
+
+  // 6. Tapet
+  tapet: TAPET_SEO_DATA as any,
+
+  // 7. Materiale Rigide
+  "pvc-forex": PVC_FOREX_DATA as any,
+  "pvc_forex": PVC_FOREX_DATA as any, // Alias pentru consistență
   
-  autocolante: {
-      // Putem face la fel și pentru autocolante în viitor (lib/seo/autocolanteData.ts)
-      auto: {
-          key: "auto",
-          title: "Autocolante Auto - Branding Flote",
-          shortDescription: "Colantare auto cu autocolant polimeric.",
-          seoTitle: "Autocolante Auto | Branding Masini | Prynt",
-          images: ["/products/autocolante/1.webp"],
-          contentHtml: "<h2>Reclama ta în mișcare</h2>"
-      }
-  },
-  // ... restul categoriilor
+  "plexiglass": PLEXIGLASS_DATA as any,
+  
+  "alucobond": ALUCOBOND_DATA as any,
+  "bond": ALUCOBOND_DATA as any, // Alias comun
+  
+  "polipropilena": POLIPROPILENA_DATA as any,
+  
+  "carton": CARTON_DATA as any,
+
+  // 8. Banner Față-Verso
+  "banner-verso": BANNER_VERSO_DATA as any,
+
+  // 9. Proiecte Fonduri (Mapăm toate categoriile URL la același set de date)
+  "fonduri-pnrr": FONDURI_DATA as any,
+  "fonduri-nationale": FONDURI_DATA as any,
+  "fonduri-regio": FONDURI_DATA as any,
+  "fonduri": FONDURI_DATA as any, // Categorie generică
 };
 
-// ... restul funcțiilor helper (listAllLandingRoutes, getLandingInfo) rămân neschimbate
+// --- HELPER FUNCTIONS ---
+
+// Helper: list all landing routes for generateStaticParams
 export function listAllLandingRoutes() {
   const out: { category: string; slug: string }[] = [];
   Object.keys(LANDING_CATALOG).forEach((category) => {
     const entries = LANDING_CATALOG[category];
     Object.keys(entries).forEach((key) => {
       const val = entries[key];
+      // If the value looks like a LandingInfo (has .key), push it directly
       if (val && typeof val === 'object' && 'key' in val) {
+        // normalize slug: prefer hyphenated form for URLs
         const slugNormalized = String(key).replace(/_/g, '-');
         out.push({ category, slug: slugNormalized });
         return;
       }
+      // Otherwise assume it's a grouped map and iterate its children
       if (val && typeof val === 'object') {
         Object.keys(val as LandingGroup).forEach((childSlug) => {
           const slugNormalized = String(childSlug).replace(/_/g, '-');
@@ -77,17 +107,23 @@ export function listAllLandingRoutes() {
   return out;
 }
 
+// Find a LandingInfo by category + slug, supporting grouped maps one level deep
 export function getLandingInfo(category: string, slug: string) {
   const cat = (LANDING_CATALOG as any)[category];
   if (!cat) return undefined;
+  
+  // try direct match, then underscore/hyphen variants
   const tryKeys = [slug, slug.replace(/-/g, '_'), slug.replace(/_/g, '-')];
   for (const k of tryKeys) {
     const direct = (cat as Record<string, any>)[k];
     if (direct && typeof direct === 'object' && 'key' in direct) return direct as LandingInfo;
   }
+  
+  // search nested groups
   for (const k of Object.keys(cat)) {
     const v = (cat as any)[k];
     if (v && typeof v === 'object' && !( 'key' in v)) {
+      // try child variants too
       const childKeys = [slug, slug.replace(/-/g, '_'), slug.replace(/_/g, '-')];
       for (const ck of childKeys) {
         if ((v as LandingGroup)[ck]) return (v as LandingGroup)[ck];

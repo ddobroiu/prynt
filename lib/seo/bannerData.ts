@@ -285,15 +285,6 @@ export const BANNER_SEO_DATA: Record<string, LandingInfo> = {
   },
 
   // --- SERVICII DIVERSE ---
-  "curatenie": {
-    key: "curatenie",
-    title: "Banner Firmă Curățenie — Scări de Bloc & Birouri",
-    shortDescription: "Banner servicii curățenie. 'Curățenie Generală', 'Spălare Covoare'.",
-    seoTitle: "Banner Firma Curatenie Profesionala | Prynt",
-    seoDescription: "Promovează serviciile de curățenie către asociații și firme.",
-    images: ["/products/banner/CURATENIE-PROFESIONALA.webp"],
-    contentHtml: `<h2>Curățenie lună</h2><p>Servicii profesionale pentru spații curate și igienizate.</p>`
-  },
   "reparatii-telefoane": {
     key: "reparatii-telefoane",
     title: "Banner Service GSM / Reparații Telefoane",
@@ -445,5 +436,628 @@ export const BANNER_SEO_DATA: Record<string, LandingInfo> = {
     seoDescription: "Creează suspans înainte de lansare.",
     images: ["/products/banner/DESCHIS-ACUM.webp"],
     contentHtml: `<h2>Lansare de succes</h2><p>Nu deschide în liniște. Fă gălăgie vizuală!</p>`
+  },
+
+  // --- AFACERI ȘI PROMOȚII ---
+  "discount": {
+    key: "discount",
+    title: "Banner DISCOUNT — Reduceri Mari",
+    shortDescription: "Banner '50% Reducere', 'Solduri', 'Promoții'.",
+    seoTitle: "Banner Discount | Reduceri & Promotii | Prynt",
+    seoDescription: "Atrage clienți cu oferte irezistibile.",
+    images: ["/products/banner/discount.webp"],
+    contentHtml: `<h2>Economie mare</h2><p>Reducerile atrag cumpărători. Detaliază procentele și produsele.</p><ul><li>Produse la reducere</li><li>Perioada promoției</li><li>Condiții speciale</li><li>Contact pentru detalii</li></ul>`
+  },
+  "promotie": {
+    key: "promotie",
+    title: "Banner Promoție — Ofertă Specială",
+    shortDescription: "Banner pentru campanii promoționale și lansări.",
+    seoTitle: "Banner Promotie | Campanii Marketing | Prynt",
+    seoDescription: "Lansează promoția cu impact vizual maxim.",
+    images: ["/products/banner/promotie.webp"],
+    contentHtml: `<h2>Ofertă limitată</h2><p>Promoțiile cresc vânzările. Un banner clar comunică beneficiile.</p><ul><li>Produsul vedetă</li><li>Preț promoțional</li><li>Stoc limitat</li><li>Valabilitate</li></ul>`
+  },
+  "publicitate": {
+    key: "publicitate",
+    title: "Banner Publicitate — Branding Exterior",
+    shortDescription: "Banner pentru reclamă firme, produse sau servicii.",
+    seoTitle: "Banner Publicitate | Reclama Outdoor | Prynt",
+    seoDescription: "Crește vizibilitatea brandului tău cu bannere profesionale.",
+    images: ["/products/banner/publicitate.webp"],
+    contentHtml: `<h2>Brand puternic</h2><p>Publicitatea outdoor construiește imaginea. Alege culori și mesaje impactante.</p><ul><li>Logo și slogan</li><li>Mesaj cheie</li><li>Contact și website</li><li>Apel la acțiune</li></ul>`
+  },
+  "firma": {
+    key: "firma",
+    title: "Banner Firmă — Prezentare Companie",
+    shortDescription: "Banner cu logo, servicii și contact pentru afaceri.",
+    seoTitle: "Banner Firma | Prezentare Companie | Prynt",
+    seoDescription: "Prezintă firma cu un banner reprezentativ.",
+    images: ["/products/banner/firma.webp"],
+    contentHtml: `<h2>Compania ta</h2><p>Un banner la intrare impresionează clienții. Include serviciile principale.</p><ul><li>Istoric scurt</li><li>Servicii oferite</li><li>Echipa și valori</li><li>Contact direct</li></ul>`
+  },
+  "startup": {
+    key: "startup",
+    title: "Banner Startup — Inovare și Creștere",
+    shortDescription: "Banner pentru startup-uri tech sau afaceri noi.",
+    seoTitle: "Banner Startup | Afaceri Inovatoare | Prynt",
+    seoDescription: "Anunță lansarea startup-ului cu entuziasm.",
+    images: ["/products/banner/startup.webp"],
+    contentHtml: `<h2>Inovare în acțiune</h2><p>Startup-urile schimbă lumea. Prezintă viziunea pe banner.</p><ul><li>Misiunea companiei</li><li>Produsul inovator</li><li>Echipa fondatoare</li><li>Investiții căutate</li></ul>`
+  },
+  "franciza": {
+    key: "franciza",
+    title: "Banner Franciză — Extindere Afaceri",
+    shortDescription: "Banner 'Franciză Disponibilă', 'Alătură-te Rețelei'.",
+    seoTitle: "Banner Franciza | Extindere Business | Prynt",
+    seoDescription: "Atrage francizați cu un banner atractiv.",
+    images: ["/products/banner/franciza.webp"],
+    contentHtml: `<h2>Creește rețeaua</h2><p>Francizele aduc succes rapid. Detaliază beneficiile pe banner.</p><ul><li>Investiția necesară</li><li>Profit estimat</li><li>Suport oferit</li><li>Teritorii disponibile</li></ul>`
+  },
+  "reparatii": {
+    key: "reparatii",
+    title: "Banner Reparații — Servicii Tehnice",
+    shortDescription: "Banner 'Reparăm TV', 'Electrocasnice', 'Mobilă'.",
+    seoTitle: "Banner Reparatii | Service Tehnic | Prynt",
+    seoDescription: "Anunță serviciile de reparații cu garanție.",
+    images: ["/products/banner/reparatii.webp"],
+    contentHtml: `<h2>Reparăm totul</h2><p>Oamenii au nevoie de reparații urgente. Fii vizibil.</p><ul><li>Dispozitive reparate</li><li>Garanție oferită</li><li>Prețuri transparente</li><li>Contact rapid</li></ul>`
+  },
+  "instalatii": {
+    key: "instalatii",
+    title: "Banner Instalații — Electricitate și Gaz",
+    shortDescription: "Banner pentru instalatori autorizați.",
+    seoTitle: "Banner Instalatii | Electricitate & Sanitara | Prynt",
+    seoDescription: "Promovează serviciile de instalații cu certificări.",
+    images: ["/products/banner/instalatii.webp"],
+    contentHtml: `<h2>Instalații sigure</h2><p>Lucrări autorizate și de calitate. Include specializările.</p><ul><li>Electricitate</li><li>Încălziere</li><li>Sanitare</li><li>Certificări</li></ul>`
+  },
+  "curatenie": {
+    key: "curatenie",
+    title: "Banner Curățenie — Servicii Profesionale",
+    shortDescription: "Banner 'Curățenie Birouri', 'Case', 'Industriale'.",
+    seoTitle: "Banner Curatenie | Servicii Menaj | Prynt",
+    seoDescription: "Atrage clienți cu servicii de curățenie complete.",
+    images: ["/products/banner/curatenie.webp"],
+    contentHtml: `<h2>Curățenie impecabilă</h2><p>Serviciile de curățenie sunt esențiale. Detaliază pachetele.</p><ul><li>Tipuri de curățenie</li><li>Produse ecologice</li><li>Program flexibil</li><li>Prețuri competitive</li></ul>`
+  },
+  "transport": {
+    key: "transport",
+    title: "Banner Transport — Mutări și Livrări",
+    shortDescription: "Banner 'Transport Rapid', 'Mutări Internaționale'.",
+    seoTitle: "Banner Transport | Mutari & Livrari | Prynt",
+    seoDescription: "Anunță serviciile de transport cu vehicule moderne.",
+    images: ["/products/banner/transport.webp"],
+    contentHtml: `<h2>Transport sigur</h2><p>Mutările sunt stresante. Oferă servicii de încredere.</p><ul><li>Tipuri de transport</li><li>Zona acoperită</li><li>Asigurare marfă</li><li>Contact 24/7</li></ul>`
+  },
+  "consultanta": {
+    key: "consultanta",
+    title: "Banner Consultanță — Experți în Afaceri",
+    shortDescription: "Banner pentru consultanți financiari, IT sau business.",
+    seoTitle: "Banner Consultanta | Expertiza Profesionala | Prynt",
+    seoDescription: "Prezintă serviciile de consultanță cu credibilitate.",
+    images: ["/products/banner/consultanta.webp"],
+    contentHtml: `<h2>Sfaturi de la experți</h2><p>Consultanța aduce succes. Include domeniile de specializare.</p><ul><li>Financiar</li><li>Management</li><li>IT și digital</li><li>Cazuri de succes</li></ul>`
+  },
+  "avocat": {
+    key: "avocat",
+    title: "Banner Avocat — Drept și Justiție",
+    shortDescription: "Banner pentru cabinete de avocatură.",
+    seoTitle: "Banner Avocat | Servicii Juridice | Prynt",
+    seoDescription: "Promovează serviciile legale cu profesionalism.",
+    images: ["/products/banner/avocat.webp"],
+    contentHtml: `<h2>Dreptate și onestitate</h2><p>Avocații apără drepturile. Detaliază specializările.</p><ul><li>Drept civil</li><li>Penal</li><li>Familial</li><li>Contact direct</li></ul>`
+  },
+  "medic": {
+    key: "medic",
+    title: "Banner Medic — Sănătate și Îngrijire",
+    shortDescription: "Banner pentru cabinete medicale private.",
+    seoTitle: "Banner Medic | Servicii Medicale | Prynt",
+    seoDescription: "Atrage pacienți cu servicii de calitate.",
+    images: ["/products/banner/medic.webp"],
+    contentHtml: `<h2>Sănătate prioritară</h2><p>Medicii salvează vieți. Include specialitățile.</p><ul><li>Consultații</li><li>Tratamente</li><li>Programări</li><li>Asigurări acceptate</li></ul>`
+  },
+
+  // --- EDUCAȚIE ---
+  "universitate": {
+    key: "universitate",
+    title: "Banner Universitate — Înscrieri și Admitere",
+    shortDescription: "Banner pentru universități și facultăți.",
+    seoTitle: "Banner Universitate | Admitere & Studii | Prynt",
+    seoDescription: "Promovează programele universitare cu un banner informativ.",
+    images: ["/products/banner/universitate.webp"],
+    contentHtml: `<h2>Educație superioară</h2><p>Universitățile formează viitorul. Detaliază facultățile.</p><ul><li>Facultăți disponibile</li><li>Taxe de școlarizare</li><li>Burse oferite</li><li>Admitere online</li></ul>`
+  },
+  "facultate": {
+    key: "facultate",
+    title: "Banner Facultate — Specializări și Cursuri",
+    shortDescription: "Banner specific pentru fiecare facultate.",
+    seoTitle: "Banner Facultate | Studii Specializate | Prynt",
+    seoDescription: "Atrage studenți cu programe atractive.",
+    images: ["/products/banner/facultate.webp"],
+    contentHtml: `<h2>Cunoașterea contează</h2><p>Facultățile oferă specializări diverse. Include beneficiile.</p><ul><li>Specializări</li><li>Durata studiilor</li><li>Diplome recunoscute</li><li>Cariere posibile</li></ul>`
+  },
+  "liceu": {
+    key: "liceu",
+    title: "Banner Liceu — Înscrieri Clasele IX-XII",
+    shortDescription: "Banner pentru licee și școli generale.",
+    seoTitle: "Banner Liceu | Educatie Secundara | Prynt",
+    seoDescription: "Promovează liceul cu rezultate și activități.",
+    images: ["/products/banner/liceu.webp"],
+    contentHtml: `<h2>Pregătire pentru viitor</h2><p>Liceele dezvoltă talentele. Detaliază profilurile.</p><ul><li>Profiluri disponibile</li><li>Rezultate examen</li><li>Activități extracurriculare</li><li>Înscrieri deschise</li></ul>`
+  },
+  "gimnaziu": {
+    key: "gimnaziu",
+    title: "Banner Gimnaziu — Clasele V-VIII",
+    shortDescription: "Banner pentru școli gimnaziale.",
+    seoTitle: "Banner Gimnaziu | Educatie Gimnaziala | Prynt",
+    seoDescription: "Atrage elevi cu un mediu educațional prietenos.",
+    images: ["/products/banner/gimnaziu.webp"],
+    contentHtml: `<h2>Învățare distractivă</h2><p>Gimnaziul este etapa de formare. Include facilitățile.</p><ul><li>Materii studiate</li><li>Profesori calificați</li><li>Cantine și săli sport</li><li>Programe afterschool</li></ul>`
+  },
+  "gradinita": {
+    key: "gradinita",
+    title: "Banner Grădiniță — Înscrieri Copii",
+    shortDescription: "Banner colorat pentru grădinițe private.",
+    seoTitle: "Banner Gradinita | Educatie Prescolara | Prynt",
+    seoDescription: "Promovează grădinița cu activități creative.",
+    images: ["/products/banner/gradinita.webp"],
+    contentHtml: `<h2>Primii pași în educație</h2><p>Grădinițele dezvoltă copii fericiți. Detaliază programele.</p><ul><li>Vârste acceptate</li><li>Activități zilnice</li><li>Mese sănătoase</li><li>Înscrieri disponibile</li></ul>`
+  },
+  "afterschool": {
+    key: "afterschool",
+    title: "Banner Afterschool — Meditații și Activități",
+    shortDescription: "Banner pentru centre afterschool.",
+    seoTitle: "Banner Afterschool | Meditatii & Hobby | Prynt",
+    seoDescription: "Atrage copii cu programe interesante.",
+    images: ["/products/banner/afterschool.webp"],
+    contentHtml: `<h2>Învățare după școală</h2><p>Afterschool-ul completează educația. Include disciplinele.</p><ul><li>Meditații școlare</li><li>Arte și sport</li><li>Ore suplimentare</li><li>Supraveghere atentă</li></ul>`
+  },
+  "meditatii": {
+    key: "meditatii",
+    title: "Banner Meditații — Îmbunătățire Note",
+    shortDescription: "Banner 'Meditații Matematică', 'Limbi Străine'.",
+    seoTitle: "Banner Meditatii | Ajutor Scolar | Prynt",
+    seoDescription: "Oferă meditații personalizate cu rezultate.",
+    images: ["/products/banner/meditatii.webp"],
+    contentHtml: `<h2>Note mai bune</h2><p>Meditațiile ajută elevii să exceleze. Detaliază materiile.</p><ul><li>Materii disponibile</li><li>Profesori experimentați</li><li>Sesiuni individuale</li><li>Rezultate garantate</li></ul>`
+  },
+  "examene": {
+    key: "examene",
+    title: "Banner Examene — Pregătire Intensivă",
+    shortDescription: "Banner pentru centre de pregătire examene.",
+    seoTitle: "Banner Examene | Pregatire Admitere | Prynt",
+    seoDescription: "Ajută studenții să treacă examenele cu succes.",
+    images: ["/products/banner/examene.webp"],
+    contentHtml: `<h2>Succes la examene</h2><p>Pregătirea este cheia. Include tipurile de examene.</p><ul><li>Admitere universitate</li><li>Bacalaureat</li><li>Concursuri</li><li>Simulări gratuite</li></ul>`
+  },
+
+  // --- IMOBILIARE SUPLIMENTAR ---
+  "teren": {
+    key: "teren",
+    title: "Banner Teren — Vânzare Loturi",
+    shortDescription: "Banner pentru terenuri agricole sau de construcție.",
+    seoTitle: "Banner Teren | Loturi de Vanzare | Prynt",
+    seoDescription: "Semnalizează terenul cu suprafața și prețul.",
+    images: ["/products/banner/teren.webp"],
+    contentHtml: `<h2>Teren perfect</h2><p>Terenurile sunt investiții bune. Detaliază caracteristicile.</p><ul><li>Suprafața totală</li><li>Utilizare permisă</li><li>Acces la utilități</li><li>Preț negociabil</li></ul>`
+  },
+  "birou": {
+    key: "birou",
+    title: "Banner Birou — Spații de Lucru",
+    shortDescription: "Banner 'Birouri de Închiriat', 'Coworking'.",
+    seoTitle: "Banner Birou | Spatii Office | Prynt",
+    seoDescription: "Promovează spațiile de birouri moderne.",
+    images: ["/products/banner/birou.webp"],
+    contentHtml: `<h2>Loc de muncă ideal</h2><p>Birourile productive cresc eficiența. Include facilitățile.</p><ul><li>Metr pătrați</li><li>Facilități incluse</li><li>Chirie lunară</li><li>Locație centrală</li></ul>`
+  },
+  "spatiu-comercial-supl": {
+    key: "spatiu-comercial-supl",
+    title: "Banner Spațiu Comercial — Magazine și Ateliere",
+    shortDescription: "Banner pentru spații comerciale diverse.",
+    seoTitle: "Banner Spatiu Comercial | Magazine & Ateliere | Prynt",
+    seoDescription: "Atrage afaceri în spațiul tău comercial.",
+    images: ["/products/banner/spatiu-comercial.webp"],
+    contentHtml: `<h2>Afacere profitabilă</h2><p>Spațiile comerciale sunt căutate. Detaliază avantajele.</p><ul><li>Tipul spațiului</li><li>Zona comercială</li><li>Parcare inclusă</li><li>Preț de închiriere</li></ul>`
+  },
+  "depozit": {
+    key: "depozit",
+    title: "Banner Depozit — Stocare și Logistică",
+    shortDescription: "Banner pentru depozite și hale industriale.",
+    seoTitle: "Banner Depozit | Stocare Marfa | Prynt",
+    seoDescription: "Oferă soluții de depozitare sigure.",
+    images: ["/products/banner/depozit.webp"],
+    contentHtml: `<h2>Depozitare sigură</h2><p>Depozitele protejează marfa. Include capacitățile.</p><ul><li>Suprafață depozit</li><li>Sisteme securitate</li><li>Acces ușor</li><li>Prețuri competitive</li></ul>`
+  },
+  "garaj": {
+    key: "garaj",
+    title: "Banner Garaj — Parcări și Boxe",
+    shortDescription: "Banner 'Garaje de Închiriat', 'Boxe Auto'.",
+    seoTitle: "Banner Garaj | Parcari & Boxe | Prynt",
+    seoDescription: "Promovează garajele disponibile în zonă.",
+    images: ["/products/banner/garaj.webp"],
+    contentHtml: `<h2>Parcare acoperită</h2><p>Garajele protejează mașinile. Detaliază dimensiunile.</p><ul><li>Dimensiuni box</li><li>Sistem închidere</li><li>Preț lunar</li><li>Locație sigură</li></ul>`
+  },
+  "schimb": {
+    key: "schimb",
+    title: "Banner Schimb — Apartamente și Case",
+    shortDescription: "Banner 'Schimb Apartament', 'Casă contra Apartament'.",
+    seoTitle: "Banner Schimb | Imobiliare Schimb | Prynt",
+    seoDescription: "Facilitează schimburile imobiliare cu transparență.",
+    images: ["/products/banner/schimb.webp"],
+    contentHtml: `<h2>Schimb avantajos</h2><p>Schimburile economisesc bani. Include detaliile proprietăților.</p><ul><li>Proprietatea oferită</li><li>Cea dorită</li><li>Diferența de preț</li><li>Contact direct</li></ul>`
+  },
+  "donatie": {
+    key: "donatie",
+    title: "Banner Donație — Ajutor pentru Nevoiți",
+    shortDescription: "Banner pentru campanii de strângere fonduri.",
+    seoTitle: "Banner Donatie | Ajutor Social | Prynt",
+    seoDescription: "Încurajează donațiile cu un mesaj emoțional.",
+    images: ["/products/banner/donatie.webp"],
+    contentHtml: `<h2>Ajută-i pe cei în nevoie</h2><p>Donațiile schimbă vieți. Detaliază cauza și impactul.</p><ul><li>Cauza sprijinită</li><li>Cum să donezi</li><li>Impactul donației</li><li>Transparență totală</li></ul>`
+  },
+  "voluntariat": {
+    key: "voluntariat",
+    title: "Banner Voluntariat — Alătură-te Cauzei",
+    shortDescription: "Banner pentru recrutare voluntari.",
+    seoTitle: "Banner Voluntariat | Activitati Sociale | Prynt",
+    seoDescription: "Atrage voluntari cu proiecte semnificative.",
+    images: ["/products/banner/voluntariat.webp"],
+    contentHtml: `<h2>Fă diferența</h2><p>Voluntariatul aduce satisfacție. Include activitățile disponibile.</p><ul><li>Proiecte active</li><li>Ore de voluntariat</li><li>Beneficii pentru tine</li><li>Înscriere ușoară</li></ul>`
+  },
+  "adoptie": {
+    key: "adoptie",
+    title: "Banner Adoptie — Caută Familie",
+    shortDescription: "Banner pentru animale sau copii în adopție.",
+    seoTitle: "Banner Adoptie | Animale & Copii | Prynt",
+    seoDescription: "Promovează adopția cu povești emoționante.",
+    images: ["/products/banner/adoptie.webp"],
+    contentHtml: `<h2>Dă o casă</h2><p>Adopția salvează vieți. Detaliază animalele sau copiii disponibili.</p><ul><li>Descriere completă</li><li>Vârsta și caracter</li><li>Cerințe adopție</li><li>Contact centru</li></ul>`
+  },
+
+  // --- SEZONALE ȘI SĂRBĂTORI ---
+  "revelion": {
+    key: "revelion",
+    title: "Banner Revelion — An Nou Fericit",
+    shortDescription: "Banner 'Revelion 2025', 'Petrecere An Nou'.",
+    seoTitle: "Banner Revelion | Sarbatori An Nou | Prynt",
+    seoDescription: "Anunță petrecerea de Revelion cu muzică și distracție.",
+    images: ["/products/banner/revelion.webp"],
+    contentHtml: `<h2>Bun venit 2025!</h2><p>Revelionul este noaptea magică. Detaliază programul.</p><ul><li>Muzică live</li><li>Meniu festivist</li><li>Preț bilet</li><li>Rezervări acum</li></ul>`
+  },
+  "ziua-mamei": {
+    key: "ziua-mamei",
+    title: "Banner Ziua Mamei — Sărbătoriți Mama",
+    shortDescription: "Banner pentru evenimente dedicate mamelor.",
+    seoTitle: "Banner Ziua Mamei | Sarbatori Familiale | Prynt",
+    seoDescription: "Promovează evenimente speciale pentru Ziua Mamei.",
+    images: ["/products/banner/ziua-mamei.webp"],
+    contentHtml: `<h2>Mulțumesc, mamă!</h2><p>Ziua Mamei este sărbătoare de iubire. Include activitățile.</p><ul><li>Cadourile ideale</li><li>Evenimente speciale</li><li>Mese festive</li><li>Mesaje de iubire</li></ul>`
+  },
+  "ziua-tatalui": {
+    key: "ziua-tatalui",
+    title: "Banner Ziua Tatălui — Onorează Tatăl",
+    shortDescription: "Banner pentru sărbătorirea taților.",
+    seoTitle: "Banner Ziua Tatalui | Sarbatori Familiale | Prynt",
+    seoDescription: "Dedică o zi specială taților cu evenimente memorabile.",
+    images: ["/products/banner/ziua-tatalui.webp"],
+    contentHtml: `<h2>Eroul familiei</h2><p>Tații merită recunoașterea. Detaliază sărbătorile.</p><ul><li>Activități pentru tați</li><li>Cadourile potrivite</li><li>Petreceri familiale</li><li>Mesaje de apreciere</li></ul>`
+  },
+  "ziua-copiilor": {
+    key: "ziua-copiilor",
+    title: "Banner Ziua Copiilor — Distracție pentru Micuți",
+    shortDescription: "Banner pentru evenimente dedicate copiilor.",
+    seoTitle: "Banner Ziua Copiilor | Sarbatori pentru Copii | Prynt",
+    seoDescription: "Organizează sărbători pline de bucurie pentru copii.",
+    images: ["/products/banner/ziua-copiilor.webp"],
+    contentHtml: `<h2>Zâmbește și joacă!</h2><p>Copiii iubesc sărbătorile. Include activitățile distractive.</p><ul><li>Jocuri și concursuri</li><li>Animatori profesioniști</li><li>Cadourile pentru toți</li><li>Mese colorate</li></ul>`
+  },
+  "valentine": {
+    key: "valentine",
+    title: "Banner Valentine — Ziua Îndrăgostiților",
+    shortDescription: "Banner romantic pentru evenimente de Valentine.",
+    seoTitle: "Banner Valentine | Ziua Indragostitilor | Prynt",
+    seoDescription: "Creează atmosferă romantică cu bannere speciale.",
+    images: ["/products/banner/valentine.webp"],
+    contentHtml: `<h2>Iubire eternă</h2><p>Valentine este ziua iubirii. Detaliază surprizele.</p><ul><li>Cina romantică</li><li>Cadourile ideale</li><li>Petreceri cuplu</li><li>Mesaje dulci</li></ul>`
+  },
+  "martisor": {
+    key: "martisor",
+    title: "Banner Martisor — Primăvară și Iubire",
+    shortDescription: "Banner pentru sărbătoarea Martisorului.",
+    seoTitle: "Banner Martisor | Sarbatoarea Primaverii | Prynt",
+    seoDescription: "Anunță evenimente tradiționale cu bannere colorate.",
+    images: ["/products/banner/martisor.webp"],
+    contentHtml: `<h2>Primăvara vine!</h2><p>Martisorul aduce noroc. Include tradițiile.</p><ul><li>Martisoare handmade</li><li>Evenimente culturale</li><li>Ateliere creative</li><li>Sărbători populare</li></ul>`
+  },
+  "ziua-nationala": {
+    key: "ziua-nationala",
+    title: "Banner Ziua Națională — Patriotism și Tradiție",
+    shortDescription: "Banner pentru sărbători naționale.",
+    seoTitle: "Banner Ziua Nationala | Sarbatori Patriotice | Prynt",
+    seoDescription: "Creează spirit patriotic cu evenimente speciale.",
+    images: ["/products/banner/ziua-nationala.webp"],
+    contentHtml: `<h2>Mândri de țara noastră</h2><p>Ziua Națională unește poporul. Detaliază manifestările.</p><ul><li>Parade și defilări</li><li>Concerte patriotice</li><li>Expoziții culturale</li><li>Activități familiale</li></ul>`
+  },
+
+  // --- SPORT ---
+  "fotbal": {
+    key: "fotbal",
+    title: "Banner Fotbal — Meciuri și Antrenamente",
+    shortDescription: "Banner pentru cluburi de fotbal sau evenimente sportive.",
+    seoTitle: "Banner Fotbal | Cluburi & Meciuri | Prynt",
+    seoDescription: "Promovează echipa cu bannere pasionale.",
+    images: ["/products/banner/fotbal.webp"],
+    contentHtml: `<h2>Goluri și pasiune</h2><p>Fotbalul unește fanii. Include programul meciurilor.</p><ul><li>Echipa favorită</li><li>Meciuri viitoare</li><li>Antrenamente</li><li>Înscrieri jucători</li></ul>`
+  },
+  "baschet": {
+    key: "baschet",
+    title: "Banner Baschet — Coșuri și Abilități",
+    shortDescription: "Banner pentru echipe de baschet.",
+    seoTitle: "Banner Baschet | Echipe & Campionate | Prynt",
+    seoDescription: "Atrage jucători talentați cu bannere dinamice.",
+    images: ["/products/banner/baschet.webp"],
+    contentHtml: `<h2>Coș după coș</h2><p>Baschetul dezvoltă agilitatea. Detaliază echipa.</p><ul><li>Jucători cheie</li><li>Campionate</li><li>Antrenori</li><li>Înscrieri deschise</li></ul>`
+  },
+  "volei": {
+    key: "volei",
+    title: "Banner Volei — Lovituri și Apărare",
+    shortDescription: "Banner pentru cluburi de volei.",
+    seoTitle: "Banner Volei | Echipe & Meciuri | Prynt",
+    seoDescription: "Promovează voleiul cu bannere energice.",
+    images: ["/products/banner/volei.webp"],
+    contentHtml: `<h2>Putere în echipă</h2><p>Voleiul cere echipă. Include rezultatele recente.</p><ul><li>Meciuri câștigate</li><li>Jucători vedetă</li><li>Antrenamente</li><li>Spirit de echipă</li></ul>`
+  },
+  "handbal": {
+    key: "handbal",
+    title: "Banner Handbal — Precizie și Viteză",
+    shortDescription: "Banner pentru echipe de handbal.",
+    seoTitle: "Banner Handbal | Campionate & Goluri | Prynt",
+    seoDescription: "Atrage suporteri cu bannere motivante.",
+    images: ["/products/banner/handbal.webp"],
+    contentHtml: `<h2>Goluri spectaculoase</h2><p>Handbalul este rapid. Detaliază performanțele.</p><ul><li>Goluri marcate</li><li>Jucători importanți</li><li>Campionate</li><li>Fani pasionați</li></ul>`
+  },
+  "atletism": {
+    key: "atletism",
+    title: "Banner Atletism — Viteză și Rezistență",
+    shortDescription: "Banner pentru cluburi de atletism.",
+    seoTitle: "Banner Atletism | Competitii & Recorduri | Prynt",
+    seoDescription: "Încurajează sportivii cu bannere inspiraționale.",
+    images: ["/products/banner/atletism.webp"],
+    contentHtml: `<h2>Depășește limitele</h2><p>Atletismul testează limitele. Include probele.</p><ul><li>Alergare</li><li>Sărituri</li><li>Aruncări</li><li>Recorduri personale</li></ul>`
+  },
+  "gimnastica": {
+    key: "gimnastica",
+    title: "Banner Gimnastică — Grație și Forță",
+    shortDescription: "Banner pentru săli de gimnastică.",
+    seoTitle: "Banner Gimnastica | Sali & Competitii | Prynt",
+    seoDescription: "Promovează gimnastica cu bannere elegante.",
+    images: ["/products/banner/gimnastica.webp"],
+    contentHtml: `<h2>Mișcare armonioasă</h2><p>Gimnastica dezvoltă corpul. Detaliază clasele.</p><ul><li>Clase pentru copii</li><li>Antrenori calificați</li><li>Competiții</li><li>Echipamente moderne</li></ul>`
+  },
+
+  // --- MUZICĂ ȘI ARTĂ ---
+  "jazz": {
+    key: "jazz",
+    title: "Banner Jazz — Improvizație și Ritm",
+    shortDescription: "Banner pentru evenimente jazz.",
+    seoTitle: "Banner Jazz | Concerte & Festivaluri | Prynt",
+    seoDescription: "Atrage melomani cu bannere sofisticate.",
+    images: ["/products/banner/jazz.webp"],
+    contentHtml: `<h2>Muzică soul</h2><p>Jazz-ul captivează. Include artiștii invitați.</p><ul><li>Trupe jazz</li><li>Concerte live</li><li>Atmosferă relaxată</li><li>Bilete disponibile</li></ul>`
+  },
+  "rock": {
+    key: "rock",
+    title: "Banner Rock — Energie și Rebeliune",
+    shortDescription: "Banner pentru concerte rock.",
+    seoTitle: "Banner Rock | Concerte & Festivaluri | Prynt",
+    seoDescription: "Creează hype cu bannere rock.",
+    images: ["/products/banner/rock.webp"],
+    contentHtml: `<h2>Rock 'n' roll forever</h2><p>Rock-ul energizează. Detaliază lineup-ul.</p><ul><li>Trupe rock</li><li>Muzică puternică</li><li>Fani entuziaști</li><li>Concerte memorabile</li></ul>`
+  },
+  "pop": {
+    key: "pop",
+    title: "Banner Pop — Dans și Melodii",
+    shortDescription: "Banner pentru evenimente pop.",
+    seoTitle: "Banner Pop | Concerte & Show-uri | Prynt",
+    seoDescription: "Promovează muzica pop cu bannere colorate.",
+    images: ["/products/banner/pop.webp"],
+    contentHtml: `<h2>Muzică pentru toți</h2><p>Pop-ul este catchy. Include hiturile.</p><ul><li>Artisti populari</li><li>Dansuri</li><li>Show-uri live</li><li>Fani tineri</li></ul>`
+  },
+  "folk": {
+    key: "folk",
+    title: "Banner Folk — Tradiție și Cântec",
+    shortDescription: "Banner pentru muzică folk românească.",
+    seoTitle: "Banner Folk | Muzica Traditionala | Prynt",
+    seoDescription: "Creează atmosferă tradițională cu bannere folk.",
+    images: ["/products/banner/folk.webp"],
+    contentHtml: `<h2>Rădăcini românești</h2><p>Folk-ul ne unește. Detaliază cântecele.</p><ul><li>Cântece populare</li><li>Instrumente tradiționale</li><li>Festivaluri</li><li>Cultură autentică</li></ul>`
+  },
+  "opera": {
+    key: "opera",
+    title: "Banner Operă — Artă și Emoție",
+    shortDescription: "Banner pentru spectacole de operă.",
+    seoTitle: "Banner Opera | Spectacole Clasice | Prynt",
+    seoDescription: "Promovează opera cu bannere elegante.",
+    images: ["/products/banner/opera.webp"],
+    contentHtml: `<h2>Emoție pură</h2><p>Opera impresionează. Include reprezentațiile.</p><ul><li>Operă clasică</li><li>Soliști celebri</li><li>Orchestră</li><li>Bilete premium</li></ul>`
+  },
+  "balet": {
+    key: "balet",
+    title: "Banner Balet — Grație și Eleganță",
+    shortDescription: "Banner pentru trupe de balet.",
+    seoTitle: "Banner Balet | Spectacole de Dans | Prynt",
+    seoDescription: "Atrage publicul cu bannere sofisticate.",
+    images: ["/products/banner/balet.webp"],
+    contentHtml: `<h2>Dans divin</h2><p>Baletul este artă. Detaliază coregrafiile.</p><ul><li>Dansatori profesioniști</li><li>Coregrafii originale</li><li>Muzică clasică</li><li>Spectacole magice</li></ul>`
+  },
+  "pictura": {
+    key: "pictura",
+    title: "Banner Pictură — Expoziții și Ateliere",
+    shortDescription: "Banner pentru artiști plastici.",
+    seoTitle: "Banner Pictura | Expozitii Artistice | Prynt",
+    seoDescription: "Promovează arta plastică cu bannere creative.",
+    images: ["/products/banner/pictura.webp"],
+    contentHtml: `<h2>Culori și forme</h2><p>Pictura exprimă sufletul. Include tehnicile.</p><ul><li>Expoziții</li><li>Ateliere creative</li><li>Artiști locali</li><li>Vânzări tablouri</li></ul>`
+  },
+  "sculptura": {
+    key: "sculptura",
+    title: "Banner Sculptură — Forme și Texturi",
+    shortDescription: "Banner pentru sculptori și expoziții.",
+    seoTitle: "Banner Sculptura | Arta 3D | Prynt",
+    seoDescription: "Atrage vizitatori cu bannere sculpturale.",
+    images: ["/products/banner/sculptura.webp"],
+    contentHtml: `<h2>Artă tridimensională</h2><p>Sculptura dă viață materialelor. Detaliază lucrările.</p><ul><li>Materiale folosite</li><li>Tehnici sculpturale</li><li>Expoziții</li><li>Comenzi personalizate</li></ul>`
+  },
+  "fotografie": {
+    key: "fotografie",
+    title: "Banner Fotografie — Capturi de Momente",
+    shortDescription: "Banner pentru fotografi și expoziții foto.",
+    seoTitle: "Banner Fotografie | Expozitii & Portrete | Prynt",
+    seoDescription: "Promovează fotografia cu bannere vizuale.",
+    images: ["/products/banner/fotografie.webp"],
+    contentHtml: `<h2>Momente eterne</h2><p>Fotografia surprinde esența. Include genurile.</p><ul><li>Portrete</li><li>Peisaje</li><li>Evenimente</li><li>Sesiuni foto</li></ul>`
+  },
+  "film": {
+    key: "film",
+    title: "Banner Film — Proiecții și Festivaluri",
+    shortDescription: "Banner pentru evenimente cinematografice.",
+    seoTitle: "Banner Film | Festivaluri & Proiectii | Prynt",
+    seoDescription: "Atrage cinefili cu bannere cinematografice.",
+    images: ["/products/banner/film.webp"],
+    contentHtml: `<h2>Lumi imaginare</h2><p>Filmul povestește. Detaliază proiecțiile.</p><ul><li>Festivaluri</li><li>Filme independente</li><li>Proiecții gratuite</li><li>Dezbateri</li></ul>`
+  },
+
+  // --- TEHNOLOGIE ȘI INOVARE ---
+  "conferinta-tech": {
+    key: "conferinta-tech",
+    title: "Banner Conferință Tech — Inovație și Viitor",
+    shortDescription: "Banner pentru evenimente tech.",
+    seoTitle: "Banner Conferinta Tech | Tehnologie & Inovare | Prynt",
+    seoDescription: "Promovează conferințe tech cu bannere moderne.",
+    images: ["/products/banner/conferinta-tech.webp"],
+    contentHtml: `<h2>Tehnologia viitorului</h2><p>Conferințele tech inspiră. Include speakerii.</p><ul><li>Speakeri celebri</li><li>Subiecte actuale</li><li>Networking</li><li>Inovații prezentate</li></ul>`
+  },
+  "hackathon": {
+    key: "hackathon",
+    title: "Banner Hackathon — Programare Intensivă",
+    shortDescription: "Banner pentru competiții de programare.",
+    seoTitle: "Banner Hackathon | Competitii Coding | Prynt",
+    seoDescription: "Atrage developeri cu bannere tech.",
+    images: ["/products/banner/hackathon.webp"],
+    contentHtml: `<h2>Codează viitorul</h2><p>Hackathon-urile creează soluții. Detaliază provocările.</p><ul><li>Provocări tech</li><li>Premii atractive</li><li>Mentori</li><li>Echipe formate</li></ul>`
+  },
+  "startup-pitch": {
+    key: "startup-pitch",
+    title: "Banner Startup Pitch — Prezentări de Afaceri",
+    shortDescription: "Banner pentru evenimente startup.",
+    seoTitle: "Banner Startup Pitch | Afaceri Inovatoare | Prynt",
+    seoDescription: "Promovează startup-uri cu bannere dinamice.",
+    images: ["/products/banner/startup-pitch.webp"],
+    contentHtml: `<h2>Idei revoluționare</h2><p>Pitch-urile conving investitori. Include ideile.</p><ul><li>Startup-uri participante</li><li>Investitori prezenți</li><li>Premii</li><li>Networking</li></ul>`
+  },
+
+  // --- SĂNĂTATE ȘI BINESTARE ---
+  "vaccin": {
+    key: "vaccin",
+    title: "Banner Vaccin — Protecție și Sănătate",
+    shortDescription: "Banner pentru campanii de vaccinare.",
+    seoTitle: "Banner Vaccin | Campanii de Imunizare | Prynt",
+    seoDescription: "Încurajează vaccinarea cu mesaje pozitive.",
+    images: ["/products/banner/vaccin.webp"],
+    contentHtml: `<h2>Sănătate pentru toți</h2><p>Vaccinurile protejează. Detaliază beneficiile.</p><ul><li>Vaccinuri disponibile</li><li>Programări</li><li>Efecte secundare minime</li><li>Protecție comunitară</li></ul>`
+  },
+  "donare-sange": {
+    key: "donare-sange",
+    title: "Banner Donare Sânge — Salvează Vieți",
+    shortDescription: "Banner pentru centre de donare sânge.",
+    seoTitle: "Banner Donare Sange | Acte de Binefacere | Prynt",
+    seoDescription: "Încurajează donarea cu bannere emoționante.",
+    images: ["/products/banner/donare-sange.webp"],
+    contentHtml: `<h2>Un gest simplu, vieți salvate</h2><p>Donarea sânge ajută. Include condițiile.</p><ul><li>Cine poate dona</li><li>Procesul donării</li><li>Beneficii pentru donator</li><li>Urgențe acoperite</li></ul>`
+  },
+  "campanie-preventie": {
+    key: "campanie-preventie",
+    title: "Banner Campanie Prevenție — Sănătate Preventivă",
+    shortDescription: "Banner pentru campanii de prevenție boli.",
+    seoTitle: "Banner Campanie Preventie | Sanatate Publica | Prynt",
+    seoDescription: "Educa populația cu bannere informative.",
+    images: ["/products/banner/campanie-preventie.webp"],
+    contentHtml: `<h2>Prevenția salvează vieți</h2><p>Campaniile educă. Detaliază sfaturile.</p><ul><li>Boli prevenite</li><li>Sfaturi practice</li><li>Screening gratuit</li><li>Specialiști implicați</li></ul>`
+  },
+  "fitness": {
+    key: "fitness",
+    title: "Banner Fitness — Mișcare și Sănătate",
+    shortDescription: "Banner pentru săli de fitness.",
+    seoTitle: "Banner Fitness | Sali Sport & Antrenamente | Prynt",
+    seoDescription: "Motivați-vă cu bannere fitness.",
+    images: ["/products/banner/fitness.webp"],
+    contentHtml: `<h2>Corp sănătos, minte puternică</h2><p>Fitness-ul transformă. Include antrenamentele.</p><ul><li>Antrenori personali</li><li>Echipamente moderne</li><li>Clase de grup</li><li>Abonamente flexibile</li></ul>`
+  },
+  "yoga": {
+    key: "yoga",
+    title: "Banner Yoga — Echilibru și Relaxare",
+    shortDescription: "Banner pentru centre de yoga.",
+    seoTitle: "Banner Yoga | Relaxare & Meditatie | Prynt",
+    seoDescription: "Promovează yoga cu bannere zen.",
+    images: ["/products/banner/yoga.webp"],
+    contentHtml: `<h2>Pace interioară</h2><p>Yoga aduce armonie. Detaliază stilurile.</p><ul><li>Yoga hatha</li><li>Meditatie</li><li>Clase pentru începători</li><li>Beneficii mentale</li></ul>`
+  },
+
+  // --- MEDIU ȘI ECOLOGIE ---
+  "ecologie": {
+    key: "ecologie",
+    title: "Banner Ecologie — Protejarea Planetei",
+    shortDescription: "Banner pentru campanii ecologice.",
+    seoTitle: "Banner Ecologie | Mediu & Protectie | Prynt",
+    seoDescription: "Încurajează acțiuni eco cu bannere verzi.",
+    images: ["/products/banner/ecologie.webp"],
+    contentHtml: `<h2>Pământul nostru</h2><p>Ecologia este viitorul. Include acțiunile.</p><ul><li>Reciclare</li><li>Plantări de copaci</li><li>Energie verde</li><li>Comunitate implicată</li></ul>`
+  },
+  "reciclare": {
+    key: "reciclare",
+    title: "Banner Reciclare — Reutilizare și Economie",
+    shortDescription: "Banner pentru centre de reciclare.",
+    seoTitle: "Banner Reciclare | Protectia Mediului | Prynt",
+    seoDescription: "Educa despre reciclare cu bannere utile.",
+    images: ["/products/banner/reciclare.webp"],
+    contentHtml: `<h2>Reciclează inteligent</h2><p>Reciclarea economisește resurse. Detaliază materialele.</p><ul><li>Hârtie și carton</li><li>Plastic și sticlă</li><li>Electrocasnice</li><li>Puncte de colectare</li></ul>`
+  },
+  "protejarea-mediului": {
+    key: "protejarea-mediului",
+    title: "Banner Protejarea Mediului — Acțiuni Concrete",
+    shortDescription: "Banner pentru proiecte de mediu.",
+    seoTitle: "Banner Protejarea Mediului | Ecologie & Actiune | Prynt",
+    seoDescription: "Mobilizează comunitatea cu bannere motivaționale.",
+    images: ["/products/banner/protejarea-mediului.webp"],
+    contentHtml: `<h2>Împreună pentru planetă</h2><p>Protejarea mediului este datoria noastră. Include proiectele.</p><ul><li>Curățenie zone</li><li>Conservare biodiversitate</li><li>Educație ecologică</li><li>Rezultate vizibile</li></ul>`
+  },
+
+  // --- CARITATE ȘI ONG ---
+  "fundatie": {
+    key: "fundatie",
+    title: "Banner Fundație — Ajutor pentru Comunitate",
+    shortDescription: "Banner pentru fundații caritabile.",
+    seoTitle: "Banner Fundatie | Activitati Caritabile | Prynt",
+    seoDescription: "Promovează fundația cu bannere de impact.",
+    images: ["/products/banner/fundatie.webp"],
+    contentHtml: `<h2>Ajutor real</h2><p>Fundațiile schimbă vieți. Detaliază proiectele.</p><ul><li>Cauze sprijinite</li><li>Proiecte active</li><li>Donații primite</li><li>Impact comunitar</li></ul>`
+  },
+  "ong": {
+    key: "ong",
+    title: "Banner ONG — Organizații Non-Guvernamentale",
+    shortDescription: "Banner pentru ONG-uri locale.",
+    seoTitle: "Banner ONG | Activitati Sociale | Prynt",
+    seoDescription: "Atrage voluntari cu bannere inspiraționale.",
+    images: ["/products/banner/ong.webp"],
+    contentHtml: `<h2>Schimbare pozitivă</h2><p>ONG-urile fac diferența. Include misiunea.</p><ul><li>Misiunea organizației</li><li>Proiecte curente</li><li>Voluntari căutați</li><li>Rezultate obținute</li></ul>`
+  },
+  "ajutor-umanitar": {
+    key: "ajutor-umanitar",
+    title: "Banner Ajutor Umanitar — Sprijin în Crize",
+    shortDescription: "Banner pentru campanii umanitare.",
+    seoTitle: "Banner Ajutor Umanitar | Sprijin Social | Prynt",
+    seoDescription: "Mobilizează ajutor cu bannere urgente.",
+    images: ["/products/banner/ajutor-umanitar.webp"],
+    contentHtml: `<h2>Solidaritate umană</h2><p>Ajutorul umanitar salvează. Detaliază nevoile.</p><ul><li>Nevoi urgente</li><li>Cum să ajuți</li><li>Distribuție ajutoare</li><li>Transparență totală</li></ul>`
   }
 };
