@@ -210,7 +210,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
             )}
 
             {/* AWB Tracking */}
-            {order.awb && (
+            {order.awbNumber && (
               <div className="bg-linear-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-3xl shadow-2xl shadow-zinc-200/50 dark:shadow-black/50 border border-purple-200 dark:border-purple-800 overflow-hidden">
                 <div className="p-6">
                   <div className="flex items-center gap-4">
@@ -221,7 +221,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Nr. AWB</p>
-                      <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">{order.awb}</p>
+                      <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">{order.awbNumber}</p>
                     </div>
                     <a
                       href={`https://www.cargus.ro/tracking`}
@@ -256,17 +256,10 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                     <span className="font-medium text-zinc-900 dark:text-white">{fmtRON(orderTotal)}</span>
                   </div>
                   
-                  {order.deliveryPrice && Number(order.deliveryPrice) > 0 && (
+                  {order.shippingFee && Number(order.shippingFee) > 0 && (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-zinc-600 dark:text-zinc-400">Livrare</span>
-                      <span className="font-medium text-zinc-900 dark:text-white">{fmtRON(Number(order.deliveryPrice))}</span>
-                    </div>
-                  )}
-                  
-                  {order.discount && Number(order.discount) > 0 && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-zinc-600 dark:text-zinc-400">Discount</span>
-                      <span className="font-medium text-green-600 dark:text-green-400">-{fmtRON(Number(order.discount))}</span>
+                      <span className="font-medium text-zinc-900 dark:text-white">{fmtRON(Number(order.shippingFee))}</span>
                     </div>
                   )}
                 </div>
@@ -290,26 +283,10 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                     <div>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">Metodă de plată</p>
                       <p className="text-sm font-semibold text-zinc-900 dark:text-white capitalize">
-                        {order.paymentMethod === 'card' ? 'Card bancar' : 'Ramburs'}
+                        {order.paymentType === 'card' ? 'Card bancar' : 'Ramburs'}
                       </p>
                     </div>
                   </div>
-                  
-                  {order.paymentStatus && (
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
-                      <div className="shrink-0 w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">Status plată</p>
-                        <p className="text-sm font-semibold text-zinc-900 dark:text-white capitalize">
-                          {order.paymentStatus === 'paid' ? 'Plătită' : 'În așteptare'}
-                        </p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

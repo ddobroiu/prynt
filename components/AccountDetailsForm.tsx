@@ -15,7 +15,7 @@ export default function AccountDetailsForm() {
     setMessage(null);
 
     if (!name) {
-      setMessage("Numele este obligatoriu.");
+      setMessage({ type: "error", text: "Numele este obligatoriu." });
       return;
     }
 
@@ -30,15 +30,15 @@ export default function AccountDetailsForm() {
 
       const data = await res.json();
       if (res.status === 401) {
-        setMessage(data?.error || 'Nu ești autentificat. Te rog autentifică-te.');
+        setMessage({ type: "error", text: data?.error || 'Nu ești autentificat. Te rog autentifică-te.' });
       } else if (!res.ok) {
-        setMessage(data?.error || 'A apărut o eroare.');
+        setMessage({ type: "error", text: data?.error || 'A apărut o eroare.' });
       } else {
-        setMessage('Numele a fost actualizat. Reîncarc pagina...');
+        setMessage({ type: "success", text: 'Numele a fost actualizat. Reîncarc pagina...' });
         setTimeout(() => window.location.reload(), 900);
       }
     } catch (e) {
-      setMessage('Eroare la comunicarea cu serverul.');
+      setMessage({ type: "error", text: 'Eroare la comunicarea cu serverul.' });
     } finally {
       setLoading(false);
     }

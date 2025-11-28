@@ -55,7 +55,7 @@ export async function GET() {
   const productPages = slugs.map((s) => {
     const prod = getProductBySlug(s);
     let lastmod = undefined;
-    if (prod?.metadata?.updatedAt) {
+    if (prod?.metadata?.updatedAt && typeof prod.metadata.updatedAt === 'string') {
       try {
         lastmod = formatDateISO(new Date(prod.metadata.updatedAt));
       } catch {}

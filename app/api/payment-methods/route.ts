@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     // Get default payment method
     const customer = await stripe.customers.retrieve(user.stripeCustomerId);
     const defaultPaymentMethodId =
-      typeof customer !== "deleted" && customer.invoice_settings?.default_payment_method
+      customer && !('deleted' in customer) && customer.invoice_settings?.default_payment_method
         ? customer.invoice_settings.default_payment_method
         : null;
 

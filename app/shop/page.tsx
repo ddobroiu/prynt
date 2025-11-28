@@ -30,7 +30,7 @@ export default function ShopPage() {
   // 1. Extragem categoriile unice și le formatăm
   const categories = useMemo(() => {
     const cats = new Set(PRODUCTS.map((p) => p.metadata?.category).filter(Boolean));
-    return ["Toate", ...Array.from(cats)];
+    return ["Toate", ...Array.from(cats)] as string[];
   }, []);
 
   // 2. Pregătim produsele cu prețuri corecte

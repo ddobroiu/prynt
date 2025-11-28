@@ -247,12 +247,13 @@ async function sendEmails(
 
   function buildDetailsHTML(item: AnyRecord) {
     const details: string[] = [];
-    const width = item.width ?? item.width_cm ?? item.rawMetadata?.width_cm ?? item.rawMetadata?.width;
-    const height = item.height ?? item.height_cm ?? item.rawMetadata?.height_cm ?? item.rawMetadata?.height;
+    const itemAny = item as any;
+    const width = itemAny.width ?? itemAny.width_cm ?? itemAny.rawMetadata?.width_cm ?? itemAny.rawMetadata?.width;
+    const height = itemAny.height ?? itemAny.height_cm ?? itemAny.rawMetadata?.height_cm ?? itemAny.rawMetadata?.height;
     if (width || height) {
       details.push(`<div><strong>Dimensiune:</strong> ${escapeHtml(String(width || '—'))} x ${escapeHtml(String(height || '—'))} cm</div>`);
     }
-    const meta = item.rawMetadata || {};
+    const meta = (item.rawMetadata || {}) as any;
     const knownKeys = Object.keys(labelForKey).filter((k) => meta[k] !== undefined);
     knownKeys.forEach((k) => {
       const label = labelForKey[k];
@@ -271,11 +272,11 @@ async function sendEmails(
       const v = meta[k];
       details.push(`<div><strong>${escapeHtml(k)}:</strong> ${escapeHtml(String(v))}</div>`);
     });
-    if (item.artwork) {
-      details.push(`<div><strong>Fișier:</strong> <a href="${escapeHtml(item.artwork)}" target="_blank" rel="noopener noreferrer">link</a></div>`);
+    if (itemAny.artwork) {
+      details.push(`<div><strong>Fișier:</strong> <a href="${escapeHtml(String(itemAny.artwork))}" target="_blank" rel="noopener noreferrer">link</a></div>`);
     }
-    if (item.textDesign) {
-      details.push(`<div><strong>Text:</strong> <em>${escapeHtml(item.textDesign)}</em></div>`);
+    if (itemAny.textDesign) {
+      details.push(`<div><strong>Text:</strong> <em>${escapeHtml(String(itemAny.textDesign))}</em></div>`);
     }
     if (details.length === 0) return '';
     return `<div style="margin-top:6px;padding:8px 10px;background:#fafafa;border:1px solid #eee;border-radius:6px;color:#333">${details.join('')}</div>`;
