@@ -5,13 +5,14 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import UserGraphicsManager from "@/components/UserGraphicsManager";
 import ReorderButton from "@/components/ReorderButton";
+import React from "react";
 
 function fmtRON(n: number) {
   return new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(n);
 }
 
 function getStatusConfig(status: string) {
-  const configs: Record<string, { label: string; color: string; icon: JSX.Element }> = {
+  const configs: Record<string, { label: string; color: string; icon: React.ReactElement }> = {
     active: {
       label: 'În procesare',
       color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
