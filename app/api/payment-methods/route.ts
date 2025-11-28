@@ -45,6 +45,7 @@ export async function GET(req: NextRequest) {
       expMonth: pm.card?.exp_month || 0,
       expYear: pm.card?.exp_year || 0,
       isDefault: pm.id === defaultPaymentMethodId,
+      nickname: pm.metadata?.nickname || undefined,
     }));
 
     return NextResponse.json({ paymentMethods: formattedMethods });
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { paymentMethodId } = await req.json();
+    const { paymentMethodId, nickname } = await req.json();
     if (!paymentMethodId) {
       return NextResponse.json({ error: "Payment method ID required" }, { status: 400 });
     }
@@ -103,6 +104,13 @@ export async function POST(req: NextRequest) {
       customer: stripeCustomerId,
     });
 
+    // Update with nickname if provided
+    if (nickname) {
+      await stripe.paymentMethods.update(paymentMethodId, {
+        metadata: { nickname },
+      });
+    }
+
     // Set as default if it's the first payment method
     const existingMethods = await stripe.paymentMethods.list({
       customer: stripeCustomerId,
@@ -127,7 +135,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// PATCH - Set default payment method
+// PATCH - Set default payment method or update nickname
 export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -135,11 +143,20 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { paymentMethodId } = await req.json();
+    const { paymentMethodId, nickname } = await req.json();
     if (!paymentMethodId) {
       return NextResponse.json({ error: "Payment method ID required" }, { status: 400 });
     }
 
+    // If nickname is provided (even if empty string), update the nickname
+    if (nickname !== undefined) {
+      await stripe.paymentMethods.update(paymentMethodId, {
+        metadata: { nickname: nickname || "" },
+      });
+      return NextResponse.json({ success: true });
+    }
+
+    // Otherwise, set as default payment method
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { stripeCustomerId: true },
@@ -157,9 +174,9 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error("Error setting default payment method:", error);
+    console.error("Error updating payment method:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to set default payment method" },
+      { error: error.message || "Failed to update payment method" },
       { status: 500 }
     );
   }
