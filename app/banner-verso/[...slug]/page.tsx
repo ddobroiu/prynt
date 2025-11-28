@@ -4,10 +4,10 @@ import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/
 import type { Product } from "@/lib/products";
 import BannerVersoConfigurator from "@/components/BannerVersoConfigurator";
 
-type Props = { params?: Promise<{ slug?: string[] }> };
+type Props = { params: Promise<{ slug?: string[] }> };
 
 export async function generateStaticParams() {
-  const slugs = getAllProductSlugsByCategory("banner-verso");
+  const slugs = getAllProductSlugsByCategory("banner-verso"); // Asigură-te că există categoria 'banner-verso' în products.ts sau fallback
   return slugs.map((slug) => ({ slug: [slug] }));
 }
 
@@ -20,10 +20,10 @@ export async function generateMetadata({ params }: Props) {
   const metadata: any = {
     title: product.seo?.title || `${product.title} | Prynt`,
     description: product.seo?.description || product.description,
-    openGraph: { 
-      title: product.seo?.title || product.title, 
-      description: product.description, 
-      images: product.images 
+    openGraph: {
+      title: product.seo?.title || product.title,
+      description: product.description,
+      images: product.images
     },
   };
   if (isFallback) metadata.robots = { index: false, follow: true };
@@ -44,11 +44,25 @@ export default async function Page({ params }: Props) {
   return (
     <>
       <ProductJsonLd product={(product as Product)} url={url} />
-      <BannerVersoConfigurator 
-        productSlug={product.slug ?? product.routeSlug} 
-        initialWidth={initialWidth ?? undefined}
-        initialHeight={initialHeight ?? undefined}
-      />
+      
+      <main className="min-h-screen bg-gray-50">
+        <BannerVersoConfigurator 
+          productSlug={product.slug ?? product.routeSlug}
+          initialWidth={initialWidth ?? undefined}
+          initialHeight={initialHeight ?? undefined}
+        />
+
+        {product.contentHtml && (
+           <section className="py-16 bg-white border-t border-gray-100">
+             <div className="container mx-auto px-4 max-w-4xl">
+               <article 
+                 className="prose prose-lg prose-indigo mx-auto prose-h2:text-3xl prose-h2:font-bold prose-h3:text-xl prose-img:rounded-xl"
+                 dangerouslySetInnerHTML={{ __html: product.contentHtml }}
+               />
+             </div>
+           </section>
+        )}
+      </main>
     </>
   );
 }
