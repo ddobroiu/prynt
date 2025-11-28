@@ -155,7 +155,7 @@ export default function SmartNewsletterPopup({
         </button>
 
         {/* Header with gradient */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 text-center">
+        <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white p-6 text-center">
           <div className="flex justify-center mb-3">
             <div className="bg-white/20 p-3 rounded-full">
               <Gift size={32} />
@@ -193,7 +193,7 @@ export default function SmartNewsletterPopup({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full bg-linear-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98]"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">

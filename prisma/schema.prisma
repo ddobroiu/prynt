@@ -89,10 +89,10 @@ model AbandonedCart {
   emailSentCount Int       @default(0)
   lastEmailSent  DateTime?
   createdAt      DateTime  @default(now())
-  lastUpdated    DateTime  @updatedAt
+  updatedAt      DateTime  @updatedAt
 
   @@unique([email, configuratorId])
-  @@index([lastUpdated])
+  @@index([updatedAt])
 }
 
 model DiscountCode {

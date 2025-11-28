@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       update: {
         cartData,
         sessionId,
-        lastUpdated: new Date(),
+        updatedAt: new Date(),
         emailSentCount: 0, // Reset email count on cart update
         lastEmailSent: null
       },
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
         sessionId,
         emailSentCount: 0,
         createdAt: new Date(),
-        lastUpdated: new Date()
+        updatedAt: new Date()
       }
     });
 
@@ -80,7 +80,7 @@ export async function PUT(req: Request) {
     // Get abandoned carts for this delay period
     const abandonedCarts = await prisma.abandonedCart.findMany({
       where: {
-        lastUpdated: {
+        updatedAt: {
           lte: cutoffTime
         },
         emailSentCount: {
