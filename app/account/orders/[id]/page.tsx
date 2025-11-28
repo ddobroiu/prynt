@@ -91,15 +91,14 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
   // Castăm address la 'any' pentru a accesa proprietățile JSON fără erori de TS
   const address = order.address as any;
   const shippingAddress = address;
-  const orderTotal = order.items.reduce((sum, item) => sum + Number(item.price), 0);
+  const orderTotal = order.items.reduce((sum, item) => sum + Number(item.total), 0);
   const statusConfig = getStatusConfig(order.status);
   
   // Serializăm items pentru a converti Decimal în number
   const serializedItems = order.items.map(item => ({
     ...item,
-    price: Number(item.price),
+    total: Number(item.total),
     unit: item.unit ? Number(item.unit) : null,
-    total: item.total ? Number(item.total) : null,
   }));
 
   return (
