@@ -1,10 +1,22 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
-import fs from 'fs';
-import path from 'path';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 
-// Styles will be created inside the component so we can conditionally set `fontFamily`
-// depending on whether font registration succeeded.
+// Funcție pentru eliminarea diacriticelor
+const removeDiacritics = (str: string | undefined | null): string => {
+  if (!str) return '';
+  const text = String(str);
+  return text
+    .replace(/ă/g, 'a')
+    .replace(/Ă/g, 'A')
+    .replace(/â/g, 'a')
+    .replace(/Â/g, 'A')
+    .replace(/î/g, 'i')
+    .replace(/Î/g, 'I')
+    .replace(/ș/g, 's')
+    .replace(/Ș/g, 'S')
+    .replace(/ț/g, 't')
+    .replace(/Ț/g, 'T');
+};
 
 const formatPrice = (val: number) => {
   const num = Number(val ?? 0);
@@ -13,36 +25,9 @@ const formatPrice = (val: number) => {
 };
 
 export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }) => {
-  // Try to register local fonts (preferred). If not found, fall back to remote registration.
-  let fontRegistered = false;
-  try {
-    const fontsDir = path.resolve(process.cwd(), 'public', 'fonts');
-    const regular = path.join(fontsDir, 'Roboto-Regular.ttf');
-    const bold = path.join(fontsDir, 'Roboto-Bold.ttf');
-
-    if (fs.existsSync(regular) && fs.existsSync(bold)) {
-      Font.register({
-        family: 'Roboto',
-        fonts: [
-          { src: regular, fontWeight: 'normal' },
-          { src: bold, fontWeight: 'bold' },
-        ],
-      });
-      fontRegistered = true;
-    } else {
-      // Do NOT attempt remote font registration to avoid Unknown font format errors
-      // in environments where remote font fetch returns unexpected content.
-      console.warn('OfferPDF: local Roboto fonts not found in public/fonts; continuing with default fonts');
-      fontRegistered = false;
-    }
-  } catch (err) {
-    console.error('OfferPDF: font registration check failed', err);
-    fontRegistered = false;
-  }
-
   const styles = StyleSheet.create({
     page: {
-      ...(fontRegistered ? { fontFamily: 'Roboto' } : {}),
+      fontFamily: 'Helvetica',
       fontSize: 10,
       padding: 0,
       color: '#111827',
@@ -73,9 +58,10 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
     },
     companyInfo: {
       color: 'white',
-      fontSize: 9,
+      fontSize: 11,
       alignItems: 'flex-end',
       paddingTop: 6,
+      minWidth: 150,
     },
     section: {
       marginHorizontal: 40,
@@ -182,8 +168,9 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
             <Text style={styles.headerSub}>Tipografie Online & Large Format</Text>
           </View>
           <View style={styles.companyInfo}>
-            <Text>OFERTĂ DE PREȚ</Text>
-            <Text>#{Date.now().toString().slice(-6)}</Text>
+            <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 16, marginBottom: 2 }}>OFERTA</Text>
+            <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 16, marginBottom: 6 }}>DE PRET</Text>
+            <Text style={{ fontSize: 11 }}>Nr. #{Date.now().toString().slice(-6)}</Text>
           </View>
         </View>
 
@@ -199,7 +186,7 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
           <View style={{ alignItems: 'flex-end' }}>
             <Text style={styles.label}>VALABILITATE</Text>
             <Text style={styles.value}>Data: {today}</Text>
-            <Text style={styles.value}>Expiră: <Text style={styles.valueBold}>{expiry.toLocaleDateString('ro-RO')}</Text></Text>
+            <Text style={styles.value}>Expira: <Text style={styles.valueBold}>{expiry.toLocaleDateString('ro-RO')}</Text></Text>
           </View>
         </View>
 
@@ -208,7 +195,7 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
           <View style={styles.tableHeader}>
             <Text style={styles.colProd}>PRODUS / DETALII</Text>
             <Text style={styles.colQty}>CANT.</Text>
-            <Text style={styles.colPrice}>PREȚ UNIT</Text>
+            <Text style={styles.colPrice}>PRET UNIT</Text>
             <Text style={styles.colTotal}>TOTAL</Text>
           </View>
 
@@ -311,9 +298,9 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
                     return (
                       <View key={i} style={styles.row} wrap={false}>
                         <View style={styles.colProd}>
-                          <Text style={styles.prodTitle}>{item.title || item.name}</Text>
+                          <Text style={styles.prodTitle}>{removeDiacritics(item.title || item.name)}</Text>
                           {details.map((d, idx) => (
-                            <Text key={idx} style={styles.prodDetail}>• {d}</Text>
+                            <Text key={idx} style={styles.prodDetail}>• {removeDiacritics(d)}</Text>
                           ))}
                         </View>
                         <Text style={styles.colQty}>{isFinite(qty) ? String(qty) : '0'}</Text>
@@ -342,8 +329,10 @@ export const OfferPDF = ({ items, shipping }: { items: any[], shipping: number }
 
         {/* 5. FOOTER */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Prețurile includ TVA. Ofertă valabilă 30 de zile.</Text>
-          <Text style={styles.footerText}>Vă mulțumim! Contact: contact@prynt.ro | 0750.259.955</Text>
+          <Text style={styles.footerText}>Preturile includ TVA.</Text>
+          <Text style={styles.footerText}>Oferta valabila pana la {expiry.toLocaleDateString('ro-RO')}.</Text>
+          <Text style={styles.footerText}>Generat automat de asistentul Prynt.ro</Text>
+          <Text style={styles.footerText}>Contact: contact@prynt.ro | 0750.259.955</Text>
         </View>
 
       </Page>

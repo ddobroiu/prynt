@@ -58,6 +58,14 @@ export const LANDING_CATALOG: LandingCatalog = {
   tapet: TAPET_SEO_DATA as unknown as LandingCatalog[string],
 
   // 7. Materiale Rigide
+  "materiale": {
+    "pvc-forex": PVC_FOREX_DATA,
+    "plexiglass": PLEXIGLASS_DATA,
+    "alucobond": ALUCOBOND_DATA,
+    "polipropilena": POLIPROPILENA_DATA,
+    "carton": CARTON_DATA,
+  } as unknown as LandingCatalog[string],
+  
   "pvc-forex": PVC_FOREX_DATA as unknown as LandingCatalog[string],
   "pvc_forex": PVC_FOREX_DATA as unknown as LandingCatalog[string], // Alias pentru consistență
   
@@ -83,9 +91,29 @@ export const LANDING_CATALOG: LandingCatalog = {
 // --- HELPER FUNCTIONS ---
 
 // Helper: list all landing routes for generateStaticParams
+// Exclude duplicate/alias categories to avoid duplicate content penalties
 export function listAllLandingRoutes() {
   const out: { category: string; slug: string }[] = [];
+  
+  // Categories to exclude (aliases that duplicate content)
+  const excludedCategories = new Set([
+    'flayere',          // Duplicate of 'pliante'
+    'pvc_forex',        // Duplicate of 'pvc-forex' 
+    'bond',             // Duplicate of 'alucobond'
+    'fonduri',          // Duplicate of 'fonduri-pnrr'
+    'fonduri-nationale', // Duplicate of 'fonduri-pnrr'
+    'fonduri-regio',    // Duplicate of 'fonduri-pnrr'
+    'pvc-forex',        // Use only materiale/pvc-forex
+    'plexiglass',       // Use only materiale/plexiglass
+    'alucobond',        // Use only materiale/alucobond
+    'polipropilena',    // Use only materiale/polipropilena
+    'carton',           // Use only materiale/carton
+  ]);
+  
   Object.keys(LANDING_CATALOG).forEach((category) => {
+    // Skip excluded categories
+    if (excludedCategories.has(category)) return;
+    
     const entries = LANDING_CATALOG[category];
     Object.keys(entries).forEach((key) => {
       const val = entries[key];

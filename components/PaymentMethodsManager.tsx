@@ -530,8 +530,9 @@ export default function PaymentMethodsManager() {
                     </svg>
                   </button>
                 </div>
+                </div>
               </div>
-            )
+            );
           })}
         </div>
       )}

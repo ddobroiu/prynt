@@ -210,7 +210,7 @@ const OfferDocument = ({ order }: { order: any }) => {
         <View style={styles.headerContainer}>
           <View><Text style={styles.logoText}>PRYNT.RO</Text></View>
           <View style={styles.offerTitleBlock}>
-            <Text style={styles.offerTitle}>OFERTĂ DE PREȚ</Text>
+            <Text style={styles.offerTitle}>OFERTA DE PRET</Text>
             <Text style={styles.offerSubtitle}>Nr: #{order.orderNo} / Data: {createdDate}</Text>
           </View>
         </View>
@@ -238,7 +238,7 @@ const OfferDocument = ({ order }: { order: any }) => {
             <Text style={[styles.tableHeaderCell, styles.col1]}>#</Text>
             <Text style={[styles.tableHeaderCell, styles.col2]}>Produs</Text>
             <Text style={[styles.tableHeaderCell, styles.col3]}>Cant.</Text>
-            <Text style={[styles.tableHeaderCell, styles.col4]}>Preț Unit.</Text>
+            <Text style={[styles.tableHeaderCell, styles.col4]}>Pret Unit.</Text>
             <Text style={[styles.tableHeaderCell, styles.col5]}>Total</Text>
           </View>
           {items.map((item: any, index: number) => (
@@ -264,7 +264,7 @@ const OfferDocument = ({ order }: { order: any }) => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Oferta valabilă până la {validUntilDate.toLocaleDateString("ro-RO")}.</Text>
+          <Text style={styles.footerText}>Oferta valabila pana la {validUntilDate.toLocaleDateString("ro-RO")}.</Text>
           <Text style={styles.footerText}>Generat automat de asistentul Prynt.ro.</Text>
         </View>
       </Page>

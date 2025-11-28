@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { siteConfig } from "@/lib/siteConfig";
-import { ChevronDown, Menu, X, User } from "lucide-react";
+import { ChevronDown, Menu, X, User, LogOut, Package, Settings } from "lucide-react";
 // 1. IMPORTĂM WIDGETUL DE CART
 import CartWidget from "./CartWidget";
 
@@ -145,9 +145,62 @@ const HeaderActions = () => {
 
   return (
     <div className="flex items-center gap-3 sm:gap-5">
-      <Link href={session?.user ? "/account" : "/login"} className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Cont">
-        <User size={24} />
-      </Link>
+      {/* Account Dropdown */}
+      {session?.user ? (
+        <div className="relative group">
+          <button className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Cont">
+            <User size={24} />
+          </button>
+          
+          {/* Dropdown Menu */}
+          <div className="absolute top-full right-0 w-56 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 ease-out z-50">
+            <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+              {/* User Info */}
+              <div className="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+                <p className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
+                  {session.user.name || session.user.email}
+                </p>
+                {session.user.name && (
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                    {session.user.email}
+                  </p>
+                )}
+              </div>
+              
+              {/* Menu Items */}
+              <div className="p-2">
+                <Link
+                  href="/account"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  <Settings size={18} />
+                  Setări cont
+                </Link>
+                
+                <Link
+                  href="/account/orders"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  <Package size={18} />
+                  Comenzile mele
+                </Link>
+                
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                >
+                  <LogOut size={18} />
+                  Delogare
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <Link href="/login" className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Cont">
+          <User size={24} />
+        </Link>
+      )}
 
       {/* 3. AICI AM ÎNLOCUIT VECHIUL LINK CU COMPONENTA NOUĂ */}
       <CartWidget />

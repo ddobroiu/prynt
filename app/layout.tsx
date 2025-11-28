@@ -53,17 +53,51 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "Organization",
+              "@type": "LocalBusiness",
+              "@id": (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "") + "/#organization",
               name: "Prynt.ro",
+              legalName: "Prynt - Tipar Digital & Productie Publicitara",
               url: (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, ""),
               logo: new URL("/logo.png", (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro")).toString(),
+              description: "Tipar digital, bannere publicitare, autocolante personalizate, pliante, canvas si materiale rigide. Configurare online cu pret instant.",
+              priceRange: "$$",
+              image: new URL("/logo.png", (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro")).toString(),
+              telephone: "+40 750 473 111",
+              email: "contact@prynt.ro",
+              address: {
+                "@type": "PostalAddress",
+                addressCountry: "RO",
+                addressLocality: "Romania",
+              },
+              geo: {
+                "@type": "GeoCoordinates",
+                addressCountry: "RO"
+              },
+              areaServed: {
+                "@type": "Country",
+                name: "Romania"
+              },
               contactPoint: [{
                 "@type": "ContactPoint",
                 telephone: "+40 750 473 111",
                 contactType: "customer service",
+                email: "contact@prynt.ro",
                 areaServed: "RO",
-                availableLanguage: ["ro"],
+                availableLanguage: ["Romanian"],
+                contactOption: "TollFree"
               }],
+              sameAs: [
+                "https://www.facebook.com/prynt.ro",
+                "https://www.instagram.com/prynt.ro"
+              ],
+              openingHoursSpecification: [{
+                "@type": "OpeningHoursSpecification",
+                dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                opens: "09:00",
+                closes: "18:00"
+              }],
+              paymentAccepted: "Cash, Card, Bank Transfer",
+              currenciesAccepted: "RON"
             }),
           }}
         />

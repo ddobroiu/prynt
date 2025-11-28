@@ -1,6 +1,8 @@
 import { getAllProductSlugs, getProductBySlug } from "@/lib/products";
 import { NextResponse } from "next/server";
 import { getAllBlogSlugs } from "@/lib/blogPosts";
+import { getAllJudeteSlugs } from "@/lib/judeteData";
+import { listAllLandingRoutes } from "@/lib/landingData";
 
 export const runtime = "edge";
 
@@ -22,24 +24,31 @@ export async function GET() {
     // Categorii principale
     { url: `${base}/banner`, priority: 0.9, lastmod: formatDateISO(new Date()) },
     { url: `${base}/banner-verso`, priority: 0.8, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/afise`, priority: 0.7, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/flayere`, priority: 0.7, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/pliante`, priority: 0.7, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/autocolante`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/afise`, priority: 0.8, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/flayere`, priority: 0.8, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/pliante`, priority: 0.8, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/autocolante`, priority: 0.8, lastmod: formatDateISO(new Date()) },
     { url: `${base}/canvas`, priority: 0.7, lastmod: formatDateISO(new Date()) },
     { url: `${base}/tapet`, priority: 0.7, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/plexiglass`, priority: 0.6, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/alucobond`, priority: 0.6, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/carton`, priority: 0.6, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/polipropilena`, priority: 0.6, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/pvc-forex`, priority: 0.6, lastmod: formatDateISO(new Date()) },
-    // Info
-  { url: `${base}/shop`, priority: 0.6, lastmod: formatDateISO(new Date()) },
-  { url: `${base}/blog`, priority: 0.6, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/contact`, priority: 0.5, lastmod: formatDateISO(new Date()) },
+    // Materiale rigide
+    { url: `${base}/materiale`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/materiale/plexiglass`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/materiale/alucobond`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/materiale/carton`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/materiale/polipropilena`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/materiale/pvc-forex`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    // Shop și configuratoare
+    { url: `${base}/shop`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/configuratoare`, priority: 0.6, lastmod: formatDateISO(new Date()) },
+    // Blog și info
+    { url: `${base}/blog`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/contact`, priority: 0.6, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/urmareste-comanda`, priority: 0.5, lastmod: formatDateISO(new Date()) },
+    // Legal și utilitate
     { url: `${base}/confidentialitate`, priority: 0.3, lastmod: formatDateISO(new Date()) },
     { url: `${base}/politica-cookies`, priority: 0.3, lastmod: formatDateISO(new Date()) },
     { url: `${base}/termeni`, priority: 0.3, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/stergere-date`, priority: 0.2, lastmod: formatDateISO(new Date()) },
   ];
 
   const productPages = slugs.map((s) => {
@@ -59,7 +68,23 @@ export async function GET() {
   });
 
   const blogPages = blogSlugs.map((s) => ({ url: `${base}/blog/${s}`, priority: 0.5, lastmod: formatDateISO(new Date()) }));
-  const urls = [...pages, ...productPages, ...blogPages];
+  
+  const judeteSlugs = getAllJudeteSlugs();
+  const judetePages = judeteSlugs.map((slug) => ({ 
+    url: `${base}/judet/${slug}`, 
+    priority: 0.6, 
+    lastmod: formatDateISO(new Date()) 
+  }));
+
+  // Landing pages SEO (bannere, afise, autocolante, etc.)
+  const landingRoutes = listAllLandingRoutes();
+  const landingPages = landingRoutes.map(({ category, slug }) => ({
+    url: `${base}/${category}/${slug}`,
+    priority: 0.7, // SEO landing pages au prioritate ridicată
+    lastmod: formatDateISO(new Date())
+  }));
+
+  const urls = [...pages, ...productPages, ...blogPages, ...judetePages, ...landingPages];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

@@ -293,19 +293,49 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="bg-ui min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Finalizare Comandă</h1>
-          <p className="text-muted text-sm mt-1">Completează detaliile pentru a plasa comanda.</p>
+    <main className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        {/* Header modern */}
+        <div className="mb-4">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mb-3 group">
+            <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Înapoi la magazin
+          </Link>
+          
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-800 dark:from-indigo-400 dark:via-purple-400 dark:to-indigo-600 bg-clip-text text-transparent">
+              Finalizare Comandă
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">Completează detaliile pentru a plasa comanda</p>
+          </div>
         </div>
 
         {isEmpty ? (
-          <EmptyCart />
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8 text-center">
+              <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Package className="w-10 h-10 text-slate-400 dark:text-slate-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Coșul tău este gol</h2>
+              <p className="text-slate-600 dark:text-slate-400 mb-6">Nu ai adăugat încă niciun produs în coș.</p>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                Continuă cumpărăturile
+              </Link>
+            </div>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
             
-            <section className="lg:col-span-2 space-y-6">
+            {/* MAIN CONTENT - 2 COLOANE */}
+            <section className="lg:col-span-2 space-y-4">
               <CartItems items={items} onRemove={removeItem} />
               <ReturningCustomerLogin />
               
@@ -318,22 +348,30 @@ export default function CheckoutPage() {
                 setSameAsDelivery={setSameAsDelivery}
                 errors={errors}
               />
+            </section>
 
-              {/* SECȚIUNE METODĂ DE PLATĂ */}
-              <div className="card p-5 border border-[--border] bg-surface rounded-xl shadow-sm">
-                <h2 className="text-xl font-bold mb-4 text-ui">Metodă de plată</h2>
-                <div className="space-y-3">
+            <aside className="lg:col-span-1 lg:sticky lg:top-6 space-y-4">
+              {/* SECȚIUNE METODĂ DE PLATĂ - MODERNIZAT */}
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div className="bg-linear-to-r from-purple-600 to-indigo-600 px-5 py-3">
+                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    Metodă de plată
+                  </h2>
+                </div>
+                
+                <div className="p-3 space-y-2">
                     
                     {/* Ramburs */}
-                    <label className={`flex items-start gap-3 p-4 rounded-lg border transition-all relative
-                        ${isRambursDisabled 
-                            ? 'border-red-500/30 bg-red-500/5 opacity-80 cursor-not-allowed' 
+                    <label className={`group relative flex items-start gap-2.5 p-3 rounded-xl border transition-all duration-200
+                        ${isRambursDisabled
+                            ? 'border-red-500/30 bg-red-500/5 opacity-60 cursor-not-allowed' 
                             : paymentMethod === 'ramburs' 
-                                ? 'border-indigo-500 bg-indigo-500/10 ring-1 ring-indigo-500/30 cursor-pointer' 
-                                : 'border-[--border] hover:bg-white/5 cursor-pointer'
+                                ? 'border-emerald-500 bg-linear-to-br from-emerald-500/10 to-green-500/5 shadow-md shadow-emerald-500/10' 
+                                : 'border-slate-700 hover:border-slate-600 hover:bg-slate-800/50 cursor-pointer'
                         }
                     `}>
-                        <div className="mt-1">
+                        <div className="mt-0.5">
                             <input 
                                 type="radio" 
                                 name="payment" 
@@ -341,70 +379,121 @@ export default function CheckoutPage() {
                                 checked={paymentMethod === 'ramburs'} 
                                 onChange={() => !isRambursDisabled && setPaymentMethod('ramburs')} 
                                 disabled={isRambursDisabled}
-                                className="h-4 w-4 border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800 disabled:opacity-50" 
+                                className="h-4 w-4 border border-slate-600 text-emerald-500 focus:ring-emerald-500 focus:ring-1 bg-slate-800 disabled:opacity-50 cursor-pointer" 
                             />
                         </div>
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                                <Banknote size={18} className={isRambursDisabled ? "text-gray-500" : "text-emerald-400"} />
-                                <span className={`font-bold ${isRambursDisabled ? "text-muted line-through decoration-red-500" : "text-ui"}`}>
+                                <div className={`p-1.5 rounded-lg ${isRambursDisabled ? 'bg-gray-700/30' : 'bg-emerald-500/10'}`}>
+                                    <Banknote className={`w-4 h-4 ${isRambursDisabled ? "text-gray-500" : "text-emerald-400"}`} />
+                                </div>
+                                <span className={`text-sm font-semibold ${isRambursDisabled ? "text-slate-500 dark:text-slate-500 line-through decoration-red-500" : "text-slate-900 dark:text-white"}`}>
                                     Ramburs (Plata la livrare)
                                 </span>
                             </div>
-                            <div className="text-xs text-muted">
+                            <p className="text-xs text-slate-600 dark:text-slate-300 ml-8">
                                 {isRambursDisabled 
-                                    ? "Indisponibil pentru comenzi." 
-                                    : "Plătești curierului numerar când ajunge coletul."
+                                    ? "Indisponibil pentru comenzi mari" 
+                                    : "Plătești curierului numerar la primirea coletului"
                                 }
-                            </div>
+                            </p>
                             {isRambursDisabled && (
-                                <div className="mt-2 flex items-start gap-2 text-xs text-red-400 font-medium bg-red-500/10 p-2 rounded">
-                                    <AlertCircle size={14} className="mt-0.5 shrink-0" />
-                                    <span>Pentru comenzi peste {MAX_RAMBURS_LIMIT} RON, plata ramburs nu este disponibilă. Te rugăm să achiți cu Cardul sau prin OP.</span>
+                                <div className="mt-2 ml-8 flex items-start gap-1.5 text-xs text-red-400 font-medium bg-red-500/10 p-2 rounded-lg border border-red-500/20">
+                                    <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                                    <span>Pentru comenzi peste <strong>{MAX_RAMBURS_LIMIT} RON</strong>, rambursul nu este disponibil. Alege Card sau Transfer Bancar.</span>
                                 </div>
                             )}
                         </div>
+                        {paymentMethod === 'ramburs' && !isRambursDisabled && (
+                            <div className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">
+                                Selectat
+                            </div>
+                        )}
                     </label>
 
                     {/* Card */}
-                    <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-indigo-500 bg-indigo-500/10 ring-1 ring-indigo-500/30' : 'border-[--border] hover:bg-white/5'}`}>
-                        <div className="mt-1">
-                            <input type="radio" name="payment" value="card" checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} className="h-4 w-4 border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800" />
+                    <label className={`group relative flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-all duration-200
+                        ${paymentMethod === 'card' 
+                            ? 'border-blue-500 bg-linear-to-br from-blue-500/10 to-indigo-500/5 shadow-md shadow-blue-500/10' 
+                            : 'border-slate-700 hover:border-slate-600 hover:bg-slate-800/50'
+                        }
+                    `}>
+                        <div className="mt-0.5">
+                            <input 
+                                type="radio" 
+                                name="payment" 
+                                value="card" 
+                                checked={paymentMethod === 'card'} 
+                                onChange={() => setPaymentMethod('card')} 
+                                className="h-4 w-4 border border-slate-600 text-blue-500 focus:ring-blue-500 focus:ring-1 bg-slate-800 cursor-pointer" 
+                            />
                         </div>
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                                <CreditCard size={18} className="text-blue-400" />
-                                <span className="font-bold text-ui">Card Online (Securizat)</span>
+                                <div className="p-1.5 rounded-lg bg-blue-500/10">
+                                    <CreditCard className="w-4 h-4 text-blue-400" />
+                                </div>
+                                <span className="text-sm font-semibold text-slate-900 dark:text-white">Card Online (Securizat)</span>
+                                <span className="ml-auto px-2 py-0.5 bg-blue-500/20 text-blue-300 text-[10px] font-bold rounded-full border border-blue-500/30">
+                                    Recomandat
+                                </span>
                             </div>
-                            <div className="text-xs text-muted">Plătești online prin Stripe. Siguranță garantată.</div>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 ml-8">Plătești instant prin Stripe. Securitate maximă garantată.</p>
                         </div>
+                        {paymentMethod === 'card' && (
+                            <div className="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">
+                                Selectat
+                            </div>
+                        )}
                     </label>
 
                     {/* Transfer Bancar (OP) */}
-                    <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentMethod === 'op' ? 'border-indigo-500 bg-indigo-500/10 ring-1 ring-indigo-500/30' : 'border-[--border] hover:bg-white/5'}`}>
-                        <div className="mt-1">
-                            <input type="radio" name="payment" value="op" checked={paymentMethod === 'op'} onChange={() => setPaymentMethod('op')} className="h-4 w-4 border-gray-600 text-indigo-600 focus:ring-indigo-600 bg-slate-800" />
+                    <label className={`group relative flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-all duration-200
+                        ${paymentMethod === 'op' 
+                            ? 'border-amber-500 bg-linear-to-br from-amber-500/10 to-yellow-500/5 shadow-md shadow-amber-500/10' 
+                            : 'border-slate-700 hover:border-slate-600 hover:bg-slate-800/50'
+                        }
+                    `}>
+                        <div className="mt-0.5">
+                            <input 
+                                type="radio" 
+                                name="payment" 
+                                value="op" 
+                                checked={paymentMethod === 'op'} 
+                                onChange={() => setPaymentMethod('op')} 
+                                className="h-4 w-4 border border-slate-600 text-amber-500 focus:ring-amber-500 focus:ring-1 bg-slate-800 cursor-pointer" 
+                            />
                         </div>
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                                <Building2 size={18} className="text-amber-400" />
-                                <span className="font-bold text-ui">Transfer Bancar (OP)</span>
+                                <div className="p-1.5 rounded-lg bg-amber-500/10">
+                                    <Building2 className="w-4 h-4 text-amber-400" />
+                                </div>
+                                <span className="text-sm font-semibold text-slate-900 dark:text-white">Transfer Bancar (OP)</span>
                             </div>
-                            <div className="text-xs text-muted">
+                            <p className="text-xs text-slate-600 dark:text-slate-300 ml-8">
                                 Vei primi factura și datele bancare pe email. Comanda intră în producție după confirmarea plății.
-                            </div>
+                            </p>
                             {paymentMethod === 'op' && (
-                                <div className="mt-3 p-3 bg-blue-900/30 border border-blue-500/30 rounded text-xs text-blue-200 animate-in fade-in">
-                                    <p><strong>Notă:</strong> Pentru o procesare rapidă, te rugăm să ne trimiți dovada plății pe email la <u>contact@prynt.ro</u> după plasarea comenzii.</p>
+                                <div className="mt-2 ml-8 p-2.5 bg-linear-to-br from-blue-900/40 to-blue-800/20 border border-blue-500/40 rounded-lg text-xs text-blue-100 animate-in slide-in-from-top-2 duration-300">
+                                    <p className="flex items-start gap-1.5">
+                                        <AlertCircle className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                                        <span>
+                                            <strong className="text-blue-300">Notă:</strong> Pentru procesare rapidă, trimite dovada plății pe email la <span className="font-semibold text-blue-200 underline decoration-blue-400">contact@prynt.ro</span> după plasarea comenzii.
+                                        </span>
+                                    </p>
                                 </div>
                             )}
                         </div>
+                        {paymentMethod === 'op' && (
+                            <div className="absolute -top-1.5 -right-1.5 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">
+                                Selectat
+                            </div>
+                        )}
                     </label>
                 </div>
               </div>
-            </section>
-
-            <aside className="lg:col-span-1 lg:sticky lg:top-6 space-y-4">
+              
               <SummaryCard
                 subtotal={subtotal}
                 shipping={costLivrare}

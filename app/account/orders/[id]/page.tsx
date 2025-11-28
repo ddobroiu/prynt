@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import UserGraphicsManager from "@/components/UserGraphicsManager";
+import ReorderButton from "@/components/ReorderButton";
 
 function fmtRON(n: number) {
   return new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(n);
@@ -131,9 +132,13 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
               </p>
             </div>
             
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border ${statusConfig.color} font-medium text-sm`}>
-              {statusConfig.icon}
-              {statusConfig.label}
+            <div className="flex items-center gap-3">
+              <ReorderButton orderId={order.id} variant="primary" />
+              
+              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border ${statusConfig.color} font-medium text-sm`}>
+                {statusConfig.icon}
+                {statusConfig.label}
+              </div>
             </div>
           </div>
         </div>

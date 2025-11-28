@@ -86,9 +86,9 @@ export default function CartWidget() {
       <DialogContent
         className={
           // 1. SUPRASCRIERE TOTALA A POZITIONARII (folosim ! pentru a bate stilurile implicite)
-          "!fixed !right-0 !left-auto !top-0 !bottom-0 !translate-x-0 !translate-y-0 !m-0 " +
+          "fixed! right-0! left-auto! top-0! bottom-0! translate-x-0! translate-y-0! m-0! " +
           // 2. DIMENSIUNI & LAYOUT
-          "h-[100dvh] w-full md:max-w-[450px] flex flex-col p-0 gap-0 z-[60] focus:outline-none " +
+          "h-dvh w-full md:max-w-[450px] flex flex-col p-0 gap-0 z-60 focus:outline-none " +
           // 3. STILURI VIZUALE
           "bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl " +
           // 4. ANIMATII INTRARE/IESIRE (Slide din dreapta)

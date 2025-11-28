@@ -1,5 +1,3 @@
-// Prisma schema for Prynt — PostgreSQL on Railway
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,132 +8,117 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  image         String?
-  phone         String?
-  passwordHash  String?   // hash pentru autentificare cu parolă (Credentials Provider)
-  emailVerified DateTime?
-  stripeCustomerId String? @unique // Stripe customer ID pentru saved payment methods
-  addresses     Address[]
-  orders        Order[]
-  accounts      Account[]
-  sessions      Session[]
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  name                String?
+  image               String?
+  phone               String?
+  passwordHash        String?
+  emailVerified       DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  stripeCustomerId    String?              @unique
+  accounts            Account[]
+  addresses           Address[]
+  aiConversations     AiConversation[]
+  orders              Order[]
   passwordResetTokens PasswordResetToken[]
-  graphics      UserGraphic[]
-  reviews       Review[]
-  aiConversations AiConversation[] // Relație chat history
-
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  reviews             Review[]
+  sessions            Session[]
+  graphics            UserGraphic[]
 }
 
 model UserGraphic {
   id           String   @id @default(cuid())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
-
-  // Câmpuri pentru legătura cu comanda
+  originalName String
+  storagePath  String   @unique
+  size         Int
+  mimeType     String
+  createdAt    DateTime @default(now())
+  publicId     String   @unique
   orderId      String?
   orderItemId  String?
-
-  originalName String   // "fileName"
-  storagePath  String   @unique // "fileUrl" / secure_url
-  publicId     String   @unique // Cloudinary public_id
-  size         Int      // bytes
-  mimeType     String   // fileType
-  
-  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Address {
-  id           String   @id @default(cuid())
-  user         User?    @relation(fields: [userId], references: [id])
-  userId       String?
-  label        String?  // ex: "Acasă", "Birou"
-  nume         String?
-  telefon      String?
-  judet        String
-  localitate   String
-  strada_nr    String
-  postCode     String?
-  // Detalii adresă
-  bloc         String?
-  scara        String?
-  etaj         String?
-  ap           String?
-  interfon     String?
-  isDefault    Boolean  @default(false)
-  type         String?
-  // shipping | billing
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id         String   @id @default(cuid())
+  userId     String?
+  label      String?
+  nume       String?
+  telefon    String?
+  judet      String
+  localitate String
+  strada_nr  String
+  postCode   String?
+  bloc       String?
+  scara      String?
+  etaj       String?
+  ap         String?
+  interfon   String?
+  isDefault  Boolean  @default(false)
+  type       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User?    @relation(fields: [userId], references: [id])
 }
 
 model Subscriber {
   id          String    @id @default(cuid())
   email       String    @unique
-  token       String    @unique // double opt-in token
+  token       String    @unique
   confirmedAt DateTime?
-  source      String?   // checkout, footer, account
+  source      String?
   createdAt   DateTime  @default(now())
 }
 
 model Order {
-  id           String    @id @default(cuid())
-  orderNo      Int       @unique
-  user         User?     @relation(fields: [userId], references: [id])
-  userId       String?
-  paymentType  String    // "Ramburs" | "Card"
-  address      Json
-  billing      Json
-  items        OrderItem[]
-  shippingFee  Decimal   @default(0)
-  total        Decimal   @default(0)
-  invoiceLink  String?
-  // AWB / tracking info
-  awbNumber    String?
-  awbCarrier   String?
-  // AWB label stored as base64 (PDF) + filename for admin download
-  awbLabelBase64 String? @db.Text
+  id               String      @id @default(cuid())
+  orderNo          Int         @unique
+  userId           String?
+  paymentType      String
+  address          Json
+  billing          Json
+  shippingFee      Decimal     @default(0)
+  total            Decimal     @default(0)
+  invoiceLink      String?
+  awbNumber        String?
+  awbCarrier       String?
+  status           String      @default("active")
+  canceledAt       DateTime?
+  marketing        Json?
+  createdAt        DateTime    @default(now())
+  awbLabelBase64   String?
   awbLabelFileName String?
-  // Status lifecycle
-  status       String    @default("active") // active | canceled | fulfilled
-  canceledAt   DateTime?
-  marketing    Json?
-  createdAt    DateTime  @default(now())
+  user             User?       @relation(fields: [userId], references: [id])
+  items            OrderItem[]
 }
 
 model OrderItem {
-  id          String  @id @default(cuid())
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId     String
-  name        String
-  qty         Int
-  unit        Decimal @default(0)
-  total       Decimal @default(0)
-  
-  // Grafică
-  artworkUrl  String?
-  // Metadate pentru designOption, textDesign, etc.
-  metadata    Json?
+  id         String  @id @default(cuid())
+  orderId    String
+  name       String
+  qty        Int
+  unit       Decimal @default(0)
+  total      Decimal @default(0)
+  artworkUrl String?
+  metadata   Json?
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
-// NextAuth (Auth.js) tables
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -160,61 +143,48 @@ model VerificationToken {
 
 model PasswordResetToken {
   id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   token     String   @unique
   expires   DateTime
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Review {
   id          String   @id @default(cuid())
-  rating      Int      // 1-5
+  rating      Int
   title       String?
   content     String
   createdAt   DateTime @default(now())
-
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
+  productSlug String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  productSlug String   // ex: "banner"
-   
   @@index([productSlug])
 }
 
-// --- MODELE PENTRU ISTORIC CHAT (ACTUALIZAT) ---
-
 model AiConversation {
-  id          String      @id @default(cuid())
-  source      String      // "web" | "whatsapp"
-  identifier  String      // SessionID (Web) sau Telefon (WhatsApp)
-  
-  userId      String?
-  user        User?       @relation(fields: [userId], references: [id])
-
-  messages    AiMessage[]
-  
-  // Flaguri și Statusuri
-  hasError    Boolean     @default(false) // True dacă botul a dat fallback
-  isRead      Boolean     @default(false)
-  
-  aiPaused    Boolean     @default(false) // Butonul ON/OFF AI
-  
-  status      String      @default("active") // "active" sau "archived" (Finalizate)
-  customTag   String?     // Ex: "Plata in asteptare"
-
-  lastMessageAt DateTime  @default(now())
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id            String      @id @default(cuid())
+  source        String
+  identifier    String
+  userId        String?
+  hasError      Boolean     @default(false)
+  isRead        Boolean     @default(false)
+  lastMessageAt DateTime    @default(now())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  aiPaused      Boolean     @default(false)
+  customTag     String?
+  status        String      @default("active")
+  user          User?       @relation(fields: [userId], references: [id])
+  messages      AiMessage[]
 }
 
 model AiMessage {
   id             String         @id @default(cuid())
   conversationId String
-  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  
-  role           String         // "user" | "assistant" | "system" | "tool" | "admin"
-  content        String         @db.Text
-  
+  role           String
+  content        String
   createdAt      DateTime       @default(now())
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }

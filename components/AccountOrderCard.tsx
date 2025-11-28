@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import OrderDetails from "@/components/OrderDetails";
+import ReorderButton from "@/components/ReorderButton";
 
 interface Order {
   id: string;
@@ -152,6 +153,8 @@ export default function AccountOrderCard({ order, onTrackingClick }: AccountOrde
         </Link>
 
         <OrderDetails order={order} />
+
+        <ReorderButton orderId={order.id} variant="secondary" />
 
         {order.invoiceLink && (
           <a
