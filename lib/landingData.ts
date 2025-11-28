@@ -28,8 +28,9 @@ export type LandingInfo = {
   images?: string[]; // paths under /public
   contentHtml?: string; // rich server-rendered HTML (SEO)
   productRouteSlug?: string; // optional link to PRODUCTS routeSlug (dacă diferă de cheia categoriei)
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 };
+
 
 // Allow either a direct LandingInfo or a grouped map of LandingInfo entries
 export type LandingGroup = Record<string, LandingInfo>;
@@ -38,45 +39,45 @@ export type LandingCatalog = Record<string, Record<string, LandingInfo | Landing
 // --- CATALOGUL PRINCIPAL ---
 export const LANDING_CATALOG: LandingCatalog = {
   // 1. Bannere
-  bannere: BANNER_SEO_DATA as any,
+  bannere: BANNER_SEO_DATA as unknown as LandingCatalog[string],
 
   // 2. Autocolante
-  autocolante: AUTOCOLANTE_SEO_DATA as any,
+  autocolante: AUTOCOLANTE_SEO_DATA as unknown as LandingCatalog[string],
 
   // 3. Afișe
-  afise: AFISE_SEO_DATA as any,
+  afise: AFISE_SEO_DATA as unknown as LandingCatalog[string],
 
   // 4. Canvas
-  canvas: CANVAS_SEO_DATA as any,
+  canvas: CANVAS_SEO_DATA as unknown as LandingCatalog[string],
 
   // 5. Pliante & Flyere
-  pliante: PLIANTE_SEO_DATA as any,
-  flayere: PLIANTE_SEO_DATA as any, // Alias: folosim aceleași date și pentru /flayere/...
+  pliante: PLIANTE_SEO_DATA as unknown as LandingCatalog[string],
+  flayere: PLIANTE_SEO_DATA as unknown as LandingCatalog[string], // Alias: folosim aceleași date și pentru /flayere/...
 
   // 6. Tapet
-  tapet: TAPET_SEO_DATA as any,
+  tapet: TAPET_SEO_DATA as unknown as LandingCatalog[string],
 
   // 7. Materiale Rigide
-  "pvc-forex": PVC_FOREX_DATA as any,
-  "pvc_forex": PVC_FOREX_DATA as any, // Alias pentru consistență
+  "pvc-forex": PVC_FOREX_DATA as unknown as LandingCatalog[string],
+  "pvc_forex": PVC_FOREX_DATA as unknown as LandingCatalog[string], // Alias pentru consistență
   
-  "plexiglass": PLEXIGLASS_DATA as any,
+  "plexiglass": PLEXIGLASS_DATA as unknown as LandingCatalog[string],
   
-  "alucobond": ALUCOBOND_DATA as any,
-  "bond": ALUCOBOND_DATA as any, // Alias comun
+  "alucobond": ALUCOBOND_DATA as unknown as LandingCatalog[string],
+  "bond": ALUCOBOND_DATA as unknown as LandingCatalog[string], // Alias comun
   
-  "polipropilena": POLIPROPILENA_DATA as any,
+  "polipropilena": POLIPROPILENA_DATA as unknown as LandingCatalog[string],
   
-  "carton": CARTON_DATA as any,
+  "carton": CARTON_DATA as unknown as LandingCatalog[string],
 
   // 8. Banner Față-Verso
-  "banner-verso": BANNER_VERSO_DATA as any,
+  "banner-verso": BANNER_VERSO_DATA as unknown as LandingCatalog[string],
 
   // 9. Proiecte Fonduri (Mapăm toate categoriile URL la același set de date)
-  "fonduri-pnrr": FONDURI_DATA as any,
-  "fonduri-nationale": FONDURI_DATA as any,
-  "fonduri-regio": FONDURI_DATA as any,
-  "fonduri": FONDURI_DATA as any, // Categorie generică
+  "fonduri-pnrr": FONDURI_DATA as unknown as LandingCatalog[string],
+  "fonduri-nationale": FONDURI_DATA as unknown as LandingCatalog[string],
+  "fonduri-regio": FONDURI_DATA as unknown as LandingCatalog[string],
+  "fonduri": FONDURI_DATA as unknown as LandingCatalog[string], // Categorie generică
 };
 
 // --- HELPER FUNCTIONS ---
@@ -109,20 +110,20 @@ export function listAllLandingRoutes() {
 
 // Find a LandingInfo by category + slug, supporting grouped maps one level deep
 export function getLandingInfo(category: string, slug: string) {
-  const cat = (LANDING_CATALOG as any)[category];
+  const cat = LANDING_CATALOG[category];
   if (!cat) return undefined;
-  
+
   // try direct match, then underscore/hyphen variants
   const tryKeys = [slug, slug.replace(/-/g, '_'), slug.replace(/_/g, '-')];
   for (const k of tryKeys) {
-    const direct = (cat as Record<string, any>)[k];
+    const direct = cat[k];
     if (direct && typeof direct === 'object' && 'key' in direct) return direct as LandingInfo;
   }
-  
+
   // search nested groups
   for (const k of Object.keys(cat)) {
-    const v = (cat as any)[k];
-    if (v && typeof v === 'object' && !( 'key' in v)) {
+    const v = cat[k];
+    if (v && typeof v === 'object' && !('key' in v)) {
       // try child variants too
       const childKeys = [slug, slug.replace(/-/g, '_'), slug.replace(/_/g, '-')];
       for (const ck of childKeys) {
