@@ -6,7 +6,7 @@ import Script from "next/script";
 
 // Helper pentru a genera text variat (evităm duplicate content 100%)
 function getSynonym(term: "titlu" | "descriere" | "cta", seed: number) {
-  constvariations = {
+  const variations = {
     titlu: [
       "Servicii de Print Digital & Tipar",
       "Producție Publicitară Completă",
@@ -43,7 +43,6 @@ export async function generateMetadata({ params }: { params: Promise<{ judet: st
 
   const cityName = data.localities[0] || data.name;
   
-  // Optimizare titlu pentru CTR mai mare
   const title = `Print ${data.name} - Bannere, Autocolante & Tipar Digital | Livrare Rapidă`;
   const description = `Cauți servicii de print în ${data.name}? Livrăm în ${cityName}, ${data.localities.slice(1, 3).join(", ")} și tot județul. Bannere, afișe, autocolante la preț de producător.`;
 
@@ -69,7 +68,6 @@ export default async function JudetPage({ params }: { params: Promise<{ judet: s
 
   const base = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, "");
   
-  // Seed simplu bazat pe lungimea numelui pentru variație deterministă
   const variationSeed = data.name.length; 
   const dynamicTitle = getSynonym("titlu", variationSeed);
   const dynamicDesc = getSynonym("descriere", variationSeed);
@@ -96,7 +94,7 @@ export default async function JudetPage({ params }: { params: Promise<{ judet: s
     },
     { 
       name: "Mesh Publicitar", 
-      slug: "banner", // Momentan ducem la banner, ideal pagină separată
+      slug: "banner", 
       desc: "Printuri de mari dimensiuni pentru clădiri, rezistente la vânt.",
       price: "Personalizat"
     },
@@ -126,7 +124,6 @@ export default async function JudetPage({ params }: { params: Promise<{ judet: s
     },
   ];
 
-  // Schema.org specifică pentru SEO Local
   const localSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -165,7 +162,6 @@ export default async function JudetPage({ params }: { params: Promise<{ judet: s
     }
   };
 
-  // FAQ Schema
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -216,7 +212,6 @@ export default async function JudetPage({ params }: { params: Promise<{ judet: s
         { name: `Print în ${data.name}`, url: `${base}/judet/${data.slug}` }
       ]} />
 
-      {/* Hero Section Local */}
       <header className="text-center mb-12 px-4 max-w-4xl mx-auto">
         <span className="inline-block py-1 px-3 rounded-full bg-ui/10 text-ui text-sm font-medium mb-4">
           Livrare rapidă în {data.name}
@@ -230,7 +225,6 @@ export default async function JudetPage({ params }: { params: Promise<{ judet: s
         </p>
       </header>
 
-      {/* Localities Tags */}
       <section className="mb-16 container mx-auto px-4">
         <div className="flex flex-wrap justify-center gap-2 md:gap-3 opacity-80">
           <span className="text-sm text-muted py-1 flex items-center">Livrăm în:</span>
@@ -245,7 +239,6 @@ export default async function JudetPage({ params }: { params: Promise<{ judet: s
         </div>
       </section>
 
-      {/* Services Grid */}
       <section className="mb-16 container mx-auto px-4">
         <h2 className="text-2xl font-bold mb-8 text-center">Ce putem produce pentru afacerea ta din {data.name}?</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -274,7 +267,6 @@ export default async function JudetPage({ params }: { params: Promise<{ judet: s
         </div>
       </section>
 
-      {/* Why Us Section */}
       <section className="py-12 bg-white mb-16 rounded-3xl mx-4 lg:mx-8 shadow-sm border border-gray-100">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-8 text-center">
@@ -297,7 +289,6 @@ export default async function JudetPage({ params }: { params: Promise<{ judet: s
         </div>
       </section>
 
-      {/* FAQ Section - SEO Gold */}
       <section className="mb-16 container mx-auto px-4 max-w-3xl">
         <h2 className="text-2xl font-bold mb-8 text-center">Întrebări frecvente despre livrarea în {data.name}</h2>
         <div className="space-y-4">
@@ -316,7 +307,6 @@ export default async function JudetPage({ params }: { params: Promise<{ judet: s
         </div>
       </section>
 
-      {/* Final CTA */}
       <section className="text-center pb-12">
         <div className="bg-ui text-white rounded-2xl p-8 md:p-12 mx-4 max-w-4xl md:mx-auto shadow-xl shadow-ui/20">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Ai un proiect în {data.name}?</h2>

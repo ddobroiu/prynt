@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import ProductJsonLd from "@/components/ProductJsonLd";
 import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
-import CanvasConfigurator from "@/components/CanvasConfigurator";
 import type { Product } from "@/lib/products";
+import CanvasConfigurator from "@/components/CanvasConfigurator";
 
-type Props = { params?: Promise<{ slug?: string[] }> };
+type Props = { params: Promise<{ slug?: string[] }> };
 
 export async function generateStaticParams() {
   const slugs = getAllProductSlugsByCategory("canvas");
@@ -20,10 +20,10 @@ export async function generateMetadata({ params }: Props) {
   const metadata: any = {
     title: product.seo?.title || `${product.title} | Prynt`,
     description: product.seo?.description || product.description,
-    openGraph: { 
-      title: product.seo?.title || product.title, 
-      description: product.description, 
-      images: product.images 
+    openGraph: {
+      title: product.seo?.title || product.title,
+      description: product.description,
+      images: product.images
     },
   };
   if (isFallback) metadata.robots = { index: false, follow: true };
@@ -44,11 +44,26 @@ export default async function Page({ params }: Props) {
   return (
     <>
       <ProductJsonLd product={(product as Product)} url={url} />
-      <CanvasConfigurator 
-        productSlug={product.slug ?? product.routeSlug} 
-        initialWidth={initialWidth ?? undefined}
-        initialHeight={initialHeight ?? undefined}
-      />
+      
+      <main className="min-h-screen bg-gray-50">
+        <CanvasConfigurator 
+          productSlug={product.slug ?? product.routeSlug}
+          initialWidth={initialWidth ?? undefined}
+          initialHeight={initialHeight ?? undefined}
+        />
+
+        {/* SECȚIUNEA SEO PENTRU LANDING PAGES */}
+        {product.contentHtml && (
+           <section className="py-16 bg-white border-t border-gray-100">
+             <div className="container mx-auto px-4 max-w-4xl">
+               <article 
+                 className="prose prose-lg prose-indigo mx-auto prose-h2:text-3xl prose-h2:font-bold prose-h3:text-xl prose-img:rounded-xl"
+                 dangerouslySetInnerHTML={{ __html: product.contentHtml }}
+               />
+             </div>
+           </section>
+        )}
+      </main>
     </>
   );
 }
