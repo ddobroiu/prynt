@@ -75,6 +75,7 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showEmbed, setShowEmbed] = useState(false);
   const [createAccount, setCreateAccount] = useState(true);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const firstInvalidRef = useRef<HTMLElement | null>(null);
@@ -264,6 +265,7 @@ export default function CheckoutPage() {
       },
       marketing,
       createAccount: createAccount && !session?.user,
+      subscribeNewsletter: subscribeNewsletter,
       paymentMethod: paymentMethod === 'op' ? 'OP' : paymentMethod === 'ramburs' ? 'Ramburs' : 'Card',
     };
 
@@ -535,6 +537,8 @@ export default function CheckoutPage() {
                 setCreateAccount={setCreateAccount}
                 acceptTerms={acceptTerms}
                 setAcceptTerms={setAcceptTerms}
+                subscribeNewsletter={subscribeNewsletter}
+                setSubscribeNewsletter={setSubscribeNewsletter}
                 isLoggedIn={!!session?.user}
                 paymentMethod={paymentMethod}
                 errors={errors}
@@ -586,6 +590,8 @@ function SummaryCard({
   setCreateAccount,
   acceptTerms,
   setAcceptTerms,
+  subscribeNewsletter,
+  setSubscribeNewsletter,
   isLoggedIn,
   paymentMethod,
   errors,
@@ -606,6 +612,8 @@ function SummaryCard({
   setCreateAccount: (v: boolean) => void;
   acceptTerms: boolean;
   setAcceptTerms: (v: boolean) => void;
+  subscribeNewsletter: boolean;
+  setSubscribeNewsletter: (v: boolean) => void;
   isLoggedIn: boolean;
   paymentMethod: PaymentMethod;
   errors: Record<string, string>;
@@ -683,7 +691,7 @@ function SummaryCard({
 
       <div className="mt-6">
         {!isLoggedIn && (
-          <label className="flex items-start gap-2 mb-4 text-xs cursor-pointer select-none opacity-80 hover:opacity-100 transition-opacity">
+          <label className="flex items-start gap-2 mb-3 text-xs cursor-pointer select-none opacity-80 hover:opacity-100 transition-opacity">
             <input
               type="checkbox"
               checked={createAccount}
@@ -695,6 +703,19 @@ function SummaryCard({
             </span>
           </label>
         )}
+
+        {/* Newsletter Subscription */}
+        <label className="flex items-start gap-2 mb-4 text-xs cursor-pointer select-none opacity-80 hover:opacity-100 transition-opacity">
+          <input
+            type="checkbox"
+            checked={subscribeNewsletter}
+            onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+            className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white"
+          />
+          <span className="text-slate-600 leading-snug">
+            Vreau să primesc oferte și noutăți pe email (10% reducere la prima comandă! 🎁).
+          </span>
+        </label>
 
         {/* Terms and Conditions Acceptance */}
         <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">

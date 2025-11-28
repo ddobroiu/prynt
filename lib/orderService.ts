@@ -542,7 +542,7 @@ async function sendEmails(
 }
 
 export async function fulfillOrder(
-  orderData: { address: Address; billing: Billing; cart: CartItem[]; marketing?: MarketingInfo; createAccount?: boolean; userId?: string | null },
+  orderData: { address: Address; billing: Billing; cart: CartItem[]; marketing?: MarketingInfo; createAccount?: boolean; subscribeNewsletter?: boolean; userId?: string | null },
   paymentType: 'Ramburs' | 'Card'
 ): Promise<{ invoiceLink: string | null; orderNo?: number; orderId?: string; createdPassword?: string }> {
   const { address, billing, cart, marketing } = orderData;
@@ -644,6 +644,33 @@ export async function fulfillOrder(
       }
     } catch (e: any) {
       console.warn('[OrderService] Eroare la crearea/verificarea contului:', e?.message || e);
+    }
+  }
+
+  // Newsletter subscription
+  if (orderData.subscribeNewsletter) {
+    try {
+      const email = address.email;
+      console.log('[OrderService] Subscribing to newsletter:', email);
+      
+      // Call newsletter API
+      const newsletterResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email, 
+          source: 'checkout',
+          configuratorId: 'order'
+        })
+      });
+      
+      if (newsletterResponse.ok) {
+        console.log('[OrderService] Newsletter subscription successful for:', email);
+      } else {
+        console.warn('[OrderService] Newsletter subscription failed for:', email);
+      }
+    } catch (e: any) {
+      console.warn('[OrderService] Eroare la abonarea newsletter:', e?.message || e);
     }
   }
 
