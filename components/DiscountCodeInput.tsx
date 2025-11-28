@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from 'react';
-import { useDiscountCode } from '@/hooks/useDiscountCode';
 import { Check, X, Percent, Tag } from 'lucide-react';
 
 interface DiscountCodeInputProps {
@@ -16,31 +15,65 @@ export default function DiscountCodeInput({
   onDiscountApplied 
 }: DiscountCodeInputProps) {
   const [inputCode, setInputCode] = useState('');
-  const { 
-    validateCode, 
-    applyCode, 
-    appliedDiscount, 
-    isValidating, 
-    error,
-    clearDiscount 
-  } = useDiscountCode();
+  const [isValidating, setIsValidating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [appliedDiscount, setAppliedDiscount] = useState<{
+    code: string;
+    type: string;
+    value: number;
+    amount: number;
+  } | null>(null);
 
   const handleApplyCode = async () => {
-    if (!inputCode.trim()) return;
+    if (!inputCode.trim()) {
+      setError('Introdu un cod de reducere');
+      return;
+    }
     
-    const result = await validateCode(inputCode.trim(), subtotal, configuratorId);
-    if (result.isValid && result.discount) {
-      const applied = await applyCode(inputCode.trim());
-      if (applied) {
+    setIsValidating(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/discount-codes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'validate',
+          code: inputCode.trim().toUpperCase(),
+          orderValue: subtotal,
+          configuratorId
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.isValid && result.discount) {
+        setAppliedDiscount({
+          code: inputCode.trim().toUpperCase(),
+          type: result.discount.type,
+          value: result.discount.value,
+          amount: result.discount.amount
+        });
         onDiscountApplied(result.discount);
         setInputCode('');
+        setError(null);
+      } else {
+        setError(result.error || 'Cod invalid sau expirat');
       }
+    } catch (err) {
+      console.error('Discount code error:', err);
+      setError('Eroare la validarea codului. Încearcă din nou.');
+    } finally {
+      setIsValidating(false);
     }
   };
 
   const handleRemoveCode = () => {
-    clearDiscount();
+    setAppliedDiscount(null);
     onDiscountApplied(null);
+    setError(null);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
