@@ -7,7 +7,8 @@ export default function AccountDetailsForm() {
   const { data: session } = useSession();
   const [name, setName] = useState(session?.user?.name || "");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
