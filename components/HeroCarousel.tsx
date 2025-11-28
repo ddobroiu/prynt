@@ -144,7 +144,7 @@ export default function HeroCarousel() {
   const currentSlide = HERO_ITEMS[activeSlide];
 
   return (
-    <section className="relative w-full bg-white overflow-hidden pt-4 pb-12 lg:pt-16 lg:pb-24 border-b border-slate-100">
+    <section className="relative w-full bg-white overflow-hidden pt-4 pb-12 lg:pt-16 lg:pb-24 border-b border-slate-200">
       <div className="container mx-auto px-4 relative z-10">
         
         {/* NAVIGARE DESKTOP (Săgeți) - Ascunse pe mobil */}

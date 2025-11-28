@@ -116,14 +116,14 @@ export default function AssistantSection() {
                     href="https://wa.me/40750259955" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold transition-all shadow-xl shadow-green-200 hover:shadow-2xl hover:-translate-y-1"
+                    className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#128C7E] hover:bg-[#0F6B5A] text-white font-bold transition-all shadow-xl shadow-green-200 hover:shadow-2xl hover:-translate-y-1"
                   >
                     <MessageCircle size={22} />
                     WhatsApp Chat
                   </a>
                   
                   {/* Buton Secundar - Săgeată spre Stânga (indicând spre widget) */}
-                  <div className="flex items-center justify-center gap-2 px-6 py-4 text-slate-500 text-sm font-medium bg-slate-50 rounded-full border border-slate-100">
+                  <div className="flex items-center justify-center gap-2 px-6 py-4 text-slate-500 text-sm font-medium bg-slate-50 rounded-full border border-slate-200">
                     <ArrowLeft className="text-indigo-500 animate-pulse" size={18} />
                     <span>Chat Live</span>
                   </div>

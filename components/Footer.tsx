@@ -50,7 +50,7 @@ export default function Footer() {
   const linkClass = "text-slate-500 hover:text-indigo-600 transition-colors text-sm flex items-center gap-2";
 
   return (
-    <footer className="bg-white border-t border-slate-100 pt-8 sm:pt-12 lg:pt-16 xl:pt-24 pb-6 sm:pb-8">
+    <footer className="bg-white border-t border-slate-200 pt-8 sm:pt-12 lg:pt-16 xl:pt-24 pb-6 sm:pb-8">
       <div className="container mx-auto px-4 sm:px-6">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 mb-8 lg:mb-16">
@@ -134,7 +134,7 @@ export default function Footer() {
 
           {/* 3. Newsletter */}
           <div className="lg:col-span-3">
-            <div className="bg-slate-50 rounded-xl lg:rounded-2xl p-4 sm:p-6 border border-slate-100">
+            <div className="bg-slate-50 rounded-xl lg:rounded-2xl p-4 sm:p-6 border border-slate-200">
                 <h3 className="font-bold text-slate-900 mb-2 text-sm sm:text-base">Abonează-te la Newsletter</h3>
                 <p className="text-xs text-slate-500 mb-3 sm:mb-4">
                   Primești oferte exclusive și reduceri. Nu facem spam.
@@ -165,7 +165,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-6 sm:pt-8 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
+        <div className="pt-6 sm:pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
           <div className="flex flex-col items-center md:items-start gap-1 sm:gap-2">
             <p className="text-xs text-slate-600 text-center md:text-left">
               &copy; {new Date().getFullYear()} {siteConfig.name}. Toate drepturile rezervate.
