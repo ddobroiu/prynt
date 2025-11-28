@@ -614,7 +614,7 @@ export const AFISE_CONSTANTS = {
     paper_150_lucioasa: { A3: [{ min: 1, price: 3.0 }], A2: [{ min: 1, price: 9.98 }], A1: [{ min: 1, price: 39.96 }], A0: [{ min: 1, price: 80.0 }], S5: [{ min: 1, price: 28.0 }], S7: [{ min: 1, price: 56.0 }] },
     blueback_115: { A0: [{ min: 1, price: 70.0 }], A1: [{ min: 1, price: 17.48 }], A2: [{ min: 1, price: 17.46 }] },
     whiteback_150_material: { A0: [{ min: 1, price: 80.0 }] },
-  } as any
+  } as Record<string, Record<string, Array<{ min: number; price: number }>>>
 };
 
 export type PriceInputAfise = { size: string; material: string; quantity: number; designOption: "upload" | "pro" };
@@ -630,7 +630,7 @@ export const calculatePosterPrice = (input: PriceInputAfise) => {
   let basePrice = 10;
   if (AFISE_CONSTANTS.PRICE_TABLE[matKey] && AFISE_CONSTANTS.PRICE_TABLE[matKey][input.size]) {
        const tiers = AFISE_CONSTANTS.PRICE_TABLE[matKey][input.size];
-       const sorted = tiers.slice().sort((a:any, b:any) => b.min - a.min);
+       const sorted = tiers.slice().sort((a: { min: number; price: number }, b: { min: number; price: number }) => b.min - a.min);
        basePrice = sorted[sorted.length - 1].price;
        for (const t of sorted) { if (input.quantity >= t.min) { basePrice = t.price; break; } }
   }
@@ -695,7 +695,7 @@ export type PriceInputPliante = { weight: PlianteWeightKey; quantity: number; fo
 
 export const calculatePliantePrice = (input: PriceInputPliante) => {
   const tiers = PLIANTE_CONSTANTS.PRICE_TABLE[input.weight];
-  let unitBasePrice = tiers[0].price;
+  let unitBasePrice: number = tiers[0].price;
   const subtotal = roundMoney(unitBasePrice * input.quantity);
   const proFee = input.designOption === "pro" ? (PLIANTE_CONSTANTS.PRO_FEES[input.fold] ?? 0) : 0;
   const finalPrice = roundMoney(subtotal + proFee);
