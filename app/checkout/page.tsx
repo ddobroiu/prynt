@@ -9,6 +9,7 @@ import { useCart } from "../../components/CartContext";
 import { ShieldCheck, Truck, X, Plus, Minus, CreditCard, Banknote, Building2, MapPin, AlertCircle, Package } from "lucide-react";
 import CheckoutForm from "./CheckoutForm";
 import DeliveryInfo from "@/components/DeliveryInfo";
+import DiscountCodeInput from "@/components/DiscountCodeInput";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -130,6 +131,13 @@ export default function CheckoutPage() {
     });
   }
 
+  // State pentru codul de reducere
+  const [appliedDiscount, setAppliedDiscount] = useState<{
+    type: string;
+    value: number;
+    amount: number;
+  } | null>(null);
+
   const subtotal = useMemo(() => {
     const norm = normalizeCart(items);
     return norm.reduce((s, it) => s + Number(it.totalAmount || it.unitAmount * it.quantity || 0), 0);
@@ -137,8 +145,23 @@ export default function CheckoutPage() {
 
   const FREE_SHIPPING_THRESHOLD = 500;
   const SHIPPING_FEE = 19.99;
-  const costLivrare = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-  const totalPlata = (items ?? []).length > 0 ? subtotal + costLivrare : 0;
+  
+  // Calculez livrarea - dacă am livrare gratuită prin cod, costul este 0
+  const costLivrare = useMemo(() => {
+    if (appliedDiscount?.type === 'free_shipping') return 0;
+    return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  }, [subtotal, appliedDiscount]);
+
+  // Calculez reducerea aplicată pe produse
+  const discountAmount = useMemo(() => {
+    if (!appliedDiscount || appliedDiscount.type === 'free_shipping') return 0;
+    return appliedDiscount.amount || 0;
+  }, [appliedDiscount]);
+
+  const totalPlata = useMemo(() => {
+    if ((items ?? []).length === 0) return 0;
+    return Math.max(0, subtotal - discountAmount + costLivrare);
+  }, [subtotal, discountAmount, costLivrare, items]);
   const isEmpty = isLoaded && (items ?? []).length === 0;
 
   const isRambursDisabled = totalPlata > MAX_RAMBURS_LIMIT;
@@ -498,6 +521,9 @@ export default function CheckoutPage() {
                 subtotal={subtotal}
                 shipping={costLivrare}
                 total={totalPlata}
+                discount={appliedDiscount}
+                discountAmount={discountAmount}
+                onDiscountApplied={setAppliedDiscount}
                 onPlaceOrder={placeOrder}
                 placing={placing}
                 county={address.judet}
@@ -543,6 +569,9 @@ function SummaryCard({
   subtotal,
   shipping,
   total,
+  discount,
+  discountAmount,
+  onDiscountApplied,
   onPlaceOrder,
   placing,
   county,
@@ -557,6 +586,9 @@ function SummaryCard({
   subtotal: number;
   shipping: number;
   total: number;
+  discount?: { type: string; value: number; amount: number } | null;
+  discountAmount?: number;
+  onDiscountApplied: (discount: { type: string; value: number; amount: number } | null) => void;
   onPlaceOrder: () => void;
   placing: boolean;
   county?: string;
@@ -616,6 +648,22 @@ function SummaryCard({
           </span>
           <span className="font-semibold text-emerald-600">{shipping === 0 ? "Gratuit" : fmt(shipping)}</span>
         </div>
+
+        {/* Cod de reducere */}
+        <div className="space-y-2">
+          <DiscountCodeInput
+            subtotal={subtotal}
+            onDiscountApplied={onDiscountApplied}
+          />
+        </div>
+
+        {/* Afișez reducerea aplicată */}
+        {discount && discountAmount && discountAmount > 0 && (
+          <div className="flex items-center justify-between text-emerald-600">
+            <span className="text-slate-500">Reducere</span>
+            <span className="font-semibold">-{fmt(discountAmount)}</span>
+          </div>
+        )}
         
         <div className="flex items-center justify-between border-t border-dashed border-slate-200 pt-4 mt-4">
           <span className="text-lg font-bold text-slate-700">Total</span>
