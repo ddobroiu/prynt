@@ -1,8 +1,7 @@
 // lib/products.ts
 import { EXTRA_PRODUCTS_RAW } from "./extraProducts";
 import { generateSeoForProduct } from "./seoTemplates";
-// 1. Importăm funcția de lookup pentru landing pages
-import { getLandingInfo } from "./landingData"; 
+import { getLandingInfo } from "./landingData"; // <--- IMPORT CRITIC
 
 export type MaterialOption = {
   id: string;
@@ -40,8 +39,7 @@ export type Product = {
   seo?: { title?: string; description?: string };
   metadata?: Record<string, any>;
   materials?: MaterialOption[];
-  // 2. Adăugăm acest câmp pentru a transporta HTML-ul din landingData către pagină
-  contentHtml?: string; 
+  contentHtml?: string; // <--- CÂMP NOU PENTRU SEO LANDING PAGES
 };
 
 function toWebpPaths(imgs?: string[]): string[] | undefined {
@@ -171,44 +169,36 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
 
   // --- LOGICĂ NOUĂ: Verificare Landing Data (Pilonul 2) ---
   if (category) {
-    // Mapping categorie URL (banner) -> categorie Landing (bannere)
     const landingCatMap: Record<string, string> = {
       "banner": "bannere",
       "autocolante": "autocolante",
       "afise": "afise",
       "canvas": "canvas",
       "pliante": "pliante",
-      "flayere": "pliante", // alias
-      "materiale": "materiale_rigide", // alias posibil
+      "flayere": "pliante",
+      "materiale": "materiale_rigide",
     };
     
     const landingCategory = landingCatMap[category] || category;
-    
-    // Căutăm informația de landing
-    // Folosim cleanedSlug (fără dimensiuni) sau raw dacă nu avem dimensiuni
     const landingInfo = getLandingInfo(landingCategory, cleanedSlug) || getLandingInfo(landingCategory, raw);
 
     if (landingInfo) {
-      // Am găsit un landing page dedicat! (ex: frizerie)
-      
-      // Încercăm să găsim un produs "părinte" real pentru a-i folosi prețul/configuratorul
-      // Dacă landingInfo are productRouteSlug, îl folosim pe acela. Dacă nu, folosim fallback-ul categoriei.
+      // Am găsit un landing page dedicat!
       const baseProductSlug = landingInfo.productRouteSlug || category;
       const baseProduct = getProductBySlug(baseProductSlug) || getProductBySlug(category);
       
-      // Construim produsul hibrid
       const hybridProduct: Product = {
-        ...(baseProduct || {}), // moștenim preț, materiale, etc.
+        ...(baseProduct || {}), 
         id: `landing-${landingInfo.key}`,
-        slug: cleanedSlug, // păstrăm slug-ul curent
+        slug: cleanedSlug,
         routeSlug: cleanedSlug,
-        title: landingInfo.title, // Titlul din Landing (H1)
+        title: landingInfo.title,
         description: landingInfo.shortDescription,
         seo: {
           title: landingInfo.seoTitle,
           description: landingInfo.seoDescription
         },
-        contentHtml: landingInfo.contentHtml, // HTML-ul bogat pentru SEO
+        contentHtml: landingInfo.contentHtml,
         images: landingInfo.images ? toWebpPaths(landingInfo.images) : (baseProduct?.images || []),
         priceBase: baseProduct?.priceBase ?? 0,
         currency: baseProduct?.currency ?? "RON",
@@ -224,9 +214,7 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
       };
     }
   }
-  // -------------------------------------------------------
 
-  // Logica standard (existenta)
   function categoryLookup(candidate: string | undefined): { product?: Product; initialWidth?: number | null; initialHeight?: number | null; isFallback?: boolean } | null {
     if (!category || !candidate) return null;
     const slugCandidate = String(candidate).toLowerCase().trim();
@@ -243,7 +231,6 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
         };
       }
     }
-    // ... (restul logicii de lookup rămâne la fel)
     return null;
   }
 
