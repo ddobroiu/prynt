@@ -1,55 +1,105 @@
-const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
-const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
+import { WhatsAppMessage } from '../types'; // Asigură-te că ai tipurile definite sau ajustează importul
+
+const WHATSAPP_API_URL = `https://graph.facebook.com/v20.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`;
+const WHATSAPP_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 
 /**
- * Trimite mesaj pe WhatsApp. Dacă options este definit, trimite Quick Replies.
+ * Trimite un mesaj text simplu pe WhatsApp
  */
-export async function sendWhatsAppMessage(to: string, text: string, options?: { id: string, title: string }[]) {
-  if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
-    console.error("WHATSAPP_TOKEN sau PHONE_NUMBER_ID lipsă din .env");
-    return;
-  }
-
-  let payload: any = {
-    messaging_product: "whatsapp",
-    recipient_type: "individual",
+export async function sendWhatsAppMessage(to: string, body: string) {
+  const payload = {
+    messaging_product: 'whatsapp',
     to: to,
+    text: { body: body },
   };
 
-  if (options && options.length > 0) {
-    payload.type = "interactive";
-    payload.interactive = {
-      type: "button",
-      body: { text },
-      action: {
-        buttons: options.map(opt => ({
-          type: "reply",
-          reply: { id: opt.id, title: opt.title }
-        }))
-      }
-    };
-  } else {
-    payload.type = "text";
-    // preview_url: true pentru ca link-urile (ex: DPD) să aibă preview
-    payload.text = { preview_url: true, body: text };
+  try {
+    const res = await fetch(WHATSAPP_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error('Error sending WhatsApp message:', JSON.stringify(errorData, null, 2));
+      return null;
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error('Error sending WhatsApp message:', error);
+    return null;
   }
+}
+
+/**
+ * Trimite un mesaj interactiv cu butoane (ex: Da/Nu)
+ * @param to Numărul de telefon al destinatarului
+ * @param text Textul mesajului (întrebarea)
+ * @param buttons Lista de butoane (max 3). Fiecare buton are un id și un titlu (max 20 caractere)
+ */
+export async function sendInteractiveButtons(
+  to: string, 
+  text: string, 
+  buttons: { id: string; title: string }[]
+) {
+  // Formatăm butoanele conform cerințelor API-ului WhatsApp
+  const formattedButtons = buttons.map((btn) => ({
+    type: 'reply',
+    reply: {
+      id: btn.id,
+      title: btn.title,
+    },
+  }));
+
+  const payload = {
+    messaging_product: 'whatsapp',
+    to: to,
+    type: 'interactive',
+    interactive: {
+      type: 'button',
+      body: {
+        text: text,
+      },
+      action: {
+        buttons: formattedButtons,
+      },
+    },
+  };
 
   try {
-    const res = await fetch(
-      `https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${WHATSAPP_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) console.error("WhatsApp Send Error:", data);
-    return data;
+    const res = await fetch(WHATSAPP_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error('Error sending interactive button message:', JSON.stringify(errorData, null, 2));
+      return null;
+    }
+
+    return await res.json();
   } catch (error) {
-    console.error("Fetch Error:", error);
+    console.error('Error sending interactive button message:', error);
+    return null;
   }
+}
+
+/**
+ * Funcție helper pentru a trimite rapid butoane de Da/Nu
+ */
+export async function sendYesNoQuestion(to: string, questionText: string) {
+  return sendInteractiveButtons(to, questionText, [
+    { id: 'yes', title: 'Da' },
+    { id: 'no', title: 'Nu' },
+  ]);
 }
