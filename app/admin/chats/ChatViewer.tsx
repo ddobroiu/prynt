@@ -161,18 +161,19 @@ export default function ChatViewer({ conversations: initialConversations }: { co
   };
 
   return (
-    // LAYOUT FIX: Înălțimea calculată exact cât ecranul minus header-ul site-ului (~64px)
-    <div className="flex h-[calc(100vh-64px)] w-full bg-slate-100 overflow-hidden border-t border-slate-200">
+    // FIX: Înălțime ajustată pentru a ține cont de padding-ul din layout (aprox 6rem total p-4 sm:p-6 lg:p-10)
+    // Folosim un container flexibil care se încadrează în spațiul părintelui scrollabil
+    <div className="flex flex-col md:flex-row h-[calc(100vh-6rem)] w-full bg-slate-100 overflow-hidden border border-slate-200 rounded-xl shadow-xl">
       
       {/* ==================== SIDEBAR (Lista Conversații) ==================== */}
-      <div className="w-1/3 min-w-[300px] border-r border-slate-200 flex flex-col bg-white h-full">
+      <div className="w-full md:w-1/3 min-w-[300px] border-r border-slate-200 flex flex-col bg-white h-full">
         {/* HEADER SIDEBAR (Fix, rămâne vizibil) */}
         <div className="shrink-0 bg-white border-b border-slate-200 z-40 sticky top-0">
           {/* Tab-uri Inbox / Finalizate */}
           <div className="flex">
             <button 
               onClick={() => setActiveTab('active')}
-              className={`flex-1 py-4 text-sm font-bold border-b-2 transition-colors flex justify-center items-center gap-2
+              className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors flex justify-center items-center gap-2
                 ${activeTab === 'active' ? 'border-slate-800 text-slate-800 bg-slate-50' : 'border-transparent text-slate-400 hover:bg-slate-50'}
               `}
             >
@@ -181,7 +182,7 @@ export default function ChatViewer({ conversations: initialConversations }: { co
             </button>
             <button 
               onClick={() => setActiveTab('archived')}
-              className={`flex-1 py-4 text-sm font-bold border-b-2 transition-colors
+              className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors
                 ${activeTab === 'archived' ? 'border-slate-800 text-slate-800 bg-slate-50' : 'border-transparent text-slate-400 hover:bg-slate-50'}
               `}
             >
@@ -198,7 +199,7 @@ export default function ChatViewer({ conversations: initialConversations }: { co
         </div>
 
         {/* LISTA (Scrollabilă) */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300">
           {filteredList.length === 0 ? (
             <div className="p-10 text-center text-slate-400 text-xs flex flex-col items-center">
               <span className="text-3xl mb-2 opacity-30">📭</span>
@@ -241,11 +242,11 @@ export default function ChatViewer({ conversations: initialConversations }: { co
       </div>
 
       {/* ==================== ZONA DE CHAT (Dreapta) ==================== */}
-      <div className="w-2/3 flex flex-col h-full bg-white relative">
+      <div className="hidden md:flex md:w-2/3 flex-col h-full bg-white relative">
         {selectedConversation ? (
           <>
             {/* HEADER CHAT (Fix) */}
-            <div className="shrink-0 bg-white border-b border-slate-200 p-3 flex justify-between items-center z-10 shadow-sm">
+            <div className="shrink-0 bg-white border-b border-slate-200 p-3 flex justify-between items-center z-10 shadow-sm h-16">
                <div>
                   <h2 className="font-bold text-slate-900 text-base flex items-center gap-2">
                     {selectedConversation.user?.name || selectedConversation.identifier}
@@ -266,8 +267,8 @@ export default function ChatViewer({ conversations: initialConversations }: { co
                />
             </div>
 
-            {/* MESAJE (Scrollabil) */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50 scroll-smooth">
+            {/* MESAJE (Scrollabil - min-h-0 este esențial pentru flex nesting) */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50 scroll-smooth min-h-0 scrollbar-thin scrollbar-thumb-slate-300">
               {selectedConversation.messages.map((msg) => {
                 if (msg.role === 'system' || msg.role === 'tool') return null;
                 const isAdmin = msg.role === 'admin';
@@ -299,7 +300,7 @@ export default function ChatViewer({ conversations: initialConversations }: { co
             </div>
 
             {/* FOOTER (Fix) - Controale + Input */}
-            <div className="shrink-0 bg-white border-t border-slate-200 p-4 shadow-lg z-20">
+            <div className="shrink-0 bg-white border-t border-slate-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
               
               {/* BARA DE CONTROL */}
               <div className="flex items-center justify-between mb-2 bg-slate-50 p-2 rounded border border-slate-100">
