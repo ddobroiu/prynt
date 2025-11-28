@@ -13,7 +13,7 @@ import {
     type PriceInputAfise 
 } from "@/lib/pricing";
 
-const GALLERY = ["/products/afise/1.webp", "/products/afise/2.webp", "/products/afise/3.webp", "/products/afise/4.webp"] as const;
+const GALLERY_BASE = ["/products/afise/1.webp", "/products/afise/2.webp", "/products/afise/3.webp", "/products/afise/4.webp"] as const;
 
 /* --- UI COMPONENTS --- */
 const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
@@ -71,8 +71,9 @@ function OptionButton({ active, onClick, title, subtitle }: { active: boolean; o
   return <button type="button" onClick={onClick} className={`w-full text-left p-3 rounded-lg border-2 transition-all text-sm ${active ? "border-indigo-600 bg-indigo-50" : "border-gray-300 bg-white hover:border-gray-400"}`}><div className="font-bold text-gray-800">{title}</div>{subtitle && <div className="text-xs text-gray-600 mt-1">{subtitle}</div>}</button>;
 }
 
-export default function AfiseConfigurator({ productSlug, initialWidth, initialHeight }: { productSlug?: string; initialWidth?: number; initialHeight?: number }) {
+export default function AfiseConfigurator({ productSlug, initialWidth, initialHeight, productImage }: { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string }) {
   const { addItem } = useCart();
+  const GALLERY = useMemo(() => productImage ? [productImage, ...GALLERY_BASE] : GALLERY_BASE, [productImage]);
   const [size, setSize] = useState<string>("A2");
   const [material, setMaterial] = useState<string>("whiteback_150_material");
   const [quantity, setQuantity] = useState<number>(50);
@@ -93,7 +94,13 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
   const [uploadError, setUploadError] = useState<string | null>(null);
   
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
+  const [activeImage, setActiveImage] = useState<string>("");
+  
+  useEffect(() => {
+    if (GALLERY.length > 0 && !activeImage) {
+      setActiveImage(GALLERY[0]);
+    }
+  }, [GALLERY, activeImage]);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);

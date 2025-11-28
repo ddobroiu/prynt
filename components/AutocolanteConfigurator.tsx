@@ -14,7 +14,7 @@ import {
   type PriceInputAutocolante 
 } from "@/lib/pricing";
 
-const GALLERY = [
+const GALLERY_BASE = [
   "/products/autocolante/1.webp", 
   "/products/autocolante/2.webp", 
   "/products/autocolante/3.webp", 
@@ -93,11 +93,13 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
   return <button type="button" onClick={onClick} className={`px-4 py-2 text-sm font-semibold transition-colors rounded-t-lg ${active ? "border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50" : "text-gray-500 hover:text-gray-800"}`}>{children}</button>;
 }
 
-type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number };
+type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string };
 
 /* --- MAIN COMPONENT --- */
-export default function AutocolanteConfigurator({ productSlug, initialWidth: initW, initialHeight: initH }: Props) {
+export default function AutocolanteConfigurator({ productSlug, initialWidth: initW, initialHeight: initH, productImage }: Props) {
   const { addItem } = useCart();
+  const GALLERY = useMemo(() => productImage ? [productImage, ...GALLERY_BASE] : GALLERY_BASE, [productImage]);
+  
   const [input, setInput] = useState<PriceInputAutocolante>({
     width_cm: initW ?? 0,
     height_cm: initH ?? 0,
@@ -111,7 +113,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
   const [lengthText, setLengthText] = useState(initW ? String(initW) : "");
   const [heightText, setHeightText] = useState(initH ? String(initH) : "");
   
-  const [activeImage, setActiveImage] = useState<string>(GALLERY[0]);
+  const [activeImage, setActiveImage] = useState<string>("");
   const [activeIndex, setActiveIndex] = useState<number>(0);
   
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
