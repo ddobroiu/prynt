@@ -43,12 +43,15 @@ export default function ChatViewer({ conversations: initialConversations }: { co
   const [isToggling, setIsToggling] = useState(false);
   const [tagInput, setTagInput] = useState("");
 
+  // Stare pentru Mobile View (List vs Chat)
+  const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const selectedConversation = conversations.find(c => c.id === selectedId);
 
-  // 1. ACTUALIZARE AUTOMATĂ (Polling la 4 secunde)
+  // 1. ACTUALIZARE AUTOMATĂ (Polling)
   useEffect(() => {
     const interval = setInterval(() => {
       router.refresh();
@@ -61,20 +64,28 @@ export default function ChatViewer({ conversations: initialConversations }: { co
     setConversations(initialConversations);
   }, [initialConversations]);
 
-  // Scroll la ultimul mesaj
+  // Scroll la ultimul mesaj și Setare Tag
   useEffect(() => {
-    if (selectedConversation && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (selectedConversation) {
+      // Pe mobil, când selectăm o conversație, trecem la vizualizarea de chat
+      setMobileView('chat');
       setTagInput(selectedConversation.customTag || "");
+      
+      setTimeout(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+        // Dacă nu e selectat nimic, revenim la listă
+        setMobileView('list');
     }
-  }, [selectedId, selectedConversation?.messages.length]);
+  }, [selectedId, selectedConversation?.messages.length]); // Dependență pe length pentru scroll la mesaj nou
 
   // LOGICA DE FILTRARE
   const filteredList = conversations.filter(c => {
     const convStatus = c.status || 'active';
-    // Tab curent (Inbox vs Finalizate)
     if (convStatus !== activeTab) return false;
-    // Sursă (Whatsapp vs Web)
     if (filterSource === 'whatsapp' && c.source !== 'whatsapp') return false;
     if (filterSource === 'web' && c.source !== 'web') return false;
     return true;
@@ -90,6 +101,16 @@ export default function ChatViewer({ conversations: initialConversations }: { co
 
   // --- ACTIONS ---
 
+  const handleSelectConversation = (id: string) => {
+      setSelectedId(id);
+      // Efectul de mai sus va schimba mobileView în 'chat'
+  };
+
+  const handleBackToList = () => {
+      setSelectedId(null);
+      setMobileView('list');
+  };
+
   const updateConversation = async (updates: any) => {
     if (!selectedId) return;
     try {
@@ -102,11 +123,12 @@ export default function ChatViewer({ conversations: initialConversations }: { co
       });
       if (!res.ok) throw new Error("Eroare update");
       
-      // Update local rapid
       setConversations(prev => prev.map(c => c.id === selectedId ? { ...c, ...updates } : c));
       
-      // Dacă finalizăm, scoatem selecția
-      if (updates.status === 'archived') setSelectedId(null);
+      if (updates.status === 'archived') {
+          setSelectedId(null);
+          setMobileView('list');
+      }
       
       router.refresh();
     } catch (e) {
@@ -161,19 +183,22 @@ export default function ChatViewer({ conversations: initialConversations }: { co
   };
 
   return (
-    // FIX: Înălțime ajustată pentru a ține cont de padding-ul din layout (aprox 6rem total p-4 sm:p-6 lg:p-10)
-    // Folosim un container flexibil care se încadrează în spațiul părintelui scrollabil
-    <div className="flex flex-col md:flex-row h-[calc(100vh-6rem)] w-full bg-slate-100 overflow-hidden border border-slate-200 rounded-xl shadow-xl">
+    // FIX: Container Full Height, fără calc() complicat, se bazează pe layout-ul părintelui
+    <div className="flex h-full w-full bg-slate-100 overflow-hidden sm:rounded-xl sm:border border-slate-200 sm:shadow-xl">
       
-      {/* ==================== SIDEBAR (Lista Conversații) ==================== */}
-      <div className="w-full md:w-1/3 min-w-[300px] border-r border-slate-200 flex flex-col bg-white h-full">
-        {/* HEADER SIDEBAR (Fix, rămâne vizibil) */}
-        <div className="shrink-0 bg-white border-b border-slate-200 z-40 sticky top-0">
-          {/* Tab-uri Inbox / Finalizate */}
+      {/* ==================== SIDEBAR (Lista) ==================== */}
+      {/* Vizibil pe desktop (md:flex) SAU pe mobil dacă suntem în modul 'list' */}
+      <div className={`
+          flex-col bg-white h-full border-r border-slate-200 w-full md:w-1/3 min-w-[300px]
+          ${mobileView === 'list' ? 'flex' : 'hidden md:flex'} 
+      `}>
+        {/* HEADER SIDEBAR */}
+        <div className="shrink-0 bg-white border-b border-slate-200 z-10">
+          {/* Tab-uri */}
           <div className="flex">
             <button 
               onClick={() => setActiveTab('active')}
-              className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors flex justify-center items-center gap-2
+              className={`flex-1 py-4 text-sm font-bold border-b-2 transition-colors flex justify-center items-center gap-2
                 ${activeTab === 'active' ? 'border-slate-800 text-slate-800 bg-slate-50' : 'border-transparent text-slate-400 hover:bg-slate-50'}
               `}
             >
@@ -182,7 +207,7 @@ export default function ChatViewer({ conversations: initialConversations }: { co
             </button>
             <button 
               onClick={() => setActiveTab('archived')}
-              className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors
+              className={`flex-1 py-4 text-sm font-bold border-b-2 transition-colors
                 ${activeTab === 'archived' ? 'border-slate-800 text-slate-800 bg-slate-50' : 'border-transparent text-slate-400 hover:bg-slate-50'}
               `}
             >
@@ -190,20 +215,20 @@ export default function ChatViewer({ conversations: initialConversations }: { co
             </button>
           </div>
 
-          {/* Filtre Sursă */}
-          <div className="p-2 flex gap-2 justify-center bg-slate-50">
-            <button onClick={() => setFilterSource('all')} className={`px-3 py-1 text-xs rounded border ${filterSource === 'all' ? 'bg-white border-slate-400 font-bold' : 'border-transparent text-slate-500'}`}>Toate</button>
-            <button onClick={() => setFilterSource('whatsapp')} className={`px-3 py-1 text-xs rounded border ${filterSource === 'whatsapp' ? 'bg-green-100 border-green-300 text-green-800 font-bold' : 'border-transparent text-slate-500'}`}>WhatsApp</button>
-            <button onClick={() => setFilterSource('web')} className={`px-3 py-1 text-xs rounded border ${filterSource === 'web' ? 'bg-blue-100 border-blue-300 text-blue-800 font-bold' : 'border-transparent text-slate-500'}`}>Web</button>
+          {/* Filtre */}
+          <div className="p-2 flex gap-2 justify-center bg-slate-50 overflow-x-auto">
+            <button onClick={() => setFilterSource('all')} className={`whitespace-nowrap px-3 py-1 text-xs rounded border ${filterSource === 'all' ? 'bg-white border-slate-400 font-bold' : 'border-transparent text-slate-500'}`}>Toate</button>
+            <button onClick={() => setFilterSource('whatsapp')} className={`whitespace-nowrap px-3 py-1 text-xs rounded border ${filterSource === 'whatsapp' ? 'bg-green-100 border-green-300 text-green-800 font-bold' : 'border-transparent text-slate-500'}`}>WhatsApp</button>
+            <button onClick={() => setFilterSource('web')} className={`whitespace-nowrap px-3 py-1 text-xs rounded border ${filterSource === 'web' ? 'bg-blue-100 border-blue-300 text-blue-800 font-bold' : 'border-transparent text-slate-500'}`}>Web</button>
           </div>
         </div>
 
-        {/* LISTA (Scrollabilă) */}
+        {/* LISTA */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300">
           {filteredList.length === 0 ? (
-            <div className="p-10 text-center text-slate-400 text-xs flex flex-col items-center">
+            <div className="p-10 text-center text-slate-400 text-xs flex flex-col items-center h-full justify-center">
               <span className="text-3xl mb-2 opacity-30">📭</span>
-              <p>Nicio conversație aici.</p>
+              <p>Nicio conversație.</p>
             </div>
           ) : (
             filteredList.map(conv => {
@@ -214,9 +239,9 @@ export default function ChatViewer({ conversations: initialConversations }: { co
                 return (
                   <div 
                     key={conv.id}
-                    onClick={() => setSelectedId(conv.id)}
-                    className={`p-4 border-b border-slate-100 cursor-pointer transition-colors hover:bg-slate-50
-                      ${isSelected ? 'bg-blue-50 border-l-4 border-l-slate-800' : 'border-l-4 border-l-transparent'}
+                    onClick={() => handleSelectConversation(conv.id)}
+                    className={`p-4 border-b border-slate-100 cursor-pointer transition-colors active:bg-blue-50
+                      ${isSelected ? 'bg-blue-50 border-l-4 border-l-slate-800' : 'border-l-4 border-l-transparent hover:bg-slate-50'}
                     `}
                   >
                     <div className="flex justify-between items-start mb-1">
@@ -241,34 +266,48 @@ export default function ChatViewer({ conversations: initialConversations }: { co
         </div>
       </div>
 
-      {/* ==================== ZONA DE CHAT (Dreapta) ==================== */}
-      <div className="hidden md:flex md:w-2/3 flex-col h-full bg-white relative">
+      {/* ==================== ZONA DE CHAT ==================== */}
+      {/* Vizibil pe desktop (md:flex) SAU pe mobil dacă suntem în modul 'chat' și avem selectat ceva */}
+      <div className={`
+          flex-col h-full bg-white relative w-full md:w-2/3
+          ${mobileView === 'chat' && selectedConversation ? 'flex fixed inset-0 z-50 md:static md:z-auto' : 'hidden md:flex'}
+      `}>
         {selectedConversation ? (
           <>
-            {/* HEADER CHAT (Fix) */}
-            <div className="shrink-0 bg-white border-b border-slate-200 p-3 flex justify-between items-center z-10 shadow-sm h-16">
-               <div>
-                  <h2 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                    {selectedConversation.user?.name || selectedConversation.identifier}
-                  </h2>
-                  <div className="text-xs text-slate-500 flex gap-2">
-                    <span className="uppercase font-bold text-[10px] bg-slate-100 px-1 rounded">{selectedConversation.source}</span>
-                    <span>{selectedConversation.identifier}</span>
+            {/* HEADER CHAT */}
+            <div className="shrink-0 bg-white border-b border-slate-200 p-2 sm:p-3 flex justify-between items-center z-10 shadow-sm h-14 sm:h-16">
+               <div className="flex items-center gap-2 overflow-hidden">
+                  {/* Buton Back Mobile */}
+                  <button 
+                    onClick={handleBackToList}
+                    className="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-full"
+                  >
+                    ⬅
+                  </button>
+
+                  <div className="min-w-0">
+                    <h2 className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2 truncate">
+                      {selectedConversation.user?.name || selectedConversation.identifier}
+                    </h2>
+                    <div className="text-xs text-slate-500 flex gap-2 items-center">
+                      <span className="uppercase font-bold text-[9px] bg-slate-100 px-1 rounded">{selectedConversation.source}</span>
+                      <span className="truncate">{selectedConversation.identifier}</span>
+                    </div>
                   </div>
                </div>
                
                <input 
                  type="text" 
-                 className="text-xs border border-slate-300 rounded px-2 py-1 w-32 focus:w-48 transition-all focus:border-blue-500 focus:outline-none" 
-                 placeholder="+ Etichetă (ex: Urgent)" 
+                 className="text-xs border border-slate-300 rounded px-2 py-1 w-24 sm:w-32 focus:w-40 transition-all focus:border-blue-500 focus:outline-none" 
+                 placeholder="+ Tag" 
                  value={tagInput} 
                  onChange={(e) => setTagInput(e.target.value)} 
                  onBlur={handleTagBlur} 
                />
             </div>
 
-            {/* MESAJE (Scrollabil - min-h-0 este esențial pentru flex nesting) */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50 scroll-smooth min-h-0 scrollbar-thin scrollbar-thumb-slate-300">
+            {/* MESAJE */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 bg-slate-50 scroll-smooth min-h-0 scrollbar-thin scrollbar-thumb-slate-300">
               {selectedConversation.messages.map((msg) => {
                 if (msg.role === 'system' || msg.role === 'tool') return null;
                 const isAdmin = msg.role === 'admin';
@@ -279,7 +318,7 @@ export default function ChatViewer({ conversations: initialConversations }: { co
                 return (
                   <div key={msg.id} className={`flex ${alignLeft ? 'justify-start' : 'justify-end'}`}>
                     <div 
-                      className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm shadow-sm relative group
+                      className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 py-2 sm:px-4 sm:py-2 text-sm shadow-sm relative group
                         ${isAdmin 
                           ? 'bg-blue-50 border border-blue-200 text-blue-900 rounded-tl-none' 
                           : isBot 
@@ -288,7 +327,7 @@ export default function ChatViewer({ conversations: initialConversations }: { co
                         }`}
                     >
                       {isAdmin && <div className="text-[9px] font-bold text-blue-600 mb-0.5 uppercase flex items-center gap-1">👮 Operator</div>}
-                      <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+                      <div className="whitespace-pre-wrap leading-relaxed break-words">{msg.content}</div>
                       <div className="text-[9px] mt-1 text-right opacity-50">
                         {formatDate(msg.createdAt).split(',')[1]}
                       </div>
@@ -299,58 +338,56 @@ export default function ChatViewer({ conversations: initialConversations }: { co
               <div ref={messagesEndRef} />
             </div>
 
-            {/* FOOTER (Fix) - Controale + Input */}
-            <div className="shrink-0 bg-white border-t border-slate-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
+            {/* FOOTER - INPUT */}
+            <div className="shrink-0 bg-white border-t border-slate-200 p-2 sm:p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 pb-safe">
               
-              {/* BARA DE CONTROL */}
-              <div className="flex items-center justify-between mb-2 bg-slate-50 p-2 rounded border border-slate-100">
-                 {/* 1. Comutator Robot */}
+              {/* Controale */}
+              <div className="flex items-center justify-between mb-2 bg-slate-50 p-1.5 sm:p-2 rounded border border-slate-100">
                  <button
                     onClick={() => updateConversation({ aiPaused: !selectedConversation.aiPaused })}
                     disabled={isToggling}
                     className={`
-                        px-3 py-1.5 rounded text-xs font-bold border flex items-center gap-2 transition-all
+                        px-2 py-1 sm:px-3 sm:py-1.5 rounded text-[10px] sm:text-xs font-bold border flex items-center gap-1 sm:gap-2 transition-all
                         ${selectedConversation.aiPaused 
-                            ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' 
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                            ? 'bg-red-50 text-red-700 border-red-200' 
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         }
                     `}
                  >
-                    {selectedConversation.aiPaused ? '🔴 MANUAL (Robot Oprit)' : '🟢 AUTO (Robot Pornit)'}
+                    {selectedConversation.aiPaused ? '🔴 MANUAL' : '🟢 AUTO'}
                  </button>
 
-                 {/* 2. Buton Finalizare */}
                  {selectedConversation.status === 'active' ? (
                     <button 
                       onClick={() => updateConversation({ status: 'archived' })}
-                      className="bg-white border border-slate-300 text-slate-700 hover:bg-green-50 hover:text-green-700 hover:border-green-300 px-3 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-1"
+                      className="bg-white border border-slate-300 text-slate-700 hover:bg-green-50 text-[10px] sm:text-xs px-2 py-1 sm:px-3 sm:py-1.5 rounded font-bold flex items-center gap-1"
                     >
                       ✅ Finalizează
                     </button>
                   ) : (
                     <button 
                       onClick={() => updateConversation({ status: 'active' })}
-                      className="bg-white border border-slate-300 text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 px-3 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-1"
+                      className="bg-white border border-slate-300 text-slate-700 hover:bg-blue-50 text-[10px] sm:text-xs px-2 py-1 sm:px-3 sm:py-1.5 rounded font-bold flex items-center gap-1"
                     >
                       ↩️ Redeschide
                     </button>
                   )}
               </div>
 
-              {/* INPUT MESAJ */}
+              {/* Textarea */}
               <div className="flex gap-2 items-end">
                 <textarea
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Scrie un mesaj... (Enter pentru a trimite)"
-                  className="flex-1 min-h-[44px] max-h-[120px] p-2.5 border border-slate-300 rounded text-sm resize-none focus:outline-none focus:ring-2 focus:ring-slate-800 bg-white"
+                  placeholder="Scrie mesaj..."
+                  className="flex-1 min-h-[44px] max-h-[100px] p-2 sm:p-2.5 border border-slate-300 rounded text-sm resize-none focus:outline-none focus:ring-2 focus:ring-slate-800 bg-white"
                   rows={1}
                 />
                 <button
                   onClick={handleSendMessage}
                   disabled={isSending || !inputText.trim()}
-                  className="h-[44px] px-6 bg-slate-900 text-white rounded text-sm font-bold hover:bg-slate-700 disabled:opacity-50 transition-all shadow-md"
+                  className="h-[44px] px-4 sm:px-6 bg-slate-900 text-white rounded text-sm font-bold hover:bg-slate-700 disabled:opacity-50 shadow-md whitespace-nowrap"
                 >
                   {isSending ? '...' : 'Trimite'}
                 </button>
@@ -359,7 +396,8 @@ export default function ChatViewer({ conversations: initialConversations }: { co
           </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-300 bg-slate-50">
-            <p className="font-medium">Selectează o conversație.</p>
+            <span className="text-4xl mb-4">💬</span>
+            <p className="font-medium px-4 text-center">Selectează o conversație din listă.</p>
           </div>
         )}
       </div>
