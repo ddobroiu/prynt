@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { tools, SYSTEM_PROMPT } from "@/lib/ai-shared";
 import { executeTool } from "@/lib/ai-tool-runner";
-import { sendWhatsAppMessage } from "@/lib/whatsapp-utils";
+// Am adăugat noile funcții pentru butoane în import
+import { sendWhatsAppMessage, sendInteractiveButtons, sendYesNoQuestion } from "@/lib/whatsapp-utils";
 import { prisma } from "@/lib/prisma";
 import { logConversation } from "@/lib/chat-logger";
 import { v2 as cloudinary } from 'cloudinary';
@@ -112,13 +113,11 @@ export async function POST(req: Request) {
         const msgType = messageObj.type;
 
         // 1. REACTIVARE AUTOMATĂ A CONVERSAȚIEI
-        // Indiferent ce trimite clientul (text sau poză), verificăm dacă e arhivată și o activăm.
         const existingConv = await prisma.aiConversation.findFirst({
             where: { source: 'whatsapp', identifier: from }
         });
 
         if (existingConv) {
-            // Dacă era finalizată (archived), o facem activă ca să apară în Inbox
             if (existingConv.status === 'archived') {
                 await prisma.aiConversation.update({
                     where: { id: existingConv.id },
@@ -133,7 +132,9 @@ export async function POST(req: Request) {
             const imageId = messageObj.image?.id;
             const uploadResult = await processWhatsAppImage(imageId, from);
             if (uploadResult) {
-                await sendWhatsAppMessage(from, "Am primit imaginea ta! 📸 Am salvat-o în contul tău. Te pot ajuta cu o ofertă pentru ea?");
+                // Întrebăm direct cu butoane Da/Nu după primirea imaginii
+                await sendYesNoQuestion(from, "Am primit imaginea ta! 📸 Am salvat-o în contul tău. Dorești o ofertă pentru ea?");
+                
                 let history = conversations.get(from) || [];
                 history.push({ role: "user", content: `[SYSTEM: Userul a trimis o imagine. URL: ${uploadResult.url}]` });
                 conversations.set(from, history);
@@ -145,14 +146,29 @@ export async function POST(req: Request) {
             return NextResponse.json({ status: "success_image" });
         }
 
-        // --- GESTIONARE TEXT ---
-        const textBody = messageObj.text?.body;
+        // --- GESTIONARE TEXT SI BUTOANE INTERACTIVE ---
+        let textBody = "";
+        let buttonId = "";
+
+        if (msgType === "text") {
+            textBody = messageObj.text?.body;
+        } else if (msgType === "interactive") {
+            // Gestionăm răspunsul la butoane
+            if (messageObj.interactive.type === "button_reply") {
+                textBody = messageObj.interactive.button_reply.title; // Textul de pe buton (ex: "Da")
+                buttonId = messageObj.interactive.button_reply.id;    // ID-ul intern (ex: "yes")
+                console.log(`🔘 Button Clicked by ${from}: ${textBody} (ID: ${buttonId})`);
+            } else if (messageObj.interactive.type === "list_reply") {
+                 textBody = messageObj.interactive.list_reply.title;
+                 buttonId = messageObj.interactive.list_reply.id;
+            }
+        }
+
         if (!textBody) return NextResponse.json({ status: "ignored_no_text" });
 
         console.log(`📩 Mesaj de la ${from}: ${textBody}`);
 
         // --- VERIFICARE DACA AI-UL ESTE PAUZAT ---
-        // Dacă e pauzat, DOAR salvăm mesajul și ieșim. Nu răspunde robotul.
         if (existingConv && existingConv.aiPaused) {
             console.log(`⏸️ AI Pauzat pentru ${from}. Nu răspund.`);
             await prisma.aiMessage.create({
@@ -162,7 +178,6 @@ export async function POST(req: Request) {
                     content: textBody
                 }
             });
-            // Update timestamp
             await prisma.aiConversation.update({
                 where: { id: existingConv.id },
                 data: { lastMessageAt: new Date() }
@@ -238,7 +253,7 @@ export async function POST(req: Request) {
         if (contextName) conversationMeta.set(from, { name: contextName });
 
         // 3. Prompt System
-        let systemContent = SYSTEM_PROMPT + "\nIMPORTANT: Clientul este pe WhatsApp. Fii concis.";
+        let systemContent = SYSTEM_PROMPT + "\nIMPORTANT: Clientul este pe WhatsApp. Fii concis. Folosește liste scurte.";
         if (contextName || orderHistoryText) {
             systemContent += `\n\nDATE CLIENT: Nume: ${contextName || 'Necunoscut'}`;
             if (contextAddress) systemContent += `, Adresă: ${contextAddress}`;
@@ -284,19 +299,41 @@ export async function POST(req: Request) {
           finalReply = finalCompletion.choices[0].message.content ?? "";
         }
 
-        // 5. Trimitere & Salvare
+        // 5. Trimitere & Salvare (CU SUPORT PENTRU BUTOANE)
         if (finalReply && finalReply.trim().length > 0) {
             let replyText = finalReply;
             if (contextName) replyText = replyText.replace(/{{\s*name\s*}}/gi, contextName);
 
-            if (finalReply.includes("||REQUEST: JUDET||")) {
-               // Logică butoane județe...
+            // LOGICA SPECIALA PENTRU INTERFAȚĂ (BUTOANE)
+            const lowerReply = replyText.toLowerCase();
+
+            // Caz 1: Cerere explicită de Județ (din tool-uri anterioare)
+            if (replyText.includes("||REQUEST: JUDET||")) {
                const res = await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/dpd/judete`);
                const data = await res.json();
                const options = data.judete?.slice(0, 5).map((j: string, idx: number) => ({ id: `judet_${idx + 1}`, title: j })) || [];
                options.push({ id: "search_judet", title: "Alt județ" });
                await sendWhatsAppMessage(from, replyText.replace("||REQUEST: JUDET||", "").trim(), options);
-            } else {
+            } 
+            // Caz 2: Întrebări de tip "Da/Nu" detectate în textul AI-ului
+            // Dacă AI-ul întreabă "Dorești...", "Vrei să...", "Confirm?"
+            else if (
+                lowerReply.includes("?") && 
+                (lowerReply.includes("dorești") || lowerReply.includes("vrei") || lowerReply.includes("confirm") || lowerReply.includes("da sau nu")) &&
+                replyText.length < 150 // Doar pentru mesaje relativ scurte
+            ) {
+                await sendYesNoQuestion(from, replyText);
+            }
+            // Caz 3: Meniu Principal sau Opțiuni detectate (ex: AI-ul zice "Alege o opțiune")
+            else if (lowerReply.includes("alege o opțiune") || lowerReply.includes("cu ce te pot ajuta")) {
+                await sendInteractiveButtons(from, replyText, [
+                    { id: 'check_status', title: 'Status Comandă' },
+                    { id: 'offer', title: 'Cere Ofertă' },
+                    { id: 'human', title: 'Agent Uman' }
+                ]);
+            }
+            // Caz 4: Text simplu (Default)
+            else {
                await sendWhatsAppMessage(from, replyText);
             }
 
