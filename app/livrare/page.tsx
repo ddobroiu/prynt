@@ -17,15 +17,15 @@ export default function LivrarePage() {
 
             <div className="relative z-10">
                 <Link href="/" className="inline-block mb-12 opacity-80 hover:opacity-100 transition">
-                    <span className="text-sm font-bold tracking-widest uppercase text-muted">? �napoi la site</span>
+                    <span className="text-sm font-bold tracking-widest uppercase text-muted">← Înapoi la site</span>
                 </Link>
                 
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-ui mb-6">
                     Livrare <br/>
-                    <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600">rapida.</span>
+                    <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600">rapidă.</span>
                 </h1>
                 <p className="text-lg text-muted max-w-md leading-relaxed">
-                    Transport rapid �n toata Rom�nia. Comenzile tale ajung la tine �n 1-2 zile lucratoare.
+                    Transport rapid în toată România. Comenzile tale ajung la tine în 1-2 zile lucrătoare.
                 </p>
             </div>
 
@@ -36,7 +36,7 @@ export default function LivrarePage() {
                     </div>
                     <div>
                         <h3 className="font-bold text-ui">1-2 zile</h3>
-                        <p className="text-muted">Livrare �n toata ?ara</p>
+                        <p className="text-muted">Livrare în toată țara</p>
                     </div>
                 </div>
 
@@ -55,7 +55,7 @@ export default function LivrarePage() {
                         <Package className="w-5 h-5 text-ui group-hover:text-indigo-500 transition-colors" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-ui">Urmarire AWB</h3>
+                        <h3 className="font-bold text-ui">Urmărire AWB</h3>
                         <p className="text-muted">Real-time prin email & SMS</p>
                     </div>
                 </div>
@@ -65,7 +65,7 @@ export default function LivrarePage() {
                         <MapPin className="w-5 h-5 text-ui" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-ui">Ridicare personala</h3>
+                        <h3 className="font-bold text-ui">Ridicare personală</h3>
                         <p className="text-muted">GRATUIT din depozit</p>
                     </div>
                 </div>
@@ -85,7 +85,7 @@ export default function LivrarePage() {
                       <thead className="bg-bg border-b border-border">
                         <tr>
                           <th className="px-6 py-4 text-left text-sm font-semibold text-ui">
-                            Valoare Comanda
+                            Valoare Comandă
                           </th>
                           <th className="px-6 py-4 text-left text-sm font-semibold text-ui">
                             Cost Livrare
@@ -129,9 +129,9 @@ export default function LivrarePage() {
                       <Clock className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-ui mb-1">1-2 zile lucratoare</h3>
+                      <h3 className="font-bold text-ui mb-1">1-2 zile lucrătoare</h3>
                       <p className="text-sm text-muted">
-                        Toate produsele sunt procesate ?i livrate �n <strong>1-2 zile lucratoare</strong> �n toata Rom�nia.
+                        Toate produsele sunt procesate și livrate în <strong>1-2 zile lucrătoare</strong> în toată România.
                       </p>
                     </div>
                   </div>
@@ -144,7 +144,7 @@ export default function LivrarePage() {
                 </div>
               </div>
 
-              {/* Ridicare Personala */}
+              {/* Ridicare Personală */}
               <div>
                 <h2 className="text-2xl font-bold text-ui mb-6">Ridicare din Depozit</h2>
                 <div className="bg-surface border border-border rounded-2xl p-6">
@@ -153,59 +153,59 @@ export default function LivrarePage() {
                       <MapPin className="w-5 h-5 text-indigo-600" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-ui mb-1">GRATUIT - Fara costuri</h3>
+                      <h3 className="font-bold text-ui mb-1">GRATUIT - Fără costuri</h3>
                       <p className="text-sm text-muted">
-                        Po?i ridica comanda personal din depozitul nostru, fara costuri suplimentare.
+                        Poți ridica comanda personal din depozitul nostru, fără costuri suplimentare.
                       </p>
                     </div>
                   </div>
                   
                   <div className="bg-bg border border-border rounded-xl p-4 space-y-2">
-                    <p className="font-semibold text-ui text-sm">Program ridicari:</p>
+                    <p className="font-semibold text-ui text-sm">Program ridicări:</p>
                     <div className="text-sm text-muted space-y-1">
-                      <p>?? <strong>Luni - Vineri:</strong> 09:00 - 18:00</p>
-                      <p>?? <strong>S�mbata:</strong> 10:00 - 14:00</p>
+                      <p>📅 <strong>Luni - Vineri:</strong> 09:00 - 18:00</p>
+                      <p>📅 <strong>Sâmbătă:</strong> 10:00 - 14:00</p>
                     </div>
                     <p className="text-xs text-muted pt-2 border-t border-border">
-                      *Te rugam sa anun?i cu 24h �nainte pentru a pregati comanda
+                      *Te rugăm să anunți cu 24h înainte pentru a pregăti comanda
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Urmarire Comanda */}
+              {/* Urmărire Comandă */}
               <div className="bg-accent/5 border border-accent/20 rounded-2xl p-8 text-center">
                 <Package className="w-12 h-12 mx-auto mb-4 text-accent" />
-                <h3 className="text-xl font-bold text-ui mb-2">Urmare?te-?i Comanda</h3>
+                <h3 className="text-xl font-bold text-ui mb-2">Urmărește-ți Comanda</h3>
                 <p className="text-muted mb-6">
-                  Prime?ti AWB automat prin email ?i SMS. Po?i urmari coletul �n timp real.
+                  Primești AWB automat prin email și SMS. Poți urmări coletul în timp real.
                 </p>
                 <Link
                   href="/urmareste-comanda"
                   className="inline-block bg-accent hover:bg-accent/90 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl"
                 >
-                  Verifica Status Comanda
+                  Verifică Status Comandă
                 </Link>
               </div>
 
               {/* Contact */}
               <div className="text-center">
-                <h3 className="text-lg font-bold text-ui mb-3">Ai �ntrebari despre livrare?</h3>
+                <h3 className="text-lg font-bold text-ui mb-3">Ai întrebări despre livrare?</h3>
                 <p className="text-muted mb-6">
-                  Echipa noastra este gata sa te ajute cu orice detalii despre transport ?i livrare.
+                  Echipa noastră este gata să te ajute cu orice detalii despre transport și livrare.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
                   <a
                     href="tel:+40750473111"
                     className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-lg"
                   >
-                    ?? 0750 473 111
+                    📞 0750 473 111
                   </a>
                   <a
                     href="mailto:contact@prynt.ro"
                     className="inline-flex items-center gap-2 bg-surface hover:bg-bg border border-border text-ui font-semibold px-6 py-3 rounded-lg transition-colors"
                   >
-                    ?? contact@prynt.ro
+                    ✉️ contact@prynt.ro
                   </a>
                 </div>
               </div>
