@@ -70,10 +70,11 @@ function NumberInput({ label, value, onChange }: { label: string; value: number;
   return <div><label className="field-label">{label}</label><div className="flex"><button onClick={() => inc(-1)} className="p-3 bg-gray-100 rounded-l-lg hover:bg-gray-200"><Minus size={16} /></button><input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-center w-full rounded-none border-x-0" /><button onClick={() => inc(1)} className="p-3 bg-gray-100 rounded-r-lg hover:bg-gray-200"><Plus size={16} /></button></div></div>;
 }
 
-type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number };
+type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string };
 
-export default function FlyerConfigurator({ productSlug }: Props) {
+export default function FlyerConfigurator({ productSlug, productImage }: Props) {
   const { addItem } = useCart();
+  const GALLERY = useMemo(() => productImage ? [productImage, "/products/flayere/1.webp", "/products/flayere/2.webp", "/products/flayere/3.webp"] : ["/products/flayere/1.webp", "/products/flayere/2.webp", "/products/flayere/3.webp", "/products/flayere/4.webp"], [productImage]);
   const [sizeKey, setSizeKey] = useState(FLYER_CONSTANTS.SIZES[0].key);
   const [quantity, setQuantity] = useState<number>(100);
   const [twoSided, setTwoSided] = useState<boolean>(false);

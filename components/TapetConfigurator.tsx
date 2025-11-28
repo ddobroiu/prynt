@@ -75,11 +75,12 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
   return <button type="button" onClick={onClick} className={`px-4 py-2 text-sm font-semibold transition-colors rounded-t-lg ${active ? "border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50" : "text-gray-500 hover:text-gray-800"}`}>{children}</button>;
 }
 
-type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number };
+type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string };
 
 /* --- MAIN COMPONENT --- */
-export default function TapetConfigurator({ productSlug }: Props) {
+export default function TapetConfigurator({ productSlug, productImage }: Props) {
   const { addItem } = useCart();
+  const GALLERY = useMemo(() => productImage ? [productImage, "/products/tapet/1.webp", "/products/tapet/2.webp", "/products/tapet/3.webp"] : ["/products/tapet/1.webp", "/products/tapet/2.webp", "/products/tapet/3.webp", "/products/tapet/4.webp"], [productImage]);
   const [input, setInput] = useState<PriceInputTapet>({
     width_cm: 0,
     height_cm: 0,
