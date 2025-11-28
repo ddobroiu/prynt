@@ -163,7 +163,7 @@ export async function validateDiscountCode(
   return {
     isValid: true,
     discount: {
-      type: discountCode.type,
+      type: discountCode.type as 'percentage' | 'fixed' | 'free_shipping',
       value: discountCode.value,
       amount: Math.round(discountAmount * 100) / 100
     }
