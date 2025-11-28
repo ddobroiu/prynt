@@ -1,5 +1,3 @@
-import { WhatsAppMessage } from '../types'; 
-
 const WHATSAPP_API_URL = `https://graph.facebook.com/v20.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`;
 const WHATSAPP_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 
@@ -8,7 +6,7 @@ const WHATSAPP_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
  */
 export async function sendWhatsAppMessage(to: string, body: string) {
   if (!WHATSAPP_TOKEN || !process.env.WHATSAPP_PHONE_NUMBER_ID) {
-    console.error("❌ ERROARE: Lipsesc variabilele de mediu WHATSAPP_ACCESS_TOKEN sau WHATSAPP_PHONE_NUMBER_ID");
+    console.error("❌ EROARE: Lipsesc variabilele de mediu WHATSAPP_ACCESS_TOKEN sau WHATSAPP_PHONE_NUMBER_ID");
     return null;
   }
 
@@ -53,7 +51,7 @@ export async function sendInteractiveButtons(
   buttons: { id: string; title: string }[]
 ) {
   if (!WHATSAPP_TOKEN || !process.env.WHATSAPP_PHONE_NUMBER_ID) {
-    console.error("❌ ERROARE: Lipsesc variabilele de mediu WHATSAPP_...");
+    console.error("❌ EROARE: Lipsesc variabilele de mediu WHATSAPP_...");
     return null;
   }
 

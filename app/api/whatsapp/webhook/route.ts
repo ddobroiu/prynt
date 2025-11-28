@@ -132,7 +132,7 @@ export async function POST(req: Request) {
             const uploadResult = await processWhatsAppImage(imageId, from);
             if (uploadResult) {
                 // Întrebăm direct cu butoane Da/Nu după primirea imaginii
-                await sendYesNoQuestion(from, "Am primit imaginea ta! 📸 Am salvat-o în contul tău. Dorești o ofertă pentru ea?");
+                const sendResult = await sendYesNoQuestion(from, "Am primit imaginea ta! 📸 Am salvat-o în contul tău. Dorești o ofertă pentru ea?");
                 
                 let history = conversations.get(from) || [];
                 history.push({ role: "user", content: `[SYSTEM: Userul a trimis o imagine. URL: ${uploadResult.url}]` });
@@ -307,7 +307,7 @@ export async function POST(req: Request) {
             const lowerReply = replyText.toLowerCase();
             let sendResult: any = null;
 
-            // Caz 1: Cerere explicită de Județ (din tool-uri anterioare)
+            // Caz 1: Cerere explicită de Județ
             if (replyText.includes("||REQUEST: JUDET||")) {
                const res = await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/dpd/judete`);
                const data = await res.json();
@@ -316,7 +316,7 @@ export async function POST(req: Request) {
                
                sendResult = await sendInteractiveButtons(from, replyText.replace("||REQUEST: JUDET||", "").trim(), options);
             } 
-            // Caz 2: Întrebări de tip "Da/Nu" detectate în textul AI-ului
+            // Caz 2: Întrebări de tip "Da/Nu"
             else if (
                 lowerReply.includes("?") && 
                 (lowerReply.includes("dorești") || lowerReply.includes("vrei") || lowerReply.includes("confirm") || lowerReply.includes("da sau nu")) &&
@@ -339,7 +339,7 @@ export async function POST(req: Request) {
 
             // LOGARE ÎN ADMIN DOAR DACĂ S-A TRIMIS SAU LOGARE EROARE
             if (sendResult) {
-                // Mesajul s-a trimis (Meta API a raspuns ok)
+                // Mesajul s-a trimis
                 const msgsToLog = [
                     { role: 'user', content: textBody },
                     { role: 'assistant', content: finalReply }
@@ -352,7 +352,6 @@ export async function POST(req: Request) {
             } else {
                 // EROARE LA TRIMITERE
                 console.error(`❌ FAILED to send message to ${from}`);
-                // Salvăm în admin că a eșuat, ca să știi
                 await logConversation('whatsapp', from, [
                     { role: 'user', content: textBody },
                     { role: 'assistant', content: `⚠️ EROARE SISTEM: Mesajul nu a ajuns la client. Verifică logurile serverului.\nConținut intenționat: ${finalReply}` }
