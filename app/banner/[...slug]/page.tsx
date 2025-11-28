@@ -57,6 +57,7 @@ export default async function Page({ params }: Props) {
             productSlug={product.slug ?? product.routeSlug} 
             initialWidth={initialWidth ?? undefined}
             initialHeight={initialHeight ?? undefined}
+            productImage={product.images?.[0]}
           />
         </Suspense>
 
