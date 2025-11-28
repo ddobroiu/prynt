@@ -64,7 +64,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       className="group flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden hover:shadow-xl hover:border-indigo-500/30 transition-all duration-300 hover:-translate-y-1 h-full"
     >
       {/* Imagine */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+      <div className="relative aspect-4/3 overflow-hidden bg-zinc-100 dark:bg-zinc-800">
         <img
           src={img}
           alt={product.title}

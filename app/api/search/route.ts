@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       const title = (product.title || "").toLowerCase();
       const description = (product.description || "").toLowerCase();
       const tags = (product.tags || []).join(" ").toLowerCase();
-      const productCategory = (product.metadata?.category || "").toLowerCase();
+      const productCategory = String(product.metadata?.category || "").toLowerCase();
       
       // Scoring algorithm
       if (title.includes(q)) score += 10;

@@ -51,7 +51,7 @@ export default function SearchBox({
   const router = useRouter();
 
   // Debounce search
-  const debounceTimeout = useRef<NodeJS.Timeout>();
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   
   const performSearch = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < 2) {
@@ -245,7 +245,7 @@ export default function SearchBox({
                   onClick={() => handleSelectResult(result)}
                 >
                   {/* Product Image */}
-                  <div className="w-12 h-12 relative flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                  <div className="w-12 h-12 relative shrink-0 bg-gray-100 rounded-lg overflow-hidden">
                     {result.images?.[0] ? (
                       <Image
                         src={result.images[0]}
