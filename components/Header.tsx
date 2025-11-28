@@ -142,18 +142,40 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 const HeaderActions = () => {
   // 2. Nu mai avem nevoie de useCart aici, CartWidget se ocupă de logică
   const { data: session } = useSession();
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+
+  // Închide dropdown-ul când se face click în afară
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isAccountOpen && !target.closest('.account-dropdown')) {
+        setIsAccountOpen(false);
+      }
+    };
+
+    if (isAccountOpen) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [isAccountOpen]);
 
   return (
     <div className="flex items-center gap-3 sm:gap-5">
       {/* Account Dropdown */}
       {session?.user ? (
-        <div className="relative group">
-          <button className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Cont">
+        <div className="relative account-dropdown">
+          <button 
+            className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" 
+            aria-label="Cont"
+            onClick={() => setIsAccountOpen(!isAccountOpen)}
+          >
             <User size={24} />
           </button>
           
           {/* Dropdown Menu */}
-          <div className="absolute top-full right-0 w-56 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 ease-out z-50">
+          <div className={`absolute top-full right-0 w-56 pt-2 transition-all duration-200 ease-out z-50 ${
+            isAccountOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'
+          }`}>
             <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
               {/* User Info */}
               <div className="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
@@ -171,6 +193,7 @@ const HeaderActions = () => {
               <div className="p-2">
                 <Link
                   href="/account"
+                  onClick={() => setIsAccountOpen(false)}
                   className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <User size={18} />
@@ -179,6 +202,7 @@ const HeaderActions = () => {
                 
                 <Link
                   href="/account?tab=orders"
+                  onClick={() => setIsAccountOpen(false)}
                   className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <Package size={18} />
@@ -187,6 +211,7 @@ const HeaderActions = () => {
 
                 <Link
                   href="/account?tab=billing"
+                  onClick={() => setIsAccountOpen(false)}
                   className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <CreditCard size={18} />
@@ -195,6 +220,7 @@ const HeaderActions = () => {
 
                 <Link
                   href="/account?tab=addresses"
+                  onClick={() => setIsAccountOpen(false)}
                   className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <MapPin size={18} />
@@ -203,6 +229,7 @@ const HeaderActions = () => {
 
                 <Link
                   href="/account?tab=payment-methods"
+                  onClick={() => setIsAccountOpen(false)}
                   className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <CreditCard size={18} />
@@ -211,6 +238,7 @@ const HeaderActions = () => {
 
                 <Link
                   href="/account?tab=favorites"
+                  onClick={() => setIsAccountOpen(false)}
                   className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <Heart size={18} />
@@ -219,6 +247,7 @@ const HeaderActions = () => {
 
                 <Link
                   href="/account?tab=security"
+                  onClick={() => setIsAccountOpen(false)}
                   className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <ShieldCheck size={18} />
