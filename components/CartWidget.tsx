@@ -82,23 +82,23 @@ export default function CartWidget() {
         </button>
       </DialogTrigger>
       
-      {/* DIALOG CONTENT - FIXAT PENTRU SIDEBAR DREAPTA */}
+      {/* DIALOG CONTENT - FIXARE DREAPTA FORTATA */}
       <DialogContent
         className={
-          // RESETARE POZIȚIONARE DEFAULT (Centrat) -> FORȚARE SIDEBAR
-          "!fixed !right-0 !left-auto !top-0 !bottom-0 !translate-x-0 !translate-y-0 " +
-          // DIMENSIUNI ȘI LAYOUT
-          "h-[100dvh] w-full md:max-w-md flex flex-col p-0 gap-0 shadow-2xl z-50 focus:outline-none " +
-          // STILURI VIZUALE
-          "bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 " +
-          // ANIMAȚII
+          // 1. SUPRASCRIERE TOTALA A POZITIONARII (folosim ! pentru a bate stilurile implicite)
+          "!fixed !right-0 !left-auto !top-0 !bottom-0 !translate-x-0 !translate-y-0 !m-0 " +
+          // 2. DIMENSIUNI & LAYOUT
+          "h-[100dvh] w-full md:max-w-[450px] flex flex-col p-0 gap-0 z-[60] focus:outline-none " +
+          // 3. STILURI VIZUALE
+          "bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl " +
+          // 4. ANIMATII INTRARE/IESIRE (Slide din dreapta)
           "duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right " +
-          // ASCUNDE BUTONUL DEFAULT DE ÎNCHIDERE AL DIALOGULUI (Îl avem pe al nostru custom)
+          // 5. ASCUNDE BUTONUL X DEFAULT
           "[&>button:last-child]:hidden"
         }
       >
         
-        {/* HEADER - FIX (Nu se mișcă la scroll) */}
+        {/* HEADER - FIX (Nu se misca) */}
         <div className="shrink-0 z-20 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
           <div className="px-4 py-3 flex items-center justify-between">
             <DialogTitle className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
@@ -165,7 +165,8 @@ export default function CartWidget() {
           </div>
         )}
 
-        {/* LISTA PRODUSE - SCROLLABILĂ (Ocupă tot spațiul rămas) */}
+        {/* LISTA PRODUSE - ZONA EXPANDABILA & SCROLLABILA */}
+        {/* flex-1 si min-h-0 sunt critice pentru a ocupa tot spatiul ramas */}
         <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4 bg-white dark:bg-slate-900 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-60">
@@ -269,7 +270,7 @@ export default function CartWidget() {
           )}
         </div>
 
-        {/* FOOTER - FIX (Butoane mereu vizibile jos) */}
+        {/* FOOTER - FIX (Mereu jos, mereu vizibil) */}
         {items.length > 0 && (
             <div className="border-t border-slate-100 dark:border-slate-800 p-4 pb-safe bg-white dark:bg-slate-900 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
                 
