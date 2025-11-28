@@ -1,14 +1,8 @@
-import React from "react";
-import { Metadata } from "next";
-import { Truck, Package, MapPin, Clock, CheckCircle, AlertCircle } from "lucide-react";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Livrare & Transport | Prynt.ro",
-  description: "Informații despre livrare: costuri, zone de livrare, timpi estimați și opțiuni de ridicare. Livrăm în toată România.",
-  alternates: {
-    canonical: "/livrare"
-  }
-};
+import React from "react";
+import Link from "next/link";
+import { Truck, Package, MapPin, Clock, CheckCircle, CreditCard } from "lucide-react";
 
 export default function LivrarePage() {
   return (
@@ -52,15 +46,15 @@ export default function LivrarePage() {
                 <ul className="space-y-2 text-slate-700 dark:text-slate-300">
                   <li className="flex items-start gap-2">
                     <span className="text-blue-600 mt-1">•</span>
-                    <span><strong>București & Ilfov:</strong> 1-2 zile lucrătoare</span>
+                    <span><strong>Toată România:</strong> 1-2 zile lucrătoare</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-blue-600 mt-1">•</span>
-                    <span><strong>Orașe mari:</strong> 2-3 zile lucrătoare</span>
+                    <span>Livrare rapidă prin curier rapid</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-blue-600 mt-1">•</span>
-                    <span><strong>Mediu rural:</strong> 3-5 zile lucrătoare</span>
+                    <span>Urmărire colet în timp real</span>
                   </li>
                 </ul>
               </div>
@@ -118,24 +112,13 @@ export default function LivrarePage() {
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                   <tr>
                     <td className="px-6 py-4 text-slate-900 dark:text-white">
-                      Sub 200 RON
+                      Sub 500 RON
                     </td>
                     <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                      25 RON
+                      19.99 RON
                     </td>
                     <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                      35 RON
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 text-slate-900 dark:text-white">
-                      200 - 500 RON
-                    </td>
-                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                      20 RON
-                    </td>
-                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                      30 RON
+                      19.99 RON
                     </td>
                   </tr>
                   <tr className="bg-green-50 dark:bg-green-900/20">
@@ -143,10 +126,10 @@ export default function LivrarePage() {
                       Peste 500 RON
                     </td>
                     <td className="px-6 py-4 font-semibold text-green-700 dark:text-green-400">
-                      GRATUIT
+                      GRATUIT ✨
                     </td>
                     <td className="px-6 py-4 font-semibold text-green-700 dark:text-green-400">
-                      GRATUIT
+                      GRATUIT ✨
                     </td>
                   </tr>
                 </tbody>
@@ -180,26 +163,26 @@ export default function LivrarePage() {
             <div className="space-y-4">
               <div className="border-l-4 border-blue-500 pl-6 py-3">
                 <h3 className="font-bold text-slate-900 dark:text-white mb-2">
-                  Producție + Livrare
+                  Producție + Livrare: 1-2 zile
                 </h3>
                 <p className="text-slate-600 dark:text-slate-300 mb-3">
-                  Timpul total include producția materialelor + transportul:
+                  Toate produsele sunt procesate și livrate în <strong>1-2 zile lucrătoare</strong>:
                 </p>
                 <ul className="space-y-2 text-slate-700 dark:text-slate-300 text-sm">
-                  <li><strong>Bannere & Autocolante:</strong> 1-2 zile producție + 1-3 zile transport</li>
-                  <li><strong>Pliante & Flayere:</strong> 2-3 zile producție + 1-3 zile transport</li>
-                  <li><strong>Canvas & Tablouri:</strong> 2-4 zile producție + 1-3 zile transport</li>
-                  <li><strong>Materiale Rigide:</strong> 3-5 zile producție + 1-3 zile transport</li>
+                  <li>✓ <strong>Bannere & Autocolante</strong></li>
+                  <li>✓ <strong>Pliante & Flayere</strong></li>
+                  <li>✓ <strong>Canvas & Tablouri</strong></li>
+                  <li>✓ <strong>Materiale Rigide (PVC, Plexiglass, Alucobond)</strong></li>
                 </ul>
               </div>
 
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 pl-6 py-3">
+              <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 pl-6 py-3">
                 <h3 className="font-bold text-slate-900 dark:text-white mb-2">
-                  🚀 Opțiune Express (cu cost adițional)
+                  ⚡ Livrare Rapidă Garantată
                 </h3>
                 <p className="text-slate-700 dark:text-slate-300 text-sm">
-                  Pentru comenzi urgente oferim producție accelerată (24-48h) + livrare urgentă. 
-                  Contactează-ne la <strong>0750 473 111</strong> pentru detalii și cost.
+                  Comenzile sunt procesate și expediate în <strong>1-2 zile lucrătoare</strong> pentru toate produsele. 
+                  Pentru urgențe, contactează-ne la <strong>0750 473 111</strong>.
                 </p>
               </div>
             </div>

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { siteConfig } from "@/lib/siteConfig";
-import { ChevronDown, Menu, X, User, LogOut, Package, Settings } from "lucide-react";
+import { ChevronDown, Menu, X, User, LogOut, Package, Settings, MapPin, CreditCard, Heart, ShieldCheck } from "lucide-react";
 // 1. IMPORTĂM WIDGETUL DE CART
 import CartWidget from "./CartWidget";
 
@@ -173,18 +173,64 @@ const HeaderActions = () => {
                   href="/account"
                   className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
-                  <Settings size={18} />
-                  Setări cont
+                  <User size={18} />
+                  Profilul meu
                 </Link>
                 
                 <Link
-                  href="/account/orders"
+                  href="/account?tab=orders"
                   className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <Package size={18} />
                   Comenzile mele
                 </Link>
-                
+
+                <Link
+                  href="/account?tab=billing"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  <CreditCard size={18} />
+                  Facturi & Plăți
+                </Link>
+
+                <Link
+                  href="/account?tab=addresses"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  <MapPin size={18} />
+                  Adrese livrare
+                </Link>
+
+                <Link
+                  href="/account?tab=payment-methods"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  <CreditCard size={18} />
+                  Metode de plată
+                </Link>
+
+                <Link
+                  href="/account?tab=favorites"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  <Heart size={18} />
+                  Favorite
+                </Link>
+
+                <Link
+                  href="/account?tab=security"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  <ShieldCheck size={18} />
+                  Securitate
+                </Link>
+              </div>
+
+              {/* Separator */}
+              <div className="border-t border-zinc-200 dark:border-zinc-800"></div>
+
+              {/* Logout */}
+              <div className="p-2">
                 <button
                   onClick={() => signOut({ callbackUrl: '/' })}
                   className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
