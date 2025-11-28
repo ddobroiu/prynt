@@ -470,52 +470,52 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
           {/* DREAPTA - CONFIGURATOR */}
           <div>
-            <header className="mb-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-3">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Configurator Banner</h1>
+            <header className="mb-4 sm:mb-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-3">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900">Configurator Banner</h1>
                 <BannerModeSwitchInline />
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
                 <p className="text-sm sm:text-base text-gray-600">Personalizează opțiunile în 3 pași simpli.</p>
-                <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5">
+                <button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-2 min-h-10 touch-manipulation">
                   <Info size={16} />
                   <span className="ml-2">Detalii</span>
                 </button>
               </div>
             </header>
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 px-3 sm:px-4">
               <AccordionStep stepNumber={1} title="Dimensiuni & Cantitate" summary={summaryStep1} isOpen={activeStep === 1} onClick={() => setActiveStep(1)}>
-                {/* OPTIMIZARE MOBIL: Grid 2 coloane mereu pentru dimensiuni */}
-                <div className="grid grid-cols-2 gap-4">
+                {/* OPTIMIZARE MOBIL: Grid responsiv pentru dimensiuni */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                      <label className="field-label">Lungime (cm)</label>
+                      <label className="field-label text-sm sm:text-base">Lungime (cm)</label>
                       <input 
                           type="text" 
                           inputMode="decimal" 
                           value={lengthText} 
                           onChange={(e) => handleDimChange(e.target.value, setLengthText, "width_cm")} 
                           placeholder="200" 
-                          className="input" 
+                          className="input min-h-12 text-base touch-manipulation" 
                       />
                   </div>
                   <div>
-                      <label className="field-label">Înălțime (cm)</label>
+                      <label className="field-label text-sm sm:text-base">Înălțime (cm)</label>
                       <input 
                           type="text" 
                           inputMode="decimal" 
                           value={heightText} 
                           onChange={(e) => handleDimChange(e.target.value, setHeightText, "height_cm")} 
                           placeholder="100" 
-                          className="input" 
+                          className="input min-h-12 text-base touch-manipulation" 
                       />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-1 sm:col-span-2">
                     <NumberInput label="Cantitate" value={input.quantity} onChange={setQty} />
                     
                     {/* --- UPSELL ALERT (NOU: Folosește logica centralizată) --- */}
                     {upsellOpportunity && (
                         <div 
-                            className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors flex gap-3 items-start"
+                            className="mt-3 p-3 sm:p-4 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors flex gap-2 sm:gap-3 items-start touch-manipulation"
                             onClick={() => updateInput("quantity", upsellOpportunity.requiredQty)}
                         >
                             <TrendingUp className="text-amber-600 w-5 h-5 mt-0.5 shrink-0" />
@@ -540,13 +540,13 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                 </div>
               </AccordionStep>
               <AccordionStep stepNumber={2} title="Material & Finisaje" summary={summaryStep2} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>
-                <label className="field-label mb-2">Material</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                <label className="field-label mb-2 text-sm sm:text-base">Material</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                     <OptionButton active={input.material === "frontlit_440"} onClick={() => updateInput("material", "frontlit_440")} title="Frontlit 440g" subtitle="Standard" />
                     <OptionButton active={input.material === "frontlit_510"} onClick={() => updateInput("material", "frontlit_510")} title="Frontlit 510g" subtitle="Premium" />
                 </div>
-                <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                    <p className="text-sm font-semibold text-gray-800">
+                <div className="mb-4 p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-800">
                         Finisaje Standard: Tiv perimetral și capse metalice de prindere (incluse în preț).
                     </p>
                 </div>
@@ -578,7 +578,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                       {uploading && <p className="text-sm text-indigo-600">Se încarcă...</p>}
                       {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
                       {lowResWarning && (
-                          <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 flex items-start gap-2">
+                          <div className="mt-2 p-2 sm:p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs sm:text-sm text-amber-700 flex items-start gap-2">
                               <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                               <span>Imaginea pare a avea o rezoluție mică. Printul ar putea ieși pixelat.</span>
                           </div>
@@ -589,13 +589,13 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
                   {input.designOption === 'text_only' && (
                     <div className="space-y-3">
-                      <label className="field-label">Introdu textul dorit</label>
-                      <textarea className="input" rows={3} value={textDesign} onChange={e => setTextDesign(e.target.value)} placeholder="ex: PROMOTIE, REDUCERI, etc."></textarea>
+                      <label className="field-label text-sm sm:text-base">Introdu textul dorit</label>
+                      <textarea className="input min-h-20 text-base touch-manipulation" rows={3} value={textDesign} onChange={e => setTextDesign(e.target.value)} placeholder="ex: PROMOTIE, REDUCERI, etc."></textarea>
                     </div>
                   )}
 
                   {input.designOption === 'pro' && (
-                    <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-sm text-indigo-800">
+                    <div className="p-3 sm:p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-xs sm:text-sm text-indigo-800">
                       <p className="font-semibold">Serviciu de Grafică Profesională</p>
                       <p>Vei primi pe email o simulare pentru confirmare. Cost: <strong>{formatMoneyDisplay(BANNER_CONSTANTS.PRO_DESIGN_FEE)}</strong>.</p>
                     </div>
@@ -605,10 +605,10 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
             </div>
             
             {/* BARĂ STATICĂ/STICKY */}
-            <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
-                <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
+            <div className="sticky bottom-0 lg:static bg-white/95 lg:bg-white backdrop-blur-md lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 p-3 sm:p-4 lg:p-6 lg:mt-8 safe-area-inset-bottom">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-2 mb-2">
+                <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 order-2 sm:order-1">{formatMoneyDisplay(displayedTotal)}</p>
+                <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-full sm:w-1/2 py-3 text-base font-bold min-h-12 touch-manipulation order-1 sm:order-2"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
               </div>
               <DeliveryEstimation />
             </div>

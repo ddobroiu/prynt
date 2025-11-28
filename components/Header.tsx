@@ -79,30 +79,31 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
       <div 
         className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
         onClick={onClose} 
+        role="presentation"
       />
       <div
-        className={`fixed top-0 left-0 h-full w-[85%] max-w-sm bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 z-50 transition-transform duration-300 ease-out lg:hidden ${
+        className={`fixed top-0 left-0 h-full w-[90%] max-w-[360px] bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl p-4 sm:p-6 z-50 transition-transform duration-300 ease-out lg:hidden safe-area-inset-left ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-zinc-100 dark:border-zinc-800">
-          <Link href="/" className="text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white" onClick={onClose}>
+        <div className="flex items-center justify-between mb-6 sm:mb-8 pb-4 border-b border-zinc-100 dark:border-zinc-800">
+          <Link href="/" className="text-lg sm:text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white touch-manipulation" onClick={onClose}>
             {siteConfig.name}
           </Link>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors">
-            <X size={24} />
+          <button onClick={onClose} className="p-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-all active:scale-95 min-w-11 min-h-11 flex items-center justify-center" aria-label="Închide meniul">
+            <X size={20} />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto">
-          <ul className="space-y-1">
+        <nav className="flex-1 overflow-y-auto pb-safe">
+          <ul className="space-y-2">
             {siteConfig.headerNav.map((item) => (
               <li key={item.label}>
                 {item.children ? (
                   <div className="rounded-xl overflow-hidden">
                     <button
                       onClick={() => setOpenSub(openSub === item.label ? null : item.label)}
-                      className={`w-full flex items-center justify-between p-3 text-left font-semibold transition-colors ${visibleOpenSub === item.label ? 'bg-zinc-50 dark:bg-zinc-900 text-indigo-600' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
+                      className={`w-full flex items-center justify-between p-4 text-left font-semibold transition-all active:bg-zinc-100 dark:active:bg-zinc-800 min-h-12 touch-manipulation ${visibleOpenSub === item.label ? 'bg-zinc-50 dark:bg-zinc-900 text-indigo-600' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
                     >
                       {item.label}
                       <ChevronDown size={18} className={`transition-transform duration-300 ${visibleOpenSub === item.label ? "rotate-180 text-indigo-600" : "text-zinc-400"}`} />
@@ -114,7 +115,7 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                             key={child.href} 
                             href={child.href} 
                             onClick={onClose} 
-                            className="block py-2.5 pl-6 pr-4 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 border-l-2 border-transparent hover:border-indigo-500 transition-colors"
+                            className="flex items-center py-3 pl-6 pr-4 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 border-l-2 border-transparent hover:border-indigo-500 transition-all active:bg-zinc-100 dark:active:bg-zinc-800 min-h-11 touch-manipulation"
                           >
                             {child.label}
                           </Link>
@@ -126,7 +127,7 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   <Link 
                     href={item.href} 
                     onClick={onClose} 
-                    className={`block p-3 font-semibold rounded-xl transition-colors ${item.highlight ? 'bg-indigo-600 text-white shadow-md mt-4 text-center' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
+                    className={`flex items-center p-4 font-semibold rounded-xl transition-all min-h-12 touch-manipulation ${item.highlight ? 'bg-indigo-600 text-white shadow-md mt-4 justify-center' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 active:bg-zinc-100 dark:active:bg-zinc-800'}`}
                   >
                     {item.label}
                   </Link>
@@ -309,16 +310,16 @@ export default function Header() {
     >
       <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
         {/* Left: Mobile Toggle & Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
            <button 
              onClick={() => setMobileMenuOpen(true)} 
-             className="lg:hidden p-2 -ml-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-             aria-label="Meniu"
+             className="lg:hidden p-3 -ml-1 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all active:scale-95 min-w-11 min-h-11 flex items-center justify-center"
+             aria-label="Deschide meniul"
            >
-            <Menu size={26} />
+            <Menu size={24} className="sm:w-6 sm:h-6" />
           </button>
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl font-extrabold tracking-tighter text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+          <Link href="/" className="flex items-center gap-2 group touch-manipulation">
+            <span className="text-xl sm:text-2xl font-extrabold tracking-tighter text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
               Prynt<span className="text-indigo-600">.ro</span>
             </span>
           </Link>

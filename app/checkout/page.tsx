@@ -358,10 +358,10 @@ export default function CheckoutPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 xl:gap-8 items-start">
             
             {/* MAIN CONTENT - 2 COLOANE */}
-            <section className="lg:col-span-2 space-y-4">
+            <section className="lg:col-span-2 space-y-4 lg:space-y-6">
               <CartItems items={items} onRemove={removeItem} />
               <ReturningCustomerLogin />
               
@@ -376,20 +376,20 @@ export default function CheckoutPage() {
               />
             </section>
 
-            <aside className="lg:col-span-1 lg:sticky lg:top-6 space-y-4">
+            <aside className="lg:col-span-1 lg:sticky lg:top-6 space-y-4 lg:space-y-6">
               {/* SECȚIUNE METODĂ DE PLATĂ - MODERNIZAT */}
-              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-                <div className="bg-linear-to-r from-purple-600 to-indigo-600 px-5 py-3">
-                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
+              <div className="bg-white dark:bg-slate-900 rounded-2xl lg:rounded-3xl shadow-xl lg:shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div className="bg-linear-to-r from-purple-600 to-indigo-600 px-4 sm:px-5 py-3">
+                  <h2 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
                     Metodă de plată
                   </h2>
                 </div>
                 
-                <div className="p-3 space-y-2">
+                <div className="p-3 sm:p-4 space-y-3">
                     
                     {/* Ramburs */}
-                    <label className={`group relative flex items-start gap-2.5 p-3 rounded-xl border transition-all duration-200
+                    <label className={`group relative flex items-start gap-3 p-3 sm:p-4 rounded-xl border transition-all duration-200 min-h-16 touch-manipulation
                         ${isRambursDisabled
                             ? 'border-red-500/30 bg-red-500/5 opacity-60 cursor-not-allowed' 
                             : paymentMethod === 'ramburs' 
@@ -691,48 +691,48 @@ function SummaryCard({
 
       <div className="mt-6">
         {!isLoggedIn && (
-          <label className="flex items-start gap-2 mb-3 text-xs cursor-pointer select-none opacity-80 hover:opacity-100 transition-opacity">
+          <label className="flex items-start gap-3 mb-4 text-sm cursor-pointer select-none opacity-90 hover:opacity-100 transition-opacity touch-manipulation p-2 rounded-lg hover:bg-slate-50">
             <input
               type="checkbox"
               checked={createAccount}
               onChange={(e) => setCreateAccount(e.target.checked)}
-              className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white"
+              className="mt-1 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white"
             />
-            <span className="text-slate-600 leading-snug">
+            <span className="text-slate-600 leading-relaxed">
               Vreau cont nou (parola vine pe email).
             </span>
           </label>
         )}
 
         {/* Newsletter Subscription */}
-        <label className="flex items-start gap-2 mb-4 text-xs cursor-pointer select-none opacity-80 hover:opacity-100 transition-opacity">
+        <label className="flex items-start gap-3 mb-4 text-sm cursor-pointer select-none opacity-90 hover:opacity-100 transition-opacity touch-manipulation p-2 rounded-lg hover:bg-slate-50">
           <input
             type="checkbox"
             checked={subscribeNewsletter}
             onChange={(e) => setSubscribeNewsletter(e.target.checked)}
-            className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white"
+            className="mt-1 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white"
           />
-          <span className="text-slate-600 leading-snug">
+          <span className="text-slate-600 leading-relaxed">
             Vreau să primesc oferte și noutăți pe email (10% reducere la prima comandă! 🎁).
           </span>
         </label>
 
         {/* Terms and Conditions Acceptance */}
-        <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
-          <label className="flex items-start gap-3 cursor-pointer select-none group">
+        <div className="mb-4 p-3 sm:p-4 bg-slate-50 border border-slate-200 rounded-lg">
+          <label className="flex items-start gap-3 cursor-pointer select-none group touch-manipulation">
             <input
               type="checkbox"
               checked={acceptTerms}
               onChange={(e) => setAcceptTerms(e.target.checked)}
-              className="mt-1 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white transition-all"
+              className="mt-1 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white transition-all"
             />
-            <div className="text-sm text-slate-700 leading-relaxed group-hover:text-slate-900 transition-colors">
+            <div className="text-sm sm:text-base text-slate-700 leading-relaxed group-hover:text-slate-900 transition-colors">
               <span className="font-semibold text-slate-900">Accept </span>
-              <Link href="/termeni" target="_blank" className="text-indigo-600 hover:text-indigo-800 underline font-medium">
+              <Link href="/termeni" target="_blank" className="text-indigo-600 hover:text-indigo-800 underline font-medium touch-manipulation">
                 Termenii și Condițiile
               </Link>
               <span className="text-slate-600"> și </span>
-              <Link href="/confidentialitate" target="_blank" className="text-indigo-600 hover:text-indigo-800 underline font-medium">
+              <Link href="/confidentialitate" target="_blank" className="text-indigo-600 hover:text-indigo-800 underline font-medium touch-manipulation">
                 Politica de Confidențialitate
               </Link>
               <span className="text-slate-600"> ale CULOAREA DIN VIATA SA SRL.</span>
