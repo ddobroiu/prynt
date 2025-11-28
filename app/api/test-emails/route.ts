@@ -12,14 +12,24 @@ export async function POST(request: Request) {
     if (type === 'all' || type === 'welcome-canvas') {
       // 1. Welcome Canvas
       console.log('🎨 Trimit Welcome Email pentru Canvas...');
-      const welcomeCanvas = await sendConfiguratorWelcomeEmail('contact@prynt.ro', 'canvas');
+      const welcomeCanvas = await sendConfiguratorWelcomeEmail({
+        email: 'contact@prynt.ro',
+        interests: ['canvas'],
+        name: 'Test User',
+        source: 'test'
+      });
       results.push({ type: 'welcome-canvas', success: welcomeCanvas });
     }
     
     if (type === 'all' || type === 'welcome-banner') {
       // 2. Welcome Banner
       console.log('🖼️ Trimit Welcome Email pentru Banner...');
-      const welcomeBanner = await sendConfiguratorWelcomeEmail('contact@prynt.ro', 'banner');
+      const welcomeBanner = await sendConfiguratorWelcomeEmail({
+        email: 'contact@prynt.ro', 
+        interests: ['banner'],
+        name: 'Test User',
+        source: 'test'
+      });
       results.push({ type: 'welcome-banner', success: welcomeBanner });
     }
     

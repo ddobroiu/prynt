@@ -346,10 +346,19 @@ export async function sendConfiguratorWelcomeEmail(subscription: NewsletterSubsc
     const { createEmailDiscountCode } = await import('@/lib/discountCodes');
     const discountCode = await createEmailDiscountCode('welcome');
     
-    discountCodeHtml = `<div style="background: linear-gradient(135deg, #4F46E5, #7C3AED); color: white; padding: 20px; border-radius: 8px; margin: 16px 0; text-align: center;">
-      <strong style="font-size: 20px;">🎁 CADOU DE BUNE VENIT!</strong><br/>
-      <span>LIVRARE GRATUITĂ cu codul: <strong>${discountCode.code}</strong></span><br/>
-      <small style="opacity: 0.9;">Pentru comenzi peste ${discountCode.minOrderValue} RON - valabil ${Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} zile!</small>
+    const daysLeft = Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    discountCodeHtml = `
+    <div style="background:#0F172A;color:#F8FAFC;padding:22px;border-radius:14px;margin:24px 0;font-family:Arial,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.25);">
+      <div style="font-size:22px;font-weight:700;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <span>🎁</span><span>Cadou de Bun Venit</span>
+      </div>
+      <div style="margin-top:10px;font-size:15px;line-height:1.5;">
+        <strong style="color:#C7D2FE;">🚚 Livrare gratuită</strong> la <u>toată comanda</u> cu codul:<br/>
+        <span style="display:inline-block;margin-top:8px;padding:10px 16px;background:#1E3A8A;border:1px solid #3B82F6;border-radius:10px;font-size:18px;font-weight:700;letter-spacing:1px;">${discountCode.code}</span>
+      </div>
+      <div style="margin-top:12px;font-size:12px;opacity:.85;line-height:1.4;">
+        Prag minim: ${discountCode.minOrderValue} RON • Valabil ${daysLeft} ${daysLeft === 1 ? 'zi' : 'zile'} • Se aplică la toate produsele din coș. Nu se cumulează cu alte coduri.
+      </div>
     </div>`;
   } catch (error) {
     console.error('[Email] Failed to create welcome discount:', error);
@@ -409,33 +418,55 @@ export async function sendAbandonedCartEmail({ email, configuratorId, cartData, 
         subject = `🎨 Ai uitat ceva? ${configurator.title} te așteaptă!`;
         mainMessage = `${configurator.title} pe care l-ai configurat te așteaptă să finalizezi comanda.`;
         discountCode = await createEmailDiscountCode('abandoned_gentle', configuratorId);
-        incentiveText = `<div style="background: linear-gradient(135deg, #059669, #10B981); color: white; padding: 20px; border-radius: 8px; margin: 16px 0; text-align: center;">
-          <strong style="font-size: 18px;">🚚 LIVRARE GRATUITĂ</strong><br/>
-          <span>Folosește codul: <strong>${discountCode.code}</strong></span><br/>
-          <small style="opacity: 0.9;">Valabil ${Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} zile!</small>
-        </div>`;
+        {
+          const daysLeft = Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+          incentiveText = `
+          <div style="background:#064E3B;color:#ECFDF5;padding:20px;border-radius:14px;margin:20px 0;font-family:Arial,sans-serif;box-shadow:0 3px 10px rgba(0,0,0,0.25);text-align:center;">
+            <div style="font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;">
+              <span>🟢</span><span>Continuă comanda</span>
+            </div>
+            <div style="margin-top:8px;font-size:14px;line-height:1.5;">🎯 Reținem configurarea încă puțin – salveaz-o acum.</div>
+            <div style="margin-top:14px;font-size:15px;font-weight:600;">🚚 Livrare gratuită la toată comanda</div>
+            <div style="margin-top:6px;">Cod: <span style="background:#065F46;padding:8px 14px;border-radius:8px;font-weight:700;letter-spacing:.5px;">${discountCode.code}</span></div>
+            <div style="margin-top:8px;font-size:11px;opacity:.85;">Valabil ${daysLeft} ${daysLeft === 1 ? 'zi' : 'zile'} • Se aplică întregului total • Nu se cumulează cu alte coduri.</div>
+          </div>`;
+        }
         break;
         
       case 'discount':
-        subject = `🎁 10% REDUCERE pentru ${configurator.title}!`;
-        mainMessage = `${configurator.title} pe care l-ai configurat vine cu o surpriză plăcută!`;
+        subject = `🎁 ${configurator.title}: 10% reducere aplicată la toată comanda`; 
+        mainMessage = `Ai configurat ${configurator.title}, iar noi ți-am rezervat un bonus special. Profită de reducere înainte să expiră.`;
         discountCode = await createEmailDiscountCode('abandoned_discount', configuratorId);
-        incentiveText = `<div style="background: linear-gradient(135deg, #7C3AED, #A855F7); color: white; padding: 20px; border-radius: 8px; margin: 16px 0; text-align: center;">
-          <strong style="font-size: 20px;">🎉 REDUCERE ${discountCode.value}%</strong><br/>
-          <span>Codul tău exclusiv: <strong>${discountCode.code}</strong></span><br/>
-          <small style="opacity: 0.9;">Valabil ${Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} zile pentru comenzi peste ${discountCode.minOrderValue} RON!</small>
-        </div>`;
+        {
+          const daysLeft = Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+          incentiveText = `
+          <div style="background:#4C1D95;color:#F5F3FF;padding:22px;border-radius:14px;margin:22px 0;font-family:Arial,sans-serif;box-shadow:0 4px 14px rgba(76,29,149,.4);text-align:center;">
+            <div style="font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <span>🎉</span><span>${discountCode.value}% Reducere</span>
+            </div>
+            <div style="margin-top:10px;font-size:14px;line-height:1.5;">Se aplică la <strong>TOATĂ COMANDA</strong> (inclusiv alte produse) – dacă totalul depășește ${discountCode.minOrderValue} RON.</div>
+            <div style="margin-top:14px;">Cod: <span style="background:#6D28D9;padding:10px 18px;border-radius:10px;font-weight:700;letter-spacing:1px;">${discountCode.code}</span></div>
+            <div style="margin-top:10px;font-size:11px;opacity:.85;">Valabil ${daysLeft} ${daysLeft === 1 ? 'zi' : 'zile'} • Nu se cumulează cu alte coduri • Se aplică înainte de transport.</div>
+          </div>`;
+        }
         break;
         
       case 'final':
-        subject = `⏰ ULTIMA ȘANSĂ: 15% reducere pentru ${configurator.title}!`;
-        mainMessage = `Configurația ta pentru ${configurator.title} se va șterge din sistem în curând.`;
+        mainMessage = `Configurația ta pentru ${configurator.title} se va șterge curând. Acesta este ultimul email – dacă finalizezi acum, beneficiezi de reducere pe întregul coș.`;
         discountCode = await createEmailDiscountCode('abandoned_final', configuratorId);
-        incentiveText = `<div style="background: linear-gradient(135deg, #DC2626, #EF4444); color: white; padding: 20px; border-radius: 8px; margin: 16px 0; text-align: center;">
-          <strong style="font-size: 22px;">🔥 REDUCERE ${discountCode.value}%</strong><br/>
-          <span>ULTIMUL TĂU COD: <strong>${discountCode.code}</strong></span><br/>
-          <small style="opacity: 0.9;">Expiră în ${Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60))} ore!</small>
-        </div>`;
+        subject = `⏰ Ultima șansă: ${discountCode.value}% reducere globală pentru ${configurator.title}`;
+        {
+          const hoursLeft = Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60));
+          incentiveText = `
+          <div style="background:#7F1D1D;color:#FEE2E2;padding:24px;border-radius:16px;margin:24px 0;font-family:Arial,sans-serif;box-shadow:0 4px 16px rgba(127,29,29,.45);text-align:center;">
+            <div style="font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <span>🔥</span><span>${discountCode.value}% Reducere Finală</span>
+            </div>
+            <div style="margin-top:12px;font-size:14px;line-height:1.55;">Se aplică la <strong>TOATĂ COMANDA</strong>. După expirare, configurarea și avantajul se pierd.</div>
+            <div style="margin-top:16px;">Cod: <span style="background:#991B1B;padding:12px 20px;border-radius:12px;font-weight:700;letter-spacing:1px;">${discountCode.code}</span></div>
+            <div style="margin-top:12px;font-size:11px;opacity:.85;">Expiră în ${hoursLeft} ${hoursLeft === 1 ? 'oră' : 'ore'} • Ne-cumulabil • Folosește-l înainte de procesarea stocurilor.</div>
+          </div>`;
+        }
         break;
     }
   } catch (error) {
