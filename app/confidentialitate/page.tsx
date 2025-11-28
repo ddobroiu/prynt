@@ -39,13 +39,23 @@ export default function ConfidentialitatePage() {
         {/* ------------------------------- */}
 
         <section>
-            <h2 className="text-xl font-bold mt-6 mb-2">3. Scopul prelucrării</h2>
+            <h2 className="text-xl font-bold mt-6 mb-2">3. Scopul prelucrării și Specificul Produselor Personalizate</h2>
+            <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 mb-4">
+                <p className="font-semibold text-orange-800 mb-2">🎨 Servicii de tipărire personalizată:</p>
+                <p className="text-orange-700 text-sm">
+                    <strong>PRYNT.ro</strong> oferă exclusiv <strong>produse personalizate</strong> (bannere, afișe, flyere, canvas, autocolante, etc.) 
+                    realizate după specificațiile și designul furnizat de client. Conform <strong>Art. 16(c) OUG 34/2014</strong>, 
+                    aceste produse <strong>nu beneficiază de dreptul de retragere</strong> întrucât sunt fabricate exclusiv după cerințele dumneavoastră.
+                </p>
+            </div>
             <p>Folosim datele dvs. pentru:</p>
             <ul className="list-disc pl-5">
-                <li>Procesarea și livrarea comenzilor.</li>
-                <li>Comunicarea legată de statusul comenzii (email, SMS, WhatsApp).</li>
-                <li>Servicii de suport clienți (inclusiv suport automatizat AI).</li>
-                <li>Obligații fiscale și legale (facturare).</li>
+                <li><strong>Procesarea comenzilor personalizate:</strong> realizarea produselor după designul și specificațiile furnizate</li>
+                <li><strong>Livrarea produselor:</strong> coordonarea cu serviciile de curierat pentru livrare sigură</li>
+                <li><strong>Comunicarea:</strong> statusul comenzii, confirmări, asistență tehnică (email, SMS, WhatsApp)</li>
+                <li><strong>Servicii de suport:</strong> asistență pentru design, îmbunătățiri, suport AI automatizat</li>
+                <li><strong>Obligații fiscale și legale:</strong> facturare, arhivare documente (10 ani), raportare ANAF</li>
+                <li><strong>Îmbunătățirea serviciilor:</strong> analiză calitate, optimizare procese de producție</li>
             </ul>
         </section>
 

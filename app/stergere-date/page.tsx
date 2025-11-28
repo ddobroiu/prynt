@@ -127,6 +127,20 @@ export default function StergereDatePage() {
           </div>
         </div>
 
+        <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 mb-4">
+          <h3 className="font-semibold text-orange-800 mb-2">🎨 Contextul Produselor Personalizate</h3>
+          <p className="text-sm text-orange-700 mb-2">
+            <strong>PRYNT.ro</strong> realizează exclusiv <strong>produse personalizate</strong> (bannere, afișe, canvas, autocolante) după designul și specificațiile clientului. 
+            Acest context influențează procesarea cererii de ștergere:
+          </p>
+          <ul className="text-sm text-orange-700 list-disc pl-5 space-y-1">
+            <li><strong>Fișiere design încărcate:</strong> Pot fi șterse la cerere explicită (dacă nu sunt păstrate pentru garanție)</li>
+            <li><strong>Specificații tehnice:</strong> Pot fi anonimizate pentru comenzile finalizate</li>
+            <li><strong>Istoric comenzi personalizate:</strong> Păstrat pentru obligații fiscale și garanție produse</li>
+            <li><strong>Comunicări design/revizii:</strong> Pot fi șterse după expirarea garanției (6 luni comercială)</li>
+          </ul>
+        </div>
+
         <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-6">
           <h3 className="font-semibold text-red-800 mb-2">⚖️ Date păstrate pentru obligații legale (nu pot fi șterse)</h3>
           <div className="text-sm text-red-700 grid md:grid-cols-2 gap-4">
@@ -137,6 +151,7 @@ export default function StergereDatePage() {
                 <li>Registre contabile</li>
                 <li>Declarații fiscale</li>
                 <li>Contracte comerciale</li>
+                <li><strong>Detalii comenzi personalizate</strong> (pentru fiscalitate)</li>
               </ul>
             </div>
             <div>
@@ -144,8 +159,9 @@ export default function StergereDatePage() {
               <ul className="list-disc pl-5 space-y-1">
                 <li>Comunicări litigii</li>
                 <li>Evidența reclamațiilor</li>
-                <li>Garanții produse</li>
+                <li>Garanții produse personalizate</li>
                 <li>Transferuri bancare</li>
+                <li><strong>Specificații tehnice produse</strong> (pentru reclamații)</li>
               </ul>
             </div>
           </div>
