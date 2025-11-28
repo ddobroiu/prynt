@@ -222,7 +222,7 @@ export function generateConfiguratorEmailContent(configurator: typeof MAIN_CONFI
         buttonText: "Continuă Comanda",
         buttonUrl: `${baseUrl}${configurator.url}?utm_source=email&utm_medium=abandoned&utm_campaign=recovery`,
         image: `${baseUrl}${configurator.image}`,
-        discount: '5% REDUCERE cu codul EMAIL5'
+        incentive: 'Livrare GRATUITĂ pentru comenzi peste 100 RON'
       };
       
     case 'recommendation':
@@ -340,6 +340,21 @@ export async function sendConfiguratorWelcomeEmail(subscription: NewsletterSubsc
   
   const content = generateConfiguratorEmailContent(configurator, 'welcome');
   
+  // Create welcome discount code
+  let discountCodeHtml = '';
+  try {
+    const { createEmailDiscountCode } = await import('@/lib/discountCodes');
+    const discountCode = await createEmailDiscountCode('welcome');
+    
+    discountCodeHtml = `<div style="background: linear-gradient(135deg, #4F46E5, #7C3AED); color: white; padding: 20px; border-radius: 8px; margin: 16px 0; text-align: center;">
+      <strong style="font-size: 20px;">🎁 CADOU DE BUNE VENIT!</strong><br/>
+      <span>LIVRARE GRATUITĂ cu codul: <strong>${discountCode.code}</strong></span><br/>
+      <small style="opacity: 0.9;">Pentru comenzi peste ${discountCode.minOrderValue} RON - valabil ${Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} zile!</small>
+    </div>`;
+  } catch (error) {
+    console.error('[Email] Failed to create welcome discount:', error);
+  }
+  
   const html = getHtmlTemplate({
     title: content.title,
     message: content.message,
@@ -348,10 +363,11 @@ export async function sendConfiguratorWelcomeEmail(subscription: NewsletterSubsc
     footerText: "Mulțumim că te-ai alăturat comunității Prynt!"
   });
   
-  // Add benefits list and image
+  // Add benefits list, image and discount code
   const enhancedHtml = html.replace(
     content.message,
     `${content.message}<br/><br/>
+    ${discountCodeHtml}
     <img src="${content.image}" alt="${configurator.title}" style="max-width: 300px; border-radius: 8px; margin: 16px 0;"/>
     <h3 style="color: #333; margin-top: 20px;">De ce să alegi ${configurator.title}?</h3>
     <ul style="color: #666; line-height: 1.6;">
@@ -368,37 +384,97 @@ export async function sendConfiguratorWelcomeEmail(subscription: NewsletterSubsc
 }
 
 // Abandoned Cart Recovery
-export async function sendAbandonedCartEmail(email: string, configuratorId: string, delay: '1h' | '24h' | '3d') {
+export async function sendAbandonedCartEmail({ email, configuratorId, cartData, emailType, discountPercent = 0 }: {
+  email: string;
+  configuratorId: string;
+  cartData: any;
+  emailType: 'gentle' | 'discount' | 'final';
+  discountPercent?: number;
+}) {
   const configurator = MAIN_CONFIGURATORS.find(c => c.id === configuratorId);
-  if (!configurator) return;
+  if (!configurator) return false;
   
-  const content = generateConfiguratorEmailContent(configurator, 'abandoned');
+  // Import discount codes function
+  const { createEmailDiscountCode } = await import('@/lib/discountCodes');
   
-  const discountCode = delay === '3d' ? 'LAST10' : delay === '24h' ? 'RETURN5' : null;
-  const discountText = discountCode ? `<div style="background: #f0fdf4; border: 2px solid #22c55e; border-radius: 8px; padding: 16px; margin: 16px 0; text-align: center;">
-    <strong style="color: #15803d;">🎉 REDUCERE SPECIALĂ: ${discountCode === 'LAST10' ? '10%' : '5%'}</strong><br/>
-    <span style="color: #166534;">Folosește codul: <code style="background: #dcfce7; padding: 4px 8px; border-radius: 4px;">${discountCode}</code></span>
-  </div>` : '';
+  let incentiveText = '';
+  let subject = '';
+  let mainMessage = '';
+  let discountCode = null;
+  
+  // Create discount code for this email
+  try {
+    switch (emailType) {
+      case 'gentle':
+        subject = `🎨 Ai uitat ceva? ${configurator.title} te așteaptă!`;
+        mainMessage = `${configurator.title} pe care l-ai configurat te așteaptă să finalizezi comanda.`;
+        discountCode = await createEmailDiscountCode('abandoned_gentle', configuratorId);
+        incentiveText = `<div style="background: linear-gradient(135deg, #059669, #10B981); color: white; padding: 20px; border-radius: 8px; margin: 16px 0; text-align: center;">
+          <strong style="font-size: 18px;">🚚 LIVRARE GRATUITĂ</strong><br/>
+          <span>Folosește codul: <strong>${discountCode.code}</strong></span><br/>
+          <small style="opacity: 0.9;">Valabil ${Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} zile!</small>
+        </div>`;
+        break;
+        
+      case 'discount':
+        subject = `🎁 10% REDUCERE pentru ${configurator.title}!`;
+        mainMessage = `${configurator.title} pe care l-ai configurat vine cu o surpriză plăcută!`;
+        discountCode = await createEmailDiscountCode('abandoned_discount', configuratorId);
+        incentiveText = `<div style="background: linear-gradient(135deg, #7C3AED, #A855F7); color: white; padding: 20px; border-radius: 8px; margin: 16px 0; text-align: center;">
+          <strong style="font-size: 20px;">🎉 REDUCERE ${discountCode.value}%</strong><br/>
+          <span>Codul tău exclusiv: <strong>${discountCode.code}</strong></span><br/>
+          <small style="opacity: 0.9;">Valabil ${Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} zile pentru comenzi peste ${discountCode.minOrderValue} RON!</small>
+        </div>`;
+        break;
+        
+      case 'final':
+        subject = `⏰ ULTIMA ȘANSĂ: 15% reducere pentru ${configurator.title}!`;
+        mainMessage = `Configurația ta pentru ${configurator.title} se va șterge din sistem în curând.`;
+        discountCode = await createEmailDiscountCode('abandoned_final', configuratorId);
+        incentiveText = `<div style="background: linear-gradient(135deg, #DC2626, #EF4444); color: white; padding: 20px; border-radius: 8px; margin: 16px 0; text-align: center;">
+          <strong style="font-size: 22px;">🔥 REDUCERE ${discountCode.value}%</strong><br/>
+          <span>ULTIMUL TĂU COD: <strong>${discountCode.code}</strong></span><br/>
+          <small style="opacity: 0.9;">Expiră în ${Math.ceil((discountCode.validUntil.getTime() - new Date().getTime()) / (1000 * 60 * 60))} ore!</small>
+        </div>`;
+        break;
+    }
+  } catch (error) {
+    console.error('[Email] Failed to create discount code:', error);
+    // Fallback to generic incentives if discount creation fails
+    incentiveText = `<div style="background: #EFF6FF; border: 1px solid #3B82F6; border-radius: 8px; padding: 16px; margin: 16px 0; text-align: center;">
+      <strong style="color: #1D4ED8;">💬 Ai întrebări?</strong><br/>
+      <span style="color: #1E40AF;">Răspundem în maxim 30 minute la contact@prynt.ro</span>
+    </div>`;
+  }
+  
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro";
+  const buttonUrl = `${baseUrl}${configurator.url}?utm_source=email&utm_medium=abandoned&utm_campaign=${emailType}`;
   
   const html = getHtmlTemplate({
-    title: content.title,
-    message: content.message,
-    buttonText: content.buttonText,
-    buttonUrl: content.buttonUrl,
+    title: subject.replace(/🎨|🎁|⏰/, '').trim(),
+    message: mainMessage,
+    buttonText: emailType === 'final' ? "Finalizează ACUM" : "Continuă Comanda",
+    buttonUrl: buttonUrl,
     footerText: "Echipa Prynt"
   });
   
   const enhancedHtml = html.replace(
-    '</div>', // Before closing button div
-    `${discountText}</div>`
+    '<div style="text-align: center; margin: 30px 0;">',
+    `${incentiveText}<div style="text-align: center; margin: 30px 0;">`
   );
   
-  await resend.emails.send({
-    from: 'Prynt Reminder <no-reply@prynt.ro>',
-    to: email,
-    subject: content.subject,
-    html: enhancedHtml,
-  });
+  try {
+    await resend.emails.send({
+      from: 'PRYNT <noreply@prynt.ro>',
+      to: email,
+      subject: subject,
+      html: enhancedHtml,
+    });
+    return true;
+  } catch (error) {
+    console.error('[Email] Abandoned cart send failed:', error);
+    return false;
+  }
 }
 
 export default {

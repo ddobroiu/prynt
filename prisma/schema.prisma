@@ -95,6 +95,26 @@ model AbandonedCart {
   @@index([lastUpdated])
 }
 
+model DiscountCode {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  type           String    // 'percentage', 'fixed', 'free_shipping'
+  value          Float     // percentage (0-100) or fixed amount in RON
+  minOrderValue  Float?    @default(0)
+  maxUses        Int?      // null = unlimited
+  currentUses    Int       @default(0)
+  validFrom      DateTime  @default(now())
+  validUntil     DateTime
+  isActive       Boolean   @default(true)
+  configuratorId String?   // null = applies to all
+  category       String?   // 'welcome', 'abandoned', 'newsletter'
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  @@index([code, isActive])
+  @@index([validUntil, isActive])
+}
+
 model Order {
   id               String      @id @default(cuid())
   orderNo          Int         @unique
