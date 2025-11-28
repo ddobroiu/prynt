@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import ProductJsonLd from "@/components/ProductJsonLd";
 import { resolveProductForRequestedSlug, getAllProductSlugsByCategory } from "@/lib/products";
 import type { Product } from "@/lib/products";
@@ -46,8 +47,9 @@ export default async function Page({ params }: Props) {
       <ProductJsonLd product={(product as Product)} url={url} />
       
       <main className="min-h-screen bg-gray-50">
-        {/* Reutilizăm configuratorul generic sau unul specific dacă există */}
-        <FonduriEUConfigurator />
+        <Suspense fallback={<div className="h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>}>
+          <FonduriEUConfigurator />
+        </Suspense>
 
         {product.contentHtml && (
            <section className="py-16 bg-white border-t border-gray-100">
