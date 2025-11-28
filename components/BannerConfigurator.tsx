@@ -20,6 +20,8 @@ import {
   type PriceInputBanner 
 } from "@/lib/pricing";
 import { QA } from "@/types";
+import NewsletterSignup from "./NewsletterSignup";
+import useAbandonedCart from "@/hooks/useAbandonedCart";
 
 /* --- SUB-COMPONENTS --- */
 const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
@@ -177,6 +179,19 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const [toastVisible, setToastVisible] = useState(false);
   const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
+
+  // Email marketing hooks
+  const [userEmail, setUserEmail] = useState<string>("");
+  useAbandonedCart({ 
+    configuratorId: 'banner', 
+    email: userEmail,
+    cartData: {
+      input,
+      artworkUrl,
+      textDesign,
+      priceData: useMemo(() => calculateBannerPrice(input), [input])
+    }
+  });
 
   const priceData = useMemo(() => calculateBannerPrice(input), [input]);
   const displayedTotal = priceData.finalPrice;
@@ -627,6 +642,15 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
           </div>
         </div>
       )}
+
+      {/* Newsletter Section */}
+      <div className="bg-linear-to-br from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-6 mt-8">
+        <NewsletterSignup 
+          configuratorId="banner"
+          source="configurator"
+          compact={true}
+        />
+      </div>
     </main>
   );
 }

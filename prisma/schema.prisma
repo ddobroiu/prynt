@@ -65,12 +65,34 @@ model Address {
 }
 
 model Subscriber {
-  id          String    @id @default(cuid())
-  email       String    @unique
-  token       String    @unique
-  confirmedAt DateTime?
-  source      String?
-  createdAt   DateTime  @default(now())
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  token        String    @unique
+  confirmed    Boolean   @default(false)
+  confirmedAt  DateTime?
+  interests    String[]  // Array of configurator IDs
+  source       String?   // 'footer' | 'popup' | 'configurator' | 'checkout'
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  subscribedAt DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+}
+
+model AbandonedCart {
+  id             String    @id @default(cuid())
+  email          String
+  configuratorId String
+  cartData       Json?     // Stored cart configuration
+  sessionId      String?
+  emailSentCount Int       @default(0)
+  lastEmailSent  DateTime?
+  createdAt      DateTime  @default(now())
+  lastUpdated    DateTime  @updatedAt
+
+  @@unique([email, configuratorId])
+  @@index([lastUpdated])
 }
 
 model Order {
