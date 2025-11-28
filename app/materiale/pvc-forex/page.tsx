@@ -1,19 +1,25 @@
-import React from "react";
+import React, { Suspense } from "react";
 import ConfiguratorPVCForex from "@/components/ConfiguratorPVCForex";
-import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import { getProductBySlug } from "@/lib/products";
+import ProductJsonLd from "@/components/ProductJsonLd";
 
 export const metadata = {
-  title: "Plăci PVC (Forex) Personalizate | Print Direct UV | Prynt",
-  description: "Print digital pe plăci PVC expandat (Forex). Material ușor, perfect pentru signalistică indoor, panouri expoziționale, decor.",
+  title: "Print pe PVC Forex | Plăci Rigide Personalizate",
+  description: "Panouri PVC Forex printate direct UV. Grosimi 1-10mm. Ideale pentru semnalistică, tablouri și panouri de expoziție.",
   alternates: { canonical: "/materiale/pvc-forex" },
 };
 
-export default function PVCForexPage() {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro";
+export default async function PvcForexPage() {
+  const product = getProductBySlug("pvc-forex");
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro"}/materiale/pvc-forex`;
+
   return (
-    <>
-      <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "PVC Forex", url: `${base}/materiale/pvc-forex` }]} />
-      <ConfiguratorPVCForex productSlug="pvc-forex" />
-    </>
+    <main className="min-h-screen bg-gray-50">
+      {product && <ProductJsonLd product={product} url={url} />}
+      
+      <Suspense fallback={<div className="h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>}>
+        <ConfiguratorPVCForex productSlug="pvc-forex" />
+      </Suspense>
+    </main>
   );
 }

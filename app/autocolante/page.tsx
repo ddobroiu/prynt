@@ -1,25 +1,25 @@
-import React from "react";
+import React, { Suspense } from "react";
 import AutocolanteConfigurator from "@/components/AutocolanteConfigurator";
-import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import { getProductBySlug } from "@/lib/products";
+import ProductJsonLd from "@/components/ProductJsonLd";
 
 export const metadata = {
-  title: "Autocolante și Etichete Personalizate | Print Digital & Cut",
-  description: "Comandă autocolante și etichete personalizate online. Vinyl rezistent, hârtie, tăiere pe contur (die-cut). Calitate foto și livrare rapidă.",
+  title: "Autocolante Personalizate | Print & Decupaj pe Contur",
+  description: "Autocolante PVC, etichete și stickere personalizate. Rezistente la exterior, opțiuni de laminare și tăiere pe contur. Comandă online!",
   alternates: { canonical: "/autocolante" },
 };
 
-export default function AutocolantePage() {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro";
+export default async function AutocolantePage() {
+  const product = getProductBySlug("autocolante");
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro"}/autocolante`;
 
   return (
-    <>
-      <BreadcrumbsJsonLd 
-        items={[
-          { name: "Acasă", url: `${base}/` }, 
-          { name: "Autocolante", url: `${base}/autocolante` }
-        ]} 
-      />
-      <AutocolanteConfigurator productSlug="autocolante" />
-    </>
+    <main className="min-h-screen bg-gray-50">
+      {product && <ProductJsonLd product={product} url={url} />}
+      
+      <Suspense fallback={<div className="h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>}>
+        <AutocolanteConfigurator productSlug="autocolante" />
+      </Suspense>
+    </main>
   );
 }

@@ -1,20 +1,25 @@
-import React from "react";
+import React, { Suspense } from "react";
 import CanvasConfigurator from "@/components/CanvasConfigurator";
-import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
-import { Metadata } from "next";
+import { getProductBySlug } from "@/lib/products";
+import ProductJsonLd from "@/components/ProductJsonLd";
 
-export const metadata: Metadata = {
-  title: "Tablouri Canvas Personalizate | Imprimare Foto pe Pânză",
-  description: "Transformă-ți amintirile în artă! Comandă tablouri canvas personalizate, imprimate la calitate fotografică. Alege dimensiunea, cu sau fără șasiu de lemn, și încarcă imaginea ta.",
+export const metadata = {
+  title: "Tablouri Canvas Personalizate | Print pe Pânză",
+  description: "Transformă pozele tale în tablouri canvas. Print de calitate pe pânză bumbac/poliester, întinsă pe șasiu de lemn. Livrare rapidă.",
   alternates: { canonical: "/canvas" },
 };
 
-export default function CanvasPage() {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro";
+export default async function CanvasPage() {
+  const product = getProductBySlug("canvas");
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro"}/canvas`;
+
   return (
-    <>
-      <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Canvas", url: `${base}/canvas` }]} />
-      <CanvasConfigurator productSlug="canvas" />
-    </>
+    <main className="min-h-screen bg-gray-50">
+      {product && <ProductJsonLd product={product} url={url} />}
+      
+      <Suspense fallback={<div className="h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>}>
+        <CanvasConfigurator productSlug="canvas" />
+      </Suspense>
+    </main>
   );
 }

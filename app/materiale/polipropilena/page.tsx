@@ -1,19 +1,25 @@
-import React from "react";
+import React, { Suspense } from "react";
 import ConfiguratorPolipropilena from "@/components/ConfiguratorPolipropilena";
-import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import { getProductBySlug } from "@/lib/products";
+import ProductJsonLd from "@/components/ProductJsonLd";
 
 export const metadata = {
-  title: "Polipropilenă Celulară (Akylux) | Panouri Imobiliare",
-  description: "Print pe polipropilenă celulară, materialul standard pentru panouri imobiliare 'DE VÂNZARE'. Ușor, ieftin, rezistent la exterior.",
+  title: "Print pe Polipropilenă Celulară | Panouri Ușoare",
+  description: "Polipropilenă celulară (coroplast) printată. Material economic și ușor pentru panouri imobiliare și semnalistică temporară.",
   alternates: { canonical: "/materiale/polipropilena" },
 };
 
-export default function PolipropilenaPage() {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro";
+export default async function PolipropilenaPage() {
+  const product = getProductBySlug("polipropilena");
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro"}/materiale/polipropilena`;
+
   return (
-    <>
-      <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Polipropilenă", url: `${base}/materiale/polipropilena` }]} />
-      <ConfiguratorPolipropilena productSlug="polipropilena" />
-    </>
+    <main className="min-h-screen bg-gray-50">
+      {product && <ProductJsonLd product={product} url={url} />}
+      
+      <Suspense fallback={<div className="h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>}>
+        <ConfiguratorPolipropilena productSlug="polipropilena" />
+      </Suspense>
+    </main>
   );
 }

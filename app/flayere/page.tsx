@@ -1,19 +1,25 @@
-import React from "react";
+import React, { Suspense } from "react";
 import FlyerConfigurator from "@/components/FlyerConfigurator";
-import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
+import { getProductBySlug } from "@/lib/products";
+import ProductJsonLd from "@/components/ProductJsonLd";
 
 export const metadata = {
-  title: "Flyere și Fluturași Publicitari | Print Digital & Offset",
-  description: "Comandă flyere și fluturași publicitari online. Diverse dimensiuni (A4, A5, A6, DL) și tipuri de hârtie. Calitate superioară și livrare rapidă.",
+  title: "Flyere Ieftine | A6, A5, DL | Tipografie Online",
+  description: "Comandă flyere pentru promovare stradală sau evenimente. Prețuri mici, tiraje flexibile și livrare rapidă.",
   alternates: { canonical: "/flayere" },
 };
 
-export default function FlyerePage() {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro";
+export default async function FlayerePage() {
+  const product = getProductBySlug("flayere"); // Sau "flyer" depinde de cum e în products.ts
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro"}/flayere`;
+
   return (
-    <>
-      <BreadcrumbsJsonLd items={[{ name: "Acasă", url: `${base}/` }, { name: "Flyere", url: `${base}/flayere` }]} />
-      <FlyerConfigurator productSlug="flyere" />
-    </>
+    <main className="min-h-screen bg-gray-50">
+      {product && <ProductJsonLd product={product} url={url} />}
+      
+      <Suspense fallback={<div className="h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>}>
+        <FlyerConfigurator productSlug="flayere" />
+      </Suspense>
+    </main>
   );
 }
