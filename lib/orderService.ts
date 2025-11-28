@@ -201,7 +201,7 @@ async function sendEmails(
   const shippingFeeForEmail = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
   const totalComanda = subtotal + shippingFeeForEmail;
 
-  function formatYesNo(v: any) {
+  function formatYesNo(v: unknown): string {
     if (typeof v === 'boolean') return v ? 'Da' : 'Nu';
     if (typeof v === 'string') {
       const t = v.toLowerCase();
@@ -236,7 +236,7 @@ async function sendEmails(
     orderNotes: 'Observații',
   };
 
-  function prettyValue(k: string, v: any) {
+  function prettyValue(k: string, v: unknown): string {
     if (k === 'materialId') return v === 'frontlit_510' ? 'Frontlit 510g' : v === 'frontlit_440' ? 'Frontlit 440g' : String(v);
     if (k === 'productType') return v === 'alucobond' ? 'Alucobond' : v === 'polipropilena' ? 'Polipropilenă' : v === 'pvc-forex' ? 'PVC Forex' : String(v);
     if (k === 'designOption') return v === 'pro' ? 'Pro' : v === 'upload' ? 'Am fișier' : v === 'text_only' ? 'Text' : String(v);
