@@ -32,6 +32,42 @@ export async function POST(request: Request) {
       });
       results.push({ type: 'welcome-banner', success: welcomeBanner });
     }
+
+    if (type === 'all' || type === 'welcome-afise') {
+      // 3. Welcome Afișe
+      console.log('📄 Trimit Welcome Email pentru Afișe...');
+      const welcomeAfise = await sendConfiguratorWelcomeEmail({
+        email: 'contact@prynt.ro',
+        interests: ['afise'], 
+        name: 'Test User',
+        source: 'test'
+      });
+      results.push({ type: 'welcome-afise', success: welcomeAfise });
+    }
+
+    if (type === 'all' || type === 'welcome-autocolante') {
+      // 4. Welcome Autocolante
+      console.log('🏷️ Trimit Welcome Email pentru Autocolante...');
+      const welcomeAutocolante = await sendConfiguratorWelcomeEmail({
+        email: 'contact@prynt.ro',
+        interests: ['autocolante'],
+        name: 'Test User', 
+        source: 'test'
+      });
+      results.push({ type: 'welcome-autocolante', success: welcomeAutocolante });
+    }
+
+    if (type === 'all' || type === 'welcome-flayere') {
+      // 5. Welcome Flyere
+      console.log('📢 Trimit Welcome Email pentru Flyere...');
+      const welcomeFlayere = await sendConfiguratorWelcomeEmail({
+        email: 'contact@prynt.ro',
+        interests: ['flayere'],
+        name: 'Test User',
+        source: 'test' 
+      });
+      results.push({ type: 'welcome-flayere', success: welcomeFlayere });
+    }
     
     if (type === 'all' || type === 'abandoned-gentle') {
       // 3. Abandoned Cart - gentle
