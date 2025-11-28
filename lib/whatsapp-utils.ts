@@ -1,4 +1,5 @@
-// lib/whatsapp-utils.ts
+import { WhatsAppMessage } from '../types'; 
+
 const WHATSAPP_API_URL = `https://graph.facebook.com/v20.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`;
 const WHATSAPP_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 
@@ -6,6 +7,11 @@ const WHATSAPP_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
  * Trimite un mesaj text simplu pe WhatsApp
  */
 export async function sendWhatsAppMessage(to: string, body: string) {
+  if (!WHATSAPP_TOKEN || !process.env.WHATSAPP_PHONE_NUMBER_ID) {
+    console.error("❌ ERROARE: Lipsesc variabilele de mediu WHATSAPP_ACCESS_TOKEN sau WHATSAPP_PHONE_NUMBER_ID");
+    return null;
+  }
+
   const payload = {
     messaging_product: 'whatsapp',
     to: to,
@@ -24,13 +30,13 @@ export async function sendWhatsAppMessage(to: string, body: string) {
 
     if (!res.ok) {
       const errorData = await res.json();
-      console.error('Error sending WhatsApp message:', JSON.stringify(errorData, null, 2));
+      console.error('❌ WhatsApp API Error (Text):', JSON.stringify(errorData, null, 2));
       return null;
     }
 
     return await res.json();
   } catch (error) {
-    console.error('Error sending WhatsApp message:', error);
+    console.error('❌ Network Error sending WhatsApp message:', error);
     return null;
   }
 }
@@ -46,12 +52,18 @@ export async function sendInteractiveButtons(
   text: string, 
   buttons: { id: string; title: string }[]
 ) {
-  // Formatăm butoanele conform cerințelor API-ului WhatsApp
-  const formattedButtons = buttons.map((btn) => ({
+  if (!WHATSAPP_TOKEN || !process.env.WHATSAPP_PHONE_NUMBER_ID) {
+    console.error("❌ ERROARE: Lipsesc variabilele de mediu WHATSAPP_...");
+    return null;
+  }
+
+  // VALIDARE: WhatsApp acceptă maxim 3 butoane și titluri de max 20 caractere
+  const validButtons = buttons.slice(0, 3).map((btn) => ({
     type: 'reply',
     reply: {
       id: btn.id,
-      title: btn.title,
+      // Tăiem titlul la 20 caractere pentru a evita eroarea API
+      title: btn.title.length > 20 ? btn.title.substring(0, 17) + "..." : btn.title,
     },
   }));
 
@@ -65,7 +77,7 @@ export async function sendInteractiveButtons(
         text: text,
       },
       action: {
-        buttons: formattedButtons,
+        buttons: validButtons,
       },
     },
   };
@@ -82,13 +94,13 @@ export async function sendInteractiveButtons(
 
     if (!res.ok) {
       const errorData = await res.json();
-      console.error('Error sending interactive button message:', JSON.stringify(errorData, null, 2));
+      console.error('❌ WhatsApp API Error (Buttons):', JSON.stringify(errorData, null, 2));
       return null;
     }
 
     return await res.json();
   } catch (error) {
-    console.error('Error sending interactive button message:', error);
+    console.error('❌ Network Error sending button message:', error);
     return null;
   }
 }

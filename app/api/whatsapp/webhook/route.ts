@@ -298,13 +298,14 @@ export async function POST(req: Request) {
           finalReply = finalCompletion.choices[0].message.content ?? "";
         }
 
-        // 5. Trimitere & Salvare (CU SUPORT PENTRU BUTOANE)
+        // 5. Trimitere & Salvare (CU VERIFICARE SUCCES)
         if (finalReply && finalReply.trim().length > 0) {
             let replyText = finalReply;
             if (contextName) replyText = replyText.replace(/{{\s*name\s*}}/gi, contextName);
 
             // LOGICA SPECIALA PENTRU INTERFAȚĂ (BUTOANE)
             const lowerReply = replyText.toLowerCase();
+            let sendResult: any = null;
 
             // Caz 1: Cerere explicită de Județ (din tool-uri anterioare)
             if (replyText.includes("||REQUEST: JUDET||")) {
@@ -312,21 +313,20 @@ export async function POST(req: Request) {
                const data = await res.json();
                const options = data.judete?.slice(0, 5).map((j: string, idx: number) => ({ id: `judet_${idx + 1}`, title: j })) || [];
                options.push({ id: "search_judet", title: "Alt județ" });
-               // AICI AM CORECTAT: FOLOSIM sendInteractiveButtons PENTRU OPȚIUNI
-               await sendInteractiveButtons(from, replyText.replace("||REQUEST: JUDET||", "").trim(), options);
+               
+               sendResult = await sendInteractiveButtons(from, replyText.replace("||REQUEST: JUDET||", "").trim(), options);
             } 
             // Caz 2: Întrebări de tip "Da/Nu" detectate în textul AI-ului
-            // Dacă AI-ul întreabă "Dorești...", "Vrei să...", "Confirm?"
             else if (
                 lowerReply.includes("?") && 
                 (lowerReply.includes("dorești") || lowerReply.includes("vrei") || lowerReply.includes("confirm") || lowerReply.includes("da sau nu")) &&
-                replyText.length < 150 // Doar pentru mesaje relativ scurte
+                replyText.length < 150 
             ) {
-                await sendYesNoQuestion(from, replyText);
+                sendResult = await sendYesNoQuestion(from, replyText);
             }
-            // Caz 3: Meniu Principal sau Opțiuni detectate (ex: AI-ul zice "Alege o opțiune")
+            // Caz 3: Meniu Principal sau Opțiuni detectate
             else if (lowerReply.includes("alege o opțiune") || lowerReply.includes("cu ce te pot ajuta")) {
-                await sendInteractiveButtons(from, replyText, [
+                sendResult = await sendInteractiveButtons(from, replyText, [
                     { id: 'check_status', title: 'Status Comandă' },
                     { id: 'offer', title: 'Cere Ofertă' },
                     { id: 'human', title: 'Agent Uman' }
@@ -334,18 +334,30 @@ export async function POST(req: Request) {
             }
             // Caz 4: Text simplu (Default)
             else {
-               await sendWhatsAppMessage(from, replyText);
+               sendResult = await sendWhatsAppMessage(from, replyText);
             }
 
-            const msgsToLog = [
-                { role: 'user', content: textBody },
-                { role: 'assistant', content: finalReply }
-            ];
-            await logConversation('whatsapp', from, msgsToLog, userId);
+            // LOGARE ÎN ADMIN DOAR DACĂ S-A TRIMIS SAU LOGARE EROARE
+            if (sendResult) {
+                // Mesajul s-a trimis (Meta API a raspuns ok)
+                const msgsToLog = [
+                    { role: 'user', content: textBody },
+                    { role: 'assistant', content: finalReply }
+                ];
+                await logConversation('whatsapp', from, msgsToLog, userId);
 
-            history.push({ role: "user", content: textBody });
-            history.push({ role: "assistant", content: finalReply });
-            conversations.set(from, history);
+                history.push({ role: "user", content: textBody });
+                history.push({ role: "assistant", content: finalReply });
+                conversations.set(from, history);
+            } else {
+                // EROARE LA TRIMITERE
+                console.error(`❌ FAILED to send message to ${from}`);
+                // Salvăm în admin că a eșuat, ca să știi
+                await logConversation('whatsapp', from, [
+                    { role: 'user', content: textBody },
+                    { role: 'assistant', content: `⚠️ EROARE SISTEM: Mesajul nu a ajuns la client. Verifică logurile serverului.\nConținut intenționat: ${finalReply}` }
+                ], userId);
+            }
         }
 
         return NextResponse.json({ status: "success" });

@@ -35,17 +35,13 @@ export const Select = ({
   placeholder?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(controlledValue ?? defaultValue);
-
-  useEffect(() => {
-    if (controlledValue !== undefined) {
-      setSelectedValue(controlledValue);
-    }
-  }, [controlledValue]);
+  // păstrăm o stare internă doar când componenta este uncontrolled
+  const [selectedValueState, setSelectedValueState] = useState<string>(defaultValue);
+  const selectedValue = controlledValue !== undefined ? controlledValue : selectedValueState;
 
   const handleValueChange = (value: string) => {
     if (controlledValue === undefined) {
-      setSelectedValue(value);
+      setSelectedValueState(value);
     }
     if (onValueChange) {
       onValueChange(value);

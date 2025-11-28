@@ -17,8 +17,26 @@ type Props = {
 
 export default function InStockScroller({ products, perPage = 4, maxPerPage = 5, minCardWidth = 220, intervalMs = 3500 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(perPage);
-  const [isMobileView, setIsMobileView] = useState<boolean>(false);
+
+  const computeResolved = () => {
+    try {
+      // avoid reading refs during render; use window.innerWidth as an initial approximation
+      const w = typeof window !== "undefined" ? window.innerWidth : 0;
+      let resolved = perPage;
+      if (w < 640) resolved = 1;
+      else if (w < 1024) resolved = 3;
+      else if (w < 1280) resolved = 4;
+      else resolved = 5;
+      resolved = Math.max(1, Math.min(maxPerPage, resolved, products.length || resolved));
+      return { resolved, isMobile: w < 640 };
+    } catch {
+      return { resolved: perPage, isMobile: false };
+    }
+  };
+
+  const init = computeResolved();
+  const [itemsPerPage, setItemsPerPage] = useState<number>(init.resolved);
+  const [isMobileView, setIsMobileView] = useState<boolean>(init.isMobile);
   const pages = Math.max(1, Math.ceil((products?.length ?? 0) / itemsPerPage));
   const [page, setPage] = useState(0);
   const mounted = useRef(false);
@@ -55,16 +73,7 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
       setItemsPerPage(resolved);
     });
     ro.observe(el);
-    // init
-      const initW = el.clientWidth || 0;
-      let initResolved = perPage;
-      if (initW < 640) initResolved = 1;
-      else if (initW < 1024) initResolved = 3;
-      else if (initW < 1280) initResolved = 4;
-      else initResolved = 5;
-      initResolved = Math.max(1, Math.min(maxPerPage, initResolved, products.length || initResolved));
-      setIsMobileView(initW < 640);
-      setItemsPerPage(initResolved);
+    // initial sizing handled via lazy init; ResizeObserver will update on changes
     return () => ro.disconnect();
   }, [containerRef, perPage, maxPerPage, minCardWidth]);
 
@@ -84,15 +93,13 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
     };
   }, [pages, intervalMs]);
 
-  // clamp page when itemsPerPage changes
-  useEffect(() => {
-    const newPages = Math.max(1, Math.ceil((products?.length ?? 0) / itemsPerPage));
-    if (page >= newPages) setPage(0);
-  }, [itemsPerPage, products, page]);
+  // Instead of forcing state changes inside effects, derive an effective page
+  const newPages = Math.max(1, Math.ceil((products?.length ?? 0) / itemsPerPage));
+  const effectivePage = Math.min(page, Math.max(0, newPages - 1));
 
   if (!products || products.length === 0) return null;
 
-  const start = page * itemsPerPage;
+  const start = effectivePage * itemsPerPage;
   const slice = products.slice(start, start + itemsPerPage);
 
   return (
@@ -175,7 +182,7 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
       {pages > 1 && (
         <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 10 }}>
           {Array.from({ length: pages }).map((_, i) => (
-            <button key={i} onClick={() => setPage(i)} aria-label={`Pagina ${i + 1}`} style={{ width: 8, height: 8, borderRadius: 999, background: i === page ? "#4f46e5" : "#cbd5e1", border: "none" }} />
+            <button key={i} onClick={() => setPage(i)} aria-label={`Pagina ${i + 1}`} style={{ width: 8, height: 8, borderRadius: 999, background: i === effectivePage ? "#4f46e5" : "#cbd5e1", border: "none" }} />
           ))}
         </div>
       )}

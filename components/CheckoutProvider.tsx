@@ -39,19 +39,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   });
 
-  const [isLoaded, setIsLoaded] = useState(false);
+    // Items are read during initialization; we consider the provider ready on the client
+    const isLoaded = true;
 
-  useEffect(() => {
-    // marchez componenta ca fiind montata (hydrated)
-    setIsLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    try {
-      localStorage.setItem("cart", JSON.stringify(items));
-    } catch {}
-  }, [items, isLoaded]);
+    useEffect(() => {
+      try {
+        localStorage.setItem("cart", JSON.stringify(items));
+      } catch {}
+    }, [items]);
 
   const addItem = (item: CartItem) => {
     setItems((prev) => {

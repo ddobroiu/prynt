@@ -70,9 +70,8 @@ const DesktopNav = () => {
 const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [openSub, setOpenSub] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isOpen) setOpenSub(null);
-  }, [isOpen]);
+  // Nu apelăm setState direct într-un effect; dacă meniul e închis, tratăm sub-meniul ca "nul" la randare
+  const visibleOpenSub = isOpen ? openSub : null;
 
   return (
     <>
@@ -102,12 +101,12 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   <div className="rounded-xl overflow-hidden">
                     <button
                       onClick={() => setOpenSub(openSub === item.label ? null : item.label)}
-                      className={`w-full flex items-center justify-between p-3 text-left font-semibold transition-colors ${openSub === item.label ? 'bg-zinc-50 dark:bg-zinc-900 text-indigo-600' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
+                      className={`w-full flex items-center justify-between p-3 text-left font-semibold transition-colors ${visibleOpenSub === item.label ? 'bg-zinc-50 dark:bg-zinc-900 text-indigo-600' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
                     >
                       {item.label}
-                      <ChevronDown size={18} className={`transition-transform duration-300 ${openSub === item.label ? "rotate-180 text-indigo-600" : "text-zinc-400"}`} />
+                      <ChevronDown size={18} className={`transition-transform duration-300 ${visibleOpenSub === item.label ? "rotate-180 text-indigo-600" : "text-zinc-400"}`} />
                     </button>
-                    <div className={`grid transition-all duration-300 ease-in-out ${openSub === item.label ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                    <div className={`grid transition-all duration-300 ease-in-out ${visibleOpenSub === item.label ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
                       <div className="overflow-hidden bg-zinc-50 dark:bg-zinc-900/50">
                         {item.children.map((child) => (
                           <Link 
