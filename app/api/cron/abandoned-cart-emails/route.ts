@@ -10,8 +10,8 @@ interface AbandonedCartWithData {
   email: string;
   configuratorId: string;
   cartData: any;
-  sessionId: string;
-  emailsSent: number;
+  sessionId: string | null;
+  emailSentCount: number;
   createdAt: Date;
   lastEmailSent: Date | null;
 }
@@ -31,14 +31,14 @@ export async function POST() {
         OR: [
           // First email (1 hour after abandonment)
           {
-            emailsSent: 0,
+            emailSentCount: 0,
             createdAt: {
               lte: oneHourAgo
             }
           },
           // Second email (24 hours after abandonment)
           {
-            emailsSent: 1,
+            emailSentCount: 1,
             createdAt: {
               lte: oneDayAgo
             },
@@ -48,7 +48,7 @@ export async function POST() {
           },
           // Third email (3 days after abandonment)
           {
-            emailsSent: 2,
+            emailSentCount: 2,
             createdAt: {
               lte: threeDaysAgo
             },
@@ -76,9 +76,9 @@ export async function POST() {
         let emailType: 'gentle' | 'discount' | 'final';
         let discountPercent = 0;
 
-        if (cart.emailsSent === 0) {
+        if (cart.emailSentCount === 0) {
           emailType = 'gentle';
-        } else if (cart.emailsSent === 1) {
+        } else if (cart.emailSentCount === 1) {
           emailType = 'discount';
           discountPercent = 10; // 10% discount
         } else {
@@ -100,7 +100,7 @@ export async function POST() {
           await prisma.abandonedCart.update({
             where: { id: cart.id },
             data: {
-              emailsSent: cart.emailsSent + 1,
+              emailSentCount: cart.emailSentCount + 1,
               lastEmailSent: now
             }
           });

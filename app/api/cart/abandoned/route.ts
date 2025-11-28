@@ -102,7 +102,27 @@ export async function PUT(req: Request) {
 
     for (const cart of abandonedCarts) {
       try {
-        await sendAbandonedCartEmail(cart.email, cart.configuratorId, delay as '1h' | '24h' | '3d');
+        // Determine email type based on attempt count
+        let emailType: 'gentle' | 'discount' | 'final';
+        let discountPercent = 0;
+        
+        if (cart.emailSentCount === 0) {
+          emailType = 'gentle';
+        } else if (cart.emailSentCount === 1) {
+          emailType = 'discount';
+          discountPercent = 10; // 10% discount
+        } else {
+          emailType = 'final';
+          discountPercent = 15; // 15% discount for final attempt
+        }
+
+        await sendAbandonedCartEmail({
+          email: cart.email,
+          configuratorId: cart.configuratorId,
+          cartData: cart.cartData,
+          emailType,
+          discountPercent
+        });
         
         await prisma.abandonedCart.update({
           where: { id: cart.id },
