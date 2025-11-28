@@ -6,233 +6,213 @@ import { Truck, Package, MapPin, Clock, CheckCircle, CreditCard } from "lucide-r
 
 export default function LivrarePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <Truck className="w-16 h-16 mx-auto mb-4" />
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Livrare & Transport
-            </h1>
-            <p className="text-xl text-blue-100">
-              Livrăm în toată România comenzile tale de materiale publicitare
-            </p>
-          </div>
-        </div>
-      </div>
+    <main className="min-h-screen bg-bg text-text flex items-center justify-center lg:p-8 p-0">
+      <div className="w-full max-w-[1600px] bg-card-bg lg:rounded-4xl overflow-hidden shadow-2xl border border-border min-h-screen lg:min-h-[800px] flex flex-col lg:flex-row">
+        
+        {/* Left Panel - Info & Branding */}
+        <div className="relative lg:w-5/12 bg-surface p-8 lg:p-16 flex flex-col justify-between overflow-hidden">
+            {/* Background decorative blobs */}
+            <div className="absolute top-[-20%] left-[-20%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none mix-blend-multiply" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none mix-blend-multiply" />
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto space-y-12">
-          
-          {/* Zone de livrare */}
-          <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="w-8 h-8 text-blue-600" />
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
-                Zone de Livrare
-              </h2>
+            <div className="relative z-10">
+                <Link href="/" className="inline-block mb-12 opacity-80 hover:opacity-100 transition">
+                    <span className="text-sm font-bold tracking-widest uppercase text-muted">? �napoi la site</span>
+                </Link>
+                
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-ui mb-6">
+                    Livrare <br/>
+                    <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600">rapida.</span>
+                </h1>
+                <p className="text-lg text-muted max-w-md leading-relaxed">
+                    Transport rapid �n toata Rom�nia. Comenzile tale ajung la tine �n 1-2 zile lucratoare.
+                </p>
             </div>
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="border-2 border-blue-200 dark:border-blue-800 rounded-xl p-6">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                  Livrare Națională
-                </h3>
-                <p className="text-slate-600 dark:text-slate-300 mb-4">
-                  Livrăm în toate județele României prin curier rapid (Fan Courier, DPD, Sameday).
-                </p>
-                <ul className="space-y-2 text-slate-700 dark:text-slate-300">
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-1">•</span>
-                    <span><strong>Toată România:</strong> 1-2 zile lucrătoare</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-1">•</span>
-                    <span>Livrare rapidă prin curier rapid</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-1">•</span>
-                    <span>Urmărire colet în timp real</span>
-                  </li>
-                </ul>
-              </div>
 
-              <div className="border-2 border-indigo-200 dark:border-indigo-800 rounded-xl p-6">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                  <Package className="w-6 h-6 text-indigo-600" />
-                  Ridicare din Depozit
-                </h3>
-                <p className="text-slate-600 dark:text-slate-300 mb-4">
-                  Poți ridica comanda personal din depozitul nostru, fără costuri suplimentare.
-                </p>
-                <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 space-y-2 text-sm">
-                  <p className="font-semibold text-slate-900 dark:text-white">
-                    Program ridicări:
-                  </p>
-                  <p className="text-slate-700 dark:text-slate-300">
-                    Luni - Vineri: 09:00 - 18:00
-                  </p>
-                  <p className="text-slate-700 dark:text-slate-300">
-                    Sâmbătă: 10:00 - 14:00
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
-                    *Te rugăm să anunți cu 24h înainte pentru a pregăti comanda
-                  </p>
+            <div className="relative z-10 mt-12 space-y-8">
+                <div className="flex items-start gap-4 group">
+                    <div className="w-12 h-12 rounded-2xl bg-bg border border-border flex items-center justify-center group-hover:border-blue-500/50 group-hover:bg-blue-500/5 transition-all duration-300 shadow-sm">
+                        <Clock className="w-5 h-5 text-ui group-hover:text-blue-500 transition-colors" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-ui">1-2 zile</h3>
+                        <p className="text-muted">Livrare �n toata ?ara</p>
+                    </div>
+                </div>
+
+                <div className="flex items-start gap-4 group">
+                    <div className="w-12 h-12 rounded-2xl bg-bg border border-border flex items-center justify-center group-hover:border-green-500/50 group-hover:bg-green-500/5 transition-all duration-300 shadow-sm">
+                        <CreditCard className="w-5 h-5 text-ui group-hover:text-green-500 transition-colors" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-ui">Transport gratuit</h3>
+                        <p className="text-muted">La comenzi peste 500 RON</p>
+                    </div>
+                </div>
+
+                <div className="flex items-start gap-4 group">
+                    <div className="w-12 h-12 rounded-2xl bg-bg border border-border flex items-center justify-center group-hover:border-indigo-500/50 group-hover:bg-indigo-500/5 transition-all duration-300 shadow-sm">
+                        <Package className="w-5 h-5 text-ui group-hover:text-indigo-500 transition-colors" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-ui">Urmarire AWB</h3>
+                        <p className="text-muted">Real-time prin email & SMS</p>
+                    </div>
+                </div>
+
+                <div className="flex items-start gap-4 group">
+                    <div className="w-12 h-12 rounded-2xl bg-bg border border-border flex items-center justify-center shadow-sm">
+                        <MapPin className="w-5 h-5 text-ui" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-ui">Ridicare personala</h3>
+                        <p className="text-muted">GRATUIT din depozit</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {/* Right Panel - Details */}
+        <div className="lg:w-7/12 bg-card-bg p-8 lg:p-20 flex flex-col justify-center relative overflow-y-auto">
+            <div className="max-w-2xl mx-auto w-full space-y-12">
+              
+              {/* Costuri Transport */}
+              <div>
+                <h2 className="text-2xl font-bold text-ui mb-6">Costuri de Transport</h2>
+                <div className="bg-surface border border-border rounded-2xl overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-bg border-b border-border">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-ui">
+                            Valoare Comanda
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-ui">
+                            Cost Livrare
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        <tr className="hover:bg-bg/50 transition-colors">
+                          <td className="px-6 py-4 text-ui font-medium">
+                            Sub 500 RON
+                          </td>
+                          <td className="px-6 py-4 text-muted">
+                            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-semibold">
+                              19.99 RON
+                            </span>
+                          </td>
+                        </tr>
+                        <tr className="hover:bg-green-500/5 transition-colors bg-green-500/5">
+                          <td className="px-6 py-4 text-ui font-bold">
+                            Peste 500 RON
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-sm font-bold">
+                              <CheckCircle className="w-4 h-4" />
+                              GRATUIT
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
 
-          {/* Costuri livrare */}
-          <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Truck className="w-8 h-8 text-indigo-600" />
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
-                Costuri de Transport
-              </h2>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-100 dark:bg-slate-700">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900 dark:text-white">
-                      Valoare Comandă
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900 dark:text-white">
-                      București & Ilfov
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900 dark:text-white">
-                      Restul Țării
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                  <tr>
-                    <td className="px-6 py-4 text-slate-900 dark:text-white">
-                      Sub 500 RON
-                    </td>
-                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                      19.99 RON
-                    </td>
-                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
-                      19.99 RON
-                    </td>
-                  </tr>
-                  <tr className="bg-green-50 dark:bg-green-900/20">
-                    <td className="px-6 py-4 font-semibold text-green-700 dark:text-green-400">
-                      Peste 500 RON
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-green-700 dark:text-green-400">
-                      GRATUIT ✨
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-green-700 dark:text-green-400">
-                      GRATUIT ✨
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
-            <div className="mt-6 bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 flex items-start gap-3">
-              <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
-              <div className="text-sm text-slate-700 dark:text-slate-300">
-                <p className="font-semibold text-slate-900 dark:text-white mb-2">
-                  Note importante:
-                </p>
-                <ul className="space-y-1 list-disc list-inside">
-                  <li>Comenzile mari (bannere peste 3m, cantități mari) pot avea costuri suplimentare</li>
-                  <li>Livrările în zone greu accesibile se vor taxa diferit (se va comunica înainte)</li>
-                  <li>Pentru livrări urgente (sub 24h) contactează-ne telefonic</li>
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          {/* Timpi de livrare */}
-          <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Clock className="w-8 h-8 text-green-600" />
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
-                Timpi Estimați de Livrare
-              </h2>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="border-l-4 border-blue-500 pl-6 py-3">
-                <h3 className="font-bold text-slate-900 dark:text-white mb-2">
-                  Producție + Livrare: 1-2 zile
-                </h3>
-                <p className="text-slate-600 dark:text-slate-300 mb-3">
-                  Toate produsele sunt procesate și livrate în <strong>1-2 zile lucrătoare</strong>:
-                </p>
-                <ul className="space-y-2 text-slate-700 dark:text-slate-300 text-sm">
-                  <li>✓ <strong>Bannere & Autocolante</strong></li>
-                  <li>✓ <strong>Pliante & Flayere</strong></li>
-                  <li>✓ <strong>Canvas & Tablouri</strong></li>
-                  <li>✓ <strong>Materiale Rigide (PVC, Plexiglass, Alucobond)</strong></li>
-                </ul>
+              {/* Timpi de Livrare */}
+              <div>
+                <h2 className="text-2xl font-bold text-ui mb-6">Timpi de Livrare</h2>
+                <div className="bg-surface border border-border rounded-2xl p-6 space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+                      <Clock className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-ui mb-1">1-2 zile lucratoare</h3>
+                      <p className="text-sm text-muted">
+                        Toate produsele sunt procesate ?i livrate �n <strong>1-2 zile lucratoare</strong> �n toata Rom�nia.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t border-border pt-4">
+                    <p className="text-sm text-muted">
+                      <strong className="text-ui">Produse incluse:</strong> Bannere, Autocolante, Pliante, Flayere, Canvas, Tablouri, Materiale Rigide (PVC, Plexiglass, Alucobond).
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 pl-6 py-3">
-                <h3 className="font-bold text-slate-900 dark:text-white mb-2">
-                  ⚡ Livrare Rapidă Garantată
-                </h3>
-                <p className="text-slate-700 dark:text-slate-300 text-sm">
-                  Comenzile sunt procesate și expediate în <strong>1-2 zile lucrătoare</strong> pentru toate produsele. 
-                  Pentru urgențe, contactează-ne la <strong>0750 473 111</strong>.
-                </p>
+              {/* Ridicare Personala */}
+              <div>
+                <h2 className="text-2xl font-bold text-ui mb-6">Ridicare din Depozit</h2>
+                <div className="bg-surface border border-border rounded-2xl p-6">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0">
+                      <MapPin className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-ui mb-1">GRATUIT - Fara costuri</h3>
+                      <p className="text-sm text-muted">
+                        Po?i ridica comanda personal din depozitul nostru, fara costuri suplimentare.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-bg border border-border rounded-xl p-4 space-y-2">
+                    <p className="font-semibold text-ui text-sm">Program ridicari:</p>
+                    <div className="text-sm text-muted space-y-1">
+                      <p>?? <strong>Luni - Vineri:</strong> 09:00 - 18:00</p>
+                      <p>?? <strong>S�mbata:</strong> 10:00 - 14:00</p>
+                    </div>
+                    <p className="text-xs text-muted pt-2 border-t border-border">
+                      *Te rugam sa anun?i cu 24h �nainte pentru a pregati comanda
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </section>
 
-          {/* Urmărire comandă */}
-          <section className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-2xl shadow-lg p-8">
-            <div className="max-w-2xl mx-auto text-center">
-              <Package className="w-12 h-12 mx-auto mb-4" />
-              <h2 className="text-3xl font-bold mb-4">
-                Urmărește-ți Comanda
-              </h2>
-              <p className="text-indigo-100 mb-6">
-                Primești AWB automat prin email și SMS. Poți urmări coletul în timp real.
-              </p>
-              <a
-                href="/urmareste-comanda"
-                className="inline-block bg-white text-indigo-600 font-semibold px-8 py-3 rounded-lg hover:bg-indigo-50 transition-colors"
-              >
-                Verifică Status Comandă
-              </a>
-            </div>
-          </section>
+              {/* Urmarire Comanda */}
+              <div className="bg-accent/5 border border-accent/20 rounded-2xl p-8 text-center">
+                <Package className="w-12 h-12 mx-auto mb-4 text-accent" />
+                <h3 className="text-xl font-bold text-ui mb-2">Urmare?te-?i Comanda</h3>
+                <p className="text-muted mb-6">
+                  Prime?ti AWB automat prin email ?i SMS. Po?i urmari coletul �n timp real.
+                </p>
+                <Link
+                  href="/urmareste-comanda"
+                  className="inline-block bg-accent hover:bg-accent/90 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl"
+                >
+                  Verifica Status Comanda
+                </Link>
+              </div>
 
-          {/* Contact */}
-          <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 text-center">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-              Ai întrebări despre livrare?
-            </h2>
-            <p className="text-slate-600 dark:text-slate-300 mb-6">
-              Echipa noastră este gata să te ajute cu orice detalii despre transport și livrare.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <a
-                href="tel:+40750473111"
-                className="inline-flex items-center gap-2 bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                📞 0750 473 111
-              </a>
-              <a
-                href="mailto:contact@prynt.ro"
-                className="inline-flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                ✉️ contact@prynt.ro
-              </a>
-            </div>
-          </section>
+              {/* Contact */}
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-ui mb-3">Ai �ntrebari despre livrare?</h3>
+                <p className="text-muted mb-6">
+                  Echipa noastra este gata sa te ajute cu orice detalii despre transport ?i livrare.
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <a
+                    href="tel:+40750473111"
+                    className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-lg"
+                  >
+                    ?? 0750 473 111
+                  </a>
+                  <a
+                    href="mailto:contact@prynt.ro"
+                    className="inline-flex items-center gap-2 bg-surface hover:bg-bg border border-border text-ui font-semibold px-6 py-3 rounded-lg transition-colors"
+                  >
+                    ?? contact@prynt.ro
+                  </a>
+                </div>
+              </div>
 
+            </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
