@@ -422,7 +422,7 @@ async function sendEmails(
     const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
     if (!resend) throw new Error('RESEND_API_KEY lipsă');
     const adminResp = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'comenzi@prynt.ro',
+      from: process.env.EMAIL_FROM || 'contact@prynt.ro',
       to: process.env.ADMIN_EMAIL || 'contact@prynt.ro',
       subject: `Comandă${orderNoSuffix} (${paymentType}) - ${escapeHtml(address.nume_prenume)}`,
       html: adminHtml,

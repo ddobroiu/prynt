@@ -83,7 +83,7 @@ export default function ConfidentialitatePage() {
                 <div>
                     <p><strong>Exercitarea drepturilor:</strong></p>
                     <ul className="list-disc pl-5 text-sm space-y-1">
-                        <li><strong>Email:</strong> dpo@prynt.ro</li>
+                        <li><strong>Email:</strong> contact@prynt.ro</li>
                         <li><strong>Telefon:</strong> 0750.473.111</li>
                         <li><strong>Poștă:</strong> CULOAREA DIN VIATA SA SRL, Sat Topliceni, Buzău</li>
                         <li><strong>Termen răspuns:</strong> Maximum 30 zile</li>
@@ -125,7 +125,7 @@ export default function ConfidentialitatePage() {
                 Legea 506/2004 (prelucrarea datelor personale), Codul Civil român.
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Pentru întrebări juridice: <a href="mailto:legal@prynt.ro" className="text-blue-600 underline">legal@prynt.ro</a>
+                Pentru întrebări juridice: <a href="mailto:contact@prynt.ro" className="text-blue-600 underline">contact@prynt.ro</a>
             </p>
         </section>
       </div>

@@ -136,8 +136,8 @@ export default function PoliticaCookiesPage() {
           </div>
           <div>
             <p><strong>Contact:</strong></p>
-            <p>Email: <a href="mailto:dpo@prynt.ro" className="text-primary underline">dpo@prynt.ro</a><br/>
-            Cookies: <a href="mailto:cookies@prynt.ro" className="text-primary underline">cookies@prynt.ro</a><br/>
+            <p>Email: <a href="mailto:contact@prynt.ro" className="text-primary underline">contact@prynt.ro</a><br/>
+            Cookies: <a href="mailto:contact@prynt.ro" className="text-primary underline">contact@prynt.ro</a><br/>
             <strong>ANSPDCP:</strong> <a href="https://dataprotection.ro" target="_blank" className="text-primary underline">dataprotection.ro</a></p>
           </div>
         </div>

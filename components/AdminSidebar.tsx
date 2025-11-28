@@ -129,7 +129,7 @@ export default function AdminSidebar() {
              </div>
              <div className="flex-1 overflow-hidden">
                <p className="text-xs font-medium text-white truncate">Administrator</p>
-               <p className="text-[10px] text-zinc-500 truncate">admin@prynt.ro</p>
+               <p className="text-[10px] text-zinc-500 truncate">contact@prynt.ro</p>
              </div>
           </div>
         </div>

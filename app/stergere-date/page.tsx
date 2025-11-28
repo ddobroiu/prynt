@@ -16,7 +16,7 @@ export default function StergereDatePage() {
             Exercitarea drepturilor GDPR: <strong>Art. 17 - Dreptul la ștergere</strong> | <strong>Legea 190/2018</strong> (România)
           </p>
           <p className="text-sm text-blue-700">
-            <strong>Operator:</strong> CULOAREA DIN VIATA SA SRL | <strong>CUI:</strong> RO44820819 | <strong>Contact DPO:</strong> dpo@prynt.ro | <strong>Termen procesare:</strong> Maximum 30 zile
+            <strong>Operator:</strong> CULOAREA DIN VIATA SA SRL | <strong>CUI:</strong> RO44820819 | <strong>Contact DPO:</strong> contact@prynt.ro | <strong>Termen procesare:</strong> Maximum 30 zile
           </p>
         </div>
 
@@ -60,7 +60,7 @@ export default function StergereDatePage() {
             <div className="text-sm text-blue-700 space-y-2">
               <p><strong>Modalități de contact:</strong></p>
               <ul className="list-disc pl-5 space-y-1">
-                <li><strong>Email DPO:</strong> <a href="mailto:dpo@prynt.ro" className="underline">dpo@prynt.ro</a> (preferat)</li>
+                <li><strong>Email DPO:</strong> <a href="mailto:contact@prynt.ro" className="underline">contact@prynt.ro</a> (preferat)</li>
                 <li><strong>Email general:</strong> <a href="mailto:contact@prynt.ro" className="underline">contact@prynt.ro</a></li>
                 <li><strong>Poștă:</strong> CULOAREA DIN VIATA SA SRL, Sat Topliceni, Buzău, România (specifică "Cerere GDPR - Ștergere date")</li>
                 <li><strong>Telefon:</strong> +40 750 473 111 (pentru clarificări)</li>
@@ -174,7 +174,7 @@ export default function StergereDatePage() {
               <h4 className="font-semibold mb-2">Contact Principal</h4>
               <p className="text-sm space-y-1">
                 <strong>DPO (Data Protection Officer):</strong><br/>
-                Email: <a href="mailto:dpo@prynt.ro" className="text-primary underline">dpo@prynt.ro</a><br/>
+                Email: <a href="mailto:contact@prynt.ro" className="text-primary underline">contact@prynt.ro</a><br/>
                 Telefon: <a href="tel:+40750473111" className="text-primary underline">+40 750 473 111</a><br/>
                 Program: L-V 9:00-18:00
               </p>

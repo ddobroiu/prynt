@@ -126,7 +126,7 @@ export default function SmartNewsletterPopup({
         onSubscribe?.(email);
         
         // Show success and close
-        alert('✅ Mulțumim! Vei primi un cod de reducere pe email!');
+        alert('✅ Mulțumim! Te-ai abonat cu succes la newsletter!');
         handleClose();
       } else {
         throw new Error('Subscription failed');
@@ -162,10 +162,10 @@ export default function SmartNewsletterPopup({
             </div>
           </div>
           <h2 className="text-2xl font-bold mb-2">
-            🎁 Cod de reducere 10%
+            Newsletter Prynt.ro
           </h2>
           <p className="text-blue-100 text-sm">
-            Primești instant un cod de 10% reducere!
+            Fii la curent cu ofertele și noutățile noastre!
           </p>
         </div>
 
@@ -201,7 +201,7 @@ export default function SmartNewsletterPopup({
                   Se trimite...
                 </span>
               ) : (
-                '🎉 Vreau codul de 10% reducere!'
+                'Abonează-te'
               )}
             </button>
           </form>
@@ -210,7 +210,7 @@ export default function SmartNewsletterPopup({
           <div className="mt-4 space-y-2 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              <span>Cod de reducere instant 10%</span>
+              <span>Oferte speciale pentru abonați</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-green-500">✓</span>

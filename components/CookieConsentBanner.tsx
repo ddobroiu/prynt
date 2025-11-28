@@ -164,7 +164,7 @@ export default function CookieConsentBanner() {
         
         <div className="text-xs text-gray-400 mt-3 pt-3 border-t border-slate-700">
           <strong>Conformitate:</strong> GDPR Art. 7, ePrivacy Directive, Legea 506/2004 (RO) | 
-          <strong> Contact:</strong> <a href="mailto:dpo@prynt.ro" className="text-blue-300 hover:text-blue-200 underline">dpo@prynt.ro</a>
+          <strong> Contact:</strong> <a href="mailto:contact@prynt.ro" className="text-blue-300 hover:text-blue-200 underline">contact@prynt.ro</a>
         </div>
       </div>
     </div>

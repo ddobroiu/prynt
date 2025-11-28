@@ -46,7 +46,7 @@ export default function TermeniPage() {
           <ul className="list-disc pl-5 mt-2 space-y-1 text-sm text-green-800">
             <li><strong>Produse standard:</strong> Drept de retragere 14 zile calendaristice fără penalități</li>
             <li><strong>EXCEPȚIE - Produse personalizate:</strong> Art. 16(c) OUG 34/2014 - Nu beneficiază de dreptul de retragere (realizate după specificațiile consumatorului)</li>
-            <li><strong>Procedura:</strong> Notificare prin email la returns@prynt.ro cu formularul de retragere</li>
+            <li><strong>Procedura:</strong> Notificare prin email la contact@prynt.ro cu formularul de retragere</li>
             <li><strong>Costuri returnare:</strong> Suportate de consumator, cu excepția produselor defecte</li>
           </ul>
         </div>
@@ -94,9 +94,9 @@ export default function TermeniPage() {
           <div>
             <p><strong>Contact legal/reclamații:</strong></p>
             <p className="text-muted text-sm">
-              Email: legal@prynt.ro<br />
-              Returns: returns@prynt.ro<br />
-              DPO: dpo@prynt.ro<br/>
+              Email: contact@prynt.ro<br />
+              Returns: contact@prynt.ro<br />
+              DPO: contact@prynt.ro<br/>
               Adresa: București, România
             </p>
           </div>
