@@ -37,7 +37,7 @@ export type Product = {
   currency?: string;
   tags?: string[];
   seo?: { title?: string; description?: string };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   materials?: MaterialOption[];
   contentHtml?: string; // <--- CÂMP NOU PENTRU SEO LANDING PAGES
 };
@@ -82,7 +82,7 @@ export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
 
 for (const _p of PRODUCTS) {
   if (!_p.seo) {
-    _p.seo = generateSeoForProduct(_p as any);
+    _p.seo = generateSeoForProduct(_p as Product);
   }
 }
 
