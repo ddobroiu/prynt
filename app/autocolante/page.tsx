@@ -5,8 +5,28 @@ import ProductJsonLd from "@/components/ProductJsonLd";
 
 export const metadata = {
   title: "Autocolante Personalizate | Print & Decupaj pe Contur",
-  description: "Autocolante PVC, etichete și stickere personalizate. Rezistente la exterior, opțiuni de laminare și tăiere pe contur. Comandă online!",
+  description: "Autocolante PVC, etichete și stickere personalizate. Rezistente la exterior, opțiuni de laminare și tăiere pe contur. Comandă online! Adeziv puternic și durabil.",
+  keywords: [
+    "autocolante personalizate",
+    "stickere vinyl",
+    "etichete adezive",
+    "autocolante exterior",
+    "decupaj pe contur",
+    "autocolante PVC",
+    "laminare autocolante",
+    "adeziv puternic"
+  ],
   alternates: { canonical: "/autocolante" },
+  openGraph: {
+    title: "Autocolante Personalizate | Print & Decupaj pe Contur",
+    description: "Autocolante PVC, etichete și stickere personalizate. Rezistente la exterior, opțiuni de laminare și tăiere pe contur. Comandă online!",
+    images: [{
+      url: "/products/autocolante/1.webp",
+      width: 1200,
+      height: 630,
+      alt: "Autocolante personalizate PVC"
+    }]
+  }
 };
 
 export default async function AutocolantePage() {

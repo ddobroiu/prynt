@@ -1,7 +1,8 @@
 import "./globals.css";
 import Script from "next/script";
 import Providers from "../components/Providers";
-import ClientLayoutWrapper from "../components/ClientLayoutWrapper"; // Importăm wrapper-ul nou
+import ClientLayoutWrapper from "../components/ClientLayoutWrapper";
+import GlobalStructuredData from "../components/GlobalStructuredData";
 
 export const metadata = {
   metadataBase: new URL(
@@ -12,11 +13,22 @@ export const metadata = {
     template: "%s | Prynt.ro",
   },
   description:
-    "Bannere, flayere, canvas, autocolante, materiale rigide. Configurează online și vezi prețul în timp real.",
+    "Tipar digital profesional în România: bannere PVC, afișe, canvas personalizat, autocolante, materiale rigide. Configuratoare online cu prețuri instant și livrare rapidă.",
+  keywords: [
+    "tipar digital",
+    "bannere publicitare",
+    "afișe personalizate", 
+    "canvas pe pânză",
+    "autocolante vinyl",
+    "materiale rigide",
+    "publicitate outdoor",
+    "print online România",
+    "configurator preț instant"
+  ],
   openGraph: {
     title: "Prynt.ro | Tipar digital & producție publicitară",
     description:
-      "Bannere, flayere, canvas, autocolante, materiale rigide. Configurează online și vezi prețul în timp real.",
+      "Tipar digital profesional în România: bannere PVC, afișe, canvas personalizat, autocolante, materiale rigide. Configuratoare online cu prețuri instant și livrare rapidă.",
     url: "/",
     siteName: "Prynt.ro",
     locale: "ro_RO",
@@ -24,9 +36,9 @@ export const metadata = {
     images: [
       {
         url: "/logo.png",
-        width: 512,
-        height: 512,
-        alt: "Prynt.ro",
+        width: 1200,
+        height: 630,
+        alt: "Prynt.ro - Tipar digital profesional",
       },
     ],
   },
@@ -34,8 +46,21 @@ export const metadata = {
     card: "summary_large_image",
     title: "Prynt.ro | Tipar digital & producție publicitară",
     description:
-      "Bannere, flayere, canvas, autocolante, materiale rigide. Configurează online și vezi prețul în timp real.",
+      "Tipar digital profesional în România: bannere PVC, afișe, canvas personalizat, autocolante, materiale rigide. Configuratoare online cu prețuri instant.",
     images: ["/logo.png"],
+    creator: "@prynt_ro",
+    site: "@prynt_ro",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -47,6 +72,7 @@ export default function RootLayout({
   return (
     <html lang="ro" data-theme="light">
       <head>
+        <GlobalStructuredData />
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Prynt Blog" />
         <script
           type="application/ld+json"

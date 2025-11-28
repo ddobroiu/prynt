@@ -5,8 +5,28 @@ import ProductJsonLd from "@/components/ProductJsonLd";
 
 export const metadata = {
   title: "Tablouri Canvas Personalizate | Print pe Pânză",
-  description: "Transformă pozele tale în tablouri canvas. Print de calitate pe pânză bumbac/poliester, întinsă pe șasiu de lemn. Livrare rapidă.",
+  description: "Transformă pozele tale în tablouri canvas. Print de calitate pe pânză bumbac/poliester, întinsă pe șasiu de lemn. Livrare rapidă în toată România.",
+  keywords: [
+    "tablouri canvas",
+    "canvas personalizat",
+    "print pe pânză",
+    "tablouri foto",
+    "canvas pe șasiu",
+    "decorațiuni perete",
+    "cadouri personalizate",
+    "pânză bumbac poliester"
+  ],
   alternates: { canonical: "/canvas" },
+  openGraph: {
+    title: "Tablouri Canvas Personalizate | Print pe Pânză",
+    description: "Transformă pozele tale în tablouri canvas. Print de calitate pe pânză bumbac/poliester, întinsă pe șasiu de lemn.",
+    images: [{
+      url: "/products/canvas/1.webp",
+      width: 1200,
+      height: 630,
+      alt: "Tablouri canvas personalizate"
+    }]
+  }
 };
 
 export default async function CanvasPage() {

@@ -5,8 +5,29 @@ import ProductJsonLd from "@/components/ProductJsonLd";
 
 export const metadata = {
   title: "Bannere Publicitare Personalizate | Print Outdoor & Indoor",
-  description: "Configurează online bannere publicitare (frontlit). Prețuri de la 9€/mp, finisaje incluse (tiv, capse). Livrare rapidă în toată țara.",
+  description: "Configurează online bannere publicitare (frontlit). Prețuri de la 9€/mp, finisaje incluse (tiv, capse). Livrare rapidă în toată țara. Rezistente la UV și vreme.",
+  keywords: [
+    "bannere publicitare",
+    "bannere PVC",
+    "bannere outdoor", 
+    "bannere personalizate",
+    "tipar bannere",
+    "bannere rezistente",
+    "publicitate exterior",
+    "bannere tivite capsate",
+    "frontlit banner"
+  ],
   alternates: { canonical: "/banner" },
+  openGraph: {
+    title: "Bannere Publicitare Personalizate | Print Outdoor & Indoor",
+    description: "Configurează online bannere publicitare (frontlit). Prețuri de la 9€/mp, finisaje incluse (tiv, capse). Livrare rapidă în toată țara.",
+    images: [{
+      url: "/products/banner/1.webp",
+      width: 1200,
+      height: 630,
+      alt: "Bannere publicitare outdoor rezistente"
+    }]
+  }
 };
 
 export default async function BannerPage() {

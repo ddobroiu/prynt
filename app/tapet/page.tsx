@@ -5,8 +5,28 @@ import ProductJsonLd from "@/components/ProductJsonLd";
 
 export const metadata = {
   title: "Tapet Personalizat | Print Fototapet la Comandă",
-  description: "Decorează pereții cu tapet personalizat. Dimensiuni la comandă, materiale premium, adeziv opțional.",
+  description: "Decorează pereții cu tapet personalizat. Dimensiuni la comandă, materiale premium, adeziv opțional. Rezoluție înaltă și culori vibrante.",
+  keywords: [
+    "tapet personalizat",
+    "fototapet",
+    "tapet la comandă",
+    "decor pereți",
+    "tapet dimensiuni mari",
+    "print tapet",
+    "materiale premium",
+    "adeziv tapet"
+  ],
   alternates: { canonical: "/tapet" },
+  openGraph: {
+    title: "Tapet Personalizat | Print Fototapet la Comandă",
+    description: "Decorează pereții cu tapet personalizat. Dimensiuni la comandă, materiale premium, adeziv opțional.",
+    images: [{
+      url: "/products/tapet/1.webp",
+      width: 1200,
+      height: 630,
+      alt: "Tapet personalizat fototapet"
+    }]
+  }
 };
 
 export default async function TapetPage() {

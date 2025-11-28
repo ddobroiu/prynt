@@ -5,8 +5,29 @@ import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 
 export const metadata = {
   title: "Blog – Sfaturi de print și publicitar | Prynt",
-  description: "Articole cu sfaturi despre bannere, autocolante, pliante, afișe și materiale de promovare. Prețuri instant în configuratoare.",
+  description: "Articole cu sfaturi despre bannere, autocolante, pliante, afișe și materiale de promovare. Ghiduri practice, prețuri instant în configuratoare și tricks din industria de tipar.",
+  keywords: [
+    "blog tipar digital",
+    "sfaturi bannere",
+    "ghid afișe",
+    "tips autocolante",
+    "materiale publicitare",
+    "industrie tipar",
+    "configuratoare print",
+    "articole promovare"
+  ],
   alternates: { canonical: "/blog" },
+  openGraph: {
+    title: "Blog – Sfaturi de print și publicitar | Prynt",
+    description: "Articole cu sfaturi despre bannere, autocolante, pliante, afișe și materiale de promovare. Ghiduri practice și tips din industrie.",
+    type: "website",
+    images: [{
+      url: "/logo.png",
+      width: 1200,
+      height: 630,
+      alt: "Blog Prynt - Sfaturi tipar digital"
+    }]
+  }
 };
 
 export default function BlogIndexPage() {
