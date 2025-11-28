@@ -130,6 +130,9 @@ const HERO_ITEMS = [
 export default function HeroCarousel() {
   const [activeSlide, setActiveSlide] = useState(0);
 
+  const nextSlide = () => setActiveSlide((prev) => (prev + 1) % HERO_ITEMS.length);
+  const prevSlide = () => setActiveSlide((prev) => (prev - 1 + HERO_ITEMS.length) % HERO_ITEMS.length);
+
   // Auto-play doar pentru Desktop (Mobilul e scroll manual)
   useEffect(() => {
     const interval = setInterval(() => {
@@ -137,9 +140,6 @@ export default function HeroCarousel() {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
-
-  const nextSlide = () => setActiveSlide((prev) => (prev + 1) % HERO_ITEMS.length);
-  const prevSlide = () => setActiveSlide((prev) => (prev - 1 + HERO_ITEMS.length) % HERO_ITEMS.length);
 
   const currentSlide = HERO_ITEMS[activeSlide];
 

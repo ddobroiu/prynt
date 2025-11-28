@@ -13,7 +13,6 @@ export default function DeliveryEstimation({ county }: Props) {
   const [debouncedCounty] = useDebounce(county, 500);
 
   useEffect(() => {
-    setLoading(true);
     const controller = new AbortController();
     const signal = controller.signal;
 

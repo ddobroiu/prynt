@@ -29,15 +29,20 @@ export function useCart() {
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(() => {
+    try {
+      if (typeof window === "undefined") return [];
+      const raw = localStorage.getItem("cart");
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      if (typeof window === "undefined") return;
-      const raw = localStorage.getItem("cart");
-      if (raw) setItems(JSON.parse(raw));
-    } catch {}
+    // marchez componenta ca fiind montata (hydrated)
     setIsLoaded(true);
   }, []);
 

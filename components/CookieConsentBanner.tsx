@@ -5,12 +5,15 @@ import React, { useState, useEffect } from 'react';
 const COOKIE_KEY = 'cookie_consent';
 
 export default function CookieConsentBanner() {
-	const [visible, setVisible] = useState(false);
-
-	useEffect(() => {
-		const consent = typeof window !== 'undefined' ? localStorage.getItem(COOKIE_KEY) : null;
-		setVisible(!consent);
-	}, []);
+	const [visible, setVisible] = useState<boolean>(() => {
+		try {
+			if (typeof window === 'undefined') return false;
+			const consent = localStorage.getItem(COOKIE_KEY);
+			return !consent;
+		} catch {
+			return false;
+		}
+	});
 
 	const handleConsent = (accept: boolean) => {
 		if (typeof window !== 'undefined') {
