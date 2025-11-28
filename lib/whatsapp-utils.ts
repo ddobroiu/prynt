@@ -1,5 +1,4 @@
-import { WhatsAppMessage } from '../types'; // Asigură-te că ai tipurile definite sau ajustează importul
-
+// lib/whatsapp-utils.ts
 const WHATSAPP_API_URL = `https://graph.facebook.com/v20.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`;
 const WHATSAPP_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 
