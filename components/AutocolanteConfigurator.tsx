@@ -116,6 +116,12 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
   const [activeImage, setActiveImage] = useState<string>("");
   const [activeIndex, setActiveIndex] = useState<number>(0);
   
+  useEffect(() => {
+    if (GALLERY.length > 0 && !activeImage) {
+      setActiveImage(GALLERY[0]);
+    }
+  }, [GALLERY, activeImage]);
+  
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
