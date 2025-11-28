@@ -65,13 +65,6 @@ export default function Footer() {
             <p className="text-slate-500 text-sm leading-relaxed max-w-sm">
               {siteConfig.description} Platforma completă de tipar digital unde configurezi, vizualizezi prețul și comanzi instant.
             </p>
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 max-w-sm">
-              <p className="text-orange-800 text-xs font-semibold mb-1">🎨 Produse 100% personalizate</p>
-              <p className="text-orange-700 text-xs">
-                Realizăm exclusiv produse după designul și specificațiile tale. 
-                Conform <strong>Art. 16(c) OUG 34/2014</strong>, produsele personalizate nu se returnează fără motiv întemeiat.
-              </p>
-            </div>
             <div className="flex items-center gap-3">
               {siteConfig.socialLinks.map((link) => (
                 <Link

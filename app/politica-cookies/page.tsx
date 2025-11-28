@@ -13,7 +13,7 @@ export default function PoliticaCookiesPage() {
             Conformitate legală: <strong>ePrivacy Directive 2002/58/EC</strong>, <strong>GDPR Art. 7</strong>, <strong>Legea 506/2004</strong> (România)
           </p>
           <p className="text-sm text-blue-700">
-            <strong>Operatorul:</strong> SC PRYNT SRL | <strong>Baza legală:</strong> Consimțământul expres (Art. 6(1)(a) GDPR) și interesul legitim (Art. 6(1)(f) GDPR)
+            <strong>Operatorul:</strong> CULOAREA DIN VIATA SA SRL | <strong>CUI:</strong> RO44820819 | <strong>Baza legală:</strong> Consimțământul expres (Art. 6(1)(a) GDPR) și interesul legitim (Art. 6(1)(f) GDPR)
           </p>
         </div>
 

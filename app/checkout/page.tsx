@@ -75,6 +75,7 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showEmbed, setShowEmbed] = useState(false);
   const [createAccount, setCreateAccount] = useState(true);
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const firstInvalidRef = useRef<HTMLElement | null>(null);
 
@@ -196,7 +197,7 @@ export default function CheckoutPage() {
 
     if ((items ?? []).length === 0) e["cart.empty"] = "Coșul este gol";
     
-    // Eliminat validare agreedToTerms
+    if (!acceptTerms) e["terms"] = "Trebuie să accepți Termenii și Condițiile";
 
     if (paymentMethod === 'ramburs' && isRambursDisabled) {
        setPaymentMethod('card'); 
@@ -532,8 +533,11 @@ export default function CheckoutPage() {
                 setShowEmbed={setShowEmbed}
                 createAccount={createAccount}
                 setCreateAccount={setCreateAccount}
+                acceptTerms={acceptTerms}
+                setAcceptTerms={setAcceptTerms}
                 isLoggedIn={!!session?.user}
                 paymentMethod={paymentMethod}
+                errors={errors}
               />
               
               <div className="text-center">
@@ -580,8 +584,11 @@ function SummaryCard({
   setShowEmbed,
   createAccount,
   setCreateAccount,
+  acceptTerms,
+  setAcceptTerms,
   isLoggedIn,
   paymentMethod,
+  errors,
 }: {
   subtotal: number;
   shipping: number;
@@ -597,8 +604,11 @@ function SummaryCard({
   setShowEmbed: (v: boolean) => void;
   createAccount: boolean;
   setCreateAccount: (v: boolean) => void;
+  acceptTerms: boolean;
+  setAcceptTerms: (v: boolean) => void;
   isLoggedIn: boolean;
   paymentMethod: PaymentMethod;
+  errors: Record<string, string>;
 }) {
   const fmt = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON", maximumFractionDigits: 2 }).format;
 
@@ -686,12 +696,45 @@ function SummaryCard({
           </label>
         )}
 
+        {/* Terms and Conditions Acceptance */}
+        <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+          <label className="flex items-start gap-3 cursor-pointer select-none group">
+            <input
+              type="checkbox"
+              checked={acceptTerms}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+              className="mt-1 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white transition-all"
+            />
+            <div className="text-sm text-slate-700 leading-relaxed group-hover:text-slate-900 transition-colors">
+              <span className="font-semibold text-slate-900">Accept </span>
+              <Link href="/termeni" target="_blank" className="text-indigo-600 hover:text-indigo-800 underline font-medium">
+                Termenii și Condițiile
+              </Link>
+              <span className="text-slate-600"> și </span>
+              <Link href="/confidentialitate" target="_blank" className="text-indigo-600 hover:text-indigo-800 underline font-medium">
+                Politica de Confidențialitate
+              </Link>
+              <span className="text-slate-600"> ale CULOAREA DIN VIATA SA SRL.</span>
+              {errors["terms"] && (
+                <p className="mt-2 text-xs text-red-600 font-medium">
+                  <AlertCircle size={12} className="inline mr-1" />
+                  {errors["terms"]}
+                </p>
+              )}
+            </div>
+          </label>
+        </div>
+
         {!showEmbed && (
           <button
             type="button"
             onClick={onPlaceOrder}
-            disabled={placing}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-4 text-base font-bold text-white hover:bg-indigo-500 transition disabled:opacity-60 shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
+            disabled={placing || !acceptTerms}
+            className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-4 text-base font-bold text-white transition shadow-lg active:scale-[0.98] ${
+              acceptTerms && !placing
+                ? 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/20'
+                : 'bg-slate-400 cursor-not-allowed opacity-60 shadow-slate-400/20'
+            }`}
           >
             <ShieldCheck size={20} />
             {btnLabel}
@@ -715,9 +758,7 @@ function SummaryCard({
           </div>
         )}
 
-        <p className="mt-4 text-[10px] text-slate-400 text-center leading-relaxed">
-          Prin plasarea comenzii, confirmi că ai citit și ești de acord cu <Link href="/termeni" className="underline hover:text-indigo-600">Termenii și Condițiile</Link>.
-        </p>
+
       </div>
     </div>
   );

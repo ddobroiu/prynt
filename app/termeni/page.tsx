@@ -15,8 +15,8 @@ export default function TermeniPage() {
             Document legal conform: <strong>OUG 34/2014</strong> (drepturile consumatorilor), <strong>Legea 449/2003</strong> (vânzarea de bunuri de consum), <strong>Codul Civil</strong> român.
           </p>
           <p className="text-sm text-red-700">
-            <strong>Operator economic:</strong> SC PRYNT SRL | <strong>CUI:</strong> RO[numărul] | <strong>J40/[numărul]/2024</strong><br/>
-            <strong>Sediul:</strong> București, România | <strong>Autorizare ONRC:</strong> Validă
+            <strong>Operator economic:</strong> CULOAREA DIN VIATA SA SRL | <strong>CUI:</strong> RO44820819 | <strong>J20/1108/2021</strong><br/>
+            <strong>Sediul:</strong> Sat Topliceni, Buzău, România | <strong>Autorizare ONRC:</strong> Validă
           </p>
         </div>
 

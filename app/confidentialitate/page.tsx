@@ -7,7 +7,7 @@ export default function ConfidentialitatePage() {
       
       <div className="prose dark:prose-invert max-w-none space-y-6">
         <p><strong>Actualizat la:</strong> {new Date().toLocaleDateString('ro-RO')} | <strong>Versiunea:</strong> 2.1</p>
-        <p><strong>Operator de date:</strong> SC PRYNT SRL, CUI: [CUI], J40/[nr]/2024, Str. [Adresa], București, România</p>
+        <p><strong>Operator de date:</strong> CULOAREA DIN VIATA SA SRL, CUI: RO44820819, J20/1108/2021, Sat Topliceni, Buzău, România</p>
         <p><strong>Persoana de contact DPO:</strong> contact@prynt.ro | <strong>Telefon:</strong> 0750.473.111</p>
 
         <section className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
@@ -85,7 +85,7 @@ export default function ConfidentialitatePage() {
                     <ul className="list-disc pl-5 text-sm space-y-1">
                         <li><strong>Email:</strong> dpo@prynt.ro</li>
                         <li><strong>Telefon:</strong> 0750.473.111</li>
-                        <li><strong>Poștă:</strong> SC PRYNT SRL, București</li>
+                        <li><strong>Poștă:</strong> CULOAREA DIN VIATA SA SRL, Sat Topliceni, Buzău</li>
                         <li><strong>Termen răspuns:</strong> Maximum 30 zile</li>
                         <li><strong>Reclamații:</strong> ANSPDCP (dataprotection.ro)</li>
                     </ul>

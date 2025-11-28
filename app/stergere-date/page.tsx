@@ -16,7 +16,7 @@ export default function StergereDatePage() {
             Exercitarea drepturilor GDPR: <strong>Art. 17 - Dreptul la ștergere</strong> | <strong>Legea 190/2018</strong> (România)
           </p>
           <p className="text-sm text-blue-700">
-            <strong>Operator:</strong> SC PRYNT SRL | <strong>Contact DPO:</strong> dpo@prynt.ro | <strong>Termen procesare:</strong> Maximum 30 zile
+            <strong>Operator:</strong> CULOAREA DIN VIATA SA SRL | <strong>CUI:</strong> RO44820819 | <strong>Contact DPO:</strong> dpo@prynt.ro | <strong>Termen procesare:</strong> Maximum 30 zile
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export default function StergereDatePage() {
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong>Email DPO:</strong> <a href="mailto:dpo@prynt.ro" className="underline">dpo@prynt.ro</a> (preferat)</li>
                 <li><strong>Email general:</strong> <a href="mailto:contact@prynt.ro" className="underline">contact@prynt.ro</a></li>
-                <li><strong>Poștă:</strong> SC PRYNT SRL, București, România (specifică "Cerere GDPR - Ștergere date")</li>
+                <li><strong>Poștă:</strong> CULOAREA DIN VIATA SA SRL, Sat Topliceni, Buzău, România (specifică "Cerere GDPR - Ștergere date")</li>
                 <li><strong>Telefon:</strong> +40 750 473 111 (pentru clarificări)</li>
               </ul>
             </div>
