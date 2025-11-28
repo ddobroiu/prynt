@@ -52,7 +52,7 @@ export type StoredOrder = {
     unit: number; 
     total: number;
     artworkUrl?: string | null;
-    metadata?: any;
+    metadata?: Record<string, unknown> | undefined;
   }>;
   shippingFee: number;
   total: number;
@@ -115,21 +115,21 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
       data: {
         orderNo,
         paymentType: input.paymentType,
-        address: input.address as any,
-        billing: input.billing as any,
-        shippingFee: (input.shippingFee ?? 0) as any,
-        total: (input.total ?? 0) as any,
+        address: input.address as unknown as Address,
+        billing: input.billing as unknown as Billing,
+        shippingFee: Number(input.shippingFee ?? 0),
+        total: Number(input.total ?? 0),
         invoiceLink: input.invoiceLink || null,
-        awbNumber: (input as any).awbNumber || null,
-        awbCarrier: (input as any).awbCarrier || null,
-        marketing: (input.marketing as any) || undefined,
+        awbNumber: (input as NewOrder).awbNumber || null,
+        awbCarrier: (input as NewOrder).awbCarrier || null,
+        marketing: input.marketing || undefined,
         userId: input.userId || undefined,
         items: {
-          create: (input.items || []).map((it) => ({
+            create: (input.items || []).map((it) => ({
             name: it.name,
             qty: it.qty,
-            unit: (it.unit ?? 0) as any,
-            total: (it.total ?? 0) as any,
+            unit: Number(it.unit ?? 0),
+            total: Number(it.total ?? 0),
             artworkUrl: it.artworkUrl || null,
             metadata: it.metadata || undefined,
           })),
@@ -140,7 +140,7 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
     // Salvare adresă implicită utilizator (best-effort)
     try {
       if (created.userId) {
-        const a = input.address as any;
+      const a = input.address as Address;
         await prisma.address.updateMany({ where: { userId: created.userId, isDefault: true, type: 'shipping' }, data: { isDefault: false } });
         await prisma.address.create({
           data: {
@@ -162,7 +162,7 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
           },
         });
         
-        const b: any = input.billing;
+        const b: Billing | undefined = input.billing;
         if (b && b.tip_factura && b.tip_factura !== 'persoana_fizica') {
           const existingBilling = await prisma.address.findFirst({ where: { userId: created.userId, type: 'billing' } });
           const billingData = {
@@ -190,23 +190,23 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
         }
       }
     } catch (e) {
-      console.warn('[orderStore] address save skipped:', (e as any)?.message || e);
+      console.warn('[orderStore] address save skipped:', ((e as Error)?.message) || String(e));
     }
     
     return {
       id: created.id,
       orderNo: created.orderNo,
       createdAt: created.createdAt.toISOString(),
-      paymentType: created.paymentType as any,
-      address: created.address as any,
-      billing: created.billing as any,
-      items: (input.items || []) as any,
+      paymentType: created.paymentType as unknown as StoredOrder['paymentType'],
+      address: created.address as unknown as Address,
+      billing: created.billing as unknown as Billing,
+      items: (input.items || []) as StoredOrder['items'],
       shippingFee: Number(created.shippingFee),
       total: Number(created.total),
       invoiceLink: created.invoiceLink,
       awbNumber: created.awbNumber || null,
       awbCarrier: created.awbCarrier || null,
-      marketing: created.marketing as any,
+      marketing: created.marketing as unknown as MarketingInfo | undefined,
       userId: created.userId,
     };
   }
@@ -258,7 +258,7 @@ export async function listOrders(limit = 200): Promise<StoredOrder[]> {
         canceledAt: r.canceledAt ? r.canceledAt.toISOString() : null,
       }));
     } catch (e) {
-      console.warn('[orderStore] DB listOrders failed:', (e as any)?.message || e);
+      console.warn('[orderStore] DB listOrders failed:', ((e as Error)?.message) || String(e));
     }
   }
 
@@ -316,7 +316,7 @@ export async function getOrder(id: string): Promise<StoredOrder | null> {
         canceledAt: r.canceledAt ? r.canceledAt.toISOString() : null,
       } as StoredOrder;
     } catch (e) {
-      console.warn('[orderStore] DB getOrder failed:', (e as any)?.message || e);
+      console.warn('[orderStore] DB getOrder failed:', ((e as Error)?.message) || String(e));
     }
   }
 
