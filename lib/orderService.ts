@@ -652,10 +652,10 @@ export async function fulfillOrder(
       const qty = Number(raw.quantity ?? 1) || 1;
       const unit = Number((raw as any).unitAmount ?? (raw as any).price ?? (raw as any)?.metadata?.price ?? 0) || 0;
       const total = Number((raw as any).totalAmount ?? (unit > 0 ? unit * qty : (raw as any)?.metadata?.totalAmount ?? 0)) || 0;
-      const name = (raw as any).name ?? (raw as any).title ?? (raw as any).slug ?? (raw as any)?.metadata?.title ?? 'Produs';
-      const artworkUrl = raw.artworkUrl ?? raw.metadata?.artworkUrl ?? null;
-      const textDesign = raw.textDesign ?? raw.metadata?.textDesign ?? null;
-      const designOption = raw.designOption ?? raw.metadata?.designOption ?? null;
+      const name = String((raw as any).name ?? (raw as any).title ?? (raw as any).slug ?? (raw as any)?.metadata?.title ?? 'Produs');
+      const artworkUrl = String(raw.artworkUrl ?? raw.metadata?.artworkUrl ?? '') || null;
+      const textDesign = String(raw.textDesign ?? raw.metadata?.textDesign ?? '') || null;
+      const designOption = String(raw.designOption ?? raw.metadata?.designOption ?? '') || null;
 
       return { 
           name, 
