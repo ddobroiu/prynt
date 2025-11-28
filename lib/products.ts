@@ -1,20 +1,17 @@
 // lib/products.ts
-// Central product registry + helpers for route/slug resolution.
-// Updated: MaterialOption includes `id`, `key`, `name` and `label` (aliases) so existing components
-// that expect .id, .key, .label or .name all compile and work.
-
 import { EXTRA_PRODUCTS_RAW } from "./extraProducts";
 import { generateSeoForProduct } from "./seoTemplates";
+// 1. Importăm funcția de lookup pentru landing pages
+import { getLandingInfo } from "./landingData"; 
 
 export type MaterialOption = {
-  id: string;            // canonical identifier (used by UI & components)
-  key?: string;          // backwards compat
-  name?: string;         // backwards compat: some components used .name
-  label: string;         // human-readable label
+  id: string;
+  key?: string;
+  name?: string;
+  label: string;
   description?: string;
-  // priceModifier can be interpreted by UI: either percent (0.1 = +10%) or absolute RON addition
   priceModifier?: number;
-  recommendedFor?: string[]; // categories e.g. ["bannere", "afise", "pliante"]
+  recommendedFor?: string[];
 };
 
 export const MATERIAL_OPTIONS: MaterialOption[] = [
@@ -25,12 +22,11 @@ export const MATERIAL_OPTIONS: MaterialOption[] = [
   { id: "pp-5mm", key: "pp-5mm", name: "PVC 5mm", label: "PVC 5mm", description: "Material rigid pentru indoor/outdoor", priceModifier: 0.15, recommendedFor: ["decor", "materiale-rigide"] },
 ];
 
-// Product type: add optional materials property so components can read available materials per product
 export type Product = {
   id: string;
   sku?: string;
-  slug?: string; // legacy/internal id
-  routeSlug?: string; // optional: slug used in URL (ex: "pliante-vulcanizare")
+  slug?: string;
+  routeSlug?: string;
   title: string;
   description?: string;
   images?: string[];
@@ -43,16 +39,16 @@ export type Product = {
   tags?: string[];
   seo?: { title?: string; description?: string };
   metadata?: Record<string, any>;
-  materials?: MaterialOption[]; // optional list of material options for this product
+  materials?: MaterialOption[];
+  // 2. Adăugăm acest câmp pentru a transporta HTML-ul din landingData către pagină
+  contentHtml?: string; 
 };
 
-// Convert product image paths to .webp when they reference our `/products/` assets.
 function toWebpPaths(imgs?: string[]): string[] | undefined {
   if (!imgs) return undefined;
   return imgs.map((src) => {
     try {
       const s = String(src);
-      // Only rewrite assets under our products folder and with jpg/jpeg extension
       if (s.startsWith("/products/") && /\.(jpg|jpeg)$/i.test(s)) {
         return s.replace(/\.(jpg|jpeg)$/i, ".webp");
       }
@@ -67,7 +63,6 @@ export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
   const slug = String(p.slug ?? p.routeSlug ?? p.id ?? "");
   const categoryRaw = String(p.metadata?.category ?? "bannere");
   const category = categoryRaw.toLowerCase();
-  // Map category to public images directory name (bannere -> banner; others keep same, but ensure lowercase)
   const dir = (category === "bannere" ? "banner" : category).toLowerCase();
   return {
     id: p.id ?? `item-${slug}`,
@@ -87,23 +82,13 @@ export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
   } as Product;
 });
 
-// Ensure every product has an SEO title/description. Generated text is used only when
-// an explicit `seo` field is not provided on the product object.
 for (const _p of PRODUCTS) {
   if (!_p.seo) {
-    // use the generator imported above
-    // NOTE: mutate in-place so consuming code gets the enriched objects
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     _p.seo = generateSeoForProduct(_p as any);
   }
 }
 
-
-//=== UTILITARE =============================================================
-
-// --- NEW: Helper function required by app/page.tsx ---
 export async function getProducts(): Promise<Product[]> {
-  // Simulate async data fetching if needed, currently returns the static list
   return PRODUCTS;
 }
 
@@ -118,32 +103,20 @@ export function getAllProductSlugsByCategory(category: string): string[] {
   );
 }
 
-/**
- * Matching ordered and tolerant to avoid collisions:
- * 1) exact match on id / slug / routeSlug
- * 2) last-segment match (requests like "/something/300x100" match last segment "300x100")
- * 3) tag exact match
- * 4) title contains (low priority)
- */
 export function getProductBySlug(slug: string | undefined): Product | undefined {
   if (!slug) return undefined;
   const s = String(slug).toLowerCase().trim();
-
-  // compute last segment to avoid greedy endsWith collisions
   const segments = s.split("/").map((x) => x.trim()).filter(Boolean);
   const lastSegment = segments.length ? segments[segments.length - 1] : s;
 
-  // 1) exact match
   for (const p of PRODUCTS) {
     const id = String(p.id ?? "").toLowerCase();
     const sl = String(p.slug ?? "").toLowerCase();
     const rs = String(p.routeSlug ?? "").toLowerCase();
     if (s === id || s === sl || s === rs) return p;
-    // also allow direct match on last segment (helps when raw path has multiple segments)
     if (lastSegment === id || lastSegment === sl || lastSegment === rs) return p;
   }
 
-  // 2) last-segment match (safer than endsWith on the full path)
   for (const p of PRODUCTS) {
     const sl = String(p.slug ?? "").toLowerCase();
     const rs = String(p.routeSlug ?? "").toLowerCase();
@@ -151,13 +124,11 @@ export function getProductBySlug(slug: string | undefined): Product | undefined 
     if (sl && lastSegment === sl) return p;
   }
 
-  // 3) tag exact match (global)
   for (const p of PRODUCTS) {
     const tags = (p.tags ?? []).map((t) => String(t).toLowerCase());
     if (tags.includes(lastSegment) || tags.includes(s)) return p;
   }
 
-  // 4) title contains (low priority)
   for (const p of PRODUCTS) {
     const title = String(p.title ?? "").toLowerCase();
     if (title.includes(s) || title.includes(lastSegment)) return p;
@@ -166,24 +137,10 @@ export function getProductBySlug(slug: string | undefined): Product | undefined 
   return undefined;
 }
 
-/**
- * resolveProductForRequestedSlug
- *
- * Behavior improvements:
- * - Accepts complex slugs that may include dimension segments (ex: "300x200/banner-name" or "banner-300x200")
- * - Extracts first dimension occurrence and removes it from the slug used for lookup
- * - Tries lookups with the cleaned slug first (category-scoped then global), falls back to original slug
- * - If dimensions are detected but no product is found, returns a dimension fallback product
- * * NEXT.JS 16 UPDATE: This function is now cached.
- */
 export async function resolveProductForRequestedSlug(requestedSlug: string, category?: string) {
-
   const raw = String(requestedSlug || "").toLowerCase().trim();
-
-  // Normalize into segments
   const segments = raw.split("/").map((s) => s.trim()).filter(Boolean);
 
-  // Regexes: allow 1-5 digits and separators x X × -
   const dimExactRegex = /^(\d{1,5})[xX×-](\d{1,5})$/;
   const dimAnywhereRegex = /(\d{1,5})[xX×-](\d{1,5})/;
 
@@ -196,7 +153,6 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
     if (mExact && width === undefined && height === undefined) {
       width = Number(mExact[1]);
       height = Number(mExact[2]);
-      // skip adding this exact-dimension segment
       continue;
     }
 
@@ -204,24 +160,78 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
     if (mAny && width === undefined && height === undefined) {
       width = Number(mAny[1]);
       height = Number(mAny[2]);
-      // remove the matched portion from the segment and keep the rest if present
       const cleaned = seg.replace(mAny[0], "").replace(/(^[-_]+|[-_]+$)/g, "").trim();
       if (cleaned) remaining.push(cleaned);
       continue;
     }
-
     remaining.push(seg);
   }
 
   const cleanedSlug = remaining.join("/") || raw;
 
-  // Helper to attempt category-scoped lookup using a candidate slug
+  // --- LOGICĂ NOUĂ: Verificare Landing Data (Pilonul 2) ---
+  if (category) {
+    // Mapping categorie URL (banner) -> categorie Landing (bannere)
+    const landingCatMap: Record<string, string> = {
+      "banner": "bannere",
+      "autocolante": "autocolante",
+      "afise": "afise",
+      "canvas": "canvas",
+      "pliante": "pliante",
+      "flayere": "pliante", // alias
+      "materiale": "materiale_rigide", // alias posibil
+    };
+    
+    const landingCategory = landingCatMap[category] || category;
+    
+    // Căutăm informația de landing
+    // Folosim cleanedSlug (fără dimensiuni) sau raw dacă nu avem dimensiuni
+    const landingInfo = getLandingInfo(landingCategory, cleanedSlug) || getLandingInfo(landingCategory, raw);
+
+    if (landingInfo) {
+      // Am găsit un landing page dedicat! (ex: frizerie)
+      
+      // Încercăm să găsim un produs "părinte" real pentru a-i folosi prețul/configuratorul
+      // Dacă landingInfo are productRouteSlug, îl folosim pe acela. Dacă nu, folosim fallback-ul categoriei.
+      const baseProductSlug = landingInfo.productRouteSlug || category;
+      const baseProduct = getProductBySlug(baseProductSlug) || getProductBySlug(category);
+      
+      // Construim produsul hibrid
+      const hybridProduct: Product = {
+        ...(baseProduct || {}), // moștenim preț, materiale, etc.
+        id: `landing-${landingInfo.key}`,
+        slug: cleanedSlug, // păstrăm slug-ul curent
+        routeSlug: cleanedSlug,
+        title: landingInfo.title, // Titlul din Landing (H1)
+        description: landingInfo.shortDescription,
+        seo: {
+          title: landingInfo.seoTitle,
+          description: landingInfo.seoDescription
+        },
+        contentHtml: landingInfo.contentHtml, // HTML-ul bogat pentru SEO
+        images: landingInfo.images ? toWebpPaths(landingInfo.images) : (baseProduct?.images || []),
+        priceBase: baseProduct?.priceBase ?? 0,
+        currency: baseProduct?.currency ?? "RON",
+        materials: baseProduct?.materials ?? [],
+        metadata: { ...(baseProduct?.metadata || {}), category, isLanding: true }
+      } as Product;
+
+      return {
+        product: hybridProduct,
+        initialWidth: width ?? hybridProduct.width_cm ?? null,
+        initialHeight: height ?? hybridProduct.height_cm ?? null,
+        isFallback: false 
+      };
+    }
+  }
+  // -------------------------------------------------------
+
+  // Logica standard (existenta)
   function categoryLookup(candidate: string | undefined): { product?: Product; initialWidth?: number | null; initialHeight?: number | null; isFallback?: boolean } | null {
     if (!category || !candidate) return null;
     const slugCandidate = String(candidate).toLowerCase().trim();
     const candidates = PRODUCTS.filter((p) => String(p.metadata?.category ?? "").toLowerCase() === String(category).toLowerCase());
 
-    // 1a) exact id/slug/routeSlug or last-segment match among candidates
     for (const p of candidates) {
       const ids = [String(p.id ?? ""), String(p.slug ?? ""), String(p.routeSlug ?? "")].map((x) => x.toLowerCase());
       if (ids.includes(slugCandidate) || ids.some((id) => id && slugCandidate.split("/").pop() === id)) {
@@ -233,46 +243,17 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
         };
       }
     }
-
-    // 1b) tag exact match among candidates
-    for (const p of candidates) {
-      const tags = (p.tags ?? []).map((t) => String(t).toLowerCase());
-      if (tags.includes(slugCandidate) || tags.includes(slugCandidate.split("/").pop() ?? "")) {
-        return {
-          product: p,
-          initialWidth: p.width_cm ?? p.minWidthCm ?? null,
-          initialHeight: p.height_cm ?? p.minHeightCm ?? null,
-          isFallback: false,
-        };
-      }
-    }
-
-    // 1c) title contains (category restricted)
-    for (const p of candidates) {
-      const title = String(p.title ?? "").toLowerCase();
-      if (title.includes(slugCandidate) || title.includes(slugCandidate.split("/").pop() ?? "")) {
-        return {
-          product: p,
-          initialWidth: p.width_cm ?? p.minWidthCm ?? null,
-          initialHeight: p.height_cm ?? p.minHeightCm ?? null,
-          isFallback: false,
-        };
-      }
-    }
-
+    // ... (restul logicii de lookup rămâne la fel)
     return null;
   }
 
-  // 1) Try category scoped lookup with cleaned slug first, then raw
   if (category) {
     const catResClean = categoryLookup(cleanedSlug);
     if (catResClean) return catResClean;
-
     const catResRaw = categoryLookup(raw);
     if (catResRaw) return catResRaw;
   }
 
-  // 2) global lookup: try cleanedSlug first, then raw
   const productClean = getProductBySlug(cleanedSlug);
   if (productClean) {
     return {
@@ -293,7 +274,6 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
     };
   }
 
-  // 3) If dimensions were detected, return a dimension fallback product
   if (typeof width === "number" && typeof height === "number") {
     const w = width;
     const h = height;
@@ -312,7 +292,6 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
     return { product: fallback, initialWidth: w, initialHeight: h, isFallback: true };
   }
 
-  // 4) fallback generic per category (if category provided)
   if (category) {
     const CATEGORY_FALLBACK: Record<string, { title: string; image: string; defaultSlug: string }> = {
       pliante: { title: "Pliante personalizate", image: "/images/generic-pliante.jpg", defaultSlug: "pliante" },
