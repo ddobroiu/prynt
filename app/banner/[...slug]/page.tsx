@@ -42,12 +42,17 @@ export default async function Page({ params }: Props) {
 
   const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/banner/${joinedSlug}`;
 
+  // LOGICA IMAGINE ROBUSTĂ
+  const slugKey = String(product.slug ?? product.id ?? "").toLowerCase();
+  const genericSet = new Set<string>(["/products/banner/1.webp","/products/banner/2.webp","/products/banner/3.webp","/products/banner/4.webp","/placeholder.png"]);
+  const imgs = product.images ?? [];
+  let img = imgs.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
+  if (!img) img = imgs.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgs[0] ?? "/products/banner/1.webp";
+
   return (
     <>
       <ProductJsonLd product={(product as Product)} url={url} />
-      
       <main className="min-h-screen bg-gray-50">
-        {/* FIX: Suspense este necesar pentru useSearchParams din BannerConfigurator */}
         <Suspense fallback={
           <div className="min-h-screen flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
@@ -57,11 +62,9 @@ export default async function Page({ params }: Props) {
             productSlug={product.slug ?? product.routeSlug} 
             initialWidth={initialWidth ?? undefined}
             initialHeight={initialHeight ?? undefined}
-            productImage={product.images?.[0]}
+            productImage={img}
           />
         </Suspense>
-
-        {/* SECȚIUNEA SEO PENTRU LANDING PAGES (Reintrodusă pentru magazin-second-hand etc.) */}
         {product.contentHtml && (
            <section className="py-16 bg-white border-t border-gray-100">
              <div className="container mx-auto px-4 max-w-4xl">

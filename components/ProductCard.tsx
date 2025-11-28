@@ -51,6 +51,13 @@ export default function ProductCard({ product }: ProductCardProps) {
     href = `/fonduri-eu`; // Link general către configurator
   }
 
+  // LOGICA IMAGINE ROBUSTĂ
+  const slugKey = String(product.slug ?? product.id ?? "").toLowerCase();
+  const genericSet = new Set<string>(["/products/banner/1.webp","/products/banner/2.webp","/products/banner/3.webp","/products/banner/4.webp","/placeholder.png"]);
+  const imgs = product.images ?? [];
+  let img = imgs.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
+  if (!img) img = imgs.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgs[0] ?? "/products/banner/1.webp";
+
   return (
     <Link 
       href={href}
@@ -59,10 +66,17 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* Imagine */}
       <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-zinc-800">
         <img
-          src={product.images?.[0] || "/products/banner/1.webp"}
+          src={img}
           alt={product.title}
           className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
+          onError={(e) => {
+            const el = e.currentTarget as HTMLImageElement;
+            if (!el.dataset.fallback) {
+              el.dataset.fallback = "1";
+              el.src = "/products/banner/1.webp";
+            }
+          }}
         />
         {/* Badge Preț */}
         <div className="absolute bottom-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">

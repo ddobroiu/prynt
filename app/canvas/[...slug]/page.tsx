@@ -42,6 +42,13 @@ export default async function Page({ params }: Props) {
 
   const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/canvas/${joinedSlug}`;
 
+  // LOGICA IMAGINE ROBUSTĂ
+  const slugKey = String(product.slug ?? product.id ?? "").toLowerCase();
+  const genericSet = new Set<string>(["/products/banner/1.webp","/products/banner/2.webp","/products/banner/3.webp","/products/banner/4.webp","/placeholder.png"]);
+  const imgs = product.images ?? [];
+  let img = imgs.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
+  if (!img) img = imgs.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgs[0] ?? "/products/banner/1.webp";
+
   return (
     <>
       <ProductJsonLd product={(product as Product)} url={url} />
@@ -52,6 +59,7 @@ export default async function Page({ params }: Props) {
             productSlug={product.slug ?? product.routeSlug}
             initialWidth={initialWidth ?? undefined}
             initialHeight={initialHeight ?? undefined}
+            productImage={img}
           />
         </Suspense>
 

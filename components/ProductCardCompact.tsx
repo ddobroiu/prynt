@@ -5,14 +5,9 @@ import type { Product as LibProduct } from "@/lib/products";
 type Product = LibProduct & { category?: string };
 
 export default function ProductCardCompact({ product }: { product: Product }) {
+  // LOGICA IMAGINE ROBUSTĂ
   const slugKey = String(product.slug ?? (product as any).routeSlug ?? product.id ?? "").toLowerCase();
-  const genericSet = new Set<string>([
-    "/products/banner/1.webp",
-    "/products/banner/2.webp",
-    "/products/banner/3.webp",
-    "/products/banner/4.webp",
-    "/placeholder.png",
-  ]);
+  const genericSet = new Set<string>(["/products/banner/1.webp","/products/banner/2.webp","/products/banner/3.webp","/products/banner/4.webp","/placeholder.png"]);
   const imgs = product.images ?? [];
   let img = imgs.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
   if (!img) img = imgs.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgs[0] ?? "/products/banner/1.webp";

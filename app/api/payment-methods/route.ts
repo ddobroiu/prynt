@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { stripeCustomerId: true },
+      select: { id: true, stripeCustomerId: true },
     });
 
     if (!user?.stripeCustomerId) {
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Get default payment method
-    const customer = await stripe.customers.retrieve(user.stripeCustomerId);
+    const customer = await stripe.customers.retrieve(user.stripeCustomerId!);
     const defaultPaymentMethodId =
       customer && !('deleted' in customer) && customer.invoice_settings?.default_payment_method
         ? customer.invoice_settings.default_payment_method
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create Stripe customer if doesn't exist
-    let stripeCustomerId = user.stripeCustomerId;
+    let stripeCustomerId = user.stripeCustomerId as string;
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
         email: user.email!,

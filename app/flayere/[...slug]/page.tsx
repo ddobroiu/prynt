@@ -42,13 +42,20 @@ export default async function Page({ params }: Props) {
 
   const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/flayere/${joinedSlug}`;
 
+  // LOGICA IMAGINE ROBUSTĂ
+  const slugKey = String(product.slug ?? product.id ?? "").toLowerCase();
+  const genericSet = new Set<string>(["/products/banner/1.webp","/products/banner/2.webp","/products/banner/3.webp","/products/banner/4.webp","/placeholder.png"]);
+  const imgs = product.images ?? [];
+  let img = imgs.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
+  if (!img) img = imgs.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgs[0] ?? "/products/banner/1.webp";
+
   return (
     <>
       <ProductJsonLd product={(product as Product)} url={url} />
       
       <main className="min-h-screen bg-gray-50">
         <Suspense fallback={<div className="h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>}>
-          <FlyerConfigurator productSlug={product.slug ?? product.routeSlug} />
+          <FlyerConfigurator productSlug={product.slug ?? product.routeSlug} productImage={img} />
         </Suspense>
 
         {product.contentHtml && (

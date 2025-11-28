@@ -82,11 +82,12 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
   return <button type="button" onClick={onClick} className={`px-4 py-2 text-sm font-semibold transition-colors rounded-t-lg ${active ? "border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50" : "text-gray-500 hover:text-gray-800"}`}>{children}</button>;
 }
 
-type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number };
+type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string };
 
 /* --- MAIN COMPONENT --- */
-export default function PlianteConfigurator({ productSlug }: Props) {
+export default function PlianteConfigurator({ productSlug, productImage }: Props) {
   const { addItem } = useCart();
+  const GALLERY = useMemo(() => productImage ? [productImage, "/products/pliante/1.webp", "/products/pliante/2.webp", "/products/pliante/3.webp"] : ["/products/pliante/1.webp", "/products/pliante/2.webp", "/products/pliante/3.webp", "/products/pliante/4.webp"], [productImage]);
   const [weight, setWeight] = useState<PlianteWeightKey>("115");
   const [quantity, setQuantity] = useState<number>(100);
   const [fold, setFold] = useState<PlianteFoldType>("simplu");
