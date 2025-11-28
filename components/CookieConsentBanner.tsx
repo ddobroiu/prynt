@@ -125,19 +125,19 @@ export default function CookieConsentBanner() {
             {!showDetails ? (
               <>
                 <button
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-semibold transition"
+                  className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded font-semibold transition"
                   onClick={handleConsentAll}
                 >
                   ✓ Accept toate
                 </button>
                 <button
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded transition"
+                  className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded transition"
                   onClick={handleRejectAll}
                 >
                   Doar esențiale
                 </button>
                 <button
-                  className="text-blue-300 hover:text-blue-200 px-4 py-2 underline text-sm transition"
+                  className="text-blue-100 hover:text-white px-4 py-2 underline text-sm transition"
                   onClick={() => setShowDetails(true)}
                 >
                   Personalizează

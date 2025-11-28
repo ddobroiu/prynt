@@ -167,10 +167,10 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-6 sm:pt-8 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
           <div className="flex flex-col items-center md:items-start gap-1 sm:gap-2">
-            <p className="text-xs text-slate-400 text-center md:text-left">
+            <p className="text-xs text-slate-600 text-center md:text-left">
               &copy; {new Date().getFullYear()} {siteConfig.name}. Toate drepturile rezervate.
             </p>
-            <p className="text-xs text-slate-400 text-center md:text-left">
+            <p className="text-xs text-slate-600 text-center md:text-left">
               Site realizat de{" "}
               <a 
                 href="https://www.e-web.ro/" 
@@ -184,7 +184,7 @@ export default function Footer() {
           </div>
           
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-            <Link href="/stergere-date" className="text-xs text-slate-400 hover:text-indigo-600 transition-colors touch-manipulation">
+            <Link href="/stergere-date" className="text-xs text-slate-600 hover:text-indigo-600 transition-colors touch-manipulation">
               Ștergere date
             </Link>
             <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noopener noreferrer" title="Soluționarea Alternativă a Litigiilor" className="touch-manipulation">

@@ -175,7 +175,7 @@ export default function CartWidget() {
               </div>
               <div className="space-y-1">
                 <p className="text-lg font-bold text-slate-900 dark:text-white">Coșul este gol</p>
-                <p className="text-slate-500 dark:text-slate-400 text-sm">Nu ai adăugat încă niciun produs.</p>
+                <p className="text-slate-600 dark:text-slate-300 text-sm">Nu ai adăugat încă niciun produs.</p>
               </div>
               <Button onClick={() => setIsOpen(false)} variant="outline" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
                 Continuă Cumpărăturile
@@ -225,7 +225,7 @@ export default function CartWidget() {
                             {item.title}
                           </Link>
                         </h3>
-                        <button onClick={() => removeItem(item.id)} className="text-slate-400 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                        <button onClick={() => removeItem(item.id)} className="text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
                             <Trash2 size={16} />
                         </button>
                     </div>
@@ -278,7 +278,7 @@ export default function CartWidget() {
                 <div className="flex justify-between items-end mb-4">
                     <div>
                       <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total Estimat</p>
-                      <p className="text-[10px] text-slate-400">(TVA inclus)</p>
+                      <p className="text-[10px] text-slate-600">(TVA inclus)</p>
                     </div>
                     <p className="text-2xl font-extrabold text-slate-900 dark:text-white">{formatMoneyDisplay(cartTotal)}</p>
                 </div>
@@ -293,7 +293,7 @@ export default function CartWidget() {
                   
                   <button 
                     onClick={() => setIsOpen(false)}
-                    className="w-full py-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors flex items-center justify-center gap-1"
+                    className="w-full py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition-colors flex items-center justify-center gap-1"
                   >
                     <ChevronLeft size={16} /> Continuă Cumpărăturile
                   </button>

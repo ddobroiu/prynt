@@ -81,7 +81,7 @@ export default function TrackOrderPage() {
                   type="text" 
                   value={orderNo}
                   onChange={(e) => setOrderNo(e.target.value.replace(/\D/g, ""))}
-                  className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none font-medium text-slate-900 placeholder:text-slate-400 transition-all"
+                  className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none font-medium text-slate-900 placeholder:text-slate-500 transition-all"
                   placeholder="Ex: 1024"
                   required
                 />
@@ -94,7 +94,7 @@ export default function TrackOrderPage() {
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none font-medium text-slate-900 placeholder:text-slate-400 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none font-medium text-slate-900 placeholder:text-slate-500 transition-all"
                 placeholder="nume@email.com"
                 required
               />
@@ -130,7 +130,7 @@ export default function TrackOrderPage() {
             {/* Header Card */}
             <div className="bg-slate-900 p-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <p className="text-slate-400 text-sm font-medium">Comanda #{order.orderNo}</p>
+                <p className="text-slate-600 text-sm font-medium">Comanda #{order.orderNo}</p>
                 <p className="text-2xl font-bold mt-1">Total: {formatMoneyDisplay(order.total)}</p>
               </div>
               <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg backdrop-blur-md border border-white/10">
@@ -166,7 +166,7 @@ export default function TrackOrderPage() {
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-colors ${getStatusInfo(order.status).step >= 1 ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-white border-2 border-slate-200 text-slate-300'}`}>
                         <Package size={16} />
                       </div>
-                      <span className={`text-xs font-bold ${getStatusInfo(order.status).step >= 1 ? 'text-slate-700' : 'text-slate-400'}`}>Producție</span>
+                      <span className={`text-xs font-bold ${getStatusInfo(order.status).step >= 1 ? 'text-slate-700' : 'text-slate-500'}`}>Producție</span>
                     </div>
 
                     {/* Step 3: Expediat */}
@@ -174,7 +174,7 @@ export default function TrackOrderPage() {
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-colors ${getStatusInfo(order.status).step >= 3 ? 'bg-emerald-500 text-white shadow-emerald-200' : 'bg-white border-2 border-slate-200 text-slate-300'}`}>
                         <Truck size={16} />
                       </div>
-                      <span className={`text-xs font-bold ${getStatusInfo(order.status).step >= 3 ? 'text-emerald-600' : 'text-slate-400'}`}>Expediată</span>
+                      <span className={`text-xs font-bold ${getStatusInfo(order.status).step >= 3 ? 'text-emerald-600' : 'text-slate-500'}`}>Expediată</span>
                     </div>
                   </div>
                 </div>

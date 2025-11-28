@@ -182,7 +182,7 @@ export default function HeroCarousel() {
             
             <p className="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 lg:min-h-[80px]">
               {currentSlide.description} <br className="hidden sm:block"/> 
-              <span className="text-slate-400 text-base">Configurezi online, vezi prețul instant și comanzi.</span>
+              <span className="text-slate-600 text-base">Configurezi online, vezi prețul instant și comanzi.</span>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">

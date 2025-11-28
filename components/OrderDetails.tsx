@@ -30,10 +30,10 @@ export default function OrderDetails({ order }: { order: any }) {
             
             <div className="flex items-start justify-between mb-6">
               <div>
-                <div className="text-xs uppercase tracking-widest text-slate-400">Comanda #{order.orderNo}</div>
+                <div className="text-xs uppercase tracking-widest text-slate-600">Comanda #{order.orderNo}</div>
                 <h2 className="text-2xl font-bold text-white mt-1">Detalii Comandă</h2>
               </div>
-              <button onClick={() => setOpen(false)} className="p-2 text-slate-400 hover:text-white">✕</button>
+              <button onClick={() => setOpen(false)} className="p-2 text-slate-600 hover:text-white">✕</button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
@@ -56,7 +56,7 @@ export default function OrderDetails({ order }: { order: any }) {
                         <div key={i} className="flex justify-between text-sm border-b border-white/5 pb-2 last:border-0">
                             <div>
                                 <div className="text-white font-medium">{it.name}</div>
-                                <div className="text-slate-400 text-xs">{it.qty} buc x {formatMoney(Number(it.unit))}</div>
+                                <div className="text-slate-600 text-xs">{it.qty} buc x {formatMoney(Number(it.unit))}</div>
                             </div>
                             <div className="text-white font-semibold">{formatMoney(Number(it.total))}</div>
                         </div>

@@ -233,6 +233,7 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
                 type="submit" 
                 disabled={isLoading || !input.trim()} 
                 className="p-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors"
+                aria-label="Trimite mesaj"
             >
                 <Send size={18} />
             </button>

@@ -34,16 +34,15 @@ const DesktopNav = () => {
           </Link>
         ) : item.children ? (
           <div key={item.label} className="relative group">
-            <button
-              className="flex items-center gap-1 font-medium text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors outline-none py-4"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              {item.label}
-              <ChevronDown size={16} className="transition-transform duration-300 group-hover:rotate-180" />
-            </button>
-
-            {/* Dropdown Container */}
+          <button 
+            className="flex items-center gap-1 font-medium text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors outline-none py-4"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-label={`Deschide meniul ${item.label}`}
+          >
+            {item.label}
+            <ChevronDown size={16} className="transition-transform duration-300 group-hover:rotate-180" />
+          </button>            {/* Dropdown Container */}
             <div className="absolute top-full left-1/2 -translate-x-1/2 w-56 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 ease-out z-50">
               <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-2 overflow-hidden">
                 {item.children.map((child) => (
@@ -104,6 +103,8 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                     <button
                       onClick={() => setOpenSub(openSub === item.label ? null : item.label)}
                       className={`w-full flex items-center justify-between p-4 text-left font-semibold transition-all active:bg-zinc-100 dark:active:bg-zinc-800 min-h-12 touch-manipulation ${visibleOpenSub === item.label ? 'bg-zinc-50 dark:bg-zinc-900 text-indigo-600' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
+                      aria-label={`${visibleOpenSub === item.label ? 'Închide' : 'Deschide'} submeniul ${item.label}`}
+                      aria-expanded={visibleOpenSub === item.label}
                     >
                       {item.label}
                       <ChevronDown size={18} className={`transition-transform duration-300 ${visibleOpenSub === item.label ? "rotate-180 text-indigo-600" : "text-zinc-400"}`} />

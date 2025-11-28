@@ -146,7 +146,7 @@ export default function DiscountCodeInput({
           type="button"
           onClick={handleApplyCode}
           disabled={!inputCode.trim() || isValidating}
-          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-50 disabled:text-slate-400 text-slate-700 font-medium text-sm rounded-lg transition-colors flex items-center gap-1"
+          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-50 disabled:text-slate-500 text-slate-700 font-medium text-sm rounded-lg transition-colors flex items-center gap-1"
         >
           {isValidating ? (
             <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
