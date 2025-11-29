@@ -188,6 +188,7 @@ export default function CheckoutPage() {
 
     if (billing.tip_factura === "persoana_juridica") {
       if (!billing.cui?.trim()) e["billing.cui"] = "CUI/CIF obligatoriu";
+      if (!billing.denumire_companie?.trim()) e["billing.denumire_companie"] = "Denumire companie obligatorie";
     }
 
     if (!sameAsDelivery && billing.tip_factura === 'persoana_fizica') {
@@ -718,29 +719,38 @@ function SummaryCard({
         </label>
 
         {/* Terms and Conditions Acceptance */}
-        <div className="mb-4 p-3 sm:p-4 bg-slate-50 border border-slate-200 rounded-lg">
-          <label className="flex items-start gap-3 cursor-pointer select-none group touch-manipulation">
-            <input
-              type="checkbox"
-              checked={acceptTerms}
-              onChange={(e) => setAcceptTerms(e.target.checked)}
-              className="mt-1 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white transition-all"
-            />
-            <div className="text-sm sm:text-base text-slate-700 leading-relaxed group-hover:text-slate-900 transition-colors">
-              <span className="font-semibold text-slate-900">Accept </span>
-              <Link href="/termeni" target="_blank" className="text-indigo-600 hover:text-indigo-800 underline font-medium touch-manipulation">
+        <div className="mb-6 p-4 bg-linear-to-r from-slate-50 to-blue-50/30 border border-slate-200/60 rounded-2xl shadow-sm">
+          <label className="flex items-start gap-4 cursor-pointer select-none group touch-manipulation">
+            <div className="relative shrink-0 mt-0.5">
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="w-5 h-5 rounded-md border-2 border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white transition-all duration-200 hover:border-indigo-400"
+              />
+              {acceptTerms && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
+            </div>
+            <div className="text-sm leading-relaxed text-slate-600 group-hover:text-slate-800 transition-colors">
+              <span className="text-slate-800 font-medium">Sunt de acord cu </span>
+              <Link href="/termeni" target="_blank" className="text-indigo-600 hover:text-indigo-700 underline decoration-2 underline-offset-2 font-medium transition-colors">
                 Termenii și Condițiile
               </Link>
-              <span className="text-slate-600"> și </span>
-              <Link href="/confidentialitate" target="_blank" className="text-indigo-600 hover:text-indigo-800 underline font-medium touch-manipulation">
+              <span className="text-slate-500"> și </span>
+              <Link href="/confidentialitate" target="_blank" className="text-indigo-600 hover:text-indigo-700 underline decoration-2 underline-offset-2 font-medium transition-colors">
                 Politica de Confidențialitate
               </Link>
-              <span className="text-slate-600"> ale CULOAREA DIN VIATA SA SRL.</span>
+              <span className="text-slate-500"> Prynt.ro</span>
               {errors["terms"] && (
-                <p className="mt-2 text-xs text-red-600 font-medium">
-                  <AlertCircle size={12} className="inline mr-1" />
-                  {errors["terms"]}
-                </p>
+                <div className="mt-3 flex items-center gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle size={14} className="text-red-500 shrink-0" />
+                  <p className="text-xs text-red-700 font-medium">{errors["terms"]}</p>
+                </div>
               )}
             </div>
           </label>

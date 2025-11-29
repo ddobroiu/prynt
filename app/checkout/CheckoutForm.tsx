@@ -233,35 +233,36 @@ export default function CheckoutForm({
           </button>
         </div>
 
-        {/* Date companie */}
+        {/* Date companie - câmpuri minime pentru Oblio */}
         {billing.tip_factura === "persoana_juridica" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 animate-in fade-in slide-in-from-top-2">
-            <Field id="billing.cui" label="CUI/CIF" error={errors["billing.cui"]}>
-              <input
-                data-field="billing.cui"
-                className={inputCls(errors["billing.cui"])}
-                value={billing.cui ?? ""}
-                onChange={(e) => onBill("cui", e.target.value)}
-                autoComplete="off"
-                placeholder="RO..."
-              />
-            </Field>
-            <Field id="billing.reg_com" label="Reg. Com (J)">
-               <input
-                className={inputCls(undefined)}
-                value={billing.reg_com ?? ""}
-                onChange={(e) => onBill("reg_com", e.target.value)}
-                placeholder="J40/..."
-              />
-            </Field>
-            <Field id="billing.denumire_companie" label="Denumire companie">
-              <input
-                className={inputCls(undefined)}
-                value={billing.denumire_companie ?? ""}
-                onChange={(e) => onBill("denumire_companie", e.target.value)}
-                autoComplete="organization"
-              />
-            </Field>
+            <div className="bg-indigo-50/50 border border-indigo-200 rounded-lg p-4 mb-4 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">💡</span>
+              </div>
+              <h3 className="text-sm font-semibold text-indigo-900">Date pentru factură - Oblio importă automat din ANAF</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field id="billing.cui" label="CUI/CIF *" error={errors["billing.cui"]}>
+                <input
+                  data-field="billing.cui"
+                  className={inputCls(errors["billing.cui"])}
+                  value={billing.cui ?? ""}
+                  onChange={(e) => onBill("cui", e.target.value)}
+                  autoComplete="off"
+                  placeholder="RO12345678"
+                />
+              </Field>
+              <Field id="billing.denumire_companie" label="Denumire companie *" error={errors["billing.denumire_companie"]}>
+                <input
+                  className={inputCls(errors["billing.denumire_companie"])}
+                  value={billing.denumire_companie ?? ""}
+                  onChange={(e) => onBill("denumire_companie", e.target.value)}
+                  autoComplete="organization"
+                  placeholder="Numele companiei cum apare în actele oficiale"
+                />
+              </Field>
+            </div>
           </div>
         )}
 
@@ -315,21 +316,7 @@ export default function CheckoutForm({
           </div>
         )}
 
-        {/* Adresă sediu social pentru persoane juridice */}
-        {billing.tip_factura === 'persoana_juridica' && (
-          <div className="animate-in fade-in">
-                <Field id="billing.strada_nr" label="Adresa sediului social" error={errors["billing.strada_nr"]}>
-                  <input
-                    data-field="billing.strada_nr"
-                    className={inputCls(errors["billing.strada_nr"])}
-                    value={billing.strada_nr ?? ""}
-                    onChange={(e) => onBill("strada_nr", e.target.value)}
-                    autoComplete="section-billing street-address"
-                    placeholder="Adresa completă a sediului social (ex: Str. Exemplu 123, București, Sectorul 1)..."
-                  />
-                </Field>
-          </div>
-        )}
+
       </div>
     </div>
   );
