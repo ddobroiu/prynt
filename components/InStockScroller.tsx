@@ -56,17 +56,18 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
     const el = containerRef.current;
     if (!el) return;
     const ro = new (window as any).ResizeObserver((entries: any[]) => {
-      const w = entries[0]?.contentRect?.width ?? el.clientWidth;
-      // Use explicit breakpoints for consistent counts across devices:
-      // <640px => mobile: 1
-      // 640px-1023px => tablet: 3
-      // 1024px-1279px => laptop: 4
-      // >=1280px => desktop: 5
-      let resolved = perPage;
-      if (w < 640) resolved = 1;
-      else if (w < 1024) resolved = 3;
-      else if (w < 1280) resolved = 4;
-      else resolved = 5;
+      requestAnimationFrame(() => {
+        const w = entries[0]?.contentRect?.width ?? 0;
+        // Use explicit breakpoints for consistent counts across devices:
+        // <640px => mobile: 1
+        // 640px-1023px => tablet: 3
+        // 1024px-1279px => laptop: 4
+        // >=1280px => desktop: 5
+        let resolved = perPage;
+        if (w < 640) resolved = 1;
+        else if (w < 1024) resolved = 3;
+        else if (w < 1280) resolved = 4;
+        else resolved = 5;
       // respect maxPerPage and ensure at least 1 and not more than products length
       resolved = Math.max(1, Math.min(maxPerPage, resolved, products.length || resolved));
       setIsMobileView(w < 640);

@@ -1,48 +1,9 @@
 @import "tailwindcss";
 
+/* Critical CSS - doar pentru primul paint */
 :root {
-  --bg: #0b0f19;
-  --surface: rgba(255,255,255,0.03);
-  --card-bg: rgba(255,255,255,0.04);
-  --text: #ffffff;
-  --muted: rgba(255,255,255,0.75);
-  --accent: #6366f1;
-  --accent-600: #4f46e5;
-  --border: rgba(255,255,255,0.08);
-  --success: #10b981;
-  color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    /* Alb pur pentru un look clean */
-    --bg: #ffffff;
-    --surface: #f8fafc; 
-    --card-bg: #ffffff;
-    --text: #0b1220;
-    --muted: rgba(0,0,0,0.65);
-    --accent: #4f46e5;
-    --accent-600: #4338ca;
-    --border: rgba(15,23,42,0.08);
-    --success: #059669;
-  }
-}
-
-[data-theme="dark"] {
-  --bg: #0b0f19;
-  --surface: rgba(255,255,255,0.03);
-  --card-bg: rgba(255,255,255,0.04);
-  --text: #ffffff;
-  --muted: rgba(255,255,255,0.75);
-  --accent: #6366f1;
-  --accent-600: #4f46e5;
-  --border: rgba(255,255,255,0.08);
-  --success: #10b981;
-}
-
-[data-theme="light"] {
   --bg: #ffffff;
-  --surface: #f8fafc;
+  --surface: #f8fafc; 
   --card-bg: #ffffff;
   --text: #0b1220;
   --muted: rgba(0,0,0,0.65);
@@ -50,6 +11,7 @@
   --accent-600: #4338ca;
   --border: rgba(15,23,42,0.08);
   --success: #059669;
+  color-scheme: light dark;
 }
 
 body {
@@ -64,104 +26,13 @@ html, body {
   overflow-x: hidden;
 }
 
-@layer components {
-  .card {
-    @apply rounded-2xl;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border);
-  }
-  .card-muted {
-    @apply rounded-2xl;
-    background-color: var(--surface);
-    border: 1px solid var(--border);
-  }
-  .panel {
-    @apply rounded-xl;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border);
-  }
-  .btn {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition;
-  }
+/* CSS critic pentru LCP */
+@layer base {
   .btn-primary {
     @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition shadow-lg;
     background-color: var(--accent);
     color: white;
   }
-  .btn-outline {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition;
-    background-color: transparent;
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-  .btn-ghost {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition;
-    background-color: transparent;
-    color: var(--text);
-  }
-  .btn-danger {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition;
-    background-color: #ef4444;
-    color: white;
-  }
-  .field-label {
-    @apply mb-1 block text-sm;
-    color: var(--muted);
-  }
-  .input {
-    @apply w-full rounded-md px-3 py-2 focus:outline-none;
-    background-color: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-  .input-error {
-    @apply border-red-500/70 ring-1 ring-red-500/40;
-  }
-  .select {
-    @apply w-full rounded-md px-3 py-2 focus:outline-none appearance-none;
-    background-color: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-  .checkbox {
-    @apply h-5 w-5 accent-indigo-500;
-  }
-  .badge {
-    @apply inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold;
-    background-color: var(--surface);
-    color: var(--text);
-  }
-  .badge-success {
-    background-color: var(--success);
-    color: white;
-  }
-  .card-bg { background-color: var(--card-bg); }
-  .bg-surface { background-color: var(--surface); }
-  .text-ui { color: var(--text); }
-  .text-muted { color: var(--muted); }
-  .toast-success {
-    @apply pointer-events-none fixed left-1/2 top-6 z-50 -translate-x-1/2 transform
-           rounded-full bg-emerald-600/95 px-4 py-2 text-sm font-semibold text-white
-           shadow-2xl shadow-emerald-900/40 transition-all duration-200;
-  }
 }
 
-@layer utilities {
-  @keyframes pulse-slow {
-    50% { opacity: 0.8; }
-  }
-  .animate-pulse-slow {
-    animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  /* --- AICI ESTE FIX-UL PENTRU SCROLLBAR --- */
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  .no-scrollbar::-webkit-scrollbar {
-      display: none;
-  }
-  /* Hide scrollbar for IE, Edge and Firefox */
-  .no-scrollbar {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
-  }
-}
+/* Încărcat dinamic după primul paint */

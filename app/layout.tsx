@@ -3,6 +3,7 @@ import Script from "next/script";
 import Providers from "../components/Providers";
 import ClientLayoutWrapper from "../components/ClientLayoutWrapper";
 import GlobalStructuredData from "../components/GlobalStructuredData";
+import DynamicStylesLoader from "../components/DynamicStylesLoader";
 
 export const metadata = {
   metadataBase: new URL(
@@ -73,6 +74,18 @@ export default function RootLayout({
     <html lang="ro" data-theme="light">
       <head>
         <GlobalStructuredData />
+        {/* Critical CSS inline pentru LCP rapid */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            :root{--bg:#ffffff;--surface:#f8fafc;--card-bg:#ffffff;--text:#0b1220;--muted:rgba(0,0,0,0.65);--accent:#4f46e5;--accent-600:#4338ca;--border:rgba(15,23,42,0.08);--success:#059669;color-scheme:light dark}
+            body{background-color:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;margin:0;font-family:system-ui,-apple-system,sans-serif}
+            html,body{max-width:100%;overflow-x:hidden}
+            .btn-primary{display:inline-flex;align-items:center;justify-content:center;border-radius:0.5rem;padding:0.5rem 1rem;font-size:0.875rem;font-weight:600;transition:all 0.2s;background-color:var(--accent);color:white;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
+          `
+        }} />
+        {/* Preload pentru CSS complet */}
+        <link rel="preload" href="/globals.css" as="style" />
+        <noscript><link rel="stylesheet" href="/globals.css" /></noscript>
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Prynt Blog" />
         <script
           type="application/ld+json"
@@ -161,6 +174,7 @@ var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n
       </head>
 
       <body className="bg-white text-black antialiased">
+        <DynamicStylesLoader />
         <Providers>
           <ClientLayoutWrapper>
             {children}

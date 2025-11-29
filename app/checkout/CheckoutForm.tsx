@@ -236,12 +236,7 @@ export default function CheckoutForm({
         {/* Date companie - câmpuri minime pentru Oblio */}
         {billing.tip_factura === "persoana_juridica" && (
             <div className="bg-indigo-50/50 border border-indigo-200 rounded-lg p-4 mb-4 animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-bold">💡</span>
-              </div>
-              <h3 className="text-sm font-semibold text-indigo-900">Date pentru factură - Oblio importă automat din ANAF</h3>
-            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Date pentru factură</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field id="billing.cui" label="CUI/CIF *" error={errors["billing.cui"]}>
                 <input

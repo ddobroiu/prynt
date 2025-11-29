@@ -12,6 +12,26 @@
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:push": "prisma db push"
   },
+  "browserslist": {
+    "production": [
+      "chrome >= 91",
+      "firefox >= 90",
+      "edge >= 91",
+      "safari >= 15",
+      "ios >= 15"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ],
+    "modern": [
+      "chrome >= 91",
+      "firefox >= 90",
+      "edge >= 91",
+      "safari >= 15"
+    ]
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.936.0",
     "@hookform/resolvers": "^5.2.2",

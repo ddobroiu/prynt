@@ -14,6 +14,15 @@ const nextConfig: NextConfig = {
     
     // Optimize for modern browsers - reduces bundle size
     optimizePackageImports: ['lucide-react', 'framer-motion'],
+    
+    // CSS optimizations
+    optimizeCss: true,
+    cssChunking: 'strict',
+  },
+  
+  // Configure for modern browsers (ES2020+)
+  env: {
+    BROWSERSLIST_ENV: 'modern',
   },
   
   // Production optimizations

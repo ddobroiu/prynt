@@ -60,12 +60,28 @@ export default function SmartNewsletterPopup({
       }
     };
 
-    // Scroll tracking (show after 50% page scroll)
+    // Scroll tracking (show after 50% page scroll) - optimizat pentru performance
+    let scrollTicking = false;
+    let cachedScrollHeight = 0;
+    let cachedInnerHeight = 0;
+    
     const handleScroll = () => {
-      const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-      if (scrollPercent > 50 && !isDismissed && !isVisible) {
-        clearTimeout(timeoutId);
-        setIsVisible(true);
+      if (!scrollTicking) {
+        requestAnimationFrame(() => {
+          // Cache valorile pentru a evita citirile repetate din DOM
+          if (cachedScrollHeight === 0) {
+            cachedScrollHeight = document.body.scrollHeight;
+            cachedInnerHeight = window.innerHeight;
+          }
+          
+          const scrollPercent = (window.scrollY / (cachedScrollHeight - cachedInnerHeight)) * 100;
+          if (scrollPercent > 50 && !isDismissed && !isVisible) {
+            clearTimeout(timeoutId);
+            setIsVisible(true);
+          }
+          scrollTicking = false;
+        });
+        scrollTicking = true;
       }
     };
 
@@ -76,7 +92,7 @@ export default function SmartNewsletterPopup({
       if (!exitIntentAdded) {
         document.addEventListener('mouseleave', handleMouseLeave);
         document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
         exitIntentAdded = true;
       }
     };

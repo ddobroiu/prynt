@@ -38,9 +38,15 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll la ultimul mesaj
+  // Auto-scroll la ultimul mesaj - optimizat pentru a preveni reflow forțat
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollRef.current) {
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      });
+    }
   }, [messages, isOpen, isLoading, inputMode]);
 
   // Funcție pentru a detecta cerințele speciale din răspunsul AI-ului
@@ -166,7 +172,7 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
       <div className="p-4 bg-blue-600 flex items-center justify-between text-white shadow-sm shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><Bot size={18} /></div>
-          <div><h3 className="font-bold text-sm">Asistent Prynt.ro</h3></div>
+          <div><h2 className="font-bold text-sm">Asistent Prynt.ro</h2></div>
         </div>
         {!embedded && (
           <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/20 rounded-lg">
