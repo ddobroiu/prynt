@@ -116,7 +116,7 @@ export default function AssistantSection() {
                     href="https://wa.me/40750259955" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#128C7E] hover:bg-[#0F6B5A] text-white font-bold transition-all shadow-xl shadow-green-200 hover:shadow-2xl hover:-translate-y-1"
+                    className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#0F6B5A] hover:bg-[#0A5446] text-white font-bold transition-all shadow-xl shadow-green-200 hover:shadow-2xl hover:-translate-y-1"
                   >
                     <MessageCircle size={22} />
                     WhatsApp Chat

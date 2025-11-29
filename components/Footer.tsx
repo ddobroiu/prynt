@@ -47,7 +47,7 @@ export default function Footer() {
     }
   };
 
-  const linkClass = "text-slate-500 hover:text-indigo-600 transition-colors text-sm flex items-center gap-2";
+  const linkClass = "text-slate-700 hover:text-indigo-600 transition-colors text-sm flex items-center gap-2";
 
   return (
     <footer className="bg-white border-t border-slate-200 pt-8 sm:pt-12 lg:pt-16 xl:pt-24 pb-6 sm:pb-8">
@@ -62,7 +62,7 @@ export default function Footer() {
                 Prynt<span className="text-indigo-600">.ro</span>
               </span>
             </Link>
-            <p className="text-slate-500 text-sm leading-relaxed max-w-sm">
+            <p className="text-slate-700 text-sm leading-relaxed max-w-sm">
               {siteConfig.description} Platforma completă de tipar digital unde configurezi, vizualizezi prețul și comanzi instant.
             </p>
             <div className="flex items-center gap-3">
@@ -184,7 +184,7 @@ export default function Footer() {
           </div>
           
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-            <Link href="/stergere-date" className="text-xs text-slate-600 hover:text-indigo-600 transition-colors touch-manipulation">
+            <Link href="/stergere-date" className="text-xs text-slate-700 hover:text-indigo-600 transition-colors touch-manipulation font-medium">>
               Ștergere date
             </Link>
             <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noopener noreferrer" title="Soluționarea Alternativă a Litigiilor" className="touch-manipulation">
