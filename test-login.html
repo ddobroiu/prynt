@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Mobile Login</title>
+</head>
+<body>
+    <h1>Test Mobile Login</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testLogin() {
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/mobile-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@test.com',
+                        password: 'test123'
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('result').innerHTML = 
+                    '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                console.log('Login test result:', data);
+            } catch (error) {
+                console.error('Error testing login:', error);
+                document.getElementById('result').innerHTML = 
+                    '<pre>Error: ' + error.message + '</pre>';
+            }
+        }
+
+        // Run test when page loads
+        window.onload = testLogin;
+    </script>
+</body>
+</html>
