@@ -1,0 +1,16 @@
+# Exclude mobile app from Vercel deployment
+mobile/
+
+# Exclude documentation
+docs/
+
+# Exclude test files
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Exclude development files
+.env.example
+.vscode/
+.idea/
