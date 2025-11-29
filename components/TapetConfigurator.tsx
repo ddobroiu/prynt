@@ -66,7 +66,7 @@ const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick:
 
 function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   const inc = (d: number) => onChange(Math.max(1, value + d));
-  return <div><label className="field-label">{label}</label><div className="flex"><button onClick={() => inc(-1)} className="p-3 bg-gray-100 rounded-l-lg hover:bg-gray-200"><Minus size={16} /></button><input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-center w-full rounded-none border-x-0" /><button onClick={() => inc(1)} className="p-3 bg-gray-100 rounded-r-lg hover:bg-gray-200"><Plus size={16} /></button></div></div>;
+  return <div><label className="field-label">{label}</label><div className="flex"><button onClick={() => inc(-1)} className="p-3 bg-gray-100 rounded-l-lg hover:bg-gray-200" aria-label={`Scade ${label.toLowerCase()}`}><Minus size={16} /></button><input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-center w-full rounded-none border-x-0" /><button onClick={() => inc(1)} className="p-3 bg-gray-100 rounded-r-lg hover:bg-gray-200" aria-label={`Creşte ${label.toLowerCase()}`}><Plus size={16} /></button></div></div>;
 }
 
 function OptionButton({ active, onClick, title, subtitle }: { active: boolean; onClick: () => void; title: string; subtitle?: string; }) {
@@ -185,7 +185,7 @@ export default function TapetConfigurator({ productSlug, productImage }: Props) 
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
               <div className="aspect-square"><img src={activeImage} alt="Tapet" className="h-full w-full object-cover" /></div>
               <div className="p-2 grid grid-cols-4 gap-2">
-                {GALLERY.map((src, i) => <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
+                {GALLERY.map((src, i) => <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`} aria-label={`Selectează imaginea ${i + 1} pentru tapet`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
               </div>
             </div>
             <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'tapet'} /></div>
@@ -257,7 +257,7 @@ export default function TapetConfigurator({ productSlug, productImage }: Props) 
       {detailsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetailsOpen(false)}>
           <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8" onClick={e => e.stopPropagation()}>
-            <button className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100" onClick={() => setDetailsOpen(false)}><X size={20} className="text-gray-600" /></button>
+            <button className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100" onClick={() => setDetailsOpen(false)} aria-label="Închide detaliile produsului"><X size={20} className="text-gray-600" /></button>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Detalii Tapet</h3>
             <div className="prose prose-sm max-w-none">
               <h4>Material Premium</h4>
