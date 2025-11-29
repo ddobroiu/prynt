@@ -184,7 +184,7 @@ export default function Footer() {
           </div>
           
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-            <Link href="/stergere-date" className="text-xs text-slate-700 hover:text-indigo-600 transition-colors touch-manipulation font-medium">>
+            <Link href="/stergere-date" className="text-xs text-slate-700 hover:text-indigo-600 transition-colors touch-manipulation font-medium">
               Ștergere date
             </Link>
             <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noopener noreferrer" title="Soluționarea Alternativă a Litigiilor" className="touch-manipulation">
