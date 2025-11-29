@@ -1,16 +1,22 @@
-# Modern browsers with ES2017+ support
-# This eliminates 13.5 KiB of unnecessary polyfills
-> 0.5%
-last 2 versions
-Firefox ESR
+# Modern browsers only - ES2020+ support
+# Eliminates ALL polyfills for Array.at, Object.hasOwn, etc.
+# Targets browsers with native support for modern features
+
+[production]
+chrome >= 91
+firefox >= 90
+edge >= 91
+safari >= 15
+ios >= 15
 not dead
-not IE 11
-not IE_Mob 11
-not op_mini all
-not and_uc > 0
-Chrome >= 58
-Safari >= 10.1
-Firefox >= 55
-Edge >= 16
-iOS >= 10.3
-Android >= 7
+
+[development]
+last 1 chrome version
+last 1 firefox version
+last 1 safari version
+
+[modern]
+chrome >= 91
+firefox >= 90
+edge >= 91
+safari >= 15

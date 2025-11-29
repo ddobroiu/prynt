@@ -4,6 +4,23 @@ const nextConfig: NextConfig = {
   // Server packages that should not be bundled
   serverExternalPackages: ['@react-pdf/renderer', 'puppeteer'],
   
+  // Configure for modern browsers (ES2020+)
+  env: {
+    BROWSERSLIST_ENV: 'modern',
+  },
+  
+  // Production optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn']
+    } : false,
+  },
+  
+  // Transpilation target for modern browsers (eliminates polyfills)
+  transpilePackages: [],
+  
+  // SWC compiler options for modern browsers
+  // This tells Next.js to NOT transpile modern JS features
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
@@ -18,18 +35,6 @@ const nextConfig: NextConfig = {
     // CSS optimizations
     optimizeCss: true,
     cssChunking: 'strict',
-  },
-  
-  // Configure for modern browsers (ES2020+)
-  env: {
-    BROWSERSLIST_ENV: 'modern',
-  },
-  
-  // Production optimizations
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn']
-    } : false,
   },
   
   // Turbopack configuration for modern browsers
