@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
     } : false,
   },
   
+  // Performance optimizations
+  poweredByHeader: false,
+  compress: true,
+  
   // Transpilation target for modern browsers (eliminates polyfills)
   transpilePackages: [],
   
@@ -61,6 +65,27 @@ const nextConfig: NextConfig = {
   
   async headers() {
     return [
+      {
+        source: '/',
+        headers: [
+          {
+            key: 'Link',
+            value: '</globals.css>; rel=preload; as=style, <https://www.googletagmanager.com>; rel=preconnect, <https://res.cloudinary.com>; rel=preconnect',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
       {
         source: '/(.*)',
         headers: [

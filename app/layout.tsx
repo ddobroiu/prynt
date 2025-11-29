@@ -74,6 +74,14 @@ export default function RootLayout({
     <html lang="ro" data-theme="light">
       <head>
         <GlobalStructuredData />
+        
+        {/* DNS Prefetch și Preconnect pentru servicii externe */}
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://analytics.tiktok.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        
         {/* Critical CSS inline pentru LCP rapid */}
         <style dangerouslySetInnerHTML={{
           __html: `
@@ -83,9 +91,7 @@ export default function RootLayout({
             .btn-primary{display:inline-flex;align-items:center;justify-content:center;border-radius:0.5rem;padding:0.5rem 1rem;font-size:0.875rem;font-weight:600;transition:all 0.2s;background-color:var(--accent);color:white;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
           `
         }} />
-        {/* Preload pentru CSS complet */}
-        <link rel="preload" href="/globals.css" as="style" />
-        <noscript><link rel="stylesheet" href="/globals.css" /></noscript>
+        
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Prynt Blog" />
         <script
           type="application/ld+json"
@@ -140,14 +146,14 @@ export default function RootLayout({
             }),
           }}
         />
-        {/* Google Analytics */}
+        {/* Google Analytics - încărcat după LCP */}
         <Script
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           src="https://www.googletagmanager.com/gtag/js?id=G-VG21Z7L33S"
         />
         <Script
           id="google-analytics"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -160,7 +166,7 @@ export default function RootLayout({
         
         <Script
           id="tiktok-pixel"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `!function (w, d, t) {
   w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(
