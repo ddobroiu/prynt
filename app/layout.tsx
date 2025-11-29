@@ -82,13 +82,37 @@ export default function RootLayout({
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         
-        {/* Critical CSS inline pentru LCP rapid */}
+        {/* Critical CSS inline pentru LCP rapid - extins pentru above-the-fold */}
         <style dangerouslySetInnerHTML={{
           __html: `
             :root{--bg:#ffffff;--surface:#f8fafc;--card-bg:#ffffff;--text:#0b1220;--muted:rgba(0,0,0,0.65);--accent:#4f46e5;--accent-600:#4338ca;--border:rgba(15,23,42,0.08);--success:#059669;color-scheme:light dark}
-            body{background-color:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;margin:0;font-family:system-ui,-apple-system,sans-serif}
+            *,::before,::after{box-sizing:border-box;border:0 solid #e5e7eb}
+            body{background-color:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5}
             html,body{max-width:100%;overflow-x:hidden}
-            .btn-primary{display:inline-flex;align-items:center;justify-content:center;border-radius:0.5rem;padding:0.5rem 1rem;font-size:0.875rem;font-weight:600;transition:all 0.2s;background-color:var(--accent);color:white;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
+            h1,h2,h3,h4,h5,h6{font-weight:700;line-height:1.2;margin:0}
+            p{margin:0}
+            a{color:inherit;text-decoration:inherit}
+            img,svg{display:block;vertical-align:middle;max-width:100%;height:auto}
+            button{font-family:inherit;cursor:pointer}
+            .btn-primary{display:inline-flex;align-items:center;justify-content:center;border-radius:0.5rem;padding:0.5rem 1rem;font-size:0.875rem;font-weight:600;transition:all 0.2s;background-color:var(--accent);color:white;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);border:none}
+            .container{width:100%;margin:0 auto;padding-left:1rem;padding-right:1rem}
+            @media(min-width:640px){.container{max-width:640px}}
+            @media(min-width:768px){.container{max-width:768px}}
+            @media(min-width:1024px){.container{max-width:1024px}}
+            @media(min-width:1280px){.container{max-width:1280px}}
+            .flex{display:flex}
+            .items-center{align-items:center}
+            .justify-center{justify-content:center}
+            .gap-2{gap:0.5rem}
+            .gap-4{gap:1rem}
+            .rounded-lg{border-radius:0.5rem}
+            .shadow-lg{box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05)}
+            .text-white{color:#fff}
+            .bg-white{background-color:#fff}
+            .sticky{position:sticky}
+            .fixed{position:fixed}
+            .relative{position:relative}
+            .z-50{z-index:50}
           `
         }} />
         
