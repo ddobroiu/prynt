@@ -265,10 +265,9 @@ export default function CheckoutForm({
           </div>
         )}
 
-        {/* Adresă facturare */}
-        {(!sameAsDelivery || billing.tip_factura === 'persoana_juridica') && (
+        {/* Adresă facturare pentru persoane fizice */}
+        {!sameAsDelivery && billing.tip_factura === 'persoana_fizica' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in">
-             {billing.tip_factura === 'persoana_fizica' && (
                 <div className="md:col-span-2">
                   <Field id="billing.name" label="Nume pe factură" error={errors["billing.name"]}>
                     <input
@@ -280,7 +279,6 @@ export default function CheckoutForm({
                     />
                   </Field>
                 </div>
-             )}
 
              <div data-field="billing.judet">
                 <JudetSelector
@@ -310,10 +308,26 @@ export default function CheckoutForm({
                     value={billing.strada_nr ?? ""}
                     onChange={(e) => onBill("strada_nr", e.target.value)}
                     autoComplete="section-billing street-address"
-                    placeholder="Sediu social, stradă, număr..."
+                    placeholder="Adresa completă pentru facturare..."
                   />
                 </Field>
              </div>
+          </div>
+        )}
+
+        {/* Adresă sediu social pentru persoane juridice */}
+        {billing.tip_factura === 'persoana_juridica' && (
+          <div className="animate-in fade-in">
+                <Field id="billing.strada_nr" label="Adresa sediului social" error={errors["billing.strada_nr"]}>
+                  <input
+                    data-field="billing.strada_nr"
+                    className={inputCls(errors["billing.strada_nr"])}
+                    value={billing.strada_nr ?? ""}
+                    onChange={(e) => onBill("strada_nr", e.target.value)}
+                    autoComplete="section-billing street-address"
+                    placeholder="Adresa completă a sediului social (ex: Str. Exemplu 123, București, Sectorul 1)..."
+                  />
+                </Field>
           </div>
         )}
       </div>
