@@ -180,28 +180,6 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
         )}
       </div>
 
-      {/* Pager dots - design fin și discret */}
-      {pages > 1 && (
-        <div style={{ display: "flex", gap: 4, justifyContent: "center", marginTop: 12 }}>
-          {Array.from({ length: pages }).map((_, i) => (
-            <button 
-              key={i} 
-              onClick={() => setPage(i)} 
-              aria-label={`Pagina ${i + 1}`} 
-              style={{ 
-                width: i === effectivePage ? 16 : 4, 
-                height: 4, 
-                borderRadius: 2, 
-                background: i === effectivePage ? "#4f46e5" : "#e2e8f0", 
-                border: "none",
-                transition: "all 0.3s ease",
-                cursor: "pointer"
-              }} 
-            />
-          ))}
-        </div>
-      )}
-
       {/* Prev / Next arrows */}
       {pages > 1 && (
         <>
