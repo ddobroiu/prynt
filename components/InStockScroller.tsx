@@ -68,10 +68,11 @@ export default function InStockScroller({ products, perPage = 4, maxPerPage = 5,
         else if (w < 1024) resolved = 3;
         else if (w < 1280) resolved = 4;
         else resolved = 5;
-      // respect maxPerPage and ensure at least 1 and not more than products length
-      resolved = Math.max(1, Math.min(maxPerPage, resolved, products.length || resolved));
-      setIsMobileView(w < 640);
-      setItemsPerPage(resolved);
+        // respect maxPerPage and ensure at least 1 and not more than products length
+        resolved = Math.max(1, Math.min(maxPerPage, resolved, products.length || resolved));
+        setIsMobileView(w < 640);
+        setItemsPerPage(resolved);
+      });
     });
     ro.observe(el);
     // initial sizing handled via lazy init; ResizeObserver will update on changes
