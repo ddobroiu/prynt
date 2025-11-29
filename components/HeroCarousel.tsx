@@ -173,14 +173,14 @@ export default function HeroCarousel() {
               <span>Tipografie Digitală Next-Gen</span>
             </div>
             
-            <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.1] lg:min-h-[160px]">
+            <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.1] lg:min-h-40">
               Printează <br className="hidden lg:block" />
-              <span className={`text-transparent bg-clip-text bg-gradient-to-r transition-all duration-700 ${currentSlide.gradient}`}>
+              <span className={`text-transparent bg-clip-text bg-linear-to-r transition-all duration-700 ${currentSlide.gradient}`}>
                 {currentSlide.title}
               </span>
             </h1>
             
-            <p className="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 lg:min-h-[80px]">
+            <p className="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 lg:min-h-20">
               {currentSlide.description} <br className="hidden sm:block"/> 
               <span className="text-slate-600 text-base">Configurezi online, vezi prețul instant și comanzi.</span>
             </p>
@@ -228,7 +228,7 @@ export default function HeroCarousel() {
                     <Link 
                         key={item.id} 
                         href={item.link}
-                        className="group relative min-w-[85vw] sm:min-w-[300px] aspect-[4/3] rounded-3xl overflow-hidden bg-slate-100 border border-slate-100 shadow-lg shrink-0 snap-center"
+                        className="group relative min-w-[85vw] sm:min-w-[300px] aspect-4/3 rounded-3xl overflow-hidden bg-slate-100 border border-slate-100 shadow-lg shrink-0 snap-center"
                     >
                         <Image 
                             src={item.image} 
@@ -239,7 +239,7 @@ export default function HeroCarousel() {
                             priority={true}
                         />
                         {/* Overlay mai puternic jos pentru text lizibil */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-90" />
                         
                         {item.badge && (
                             <div className="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
@@ -255,7 +255,7 @@ export default function HeroCarousel() {
                         </div>
                     </Link>
                     ))}
-                    <div className="min-w-[10px] shrink-0" /> 
+                    <div className="min-w-2.5 shrink-0" /> 
                 </div>
              </div>
 
@@ -272,7 +272,7 @@ export default function HeroCarousel() {
                               priority={true}
                               sizes="50vw"
                              />
-                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                             <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
                              
                              <div className="absolute bottom-8 left-8 bg-white/95 backdrop-blur-md px-8 py-5 rounded-2xl shadow-lg border border-white/50">
                                 <p className="font-bold text-slate-900 text-2xl">{currentSlide.title}</p>
@@ -290,6 +290,7 @@ export default function HeroCarousel() {
                           key={slide.id} 
                           onClick={() => setActiveSlide(idx)}
                           className={`h-2 rounded-full transition-all duration-300 ${idx === activeSlide ? 'w-8 bg-indigo-600' : 'w-2 bg-slate-300 hover:bg-slate-400'}`}
+                          aria-label={`Mergi la slide-ul ${idx + 1}: ${slide.title}`}
                         />
                     ))}
                 </div>
