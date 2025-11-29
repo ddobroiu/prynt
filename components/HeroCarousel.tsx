@@ -248,7 +248,7 @@ export default function HeroCarousel() {
                         )}
 
                         <div className="absolute bottom-0 left-0 w-full p-6 text-left">
-                            <h3 className="text-white font-bold text-2xl leading-tight mb-1">{item.title}</h3>
+                            <p className="text-white font-bold text-2xl leading-tight mb-1">{item.title}</p>
                             <div className="flex items-center gap-2 text-indigo-300 text-sm font-bold uppercase tracking-wide">
                                 Configurează <ChevronRight size={16} strokeWidth={3} />
                             </div>
