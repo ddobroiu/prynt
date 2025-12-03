@@ -53,7 +53,7 @@ export default function HomePage() {
         <div className="container mx-auto px-0 sm:px-4 relative group">
             
             {/* Buton Stânga */}
-            <div className="absolute left-0 top-0 bottom-0 z-20 bg-gradient-to-r from-white via-white/95 to-transparent pl-2 pr-4 flex items-center">
+            <div className="absolute left-0 top-0 bottom-0 z-20 bg-linear-to-r from-white via-white/95 to-transparent pl-2 pr-4 flex items-center">
                 <button 
                   onClick={scrollLeft}
                   className="p-1.5 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200 shadow-sm transition-all active:scale-90 flex items-center justify-center"
@@ -85,7 +85,7 @@ export default function HomePage() {
             </div>
 
             {/* Buton Dreapta */}
-            <div className="absolute right-0 top-0 bottom-0 z-20 bg-gradient-to-l from-white via-white/95 to-transparent pr-2 pl-4 flex items-center">
+            <div className="absolute right-0 top-0 bottom-0 z-20 bg-linear-to-l from-white via-white/95 to-transparent pr-2 pl-4 flex items-center">
                 <button 
                   onClick={scrollRight}
                   className="p-1.5 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200 shadow-sm transition-all active:scale-90 flex items-center justify-center"
