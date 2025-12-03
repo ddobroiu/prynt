@@ -98,8 +98,11 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         frameType = "framed";
         framedSize = args.framed_size;
         // Detectăm forma din dimensiune (ex: "30x30" = square)
-        const [w, h] = framedSize.split("x").map(Number);
-        framedShape = w === h ? "square" : "rectangle";
+        const parts = framedSize.split("x");
+        if (parts.length === 2) {
+          const [w, h] = parts.map(Number);
+          framedShape = w === h ? "square" : "rectangle";
+        }
       }
 
       const res = calculateCanvasPrice({
@@ -187,7 +190,27 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     // 6. GENERARE OFERTĂ PDF (CU NUME CLIENT)
     // ============================================================
     else if (fnName === "generate_offer") {
+      console.log("📄 generate_offer called with args:", JSON.stringify(args, null, 2));
+      
       const { customer_details, items } = args;
+      
+      // Validări
+      if (!customer_details || !customer_details.name) {
+        console.error("❌ generate_offer: Lipsește customer_details.name!");
+        return { 
+          success: false, 
+          error: "Numele clientului este obligatoriu pentru generarea ofertei." 
+        };
+      }
+      
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        console.error("❌ generate_offer: Items array gol sau invalid!");
+        return { 
+          success: false, 
+          error: "Lista de produse este obligatorie pentru generarea ofertei." 
+        };
+      }
+      
       const totalAmount = items.reduce(
         (acc: number, item: any) => acc + (item.price * item.quantity), 0
       );
@@ -206,7 +229,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
 
       // Creăm o înregistrare de tip "Ofertă"
       const offerData: any = {
-        orderNo: nextOrderNo, // Folosim secvența, dar marcat ca ofertă
+        orderNo: nextOrderNo,
         status: "pending_verification",
         paymentStatus: "pending",
         paymentMethod: "oferta",
@@ -214,20 +237,28 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         currency: "RON",
         total: totalAmount,
         userEmail: customer_details.email || `offer_${context.source}@prynt.ro`,
+        address: {
+          name: customer_details.name,
+          phone: customer_details.phone || "",
+          street: customer_details.address || "",
+          city: customer_details.city || "",
+          county: customer_details.county || "",
+          country: "Romania",
+        },
         shippingAddress: {
-          name: customer_details.name, // Salvăm numele aici
-          phone: customer_details.phone || "-",
-          street: customer_details.address || "-",
-          city: customer_details.city || "-",
-          county: customer_details.county || "-",
+          name: customer_details.name,
+          phone: customer_details.phone || "",
+          street: customer_details.address || "",
+          city: customer_details.city || "",
+          county: customer_details.county || "",
           country: "Romania",
         },
         billingAddress: {
-          name: customer_details.name, // Salvăm numele și aici
-          phone: customer_details.phone || "-",
-          street: customer_details.address || "-",
-          city: customer_details.city || "-",
-          county: customer_details.county || "-",
+          name: customer_details.name,
+          phone: customer_details.phone || "",
+          street: customer_details.address || "",
+          city: customer_details.city || "",
+          county: customer_details.county || "",
           country: "Romania",
         },
         items: {
@@ -260,6 +291,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       const baseUrl = process.env.NEXTAUTH_URL || "https://prynt.ro";
       // Ruta /api/pdf/offer va folosi ID-ul pentru a prelua datele din DB (inclusiv numele clientului)
       const offerLink = `${baseUrl}/api/pdf/offer?id=${offerRecord.id}`;
+
+      console.log("✅ Ofertă creată cu ID:", offerRecord.id);
 
       return { 
           success: true, 

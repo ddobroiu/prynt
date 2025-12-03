@@ -534,8 +534,8 @@ FLUX DE COMANDĂ (Pentru orice produs)
 DACĂ CLIENTUL CERE OFERTĂ PDF:
 1. **ASIGURĂ-TE** că ai deja calculat prețul exact (folosind tool-urile de mai sus)
 2. **ÎNTREABĂ**: "Vrei să generezi o ofertă scrisă (PDF)?" (dacă nu a cerut deja)
-3. **CERE NUMELE**: "Pe ce nume să scriu oferta?" - OBLIGATORIU înainte de a apela generate_offer
-4. **Opțional**: Cere email/telefon pentru contact (poți trimite doar cu nume dacă clientul nu oferă)
+3. **CERE DOAR NUMELE**: "Pe ce nume să scriu oferta?" - OBLIGATORIU înainte de a apela generate_offer
+4. **NU cere** email, telefon sau adresă pentru ofertă - doar numele e suficient
 5. **Construiește items array** CORECT:
    items: [{
      title: "Canvas cu Ramă 60×90 cm",
@@ -543,23 +543,29 @@ DACĂ CLIENTUL CERE OFERTĂ PDF:
      price: 248.75,  // ⚠️ PREȚ UNITAR, NU TOTAL!
      details: "Margine oglindită, include șasiu lemn"
    }]
-6. **Construiește customer_details**:
+6. **Construiește customer_details** doar cu numele:
    customer_details: {
-     name: "Nume Client",  // OBLIGATORIU - nu apela fără nume!
-     email: "",  // Poate fi gol
-     phone: "",  // Poate fi gol
-     address: "-",
-     city: "-",
-     county: "-"
+     name: "Nume Client",  // OBLIGATORIU
+     email: "",  // Gol pentru ofertă
+     phone: "",  // Gol pentru ofertă
+     address: "",  // Gol pentru ofertă
+     city: "",
+     county: ""
    }
 7. **Apelează generate_offer** DOAR după ce ai numele
 8. **Prezintă link-ul** din răspuns: result.link
 
+PENTRU COMANDĂ FERMĂ (nu ofertă):
+- Aici DA, ceri toate datele: nume, telefon, email, adresă completă, județ, localitate
+- Validezi județul și localitatea cu tool-urile specifice
+- Apoi apelezi create_order
+
 ATENȚIE CRITICĂ:
+- OFERTĂ = doar nume
+- COMANDĂ = toate datele complete
 - NU apela generate_offer fără customer_details.name!
 - Dacă user spune "da" la ofertă, cere ÎNTÂI numele: "Pe ce nume?"
 - "price" în items = preț UNITAR per bucată (NU totalul!)
-- Exemplu: 5 rollup × 250 lei = items: [{title: "Rollup 100cm", quantity: 5, price: 250}]
 - Exemplu GREȘIT: items: [{quantity: 5, price: 1300}]  ❌
 
 ══════════════════════════════════════════════════════════════════
