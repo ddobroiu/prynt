@@ -69,14 +69,14 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       // Verificăm tipul de produs
       if (args.product_type === "afis") {
         const res = calculatePosterPrice({
-          sizeKey: args.size || "A3",
+          size: args.size || "A3",
+          material: args.paper_type || "blueback",
           quantity: args.quantity,
-          paperKey: args.paper_type || "blueback",
           designOption: "upload",
         });
         return { 
           pret_total: res.finalPrice,
-          pret_unitar: res.pricePerUnit,
+          pret_unitar: res.unitPrice,
           info: `Afișe ${args.size} pe ${args.paper_type || 'Blueback'}`
         };
       } else if (args.product_type === "pliant") {

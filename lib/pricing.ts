@@ -71,6 +71,55 @@ export const calculateUpsellGeneric = (
   };
 };
 
+/* =========================================================================
+   HELPER: UPSELL CALCULATOR PENTRU PRODUSE CU PRAGURI DE CANTITATE
+   Pentru Flyer, Afișe, Pliante - unde prețul depinde direct de cantitate, nu de mp
+   ========================================================================= */
+export const calculateUpsellByQuantity = (
+  currentQty: number,
+  currentUnitPrice: number,
+  tiers: { min: number, price: number }[],
+  priceCalculator: (qty: number) => { finalPrice: number }
+): UpsellResult => {
+  
+  // 1. Găsim tier-ul curent
+  let currentTierIndex = -1;
+  for (let i = tiers.length - 1; i >= 0; i--) {
+    if (currentQty >= tiers[i].min) {
+      currentTierIndex = i;
+      break;
+    }
+  }
+
+  // Dacă suntem deja în ultimul tier (cel mai ieftin), nu există upsell
+  if (currentTierIndex === -1 || currentTierIndex >= tiers.length - 1) return null;
+
+  // 2. Următorul tier
+  const nextTier = tiers[currentTierIndex + 1];
+  const requiredQty = nextTier.min;
+
+  // 3. Simulăm prețul pentru cantitatea următorului tier
+  const futurePriceData = priceCalculator(requiredQty);
+  const futureUnitPrice = futurePriceData.finalPrice / requiredQty;
+
+  // 4. Calculăm reducerea procentuală
+  const discountPercent = Math.round(((currentUnitPrice - futureUnitPrice) / currentUnitPrice) * 100);
+
+  // Ignorăm reducerile nesemnificative (< 2%)
+  if (discountPercent < 2) return null;
+
+  const totalSavings = (currentUnitPrice * requiredQty) - futurePriceData.finalPrice;
+
+  return {
+      hasUpsell: true,
+      requiredQty,
+      discountPercent,
+      newUnitPrice: parseFloat(futureUnitPrice.toFixed(2)),
+      totalSavings: parseFloat(totalSavings.toFixed(2)),
+      message: `Sfat: Dacă alegi ${requiredQty} bucăți, prețul unitar scade cu ${discountPercent}%, ajungând la ${formatMoneyDisplay(futureUnitPrice)}/buc. Economie totală estimată: ${formatMoneyDisplay(totalSavings)}.`
+  };
+};
+
 // ==========================================
 // 1. BANNER SIMPLU (FRONTLIT)
 // ==========================================
@@ -590,15 +639,18 @@ export const getAutocolanteUpsell = (input: PriceInputAutocolante): UpsellResult
   const currentUnitPrice = priceData.finalPrice / input.quantity;
 
   // Găsim banda pentru materialul selectat
-  const materialDef = AUTOCOLANTE_CONSTANTS.MATERIALS.find((m) => m.key === input.materialKey);
+  const materialDef = AUTOCOLANTE_CONSTANTS.MATERIALS.find((m) => m.key === input.material);
   if (!materialDef) return null;
+
+  // Transformăm benzile din formatul autocolante în formatul generic
+  const transformedBands = materialDef.bands.map(b => ({ max: b.max_sqm, price: b.price_per_sqm }));
 
   return calculateUpsellGeneric(
       currentTotalSqm,
       sqmPerUnit,
       input.quantity,
       currentUnitPrice,
-      materialDef.bands,
+      transformedBands,
       (newQty) => calculateAutocolantePrice({ ...input, quantity: newQty })
   );
 };
@@ -1030,6 +1082,29 @@ export const calculatePosterPrice = (input: PriceInputAfise) => {
   return { finalPrice, unitPrice, proFee };
 };
 
+// --- UPSELL FOR AFISE ---
+export const getAfiseUpsell = (input: PriceInputAfise): UpsellResult => {
+  let matKey = input.material;
+  if (matKey.startsWith("paper_300")) {
+    matKey = matKey.includes("lucioasa") ? "paper_150_lucioasa" : "paper_150_mata";
+  }
+
+  if (!AFISE_CONSTANTS.PRICE_TABLE[matKey] || !AFISE_CONSTANTS.PRICE_TABLE[matKey][input.size]) {
+    return null;
+  }
+
+  const tiers = AFISE_CONSTANTS.PRICE_TABLE[matKey][input.size];
+  const priceData = calculatePosterPrice(input);
+  const currentUnitPrice = priceData.unitPrice;
+
+  return calculateUpsellByQuantity(
+    input.quantity,
+    currentUnitPrice,
+    tiers,
+    (newQty) => calculatePosterPrice({ ...input, quantity: newQty })
+  );
+};
+
 // ==========================================
 // 11. FLYERE
 // ==========================================
@@ -1137,6 +1212,23 @@ export const calculateFlyerPrice = (input: PriceInputFlyer) => {
   return { finalPrice: roundMoney(unitPrice * input.quantity + proFee), unitPrice, proFee };
 };
 
+// --- UPSELL FOR FLYER ---
+export const getFlyerUpsell = (input: PriceInputFlyer): UpsellResult => {
+  const sizeDef = FLYER_CONSTANTS.SIZES.find((x) => x.key === input.sizeKey);
+  if (!sizeDef) return null;
+
+  const tiers = input.twoSided ? sizeDef.twoSided : sizeDef.oneSided;
+  const priceData = calculateFlyerPrice(input);
+  const currentUnitPrice = priceData.unitPrice;
+
+  return calculateUpsellByQuantity(
+    input.quantity,
+    currentUnitPrice,
+    tiers,
+    (newQty) => calculateFlyerPrice({ ...input, quantity: newQty })
+  );
+};
+
 // ==========================================
 // 12. PLIANTE
 // ==========================================
@@ -1225,6 +1317,20 @@ export const calculatePliantePrice = (input: PriceInputPliante) => {
   return { finalPrice, pricePerUnit, proFee };
 };
 
+// --- UPSELL FOR PLIANTE ---
+export const getPlianteUpsell = (input: PriceInputPliante): UpsellResult => {
+  const tiers = PLIANTE_CONSTANTS.PRICE_TABLE[input.weight];
+  const priceData = calculatePliantePrice(input);
+  const currentUnitPrice = priceData.pricePerUnit;
+
+  return calculateUpsellByQuantity(
+    input.quantity,
+    currentUnitPrice,
+    tiers,
+    (newQty) => calculatePliantePrice({ ...input, quantity: newQty })
+  );
+};
+
 // ==========================================
 // 13. TAPET
 // ==========================================
@@ -1274,12 +1380,15 @@ export const getTapetUpsell = (input: PriceInputTapet): UpsellResult => {
   const currentTotalSqm = sqmPerUnit * input.quantity;
   const currentUnitPrice = priceData.finalPrice / input.quantity;
 
+  // Transformăm benzile din formatul tapet în formatul generic
+  const transformedBands = TAPET_CONSTANTS.PRICES.bands.map(b => ({ max: b.max_sqm, price: b.price_per_sqm }));
+
   return calculateUpsellGeneric(
       currentTotalSqm,
       sqmPerUnit,
       input.quantity,
       currentUnitPrice,
-      TAPET_CONSTANTS.PRICES.bands,
+      transformedBands,
       (newQty) => calculateTapetPrice({ ...input, quantity: newQty })
   );
 };
@@ -1532,4 +1641,20 @@ export const calculateRollupPrice = (input: PriceInputRollup) => {
     unitPrice,
     designFee,
   };
+};
+
+// --- UPSELL FOR ROLLUP ---
+export const getRollupUpsell = (input: PriceInputRollup): UpsellResult => {
+  const priceTable = ROLLUP_CONSTANTS.PRICE_TABLE[input.width_cm as keyof typeof ROLLUP_CONSTANTS.PRICE_TABLE];
+  if (!priceTable) return null;
+
+  const priceData = calculateRollupPrice(input);
+  const currentUnitPrice = priceData.unitPrice;
+
+  return calculateUpsellByQuantity(
+    input.quantity,
+    currentUnitPrice,
+    priceTable,
+    (newQty) => calculateRollupPrice({ ...input, quantity: newQty })
+  );
 };

@@ -131,7 +131,11 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
   const displayedTotal = priceData.finalPrice;
 
   // Upsell Logic
-  const upsellOpportunity = useMemo(() => getAutocolanteUpsell(input), [input]);
+  const upsellOpportunity = useMemo(() => {
+    const result = getAutocolanteUpsell(input);
+    console.log('🔍 AUTOCOLANTE UPSELL DEBUG:', { input, result });
+    return result;
+  }, [input]);
 
   // Auto-capture abandoned carts
   const cartData = useMemo(() => ({

@@ -121,7 +121,11 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
   const displayedTotal = priceData.finalPrice;
 
   // Upsell Logic (doar pentru Fără Ramă)
-  const upsellOpportunity = useMemo(() => getCanvasUpsell(input), [input]);
+  const upsellOpportunity = useMemo(() => {
+    const result = getCanvasUpsell(input);
+    console.log('🔍 CANVAS UPSELL DEBUG:', { input, result, frameType: input.frameType });
+    return result;
+  }, [input]);
 
   // Auto-capture abandoned carts
   const cartData = useMemo(() => ({

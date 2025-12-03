@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { useToast } from "@/components/ToastProvider";
-import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
+import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, TrendingUp, Percent } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
@@ -11,6 +11,7 @@ import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture";
 import { QA } from "@/types";
 import {
   calculateFlyerPrice,
+  getFlyerUpsell,
   FLYER_CONSTANTS,
   formatMoneyDisplay,
   type PriceInputFlyer,
@@ -100,6 +101,11 @@ export default function FlyerConfigurator({ productSlug, productImage }: Props) 
 
   const priceData = useMemo(() => calculateFlyerPrice({ sizeKey, quantity, twoSided, paperWeightKey, designOption } as PriceInputFlyer), [sizeKey, quantity, twoSided, paperWeightKey, designOption]);
   const displayedTotal = priceData.finalPrice;
+
+  // Upsell Logic
+  const upsellOpportunity = useMemo(() => {
+    return getFlyerUpsell({ sizeKey, quantity, twoSided, paperWeightKey, designOption } as PriceInputFlyer);
+  }, [sizeKey, quantity, twoSided, paperWeightKey, designOption]);
 
   // Auto-capture abandoned carts
   const cartData = useMemo(() => ({
@@ -214,6 +220,30 @@ export default function FlyerConfigurator({ productSlug, productImage }: Props) 
                     </div>
                   </div>
                 </div>
+                
+                {upsellOpportunity && (
+                  <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors" onClick={() => setQuantity(upsellOpportunity.requiredQty)}>
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 mt-0.5">
+                        <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                          <TrendingUp className="w-4 h-4 text-white" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-amber-900 mb-1">💡 Recomandare Smart:</p>
+                        <p className="text-sm text-amber-800">
+                          Dacă alegi <strong>{upsellOpportunity.requiredQty} buc</strong>, prețul scade la <strong>{formatMoneyDisplay(upsellOpportunity.newUnitPrice)}/buc</strong>.
+                        </p>
+                        <p className="text-xs text-amber-700 mt-1">
+                          Economisești {upsellOpportunity.discountPercent}% la prețul per unitate!
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <span className="text-xs font-bold text-amber-600">-{upsellOpportunity.discountPercent}%</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </AccordionStep>
 
               <AccordionStep stepNumber={3} title="Grafică" summary={designOption === 'upload' ? 'Grafică proprie' : 'Vreau grafică'} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
