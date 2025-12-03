@@ -79,8 +79,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       return { 
         pret_total: res.finalPrice, 
         pret_unitar: res.pricePerSqm,
-        suprafata_mp: res.totalSqm,
-        info: `Window Graphics folie PVC 140μ perforată (${res.totalSqm.toFixed(2)} mp × ${res.pricePerSqm} lei/mp)${args.design_pro ? ' + Design Pro 100 lei' : ''}`
+        suprafata_mp: res.total_sqm,
+        info: `Window Graphics folie PVC 140μ perforată (${res.total_sqm.toFixed(2)} mp × ${res.pricePerSqm} lei/mp)${args.design_pro ? ' + Design Pro 100 lei' : ''}`
       };
     }
 
