@@ -344,6 +344,27 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   {
     type: "function",
     function: {
+      name: "calculate_fonduri_eu_price",
+      description: "Calculează preț pentru Kit Vizibilitate Fonduri Europene (panouri, autocolante, logo). Configurația include comunicat presă, panou principal, autocolante laterale, panou temporar, placă permanentă.",
+      parameters: {
+        type: "object",
+        properties: {
+          comunicat: { type: "string", description: "Tip comunicat: none, A4, A3" },
+          panou_principal_size: { type: "string", description: "Dimensiune panou: 60x40, 80x60, 100x70, 120x80" },
+          panou_principal_material: { type: "string", description: "Material: alucobond (default), forex_5mm, forex_10mm" },
+          autocolante_size: { type: "string", description: "Dimensiune autocolante: none, 40x20, 50x25, 60x30" },
+          panou_temporar: { type: "string", description: "Panou temporar: none, A2, 80x50, 200x150, 300x200" },
+          placa_permanenta: { type: "string", description: "Placă permanentă: none, A2, 80x50, 150x100" },
+          add_logo: { type: "boolean", description: "Adaugă logo (+30 lei)" },
+          funding_type: { type: "string", description: "Tip fonduri: pnrr, regio, nationale" }
+        },
+        required: ["panou_principal_size"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "check_order_status",
       description: "Verifică statusul unei comenzi și returnează link-ul de tracking DPD.",
       parameters: {

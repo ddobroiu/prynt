@@ -8,6 +8,15 @@ import {
   calculateRollupPrice,
   calculateCanvasPrice,
   calculateTapetPrice,
+  calculateAutocolantePrice,
+  calculatePosterPrice,
+  calculatePliantePrice,
+  calculatePlexiglassPrice,
+  calculatePVCForexPrice,
+  calculateAlucobondPrice,
+  calculatePolipropilenaPrice,
+  calculateCartonPrice,
+  calculateFonduriEUPrice,
 } from "@/lib/pricing";
 
 type ToolContext = {
@@ -54,17 +63,50 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
-    // 2. CALCUL PREȚ FLYER / PRINT STANDARD
+    // 2. CALCUL PREȚ FLYER / AFIȘE / PLIANTE
     // ============================================================
     else if (fnName === "calculate_standard_print_price") {
-      const res = calculateFlyerPrice({
-        sizeKey: args.size || "A6",
-        quantity: args.quantity,
-        twoSided: args.two_sided ?? true,
-        paperWeightKey: "135",
-        designOption: "upload",
-      });
-      return { pret_total: res.finalPrice };
+      // Verificăm tipul de produs
+      if (args.product_type === "afis") {
+        const res = calculatePosterPrice({
+          sizeKey: args.size || "A3",
+          quantity: args.quantity,
+          paperKey: args.paper_type || "blueback",
+          designOption: "upload",
+        });
+        return { 
+          pret_total: res.finalPrice,
+          pret_unitar: res.pricePerUnit,
+          info: `Afișe ${args.size} pe ${args.paper_type || 'Blueback'}`
+        };
+      } else if (args.product_type === "pliant") {
+        const res = calculatePliantePrice({
+          sizeKey: args.size || "A5",
+          quantity: args.quantity,
+          paperKey: args.paper_type || "130",
+          foldType: args.fold_type || "2",
+          designOption: "upload",
+        });
+        return { 
+          pret_total: res.finalPrice,
+          pret_unitar: res.pricePerUnit,
+          info: `Pliante ${args.size} ${args.fold_type || '2'} falduri pe hârtie ${args.paper_type || '130g'}`
+        };
+      } else {
+        // Flyer implicit
+        const res = calculateFlyerPrice({
+          sizeKey: args.size || "A6",
+          quantity: args.quantity,
+          twoSided: args.two_sided ?? true,
+          paperWeightKey: "135",
+          designOption: "upload",
+        });
+        return { 
+          pret_total: res.finalPrice,
+          pret_unitar: res.pricePerUnit,
+          info: `Flyere ${args.size} ${args.two_sided ? 'față-verso' : 'o față'}`
+        };
+      }
     }
 
     // ============================================================
@@ -151,6 +193,112 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
+    // 4.6. CALCUL PREȚ AUTOCOLANTE
+    // ============================================================
+    else if (fnName === "calculate_roll_print_price" && args.product_type === "autocolant") {
+      const res = calculateAutocolantePrice({
+        width_cm: args.width_cm || 0,
+        height_cm: args.height_cm || 0,
+        quantity: args.quantity,
+        materialKey: args.material_subtype || "oracal_651",
+        printType: args.options?.diecut === false ? "print_only" : "print_cut",
+        laminated: args.options?.laminated || false,
+        designOption: args.design_pro ? "pro" : "upload",
+      });
+
+      return { 
+        pret_total: res.finalPrice,
+        pret_unitar: res.pricePerUnit,
+        suprafata_mp: res.totalSqm,
+        info: `Autocolante ${args.width_cm}×${args.height_cm} cm (${res.totalSqm.toFixed(2)} mp) pe ${args.material_subtype || 'Oracal 651'}${args.options?.laminated ? ' + Laminare' : ''}${args.options?.diecut === false ? ' Print Only' : ' Print+Cut'}${args.design_pro ? ' + Design Pro 30 lei' : ''}`
+      };
+    }
+
+    // ============================================================
+    // 4.7. CALCUL PREȚ MATERIALE RIGIDE
+    // ============================================================
+    else if (fnName === "calculate_rigid_price") {
+      const { material_type, width_cm, height_cm, quantity, thickness_mm, print_double, color, subtype } = args;
+
+      if (material_type === "plexiglass") {
+        const res = calculatePlexiglassPrice({
+          width_cm: width_cm || 0,
+          height_cm: height_cm || 0,
+          quantity: quantity || 1,
+          thickness: thickness_mm || 3,
+          printType: print_double ? "both" : subtype === "transparent" ? "front" : "white",
+          designOption: args.design_pro ? "pro" : "upload",
+        });
+        return {
+          pret_total: res.finalPrice,
+          pret_unitar: res.pricePerUnit,
+          suprafata_mp: res.totalSqm,
+          info: `Plexiglas ${subtype || 'alb'} ${thickness_mm}mm (${res.totalSqm.toFixed(2)} mp)${print_double ? ' print față-verso' : ''}${args.design_pro ? ' + Design Pro 60 lei' : ''}`
+        };
+      } else if (material_type === "forex") {
+        const res = calculatePVCForexPrice({
+          width_cm: width_cm || 0,
+          height_cm: height_cm || 0,
+          quantity: quantity || 1,
+          thickness: thickness_mm || 3,
+          designOption: args.design_pro ? "pro" : "upload",
+        });
+        return {
+          pret_total: res.finalPrice,
+          pret_unitar: res.pricePerUnit,
+          suprafata_mp: res.totalSqm,
+          info: `PVC Forex ${thickness_mm}mm (${res.totalSqm.toFixed(2)} mp)${args.design_pro ? ' + Design Pro 50 lei' : ''}`
+        };
+      } else if (material_type === "alucobond") {
+        const res = calculateAlucobondPrice({
+          width_cm: width_cm || 0,
+          height_cm: height_cm || 0,
+          quantity: quantity || 1,
+          thickness: thickness_mm || 3,
+          color: color || "alb",
+          designOption: args.design_pro ? "pro" : "upload",
+        });
+        return {
+          pret_total: res.finalPrice,
+          pret_unitar: res.pricePerUnit,
+          suprafata_mp: res.totalSqm,
+          info: `Alucobond ${thickness_mm}mm culoare ${color || 'alb'} (${res.totalSqm.toFixed(2)} mp)${args.design_pro ? ' + Design Pro 60 lei' : ''}`
+        };
+      } else if (material_type === "polipropilena") {
+        const res = calculatePolipropilenaPrice({
+          width_cm: width_cm || 0,
+          height_cm: height_cm || 0,
+          quantity: quantity || 1,
+          thickness: thickness_mm || 3,
+          designOption: args.design_pro ? "pro" : "upload",
+        });
+        return {
+          pret_total: res.finalPrice,
+          pret_unitar: res.pricePerUnit,
+          suprafata_mp: res.totalSqm,
+          info: `Polipropilenă ${thickness_mm}mm (${res.totalSqm.toFixed(2)} mp)${args.design_pro ? ' + Design Pro 50 lei' : ''}`
+        };
+      } else if (material_type === "carton") {
+        const res = calculateCartonPrice({
+          width_cm: width_cm || 0,
+          height_cm: height_cm || 0,
+          quantity: quantity || 1,
+          cartonType: subtype || "ondulat_E",
+          printBothSides: print_double || false,
+          designOption: args.design_pro ? "pro" : "upload",
+        });
+        return {
+          pret_total: res.finalPrice,
+          pret_unitar: res.pricePerUnit,
+          suprafata_mp: res.totalSqm,
+          info: `Carton ${subtype || 'ondulat E'} (${res.totalSqm.toFixed(2)} mp)${print_double ? ' print față-verso' : ''}${args.design_pro ? ' + Design Pro 50 lei' : ''}`
+        };
+      }
+
+      return { error: "Tip material rigid necunoscut" };
+    }
+
+    // ============================================================
     // 5. CALCUL PREȚ ROLLUP BANNER
     // ============================================================
     else if (fnName === "calculate_rollup_price") {
@@ -167,7 +315,34 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
-    // 5. VERIFICARE STATUS COMANDĂ + LINK DPD
+    // 5.5. CALCUL PREȚ FONDURI EU
+    // ============================================================
+    else if (fnName === "calculate_fonduri_eu_price") {
+      // Construim obiectul selections pentru calculateFonduriEUPrice
+      const selections: Record<string, string> = {
+        comunicat: args.comunicat || "none",
+        panouPrincipal: args.panou_principal_size || "none",
+        materialPanouPrincipal: args.panou_principal_material || "alucobond",
+        autocolanteLaterale: args.autocolante_size || "none",
+        panouTemporar: args.panou_temporar || "none",
+        placaPermanenta: args.placa_permanenta || "none",
+      };
+
+      // Adăugăm logo dacă e cazul
+      if (args.add_logo) {
+        selections.logo = "yes";
+      }
+
+      const res = calculateFonduriEUPrice({ selections });
+
+      return {
+        pret_total: res.finalPrice,
+        info: `Kit Vizibilitate Fonduri ${args.funding_type?.toUpperCase() || 'UE'}: Panou ${args.panou_principal_size} pe ${args.panou_principal_material || 'Alucobond'}${args.autocolante_size && args.autocolante_size !== 'none' ? ` + Autocolante ${args.autocolante_size}` : ''}${args.add_logo ? ' + Logo' : ''}`
+      };
+    }
+
+    // ============================================================
+    // 6. VERIFICARE STATUS COMANDĂ + LINK DPD
     // ============================================================
     else if (fnName === "check_order_status") {
       const orderNo = parseInt(args.orderNo);
@@ -210,7 +385,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
-    // 6. CĂUTARE CLIENȚI ÎN BAZA DE DATE
+    // 7. CĂUTARE CLIENȚI ÎN BAZA DE DATE
     // ============================================================
     else if (fnName === "search_customers") {
       const { partial_name } = args;
@@ -274,7 +449,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
-    // 7. GENERARE OFERTĂ PDF (CU NUME CLIENT)
+    // 8. GENERARE OFERTĂ PDF (CU NUME CLIENT)
     // ============================================================
     else if (fnName === "generate_offer") {
       console.log("📄 generate_offer called with args:", JSON.stringify(args, null, 2));
@@ -389,7 +564,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
-    // 8. CREARE COMANDĂ FERMĂ
+    // 9. CREARE COMANDĂ FERMĂ
     // ============================================================
     else if (fnName === "create_order") {
       const { customer_details, items } = args;
