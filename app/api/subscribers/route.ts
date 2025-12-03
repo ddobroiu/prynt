@@ -6,7 +6,8 @@ export async function POST(req: Request) {
   try {
     const { email, source } = await req.json();
     const em = String(email || "").trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+    // FIX: Regex mai robust pentru email validation
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*@[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(em)) {
       return NextResponse.json({ ok: false, message: "Email invalid" }, { status: 400 });
     }
 

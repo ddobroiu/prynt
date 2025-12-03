@@ -54,7 +54,7 @@ export default function AdminSidebar() {
         <div className="flex flex-col h-full p-4 sm:p-6 pb-safe">
           {/* Logo Area */}
           <div className="mb-10 px-2 flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <div className="h-8 w-8 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
               <span className="font-bold text-white text-lg">P</span>
             </div>
             <div>

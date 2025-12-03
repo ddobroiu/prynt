@@ -29,7 +29,7 @@ export default function AssistantSection() {
             */}
             <div className="flex-1 w-full max-w-xl mx-auto lg:mx-0 relative">
                {/* Glow effect behind */}
-               <div className="absolute -inset-4 bg-gradient-to-r from-indigo-200 to-blue-100 rounded-[40px] blur-3xl opacity-40 -z-10"></div>
+               <div className="absolute -inset-4 bg-linear-to-r from-indigo-200 to-blue-100 rounded-[40px] blur-3xl opacity-40 -z-10"></div>
                
                <div className="relative rounded-[32px] overflow-hidden bg-white/80 backdrop-blur-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-white/50 ring-1 ring-slate-900/5">
                   {/* Header Minimalist */}
@@ -68,7 +68,7 @@ export default function AssistantSection() {
 
                 <h2 className="text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight tracking-tight">
                   Colegul tău digital, <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">disponibil non-stop.</span>
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-500">disponibil non-stop.</span>
                 </h2>
 
                 <p className="text-lg text-slate-500 max-w-lg mx-auto lg:mx-0 leading-relaxed font-light">

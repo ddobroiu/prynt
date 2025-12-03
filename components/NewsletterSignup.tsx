@@ -101,9 +101,9 @@ export default function NewsletterSignup({ source = 'footer', configuratorId, co
   }
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-2xl p-6">
+    <div className="bg-linear-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-2xl p-6">
       <div className="flex items-start gap-4 mb-4">
-        <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
+        <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center shrink-0">
           <Mail className="w-6 h-6 text-indigo-600" />
         </div>
         <div>

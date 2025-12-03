@@ -179,7 +179,8 @@ export default function CheckoutPage() {
 
   function validate(): { ok: boolean; errs: Record<string, string> } {
     const e: Record<string, string> = {};
-    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // FIX: Regex mai robust pentru email validation
+    const emailRe = /^[a-zA-Z0-9][a-zA-Z0-9._-]*@[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const telRe = /^[0-9+()\-\s]{7,}$/;
 
     if (!address.nume_prenume.trim()) e["address.nume_prenume"] = "Nume și prenume obligatoriu";

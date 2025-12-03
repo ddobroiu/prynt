@@ -14,8 +14,8 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // FIX: Email validation cu regex mai robust
+    const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._-]*@[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json({
         success: false,
