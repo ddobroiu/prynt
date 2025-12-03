@@ -31,7 +31,7 @@ export default function AssistantSection() {
                {/* Glow effect behind */}
                <div className="absolute -inset-4 bg-linear-to-r from-indigo-200 to-blue-100 rounded-[40px] blur-3xl opacity-40 -z-10"></div>
                
-               <div className="relative rounded-[32px] overflow-hidden bg-white/80 backdrop-blur-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-white/50 ring-1 ring-slate-900/5">
+               <div className="relative rounded-4xl overflow-hidden bg-white/80 backdrop-blur-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-white/50 ring-1 ring-slate-900/5">
                   {/* Header Minimalist */}
                   <div className="h-14 bg-white/50 border-b border-slate-100 flex items-center justify-between px-6">
                      <div className="flex items-center gap-2">

@@ -284,16 +284,14 @@ export default function HeroCarousel() {
                       </div>
                  </div>
                  
-                 <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+                 <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
                     {HERO_ITEMS.map((slide, idx) => (
                         <button 
                           key={slide.id} 
                           onClick={() => setActiveSlide(idx)}
-                          className={`min-w-11 min-h-11 p-3 rounded-full transition-all duration-300 flex items-center justify-center ${idx === activeSlide ? 'bg-indigo-600' : 'bg-slate-300 hover:bg-slate-400'}`}
+                          className={`transition-all duration-300 rounded-full ${idx === activeSlide ? 'w-8 h-2 bg-indigo-600' : 'w-2 h-2 bg-slate-300 hover:bg-slate-400'}`}
                           aria-label={`Mergi la slide-ul ${idx + 1}: ${slide.title}`}
-                        >
-                          <div className={`rounded-full transition-all duration-300 ${idx === activeSlide ? 'w-6 h-2 bg-white' : 'w-2 h-2 bg-slate-600'}`} />
-                        </button>
+                        />
                     ))}
                 </div>
              </div>
