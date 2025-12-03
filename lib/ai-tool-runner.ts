@@ -7,6 +7,7 @@ import {
   calculateWindowGraphicsPrice,
   calculateRollupPrice,
   calculateCanvasPrice,
+  calculateTapetPrice,
 } from "@/lib/pricing";
 
 type ToolContext = {
@@ -130,6 +131,26 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
+    // 4.5. CALCUL PREȚ TAPET
+    // ============================================================
+    else if (fnName === "calculate_roll_print_price" && args.product_type === "tapet") {
+      const res = calculateTapetPrice({
+        width_cm: args.width_cm || 0,
+        height_cm: args.height_cm || 0,
+        quantity: args.quantity,
+        want_adhesive: args.options?.adhesive || false,
+        designOption: args.design_pro ? "pro" : "upload",
+      });
+
+      return { 
+        pret_total: res.finalPrice,
+        pret_unitar: res.pricePerUnit,
+        suprafata_mp: res.totalSqm,
+        info: `Tapet ${args.width_cm}×${args.height_cm} cm (${res.totalSqm.toFixed(2)} mp total)${args.options?.adhesive ? ' + Adeziv auto-adeziv (+10%)' : ''}${args.design_pro ? ' + Design Pro 200 lei' : ''}`
+      };
+    }
+
+    // ============================================================
     // 5. CALCUL PREȚ ROLLUP BANNER
     // ============================================================
     else if (fnName === "calculate_rollup_price") {
@@ -189,7 +210,71 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
-    // 6. GENERARE OFERTĂ PDF (CU NUME CLIENT)
+    // 6. CĂUTARE CLIENȚI ÎN BAZA DE DATE
+    // ============================================================
+    else if (fnName === "search_customers") {
+      const { partial_name } = args;
+      
+      if (!partial_name || partial_name.length < 2) {
+        return { 
+          success: false, 
+          customers: [],
+          message: "Numele trebuie să conțină minim 2 caractere pentru căutare." 
+        };
+      }
+
+      try {
+        // Căutăm în Order după numele din câmpul billing
+        const orders = await prisma.order.findMany({
+          where: {
+            billing: {
+              path: ['name'],
+              string_contains: partial_name
+            }
+          },
+          select: {
+            billing: true
+          },
+          distinct: ['billing'],
+          take: 5 // Limităm la 5 rezultate
+        });
+
+        // Extragem numele unice
+        const uniqueNames = new Set<string>();
+        orders.forEach(order => {
+          const billing = order.billing as any;
+          if (billing?.name) {
+            uniqueNames.add(billing.name);
+          }
+        });
+
+        const customers = Array.from(uniqueNames);
+
+        if (customers.length > 0) {
+          return {
+            success: true,
+            customers: customers,
+            message: `Am găsit ${customers.length} clienți cu numele similar. Îți sugerez să confirmi: ${customers.join(', ')}`
+          };
+        } else {
+          return {
+            success: true,
+            customers: [],
+            message: "Nu am găsit clienți existenți cu acest nume în baza de date."
+          };
+        }
+      } catch (error: any) {
+        console.error("Eroare căutare clienți:", error);
+        return {
+          success: false,
+          customers: [],
+          message: "Eroare la căutarea în baza de date."
+        };
+      }
+    }
+
+    // ============================================================
+    // 7. GENERARE OFERTĂ PDF (CU NUME CLIENT)
     // ============================================================
     else if (fnName === "generate_offer") {
       console.log("📄 generate_offer called with args:", JSON.stringify(args, null, 2));
@@ -304,7 +389,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
-    // 7. CREARE COMANDĂ FERMĂ
+    // 8. CREARE COMANDĂ FERMĂ
     // ============================================================
     else if (fnName === "create_order") {
       const { customer_details, items } = args;
