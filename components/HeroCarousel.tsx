@@ -146,22 +146,6 @@ export default function HeroCarousel() {
   return (
     <section className="relative w-full bg-white overflow-hidden pt-4 pb-12 lg:pt-16 lg:pb-24 border-b border-slate-200">
       <div className="container mx-auto px-4 relative z-10">
-        
-        {/* NAVIGARE DESKTOP (Săgeți) - Ascunse pe mobil */}
-        <button 
-            onClick={prevSlide} 
-            className="absolute left-8 top-1/2 z-30 p-3 rounded-full bg-white/80 hover:bg-white shadow-lg border border-slate-100 text-slate-600 hover:text-indigo-600 transition-all hidden lg:block"
-            aria-label="Previous Slide"
-        >
-            <ChevronLeft size={24} />
-        </button>
-        <button 
-            onClick={nextSlide} 
-            className="absolute right-8 top-1/2 z-30 p-3 rounded-full bg-white/80 hover:bg-white shadow-lg border border-slate-100 text-slate-600 hover:text-indigo-600 transition-all hidden lg:block"
-            aria-label="Next Slide"
-        >
-            <ChevronRight size={24} />
-        </button>
 
         {/* LAYOUT */}
         <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
@@ -260,7 +244,24 @@ export default function HeroCarousel() {
              </div>
 
              {/* --- VARIANTA DESKTOP: SINGLE SLIDE (NESCHIMBATĂ) --- */}
-             <div className="hidden lg:block h-[550px]">
+             <div className="hidden lg:block h-[550px] relative">
+                 
+                 {/* SĂGEȚI POZIȚIONARE RELATIVĂ LA IMAGINEA DESKTOP */}
+                 <button 
+                     onClick={prevSlide} 
+                     className="absolute -left-6 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 shadow-2xl text-white transition-all"
+                     aria-label="Previous Slide"
+                 >
+                     <ChevronLeft size={20} />
+                 </button>
+                 <button 
+                     onClick={nextSlide} 
+                     className="absolute -right-6 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 shadow-2xl text-white transition-all"
+                     aria-label="Next Slide"
+                 >
+                     <ChevronRight size={20} />
+                 </button>
+                 
                  <div key={currentSlide.id} className="relative w-full h-full animate-in fade-in duration-700">
                       <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border-4 border-white group cursor-pointer bg-slate-100">
                          <Link href={currentSlide.link} className="block w-full h-full">
