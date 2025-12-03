@@ -1,11 +1,13 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
+import { useToast } from "@/components/ToastProvider";
 import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
 import SmartNewsletterPopup from "./SmartNewsletterPopup";
+import RelatedProducts from "./RelatedProducts";
 import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture";
 import { QA } from "@/types";
 import { 
@@ -104,10 +106,9 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
     }
   }, [GALLERY, activeImage]);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [toastVisible, setToastVisible] = useState(false);
-  const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
   const [userEmail, setUserEmail] = useState<string>('');
+  const toast = useToast();
 
   // Helper: Check validity of material for current size
   function isMaterialVisibleForSize(mKey: string, sKey: string) {
@@ -162,8 +163,7 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
 
   function handleAddToCart() {
     if (displayedTotal <= 0) {
-      setErrorToast("Combinație invalidă.");
-      setTimeout(() => setErrorToast(null), 1600);
+      toast.warning("Combinație invalidă.");
       return;
     }
     
@@ -186,8 +186,7 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
         artworkUrl,
       },
     });
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 1600);
+    toast.success("Produs adăugat în coș");
   }
 
   const summaryStep1 = `${AFISE_CONSTANTS.SIZES.find(s => s.key === size)?.label}, ${quantity} buc.`;
@@ -207,9 +206,6 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
   
   return (
     <main className="bg-gray-50 min-h-screen">
-      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">Produs adăugat în coș</div>
-      {errorToast && <div className={`toast-error opacity-100 translate-y-0`} aria-live="assertive">{errorToast}</div>}
-      
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div className="lg:sticky top-24 h-max space-y-8">
@@ -310,6 +306,9 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
         onSubscribe={(email) => setUserEmail(email)}
         delay={30}
       />
+
+      {/* Related Products Section */}
+      <RelatedProducts category="afise" />
     </main>
   );
 }

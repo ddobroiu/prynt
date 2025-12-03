@@ -3,6 +3,7 @@
 "use client";
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useCart } from "@/components/CartContext";
+import { useToast } from "@/components/ToastProvider";
 import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon, PlayCircle, TrendingUp, Percent } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -13,6 +14,7 @@ import DynamicBannerPreview from "./DynamicBannerPreview";
 import ArtworkRatioPreview from "./ArtworkRatioPreview";
 import SmartNewsletterPopup from "./SmartNewsletterPopup";
 import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture"; 
+import RelatedProducts from "./RelatedProducts";
 import { 
   calculateBannerPrice, 
   getBannerUpsell, // <--- IMPORT NOU: Logica centralizată
@@ -178,9 +180,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
   const [textDesign, setTextDesign] = useState<string>("");
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [toastVisible, setToastVisible] = useState(false);
-  const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
+  const toast = useToast();
 
   // Email marketing hooks
   const [userEmail, setUserEmail] = useState<string>("");
@@ -294,13 +295,11 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
   function handleAddToCart() {
     if (!input.width_cm || !input.height_cm) {
-      setErrorToast("Te rugăm să completezi lungimea și înălțimea.");
-      setTimeout(() => setErrorToast(null), 1600);
+      toast.warning("Te rugăm să completezi lungimea și înălțimea.");
       return;
     }
     if (displayedTotal <= 0) {
-      setErrorToast("Prețul trebuie calculat înainte de a adăuga în coș.");
-      setTimeout(() => setErrorToast(null), 1600);
+      toast.warning("Prețul trebuie calculat înainte de a adăuga în coș.");
       return;
     }
     const unitPrice = roundMoney(displayedTotal / input.quantity);
@@ -328,8 +327,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         artworkUrl, 
       },
     });
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 1600);
   }
 
   useEffect(() => {
@@ -351,12 +348,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
   return (
     <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
-      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
-        Produs adăugat în coș
-      </div>
-      
       {/* Container cu padding responsive */}
-      <div className="container mx-auto px-4 py-6 lg:py-16">
+      <div className="container mx-auto px-4 py-6 lg:py-16">{
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           
           {/* STÂNGA - ZONA VIZUALĂ */}
@@ -652,6 +645,9 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         onSubscribe={(email) => setUserEmail(email)}
         delay={30}
       />
+
+      {/* Related Products Section */}
+      <RelatedProducts category="bannere" />
     </main>
   );
 }

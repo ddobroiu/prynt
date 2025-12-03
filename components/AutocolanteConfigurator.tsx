@@ -1,12 +1,14 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
+import { useToast } from "@/components/ToastProvider";
 import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { usePathname, useRouter } from "next/navigation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
 import SmartNewsletterPopup from "./SmartNewsletterPopup";
+import RelatedProducts from "./RelatedProducts";
 import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture";
 import { QA } from "@/types";
 import { 
@@ -130,10 +132,9 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
   const [textDesign, setTextDesign] = useState<string>("");
   
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [toastVisible, setToastVisible] = useState(false);
-  const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
   const [userEmail, setUserEmail] = useState<string>('');
+  const toast = useToast();
 
   // Pricing
   const priceData = useMemo(() => calculateAutocolantePrice(input), [input]);
@@ -174,10 +175,12 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
 
   function handleAddToCart() {
     if (!input.width_cm || !input.height_cm) {
-      setErrorToast("Introduceți dimensiunile."); setTimeout(() => setErrorToast(null), 1600); return;
+      toast.warning("Te rugăm să introduci dimensiunile.");
+      return;
     }
     if (displayedTotal <= 0) {
-      setErrorToast("Prețul trebuie calculat."); setTimeout(() => setErrorToast(null), 1600); return;
+      toast.warning("Prețul trebuie calculat.");
+      return;
     }
 
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
@@ -203,7 +206,6 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
         artworkUrl,
       },
     });
-    setToastVisible(true); setTimeout(() => setToastVisible(false), 1600);
   }
 
   useEffect(() => {
@@ -342,6 +344,9 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
         onSubscribe={(email) => setUserEmail(email)}
         delay={30}
       />
+
+      {/* Related Products Section */}
+      <RelatedProducts category="autocolante" />
     </main>
   );
 }

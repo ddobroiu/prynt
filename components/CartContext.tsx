@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useToast } from "./ToastProvider";
 
 /**
  * Structura unui produs din coș
@@ -61,6 +62,7 @@ function normalizeItem(raw: Partial<CartItem> & { price?: number; id?: string })
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const toast = useToast();
 
   // 1. Încărcare din LocalStorage
   useEffect(() => {
@@ -115,15 +117,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           ...copy[idx],
           quantity: copy[idx].quantity + item.quantity,
         };
+        toast.success('Cantitate actualizată în coș!');
         return copy;
       }
 
+      toast.success('Produs adăugat în coș!');
       return [...prev, item];
     });
   }
 
   function removeItem(id: string) {
     setItems((prev) => prev.filter((i) => i.id !== id));
+    toast.success('Produs șters din coș!');
   }
 
   function updateQuantity(id: string, quantity: number) {
@@ -135,10 +140,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return item;
       })
     );
+    toast.info('Cantitate modificată!');
   }
 
   function clearCart() {
     setItems([]);
+    toast.info('Coș golit!');
   }
 
   const cartTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);

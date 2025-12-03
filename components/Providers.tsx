@@ -4,13 +4,16 @@
 // shares a single cart instance and the header updates live.
 import { CartProvider } from "./CartContext";
 import { SessionProvider } from "next-auth/react";
+import { ToastProvider } from "./ToastProvider";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
-      <CartProvider>
-        {children}
-      </CartProvider>
+      <ToastProvider>
+        <CartProvider>
+          {children}
+        </CartProvider>
+      </ToastProvider>
     </SessionProvider>
   );
 }

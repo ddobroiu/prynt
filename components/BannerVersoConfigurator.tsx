@@ -3,6 +3,7 @@
 "use client";
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useCart } from "@/components/CartContext";
+import { useToast } from "@/components/ToastProvider";
 import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon, PlayCircle, TrendingUp, Percent } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -180,10 +181,9 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   const [textDesignVerso, setTextDesignVerso] = useState<string>(""); 
   
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [toastVisible, setToastVisible] = useState(false);
-  const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
   const [userEmail, setUserEmail] = useState<string>('');
+  const toast = useToast();
 
   const priceData = useMemo(() => calculateBannerVersoPrice(input), [input]);
   const displayedTotal = priceData.finalPrice;
@@ -299,13 +299,11 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
 
   function handleAddToCart() {
     if (!input.width_cm || !input.height_cm) {
-      setErrorToast("Te rugăm să completezi lungimea și înălțimea.");
-      setTimeout(() => setErrorToast(null), 1600);
+      toast.warning("Te rugăm să completezi lungimea și înălțimea.");
       return;
     }
     if (displayedTotal <= 0) {
-      setErrorToast("Prețul trebuie calculat înainte de a adăuga în coș.");
-      setTimeout(() => setErrorToast(null), 1600);
+      toast.warning("Prețul trebuie calculat înainte de a adăuga în coș.");
       return;
     }
     
@@ -345,8 +343,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       currency: "RON",
       metadata,
     });
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 1600);
+    toast.success("Produs adăugat în coș");
   }
 
   useEffect(() => {
@@ -405,9 +402,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
 
   return (
     <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
-      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">
-        Produs adăugat în coș
-      </div>
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           

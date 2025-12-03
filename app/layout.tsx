@@ -3,6 +3,7 @@ import Script from "next/script";
 import Providers from "../components/Providers";
 import ClientLayoutWrapper from "../components/ClientLayoutWrapper";
 import GlobalStructuredData from "../components/GlobalStructuredData";
+import LocalBusinessSchema from "../components/LocalBusinessSchema";
 import DynamicStylesLoader from "../components/DynamicStylesLoader";
 
 export const metadata = {
@@ -74,6 +75,7 @@ export default function RootLayout({
     <html lang="ro" data-theme="light">
       <head>
         <GlobalStructuredData />
+        <LocalBusinessSchema />
         
         {/* DNS Prefetch și Preconnect pentru servicii externe */}
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />

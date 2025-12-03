@@ -6,6 +6,7 @@ import ReturningCustomerLogin from "@/components/ReturningCustomerLogin";
 import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "../../components/CartContext";
+import { useToast } from "@/components/ToastProvider";
 import { ShieldCheck, Truck, X, Plus, Minus, CreditCard, Banknote, Building2, MapPin, AlertCircle, Package } from "lucide-react";
 import CheckoutForm from "./CheckoutForm";
 import DeliveryInfo from "@/components/DeliveryInfo";
@@ -53,6 +54,7 @@ type Billing = {
 export default function CheckoutPage() {
   const { data: session } = useSession();
   const { items = [], removeItem, isLoaded } = useCart();
+  const toast = useToast();
   
   // FIX: Race condition prevention cu ref atomic
   const isPlacingOrder = useRef(false);
@@ -224,6 +226,7 @@ export default function CheckoutPage() {
     const { ok, errs } = validate();
     if (!ok) {
       setErrors(errs);
+      toast.warning('Te rugăm să completezi toate câmpurile obligatorii!');
       const firstKey = Object.keys(errs)[0];
       const el = document.querySelector<HTMLElement>(`[data-field="${firstKey}"]`);
       if (el) {
@@ -318,7 +321,7 @@ export default function CheckoutPage() {
       }, 0);
     } catch (err: any) {
       console.error("[placeOrder] error:", err?.message || err);
-      alert(err?.message || "A apărut o eroare. Reîncearcă.");
+      toast.error(err?.message || "A apărut o eroare. Reîncearcă.");
       setShowEmbed(false);
     } finally {
       setPlacing(false);

@@ -1,6 +1,7 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
+import { useToast } from "@/components/ToastProvider";
 import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import FaqAccordion from "./FaqAccordion";
@@ -103,9 +104,8 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
   const [textDesign, setTextDesign] = useState<string>("");
   
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [toastVisible, setToastVisible] = useState(false);
-  const [errorToast, setErrorToast] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
+  const toast = useToast();
 
   // Pricing
   const priceData = useMemo(() => calculatePolipropilenaPrice(input), [input]);
@@ -135,15 +135,14 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
 
   function handleAddToCart() {
     if (!input.width_cm || !input.height_cm) {
-      setErrorToast("Introduceți dimensiunile."); setTimeout(() => setErrorToast(null), 1600); return;
+      toast.warning("Introduceți dimensiunile."); return;
     }
     if (input.width_cm > POLIPROPILENA_CONSTANTS.LIMITS.MAX_WIDTH || input.height_cm > POLIPROPILENA_CONSTANTS.LIMITS.MAX_HEIGHT) {
-        setErrorToast(`Dimensiune maximă: ${POLIPROPILENA_CONSTANTS.LIMITS.MAX_WIDTH}x${POLIPROPILENA_CONSTANTS.LIMITS.MAX_HEIGHT} cm`); 
-        setTimeout(() => setErrorToast(null), 2000); 
+        toast.warning(`Dimensiune maximă: ${POLIPROPILENA_CONSTANTS.LIMITS.MAX_WIDTH}x${POLIPROPILENA_CONSTANTS.LIMITS.MAX_HEIGHT} cm`); 
         return;
     }
     if (displayedTotal <= 0) {
-      setErrorToast("Prețul trebuie calculat."); setTimeout(() => setErrorToast(null), 1600); return;
+      toast.warning("Prețul trebuie calculat."); return;
     }
 
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
@@ -169,7 +168,6 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
         artworkUrl,
       },
     });
-    setToastVisible(true); setTimeout(() => setToastVisible(false), 1600);
   }
 
   useEffect(() => {
@@ -184,9 +182,6 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
 
   return (
     <main className="bg-gray-50 min-h-screen">
-      <div id="added-toast" className={`toast-success ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`} aria-live="polite">Produs adăugat în coș</div>
-      {errorToast && <div className={`toast-error opacity-100 translate-y-0`} aria-live="assertive">{errorToast}</div>}
-      
       <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div className="lg:sticky top-24 h-max space-y-8">
