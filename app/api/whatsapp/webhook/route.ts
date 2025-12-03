@@ -354,7 +354,39 @@ export async function POST(req: Request) {
                options.push({ id: "search_judet", title: "Alt județ" });
                
                sendResult = await sendInteractiveButtons(from, replyText.replace("||REQUEST: JUDET||", "").trim(), options);
-            } 
+            }
+            // Caz 1.5: Tag-ul ||OPTIONS: [...]||
+            else if (replyText.includes("||OPTIONS:")) {
+               const optionsMatch = replyText.match(/\|\|OPTIONS:\s*(\[.*?\])\|\|/);
+               if (optionsMatch) {
+                  try {
+                     const optionsArray = JSON.parse(optionsMatch[1]);
+                     const cleanText = replyText.replace(/\|\|OPTIONS:.*?\|\|/g, "").trim();
+                     
+                     // Limitează la primele 3 opțiuni (limită WhatsApp pentru butoane)
+                     const buttons = optionsArray.slice(0, 3).map((opt: string, idx: number) => ({
+                        id: `opt_${idx}`,
+                        title: opt.length > 20 ? opt.substring(0, 20) : opt
+                     }));
+                     
+                     // Dacă sunt mai mult de 3 opțiuni, adaugă buton "Mai multe"
+                     if (optionsArray.length > 3) {
+                        buttons.pop();
+                        buttons.push({ id: 'more_options', title: 'Mai multe...' });
+                        // Trimite lista completă în mesaj
+                        const allOptions = optionsArray.join(", ");
+                        sendResult = await sendInteractiveButtons(from, `${cleanText}\n\n📋 Toate: ${allOptions}`, buttons);
+                     } else {
+                        sendResult = await sendInteractiveButtons(from, cleanText, buttons);
+                     }
+                  } catch (e) {
+                     console.error("Eroare parsare ||OPTIONS||:", e);
+                     sendResult = await sendWhatsAppMessage(from, replyText.replace(/\|\|OPTIONS:.*?\|\|/g, "").trim());
+                  }
+               } else {
+                  sendResult = await sendWhatsAppMessage(from, replyText);
+               }
+            }
             // Caz 2: Întrebări de tip "Da/Nu"
             else if (
                 lowerReply.includes("?") && 

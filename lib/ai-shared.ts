@@ -276,14 +276,16 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
         type: "object",
         properties: {
           product_type: { type: "string", enum: ["autocolant", "canvas", "tapet"] },
-          width_cm: { type: "number" },
-          height_cm: { type: "number" },
+          width_cm: { type: "number", description: "Lățime în cm (doar pentru Fără Ramă)" },
+          height_cm: { type: "number", description: "Înălțime în cm (doar pentru Fără Ramă)" },
           quantity: { type: "number" },
+          framed_size: { type: "string", description: "Dimensiune cu ramă (ex: '60x90'). Dacă este setat, înseamnă Cu Ramă." },
+          design_pro: { type: "boolean", description: "Dacă clientul dorește Design Pro (+40 lei pentru Canvas)" },
           material_subtype: { type: "string" },
           canvas_edge: { type: "string" },
           options: { type: "object", properties: { laminated: {type:"boolean"}, diecut: {type:"boolean"}, adhesive: {type:"boolean"} } }
         },
-        required: ["product_type", "width_cm", "height_cm", "quantity"]
+        required: ["product_type", "quantity"]
       },
     },
   },
@@ -551,9 +553,21 @@ IMPORTANT pentru generate_offer:
 ══════════════════════════════════════════════════════════════════
 REGULI DE INTERACȚIUNE
 ══════════════════════════════════════════════════════════════════
-- **ÎNTREBĂRI SCURTE, PE RÂND**: Nu cere toate informațiile deodată! Pune câte o întrebare simplă și așteaptă răspunsul.
-- **ADAPTARE LA CONFIGURATOR**: Fiecare produs are parametri diferiți - pune doar întrebările relevante pentru produsul respectiv.
-- **CONVERSAȚIE NATURALĂ**: Fii concis și direct. Evită liste lungi de întrebări.
+- **CÂTE O ÎNTREBARE PE RÂND**: FOARTE IMPORTANT - pune DOAR o singură întrebare și așteaptă răspunsul! NU lista toate întrebările deodată!
+- **SCURTĂ ȘI DIRECTĂ**: Fiecare mesaj = 1 întrebare simplă. Fără enumerări (1., 2., 3.)
+- **FOLOSEȘTE ||OPTIONS: [...]||**: Când ai opțiuni multiple, afișează-le cu tag-ul ||OPTIONS: ["Opțiune1", "Opțiune2"]||
+- **ADAPTARE LA CONFIGURATOR**: Fiecare produs are parametri diferiți - pune doar întrebările relevante pentru produsul respectiv
+- **CONVERSAȚIE NATURALĂ**: Fii concis și direct
+
+**GREȘIT ❌:**
+"Pentru Canvas cu Ramă, te rog să îmi spui:
+1. Forma dorită: Dreptunghi sau Pătrat?
+2. Dimensiunea dorită
+3. Câte bucăți dorești?"
+
+**CORECT ✅:**
+"Formă?"
+||OPTIONS: ["Dreptunghi", "Pătrat"]||
 
 **FLOW CONVERSAȚIE PENTRU BANNERE:**
 1. "Dimensiuni? (lățime × înălțime)"
@@ -594,11 +608,19 @@ REGULI DE INTERACȚIUNE
 7. → Calculează
 
 **FLOW PENTRU CANVAS:**
-1. "Ce dimensiuni? (lățime × înălțime)"
-2. "Câte bucăți?"
-3. "Tip margini: alb, oglindă sau wrap?"
-4. "Ai grafică sau Design Pro (+40 lei)?"
-5. → Calculează (include automat șasiu lemn 20 lei/ml)
+1. "Cu Ramă sau Fără Ramă?" ||OPTIONS: ["Cu Ramă", "Fără Ramă"]||
+2. Dacă Cu Ramă: 
+   - "Formă?" ||OPTIONS: ["Dreptunghi", "Pătrat"]||
+   - "Dimensiune?" ||OPTIONS: ["20×30", "30×40", "50×70", ...]||
+   - "Câte bucăți?"
+   - "Ai fotografie sau Colaj/Editare?" ||OPTIONS: ["Am fotografie", "Colaj/Editare +40 lei"]||
+   - → **calculate_roll_print_price** cu: {product_type: "canvas", framed_size: "60x90", quantity: 1, design_pro: false}
+3. Dacă Fără Ramă:
+   - "Lățime? (cm)"
+   - "Înălțime? (cm)"
+   - "Câte bucăți?"
+   - "Ai fotografie sau Colaj/Editare?" ||OPTIONS: ["Am fotografie", "Colaj/Editare +40 lei"]||
+   - → **calculate_roll_print_price** cu: {product_type: "canvas", width_cm: 50, height_cm: 70, quantity: 1, design_pro: false}
 
 **FLOW PENTRU TAPET:**
 1. "Ce dimensiuni?"
@@ -692,21 +714,31 @@ Include casetă + print + geantă ✅"
 👤 User: "651"
 🤖 AI: "200 autocolante Ø10cm Oracal 651: **142 lei**"
 
-**EXEMPLU 4 - Canvas (întrebări specifice):**
+**EXEMPLU 4 - Canvas (întrebări scurte, pe rând):**
 👤 User: "canvas"
-🤖 AI: "Dimensiuni?"
+🤖 AI: "Cu Ramă sau Fără Ramă?"
+||OPTIONS: ["Cu Ramă", "Fără Ramă"]||
+
+👤 User: "cu rama"
+🤖 AI: "Formă?"
+||OPTIONS: ["Dreptunghi", "Pătrat"]||
+
+👤 User: "dreptunghi"
+🤖 AI: "Dimensiune?"
+||OPTIONS: ["20×30", "30×40", "30×50", "40×50", "40×60", "50×70", "50×80", "60×80", "60×90", "70×80", "70×100", "80×100", "80×120", "90×120", "100×120"]||
 
 👤 User: "50x70"
 🤖 AI: "Câte bucăți?"
 
 👤 User: "1"
-🤖 AI: "Margini: alb, oglindă sau wrap?"
+🤖 AI: "Ai fotografie sau Colaj/Editare?"
+||OPTIONS: ["Am fotografie", "Colaj/Editare +40 lei"]||
 
-👤 User: "alb"
+👤 User: "am fotografie"
 🤖 AI: [calculează]
-"Canvas 50×70cm cu margini albe:
-- **145 lei** (include șasiu lemn)
-Design Pro: +40 lei"
+"Canvas 50×70cm cu ramă:
+- **169 lei** (margine oglindită, include șasiu)
+Colaj/Editare: +40 lei"
 
 **EXEMPLU 5 - Client dă detalii complete:**
 👤 User: "10 rollup de 100cm"

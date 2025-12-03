@@ -6,6 +6,7 @@ import {
   calculateFlyerPrice,
   calculateWindowGraphicsPrice,
   calculateRollupPrice,
+  calculateCanvasPrice,
 } from "@/lib/pricing";
 
 type ToolContext = {
@@ -84,7 +85,47 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
-    // 4. CALCUL PREȚ ROLLUP BANNER
+    // 4. CALCUL PREȚ CANVAS
+    // ============================================================
+    else if (fnName === "calculate_roll_print_price" && args.product_type === "canvas") {
+      // Determinăm frameType și framedSize din args
+      let frameType: "framed" | "none" = "none";
+      let framedSize: string | undefined = undefined;
+      let framedShape: "rectangle" | "square" = "rectangle";
+
+      // Dacă args conține framed_size, înseamnă că e Cu Ramă
+      if (args.framed_size) {
+        frameType = "framed";
+        framedSize = args.framed_size;
+        // Detectăm forma din dimensiune (ex: "30x30" = square)
+        const [w, h] = framedSize.split("x").map(Number);
+        framedShape = w === h ? "square" : "rectangle";
+      }
+
+      const res = calculateCanvasPrice({
+        width_cm: args.width_cm || 0,
+        height_cm: args.height_cm || 0,
+        quantity: args.quantity,
+        edge_type: "mirror", // fix oglindită
+        designOption: args.design_pro ? "pro" : "upload",
+        frameType: frameType,
+        framedSize: framedSize,
+        framedShape: framedShape,
+      });
+
+      const typeInfo = frameType === "framed" 
+        ? `Canvas cu Ramă ${framedSize?.replace("x", "×")} cm`
+        : `Canvas ${args.width_cm}×${args.height_cm} cm`;
+
+      return { 
+        pret_total: res.finalPrice,
+        pret_unitar: Math.round((res.finalPrice / args.quantity) * 100) / 100,
+        info: `${typeInfo} (margine oglindită, include șasiu)${args.design_pro ? ' + Design Pro 40 lei' : ''}`
+      };
+    }
+
+    // ============================================================
+    // 5. CALCUL PREȚ ROLLUP BANNER
     // ============================================================
     else if (fnName === "calculate_rollup_price") {
       const res = calculateRollupPrice({
