@@ -98,10 +98,12 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         frameType = "framed";
         framedSize = args.framed_size;
         // Detectăm forma din dimensiune (ex: "30x30" = square)
-        const parts = framedSize.split("x");
-        if (parts.length === 2) {
-          const [w, h] = parts.map(Number);
-          framedShape = w === h ? "square" : "rectangle";
+        if (framedSize) {
+          const parts = framedSize.split("x");
+          if (parts.length === 2) {
+            const [w, h] = parts.map(Number);
+            framedShape = w === h ? "square" : "rectangle";
+          }
         }
       }
 
@@ -228,8 +230,10 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       const nextOrderNo = (lastOrder?.orderNo ?? 1000) + 1; 
 
       // Creăm o înregistrare de tip "Ofertă"
+      // Structură adresă pentru câmpurile JSON (address & billing)
       const addressData = {
         name: customer_details.name,
+        email: customer_details.email || `offer_${context.source}@prynt.ro`,
         phone: customer_details.phone || "",
         street: customer_details.address || "",
         city: customer_details.city || "",
@@ -237,19 +241,30 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         country: "Romania",
       };
 
+      // Marketing metadata pentru a stoca informații suplimentare
+      const marketingData = {
+        type: 'offer',
+        generatedFrom: context.source,
+        clientName: customer_details.name,
+        paymentMethod: "oferta",
+        currency: "RON",
+        items: items.map((item: any) => ({
+          title: item.title,
+          quantity: item.quantity,
+          price: item.price,
+          details: item.details,
+        })),
+      };
+
       const offerData: any = {
         orderNo: nextOrderNo,
         status: "pending_verification",
-        paymentStatus: "pending",
-        paymentMethod: "oferta",
-        paymentType: "Card",
-        currency: "RON",
+        paymentType: "Ramburs", // Ramburs pentru oferte
         total: totalAmount,
-        userEmail: customer_details.email || `offer_${context.source}@prynt.ro`,
+        shippingFee: 0,
         address: addressData,
-        billing: addressData, // Același obiect pentru billing
-        shippingAddress: addressData,
-        billingAddress: addressData,
+        billing: addressData,
+        marketing: marketingData,
         items: {
           create: items.map((item: any) => ({
             name: item.title,
@@ -263,11 +278,6 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
             },
           })),
         },
-        metadata: { 
-            type: 'offer', // Marcaj critic pentru a distinge de comenzi reale
-            generatedFrom: context.source,
-            clientName: customer_details.name // ADĂUGAT: Salvăm numele explicit și în metadata
-        }
       };
 
       if (existingUser) {
