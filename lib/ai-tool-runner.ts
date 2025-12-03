@@ -226,8 +226,9 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           width_cm: width_cm || 0,
           height_cm: height_cm || 0,
           quantity: quantity || 1,
+          material: subtype === "transparent" ? "transparent" : "alb",
           thickness_mm: thickness_mm || 3,
-          print_type: print_double ? "both" : subtype === "transparent" ? "front" : "white",
+          print_double: print_double || false,
           designOption: args.design_pro ? "pro" : "upload",
         });
         return {
@@ -241,7 +242,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           width_cm: width_cm || 0,
           height_cm: height_cm || 0,
           quantity: quantity || 1,
-          thickness: thickness_mm || 3,
+          thickness_mm: thickness_mm || 3,
           designOption: args.design_pro ? "pro" : "upload",
         });
         return {
@@ -255,7 +256,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           width_cm: width_cm || 0,
           height_cm: height_cm || 0,
           quantity: quantity || 1,
-          thickness: thickness_mm || 3,
+          thickness_mm: thickness_mm || 3,
           color: color || "alb",
           designOption: args.design_pro ? "pro" : "upload",
         });
@@ -270,7 +271,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           width_cm: width_cm || 0,
           height_cm: height_cm || 0,
           quantity: quantity || 1,
-          thickness: thickness_mm || 3,
+          thickness_mm: thickness_mm || 3,
           designOption: args.design_pro ? "pro" : "upload",
         });
         return {
@@ -280,12 +281,15 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           info: `Polipropilenă ${thickness_mm}mm (${(res.total_sqm || 0).toFixed(2)} mp)${args.design_pro ? ' + Design Pro 50 lei' : ''}`
         };
       } else if (material_type === "carton") {
+        const material = subtype?.includes("reciclat") ? "reciclat" : "ondulat";
         const res = calculateCartonPrice({
           width_cm: width_cm || 0,
           height_cm: height_cm || 0,
           quantity: quantity || 1,
-          cartonType: subtype || "ondulat_E",
-          printBothSides: print_double || false,
+          material,
+          ondula: material === "ondulat" ? (subtype || "E") : undefined,
+          reciclatBoard: material === "reciclat" ? (subtype || "400g") : undefined,
+          printDouble: print_double || false,
           designOption: args.design_pro ? "pro" : "upload",
         });
         return {
@@ -304,7 +308,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     // ============================================================
     else if (fnName === "calculate_rollup_price") {
       const res = calculateRollupPrice({
-        width: args.width_cm,
+        width_cm: args.width_cm,
         quantity: args.quantity,
         designOption: args.design_pro ? "pro" : "upload",
       });

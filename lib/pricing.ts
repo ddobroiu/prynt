@@ -731,7 +731,7 @@ export const calculateCanvasPrice = (input: PriceInputCanvas) => {
       ? CANVAS_CONSTANTS.FRAMED_PRICES_SQUARE 
       : CANVAS_CONSTANTS.FRAMED_PRICES_RECTANGLE;
     
-    const priceArray = priceTable[input.framedSize as keyof typeof priceTable];
+    const priceArray = priceTable[input.framedSize as keyof typeof priceTable] as number[] | undefined;
     if (!priceArray) {
       return { finalPrice: 0, total_sqm: 0, pricePerUnit: 0 };
     }
@@ -799,12 +799,14 @@ export const getCanvasUpsell = (input: PriceInputCanvas): UpsellResult => {
   const currentTotalSqm = sqmPerUnit * input.quantity;
   const currentUnitPrice = priceData.finalPrice / input.quantity;
 
+  const transformedBands = CANVAS_CONSTANTS.PRICES.bands.map(b => ({ max: b.max_sqm, price: b.price_per_sqm }));
+
   return calculateUpsellGeneric(
       currentTotalSqm,
       sqmPerUnit,
       input.quantity,
       currentUnitPrice,
-      CANVAS_CONSTANTS.PRICES.bands,
+      transformedBands,
       (newQty) => calculateCanvasPrice({ ...input, quantity: newQty })
   );
 };
