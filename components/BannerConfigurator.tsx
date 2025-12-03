@@ -295,11 +295,11 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
 
   function handleAddToCart() {
     if (!input.width_cm || !input.height_cm) {
-      toast.warning("Te rugăm să completezi lungimea și înălțimea.");
+      toast?.warning("Te rugăm să completezi lungimea și înălțimea.");
       return;
     }
     if (displayedTotal <= 0) {
-      toast.warning("Prețul trebuie calculat înainte de a adăuga în coș.");
+      toast?.warning("Prețul trebuie calculat înainte de a adăuga în coș.");
       return;
     }
     const unitPrice = roundMoney(displayedTotal / input.quantity);
@@ -349,7 +349,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   return (
     <main className={renderOnlyConfigurator ? "" : "bg-gray-50 min-h-screen"}>
       {/* Container cu padding responsive */}
-      <div className="container mx-auto px-4 py-6 lg:py-16">{
+      <div className="container mx-auto px-4 py-6 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           
           {/* STÂNGA - ZONA VIZUALĂ */}
@@ -601,7 +601,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
             <div className="sticky bottom-0 lg:static bg-white/95 lg:bg-white backdrop-blur-md lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 p-3 sm:p-4 lg:p-6 lg:mt-8 safe-area-inset-bottom">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-2 mb-2">
                 <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 order-2 sm:order-1">{formatMoneyDisplay(displayedTotal)}</p>
-                <button onClick={handleAddToCart} disabled={!canAdd} className="btn-primary w-full sm:w-1/2 py-3 text-base font-bold min-h-12 touch-manipulation order-1 sm:order-2"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
+                <button onClick={handleAddToCart} className="btn-primary w-full sm:w-1/2 py-3 text-base font-bold order-1 sm:order-2"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
               </div>
               <DeliveryEstimation />
             </div>
