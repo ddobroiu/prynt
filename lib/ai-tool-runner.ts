@@ -228,6 +228,15 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       const nextOrderNo = (lastOrder?.orderNo ?? 1000) + 1; 
 
       // Creăm o înregistrare de tip "Ofertă"
+      const addressData = {
+        name: customer_details.name,
+        phone: customer_details.phone || "",
+        street: customer_details.address || "",
+        city: customer_details.city || "",
+        county: customer_details.county || "",
+        country: "Romania",
+      };
+
       const offerData: any = {
         orderNo: nextOrderNo,
         status: "pending_verification",
@@ -237,30 +246,10 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         currency: "RON",
         total: totalAmount,
         userEmail: customer_details.email || `offer_${context.source}@prynt.ro`,
-        address: {
-          name: customer_details.name,
-          phone: customer_details.phone || "",
-          street: customer_details.address || "",
-          city: customer_details.city || "",
-          county: customer_details.county || "",
-          country: "Romania",
-        },
-        shippingAddress: {
-          name: customer_details.name,
-          phone: customer_details.phone || "",
-          street: customer_details.address || "",
-          city: customer_details.city || "",
-          county: customer_details.county || "",
-          country: "Romania",
-        },
-        billingAddress: {
-          name: customer_details.name,
-          phone: customer_details.phone || "",
-          street: customer_details.address || "",
-          city: customer_details.city || "",
-          county: customer_details.county || "",
-          country: "Romania",
-        },
+        address: addressData,
+        billing: addressData, // Același obiect pentru billing
+        shippingAddress: addressData,
+        billingAddress: addressData,
         items: {
           create: items.map((item: any) => ({
             name: item.title,
