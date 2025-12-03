@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   const body = await req.formData().catch(() => null);
+  // @ts-ignore - FormData.get() exists at runtime
   const password = (body?.get('password') as string) || '';
   const expected = process.env.ADMIN_PANEL_TOKEN || process.env.ADMIN_PASSWORD;
 

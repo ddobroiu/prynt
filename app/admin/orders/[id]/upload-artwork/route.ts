@@ -27,11 +27,13 @@ export async function POST(
 
   try {
     const { id: orderId } = await params;
-    const formData = await req.formData();
-    const file = formData.get('file') as File;
-    const orderItemId = formData.get('orderItemId') as string;
+    const data = await req.formData();
+    // @ts-ignore - FormData.get() exists at runtime
+    const file = data.get('file') as FormDataEntryValue | null;
+    // @ts-ignore - FormData.get() exists at runtime
+    const orderItemId = data.get('orderItemId') as FormDataEntryValue | null;
 
-    if (!file || !orderItemId) {
+    if (!file || typeof orderItemId !== 'string' || !(file instanceof File)) {
       return NextResponse.json({ error: 'File or Item ID missing' }, { status: 400 });
     }
 

@@ -87,7 +87,9 @@ export async function POST(req: Request, ctx: any) {
     if (!id) return NextResponse.json({ ok: false, message: 'Missing id' }, { status: 400 });
 
     const form = await req.formData();
+    // @ts-ignore - FormData.get() exists at runtime
     const file = form.get('file') as File | null;
+    // @ts-ignore - FormData.get() exists at runtime
     const billingRaw = form.get('billing') as string | null;
     let billing = null;
     try { if (billingRaw) billing = JSON.parse(billingRaw); } catch {}

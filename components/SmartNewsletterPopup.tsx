@@ -32,7 +32,7 @@ export default function SmartNewsletterPopup({
       return;
     }
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     let exitIntentAdded = false;
 
     // Show after delay

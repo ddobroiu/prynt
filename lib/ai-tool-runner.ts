@@ -17,6 +17,8 @@ import {
   calculatePolipropilenaPrice,
   calculateCartonPrice,
   calculateFonduriEUPrice,
+  type PlianteWeightKey,
+  type PlianteFoldType,
 } from "@/lib/pricing";
 
 type ToolContext = {
@@ -81,16 +83,15 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         };
       } else if (args.product_type === "pliant") {
         const res = calculatePliantePrice({
-          sizeKey: args.size || "A5",
+          weight: (args.paper_type || "130") as PlianteWeightKey,
           quantity: args.quantity,
-          paperKey: args.paper_type || "130",
-          foldType: args.fold_type || "2",
+          fold: (args.fold_type || "simplu") as PlianteFoldType,
           designOption: "upload",
         });
         return { 
           pret_total: res.finalPrice,
           pret_unitar: res.pricePerUnit,
-          info: `Pliante ${args.size} ${args.fold_type || '2'} falduri pe hârtie ${args.paper_type || '130g'}`
+          info: `Pliante ${args.fold_type || 'simplu'} pe hârtie ${args.paper_type || '130g'}`
         };
       } else {
         // Flyer implicit
@@ -103,7 +104,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         });
         return { 
           pret_total: res.finalPrice,
-          pret_unitar: res.pricePerUnit,
+          pret_unitar: res.unitPrice,
           info: `Flyere ${args.size} ${args.two_sided ? 'față-verso' : 'o față'}`
         };
       }
@@ -200,15 +201,15 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         width_cm: args.width_cm || 0,
         height_cm: args.height_cm || 0,
         quantity: args.quantity,
-        materialKey: args.material_subtype || "oracal_651",
-        printType: args.options?.diecut === false ? "print_only" : "print_cut",
+        material: args.material_subtype || "oracal_651",
+        print_type: args.options?.diecut === false ? "print_only" : "print_cut",
         laminated: args.options?.laminated || false,
         designOption: args.design_pro ? "pro" : "upload",
       });
 
       return { 
         pret_total: res.finalPrice,
-        pret_unitar: res.pricePerUnit,
+        pret_unitar: Math.round((res.finalPrice / args.quantity) * 100) / 100,
         suprafata_mp: res.total_sqm || 0,
         info: `Autocolante ${args.width_cm}×${args.height_cm} cm (${(res.total_sqm || 0).toFixed(2)} mp) pe ${args.material_subtype || 'Oracal 651'}${args.options?.laminated ? ' + Laminare' : ''}${args.options?.diecut === false ? ' Print Only' : ' Print+Cut'}${args.design_pro ? ' + Design Pro 30 lei' : ''}`
       };
@@ -225,8 +226,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           width_cm: width_cm || 0,
           height_cm: height_cm || 0,
           quantity: quantity || 1,
-          thickness: thickness_mm || 3,
-          printType: print_double ? "both" : subtype === "transparent" ? "front" : "white",
+          thickness_mm: thickness_mm || 3,
+          print_type: print_double ? "both" : subtype === "transparent" ? "front" : "white",
           designOption: args.design_pro ? "pro" : "upload",
         });
         return {

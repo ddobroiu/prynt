@@ -42,8 +42,11 @@ const uploadStream = (buffer: Buffer, folder: string) => {
 export async function POST(req: NextRequest) {
     try {
         const formData = await req.formData();
+        // @ts-ignore - FormData.get() exists at runtime
         const file = formData.get('file') as File;
+        // @ts-ignore - FormData.get() exists at runtime
         const type = formData.get('type') as string;
+        // @ts-ignore - FormData.get() exists at runtime
         const publicId = formData.get('publicId') as string; // Acesta va fi orderItemId
 
         if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 });

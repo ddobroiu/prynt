@@ -10,7 +10,7 @@ interface UseAbandonedCartProps {
 
 export function useAbandonedCart({ configuratorId, email, cartData }: UseAbandonedCartProps) {
   const { items } = useCart();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedRef = useRef<string>('');
 
   const saveAbandonedCart = useCallback(async () => {

@@ -51,7 +51,7 @@ export default function SearchBox({
   const router = useRouter();
 
   // Debounce search
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const performSearch = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < 2) {
