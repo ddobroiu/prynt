@@ -580,6 +580,29 @@ export const calculateAutocolantePrice = (input: PriceInputAutocolante) => {
   return { finalPrice: roundMoney(finalPrice), total_sqm: totalSqm, pricePerSqm, sqmPerUnit };
 };
 
+// --- UPSELL FOR AUTOCOLANTE ---
+export const getAutocolanteUpsell = (input: PriceInputAutocolante): UpsellResult => {
+  if (input.width_cm <= 0 || input.height_cm <= 0) return null;
+
+  const priceData = calculateAutocolantePrice(input);
+  const sqmPerUnit = (input.width_cm / 100) * (input.height_cm / 100);
+  const currentTotalSqm = sqmPerUnit * input.quantity;
+  const currentUnitPrice = priceData.finalPrice / input.quantity;
+
+  // Găsim banda pentru materialul selectat
+  const materialDef = AUTOCOLANTE_CONSTANTS.MATERIALS.find((m) => m.key === input.materialKey);
+  if (!materialDef) return null;
+
+  return calculateUpsellGeneric(
+      currentTotalSqm,
+      sqmPerUnit,
+      input.quantity,
+      currentUnitPrice,
+      materialDef.bands,
+      (newQty) => calculateAutocolantePrice({ ...input, quantity: newQty })
+  );
+};
+
 // ==========================================
 // 9. CANVAS
 // ==========================================
@@ -711,6 +734,27 @@ export const calculateCanvasPrice = (input: PriceInputCanvas) => {
 
   const pricePerUnit = roundMoney(finalPrice / input.quantity);
   return { finalPrice: roundMoney(finalPrice), total_sqm: totalSqm, pricePerUnit };
+};
+
+// --- UPSELL FOR CANVAS (Fără Ramă) ---
+export const getCanvasUpsell = (input: PriceInputCanvas): UpsellResult => {
+  // Upsell doar pentru Canvas fără ramă (personalizat)
+  if (input.frameType === "framed") return null;
+  if (input.width_cm <= 0 || input.height_cm <= 0) return null;
+
+  const priceData = calculateCanvasPrice(input);
+  const sqmPerUnit = (input.width_cm / 100) * (input.height_cm / 100);
+  const currentTotalSqm = sqmPerUnit * input.quantity;
+  const currentUnitPrice = priceData.finalPrice / input.quantity;
+
+  return calculateUpsellGeneric(
+      currentTotalSqm,
+      sqmPerUnit,
+      input.quantity,
+      currentUnitPrice,
+      CANVAS_CONSTANTS.PRICES.bands,
+      (newQty) => calculateCanvasPrice({ ...input, quantity: newQty })
+  );
 };
 
 // ==========================================
@@ -1221,6 +1265,25 @@ export const calculateTapetPrice = (input: PriceInputTapet) => {
   return { finalPrice: roundMoney(finalPrice), totalSqm, pricePerUnit: roundMoney(finalPrice / input.quantity) };
 };
 
+// --- UPSELL FOR TAPET ---
+export const getTapetUpsell = (input: PriceInputTapet): UpsellResult => {
+  if (input.width_cm <= 0 || input.height_cm <= 0) return null;
+
+  const priceData = calculateTapetPrice(input);
+  const sqmPerUnit = (input.width_cm / 100) * (input.height_cm / 100);
+  const currentTotalSqm = sqmPerUnit * input.quantity;
+  const currentUnitPrice = priceData.finalPrice / input.quantity;
+
+  return calculateUpsellGeneric(
+      currentTotalSqm,
+      sqmPerUnit,
+      input.quantity,
+      currentUnitPrice,
+      TAPET_CONSTANTS.PRICES.bands,
+      (newQty) => calculateTapetPrice({ ...input, quantity: newQty })
+  );
+};
+
 // ==========================================
 // 14. FONDURI EU (KIT VIZIBILITATE)
 // ==========================================
@@ -1369,6 +1432,25 @@ export const calculateWindowGraphicsPrice = (input: PriceInputWindowGraphics) =>
     total_sqm: roundMoney(total_sqm),
     designFee,
   };
+};
+
+// --- UPSELL FOR WINDOW GRAPHICS ---
+export const getWindowGraphicsUpsell = (input: PriceInputWindowGraphics): UpsellResult => {
+  if (input.width_cm <= 0 || input.height_cm <= 0) return null;
+
+  const priceData = calculateWindowGraphicsPrice(input);
+  const sqmPerUnit = (input.width_cm / 100) * (input.height_cm / 100);
+  const currentTotalSqm = sqmPerUnit * input.quantity;
+  const currentUnitPrice = priceData.finalPrice / input.quantity;
+
+  return calculateUpsellGeneric(
+      currentTotalSqm,
+      sqmPerUnit,
+      input.quantity,
+      currentUnitPrice,
+      WINDOW_GRAPHICS_CONSTANTS.PRICES.bands,
+      (newQty) => calculateWindowGraphicsPrice({ ...input, quantity: newQty })
+  );
 };
 
 // ==========================================

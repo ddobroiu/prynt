@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { useToast } from "@/components/ToastProvider";
-import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Frame } from "lucide-react";
+import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Frame, TrendingUp, Percent } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
@@ -12,6 +12,7 @@ import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture";
 import { QA } from "@/types";
 import { 
   calculateCanvasPrice, 
+  getCanvasUpsell,
   CANVAS_CONSTANTS, 
   formatMoneyDisplay, 
   type PriceInputCanvas 
@@ -118,6 +119,9 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
   // Pricing
   const priceData = useMemo(() => calculateCanvasPrice(input), [input]);
   const displayedTotal = priceData.finalPrice;
+
+  // Upsell Logic (doar pentru Fără Ramă)
+  const upsellOpportunity = useMemo(() => getCanvasUpsell(input), [input]);
 
   // Auto-capture abandoned carts
   const cartData = useMemo(() => ({
@@ -333,6 +337,31 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
                     </div>
                     <div>
                       <NumberInput label="Cantitate" value={input.quantity} onChange={setQty} />
+                      
+                      {/* UPSELL ALERT (doar pentru Fără Ramă) */}
+                      {upsellOpportunity && (
+                          <div 
+                              className="mt-3 p-3 sm:p-4 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors flex gap-2 sm:gap-3 items-start touch-manipulation"
+                              onClick={() => updateInput("quantity", upsellOpportunity.requiredQty)}
+                          >
+                              <TrendingUp className="text-amber-600 w-5 h-5 mt-0.5 shrink-0" />
+                              <div>
+                                  <p className="text-sm text-amber-900 font-bold">
+                                      Reducere de Volum Disponibilă!
+                                  </p>
+                                  <p className="text-xs text-amber-800 mt-1">
+                                      Dacă alegi <strong>{upsellOpportunity.requiredQty} buc</strong>, prețul scade la <strong>{formatMoneyDisplay(upsellOpportunity.newUnitPrice)}/buc</strong>.
+                                      <span className="block mt-0.5 font-semibold text-amber-700">
+                                          Economisești {upsellOpportunity.discountPercent}% la prețul per unitate!
+                                      </span>
+                                  </p>
+                              </div>
+                              <div className="ml-auto flex flex-col justify-center items-center bg-white rounded-lg px-2 py-1 shadow-sm border border-amber-100">
+                                  <Percent className="w-4 h-4 text-amber-600 mb-0.5" />
+                                  <span className="text-xs font-bold text-amber-600">-{upsellOpportunity.discountPercent}%</span>
+                              </div>
+                          </div>
+                      )}
                     </div>
                   </div>
                 )}

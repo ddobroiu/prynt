@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { useToast } from "@/components/ToastProvider";
-import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
+import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, TrendingUp, Percent } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { usePathname, useRouter } from "next/navigation";
 import FaqAccordion from "./FaqAccordion";
@@ -13,6 +13,7 @@ import { useUserActivityTracking } from "@/hooks/useAbandonedCartCapture";
 import { QA } from "@/types";
 import { 
   calculateAutocolantePrice, 
+  getAutocolanteUpsell,
   AUTOCOLANTE_CONSTANTS, 
   formatMoneyDisplay, 
   type PriceInputAutocolante,
@@ -129,6 +130,9 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
   const priceData = useMemo(() => calculateAutocolantePrice(input), [input]);
   const displayedTotal = priceData.finalPrice;
 
+  // Upsell Logic
+  const upsellOpportunity = useMemo(() => getAutocolanteUpsell(input), [input]);
+
   // Auto-capture abandoned carts
   const cartData = useMemo(() => ({
     configuratorId: 'autocolante',
@@ -239,7 +243,34 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div><label className="field-label">Lungime (cm)</label><input type="text" inputMode="numeric" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="10" className="input" /></div>
                   <div><label className="field-label">Înălțime (cm)</label><input type="text" inputMode="numeric" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="10" className="input" /></div>
-                  <div className="md:col-span-2"><NumberInput label="Cantitate" value={input.quantity} onChange={setQty} /></div>
+                  <div className="md:col-span-2">
+                    <NumberInput label="Cantitate" value={input.quantity} onChange={setQty} />
+                    
+                    {/* UPSELL ALERT */}
+                    {upsellOpportunity && (
+                        <div 
+                            className="mt-3 p-3 sm:p-4 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors flex gap-2 sm:gap-3 items-start touch-manipulation"
+                            onClick={() => updateInput("quantity", upsellOpportunity.requiredQty)}
+                        >
+                            <TrendingUp className="text-amber-600 w-5 h-5 mt-0.5 shrink-0" />
+                            <div>
+                                <p className="text-sm text-amber-900 font-bold">
+                                    Reducere de Volum Disponibilă!
+                                </p>
+                                <p className="text-xs text-amber-800 mt-1">
+                                    Dacă alegi <strong>{upsellOpportunity.requiredQty} buc</strong>, prețul scade la <strong>{formatMoneyDisplay(upsellOpportunity.newUnitPrice)}/buc</strong>.
+                                    <span className="block mt-0.5 font-semibold text-amber-700">
+                                        Economisești {upsellOpportunity.discountPercent}% la prețul per unitate!
+                                    </span>
+                                </p>
+                            </div>
+                            <div className="ml-auto flex flex-col justify-center items-center bg-white rounded-lg px-2 py-1 shadow-sm border border-amber-100">
+                                <Percent className="w-4 h-4 text-amber-600 mb-0.5" />
+                                <span className="text-xs font-bold text-amber-600">-{upsellOpportunity.discountPercent}%</span>
+                            </div>
+                        </div>
+                    )}
+                  </div>
                 </div>
               </AccordionStep>
               <AccordionStep stepNumber={2} title="Material & Tip Print" summary={summaryStep2} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>
