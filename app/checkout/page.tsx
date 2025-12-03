@@ -53,6 +53,9 @@ type Billing = {
 export default function CheckoutPage() {
   const { data: session } = useSession();
   const { items = [], removeItem, isLoaded } = useCart();
+  
+  // FIX: Race condition prevention cu ref atomic
+  const isPlacingOrder = useRef(false);
 
   const [address, setAddress] = useState<Address>({
     nume_prenume: "",
@@ -210,7 +213,9 @@ export default function CheckoutPage() {
   }
 
   async function placeOrder() {
-    if (placing) return;
+    // FIX: Previne race condition cu ref atomic
+    if (isPlacingOrder.current || placing) return;
+    isPlacingOrder.current = true;
     setPlacing(true);
     setErrors({});
     firstInvalidRef.current = null;
@@ -316,6 +321,7 @@ export default function CheckoutPage() {
       setShowEmbed(false);
     } finally {
       setPlacing(false);
+      isPlacingOrder.current = false; // FIX: Reset ref atomic
     }
   }
 

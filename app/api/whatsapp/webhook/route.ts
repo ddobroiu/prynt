@@ -22,12 +22,42 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-const conversations = new Map<string, any[]>();
-const conversationMeta = new Map<string, { name?: string }>();
+// FIX: Memory leak prevention - TTL și limitare
+const MAX_CONVERSATIONS = 1000;
+const CONVERSATION_TTL = 30 * 60 * 1000; // 30 minute
+const conversations = new Map<string, { messages: any[], lastAccess: number }>();
+const conversationMeta = new Map<string, { name?: string, lastAccess: number }>();
+
+// Cleanup function pentru conversații vechi
+function cleanupOldConversations() {
+  const now = Date.now();
+  for (const [key, value] of conversations.entries()) {
+    if (now - value.lastAccess > CONVERSATION_TTL) {
+      conversations.delete(key);
+    }
+  }
+  for (const [key, value] of conversationMeta.entries()) {
+    if (now - value.lastAccess > CONVERSATION_TTL) {
+      conversationMeta.delete(key);
+    }
+  }
+  // Limitare număr maxim conversații
+  if (conversations.size > MAX_CONVERSATIONS) {
+    const sortedKeys = Array.from(conversations.entries())
+      .sort((a, b) => a[1].lastAccess - b[1].lastAccess)
+      .slice(0, conversations.size - MAX_CONVERSATIONS)
+      .map(([key]) => key);
+    sortedKeys.forEach(key => conversations.delete(key));
+  }
+}
 
 async function processWhatsAppImage(imageId: string, fromNumber: string) {
   try {
     const token = process.env.META_API_TOKEN;
+    if (!token) {
+      console.error("❌ META_API_TOKEN lipsește din configurare");
+      throw new Error("META_API_TOKEN nu este configurat");
+    }
     const metaRes = await fetch(`https://graph.facebook.com/v18.0/${imageId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -134,9 +164,11 @@ export async function POST(req: Request) {
                 // Întrebăm direct cu butoane Da/Nu după primirea imaginii
                 const sendResult = await sendYesNoQuestion(from, "Am primit imaginea ta! 📸 Am salvat-o în contul tău. Dorești o ofertă pentru ea?");
                 
-                let history = conversations.get(from) || [];
-                history.push({ role: "user", content: `[SYSTEM: Userul a trimis o imagine. URL: ${uploadResult.url}]` });
-                conversations.set(from, history);
+                const now = Date.now();
+                const convData = conversations.get(from) || { messages: [], lastAccess: now };
+                convData.messages.push({ role: "user", content: `[SYSTEM: Userul a trimis o imagine. URL: ${uploadResult.url}]` });
+                convData.lastAccess = now;
+                conversations.set(from, convData);
                 
                 await logConversation('whatsapp', from, [{role: 'user', content: `[IMAGE: ${uploadResult.url}]`}, {role: 'assistant', content: 'Confirmare primire imagine.'}], undefined);
             } else {
@@ -241,7 +273,12 @@ export async function POST(req: Request) {
             console.error("Eroare DB user:", dbError);
         }
 
-        let history = conversations.get(from) || [];
+        // Cleanup conversații vechi periodic
+        if (Math.random() < 0.1) cleanupOldConversations(); // 10% șansă la fiecare mesaj
+
+        const now = Date.now();
+        const convData = conversations.get(from) || { messages: [], lastAccess: now };
+        let history = convData.messages;
         if (history.length > 10) history = history.slice(-10);
 
         if (!contextName) {
@@ -249,7 +286,9 @@ export async function POST(req: Request) {
             if (nameMatch) contextName = nameMatch[1].trim();
             else if (conversationMeta.has(from)) contextName = conversationMeta.get(from)?.name || "";
         }
-        if (contextName) conversationMeta.set(from, { name: contextName });
+        if (contextName) {
+            conversationMeta.set(from, { name: contextName, lastAccess: now });
+        }
 
         // 3. Prompt System
         let systemContent = SYSTEM_PROMPT + "\nIMPORTANT: Clientul este pe WhatsApp. Fii concis. Folosește liste scurte.";
@@ -348,7 +387,7 @@ export async function POST(req: Request) {
 
                 history.push({ role: "user", content: textBody });
                 history.push({ role: "assistant", content: finalReply });
-                conversations.set(from, history);
+                conversations.set(from, { messages: history, lastAccess: Date.now() });
             } else {
                 // EROARE LA TRIMITERE
                 console.error(`❌ FAILED to send message to ${from}`);
