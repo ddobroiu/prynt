@@ -187,8 +187,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       return { 
         pret_total: res.finalPrice,
         pret_unitar: res.pricePerUnit,
-        suprafata_mp: res.totalSqm,
-        info: `Tapet ${args.width_cm}×${args.height_cm} cm (${res.totalSqm.toFixed(2)} mp total)${args.options?.adhesive ? ' + Adeziv auto-adeziv (+10%)' : ''}${args.design_pro ? ' + Design Pro 200 lei' : ''}`
+        suprafata_mp: res.totalSqm || res.total_sqm || 0,
+        info: `Tapet ${args.width_cm}×${args.height_cm} cm (${(res.totalSqm || res.total_sqm || 0).toFixed(2)} mp total)${args.options?.adhesive ? ' + Adeziv auto-adeziv (+10%)' : ''}${args.design_pro ? ' + Design Pro 200 lei' : ''}`
       };
     }
 
@@ -209,8 +209,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       return { 
         pret_total: res.finalPrice,
         pret_unitar: res.pricePerUnit,
-        suprafata_mp: res.totalSqm,
-        info: `Autocolante ${args.width_cm}×${args.height_cm} cm (${res.totalSqm.toFixed(2)} mp) pe ${args.material_subtype || 'Oracal 651'}${args.options?.laminated ? ' + Laminare' : ''}${args.options?.diecut === false ? ' Print Only' : ' Print+Cut'}${args.design_pro ? ' + Design Pro 30 lei' : ''}`
+        suprafata_mp: res.total_sqm || 0,
+        info: `Autocolante ${args.width_cm}×${args.height_cm} cm (${(res.total_sqm || 0).toFixed(2)} mp) pe ${args.material_subtype || 'Oracal 651'}${args.options?.laminated ? ' + Laminare' : ''}${args.options?.diecut === false ? ' Print Only' : ' Print+Cut'}${args.design_pro ? ' + Design Pro 30 lei' : ''}`
       };
     }
 
@@ -232,8 +232,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         return {
           pret_total: res.finalPrice,
           pret_unitar: res.pricePerUnit,
-          suprafata_mp: res.totalSqm,
-          info: `Plexiglas ${subtype || 'alb'} ${thickness_mm}mm (${res.totalSqm.toFixed(2)} mp)${print_double ? ' print față-verso' : ''}${args.design_pro ? ' + Design Pro 60 lei' : ''}`
+          suprafata_mp: res.total_sqm || 0,
+          info: `Plexiglas ${subtype || 'alb'} ${thickness_mm}mm (${(res.total_sqm || 0).toFixed(2)} mp)${print_double ? ' print față-verso' : ''}${args.design_pro ? ' + Design Pro 60 lei' : ''}`
         };
       } else if (material_type === "forex") {
         const res = calculatePVCForexPrice({
@@ -246,8 +246,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         return {
           pret_total: res.finalPrice,
           pret_unitar: res.pricePerUnit,
-          suprafata_mp: res.totalSqm,
-          info: `PVC Forex ${thickness_mm}mm (${res.totalSqm.toFixed(2)} mp)${args.design_pro ? ' + Design Pro 50 lei' : ''}`
+          suprafata_mp: res.total_sqm || 0,
+          info: `PVC Forex ${thickness_mm}mm (${(res.total_sqm || 0).toFixed(2)} mp)${args.design_pro ? ' + Design Pro 50 lei' : ''}`
         };
       } else if (material_type === "alucobond") {
         const res = calculateAlucobondPrice({
@@ -261,8 +261,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         return {
           pret_total: res.finalPrice,
           pret_unitar: res.pricePerUnit,
-          suprafata_mp: res.totalSqm,
-          info: `Alucobond ${thickness_mm}mm culoare ${color || 'alb'} (${res.totalSqm.toFixed(2)} mp)${args.design_pro ? ' + Design Pro 60 lei' : ''}`
+          suprafata_mp: res.total_sqm || 0,
+          info: `Alucobond ${thickness_mm}mm culoare ${color || 'alb'} (${(res.total_sqm || 0).toFixed(2)} mp)${args.design_pro ? ' + Design Pro 60 lei' : ''}`
         };
       } else if (material_type === "polipropilena") {
         const res = calculatePolipropilenaPrice({
@@ -275,8 +275,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         return {
           pret_total: res.finalPrice,
           pret_unitar: res.pricePerUnit,
-          suprafata_mp: res.totalSqm,
-          info: `Polipropilenă ${thickness_mm}mm (${res.totalSqm.toFixed(2)} mp)${args.design_pro ? ' + Design Pro 50 lei' : ''}`
+          suprafata_mp: res.total_sqm || 0,
+          info: `Polipropilenă ${thickness_mm}mm (${(res.total_sqm || 0).toFixed(2)} mp)${args.design_pro ? ' + Design Pro 50 lei' : ''}`
         };
       } else if (material_type === "carton") {
         const res = calculateCartonPrice({
@@ -290,8 +290,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
         return {
           pret_total: res.finalPrice,
           pret_unitar: res.pricePerUnit,
-          suprafata_mp: res.totalSqm,
-          info: `Carton ${subtype || 'ondulat E'} (${res.totalSqm.toFixed(2)} mp)${print_double ? ' print față-verso' : ''}${args.design_pro ? ' + Design Pro 50 lei' : ''}`
+          suprafata_mp: res.total_sqm || 0,
+          info: `Carton ${subtype || 'ondulat E'} (${(res.total_sqm || 0).toFixed(2)} mp)${print_double ? ' print față-verso' : ''}${args.design_pro ? ' + Design Pro 50 lei' : ''}`
         };
       }
 
