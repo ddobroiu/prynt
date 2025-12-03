@@ -32,6 +32,8 @@ export const siteConfig = {
         { href: "/flayere", label: "Flayere" }, // Nota: Verifica daca ai ruta /flayere sau daca e tot /pliante
         { href: "/afise", label: "Afișe" },
         { href: "/autocolante", label: "Autocolante" },
+        { href: "/rollup", label: "Rollup" },
+        { href: "/window-graphics", label: "Window Graphics" },
       ],
     },
     {
@@ -106,6 +108,8 @@ export const siteConfig = {
         { title: "Bannere", href: "/banner" },
         { title: "Afișe", href: "/afise" },
         { title: "Autocolante", href: "/autocolante" },
+        { title: "Rollup", href: "/rollup" },
+        { title: "Window Graphics", href: "/window-graphics" },
         { title: "Canvas & Tapet", href: "/canvas" },
       ],
     },

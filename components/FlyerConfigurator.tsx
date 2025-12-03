@@ -70,7 +70,7 @@ const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick:
 
 function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   const inc = (d: number) => onChange(Math.max(1, value + d));
-  return <div><label className="field-label">{label}</label><div className="flex"><button onClick={() => inc(-1)} className="p-3 bg-gray-100 rounded-l-lg hover:bg-gray-200" aria-label={`Scade ${label.toLowerCase()}`}><Minus size={16} /></button><input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-center w-full rounded-none border-x-0" /><button onClick={() => inc(1)} className="p-3 bg-gray-100 rounded-r-lg hover:bg-gray-200" aria-label={`Creşte ${label.toLowerCase()}`}><Plus size={16} /></button></div></div>;
+  return <div><label className="field-label">{label}</label><div className="flex"><button onClick={() => inc(-10)} className="p-3 bg-gray-100 rounded-l-lg hover:bg-gray-200" aria-label={`Scade ${label.toLowerCase()}`}><Minus size={16} /></button><input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-center w-full rounded-none border-x-0" min="1" /><button onClick={() => inc(10)} className="p-3 bg-gray-100 rounded-r-lg hover:bg-gray-200" aria-label={`Creşte ${label.toLowerCase()}`}><Plus size={16} /></button></div></div>;
 }
 
 type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productImage?: string };
@@ -173,7 +173,15 @@ export default function FlyerConfigurator({ productSlug, productImage }: Props) 
           </div>
           <div>
             <header className="mb-6">
-              <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Flyere</h1></div>
+              <div className="flex justify-between items-center gap-4 mb-3">
+                <h1 className="text-3xl font-extrabold text-gray-900">Configurator Flyere</h1>
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-red-100 text-red-700 border-2 border-red-500 animate-pulse">
+                  🔥 -25% REDUCERE
+                </span>
+              </div>
+              <div className="mb-4 p-3 bg-linear-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
+                <p className="text-sm font-semibold text-green-800">🎉 Reducere specială 25% aplicată la toate flyerele!</p>
+              </div>
               <div className="flex justify-between items-center"><p className="text-gray-600">Alege dimensiune, hârtie și tirajul.</p><button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5"><Info size={16} /><span className="ml-2">Detalii</span></button></div>
             </header>
 

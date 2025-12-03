@@ -73,8 +73,8 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
 const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
 
 function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
-  const inc = (d: number) => onChange(Math.max(100, value + d));
-  return <div><label className="field-label">{label}</label><div className="flex"><button onClick={() => inc(-100)} className="p-3 bg-gray-100 rounded-l-lg hover:bg-gray-200" aria-label={`Scade ${label.toLowerCase()}`}><Minus size={16} /></button><input type="number" value={value} onChange={(e) => onChange(Math.max(100, parseInt(e.target.value) || 100))} className="input text-center w-full rounded-none border-x-0" /><button onClick={() => inc(100)} className="p-3 bg-gray-100 rounded-r-lg hover:bg-gray-200" aria-label={`Creşte ${label.toLowerCase()}`}><Plus size={16} /></button></div></div>;
+  const inc = (d: number) => onChange(Math.max(1, value + d));
+  return <div><label className="field-label">{label}</label><div className="flex"><button onClick={() => inc(-10)} className="p-3 bg-gray-100 rounded-l-lg hover:bg-gray-200" aria-label={`Scade ${label.toLowerCase()}`}><Minus size={16} /></button><input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-center w-full rounded-none border-x-0" min="1" /><button onClick={() => inc(10)} className="p-3 bg-gray-100 rounded-r-lg hover:bg-gray-200" aria-label={`Creşte ${label.toLowerCase()}`}><Plus size={16} /></button></div></div>;
 }
 
 function OptionButton({ active, onClick, title, subtitle }: { active: boolean; onClick: () => void; title: string; subtitle?: string; }) {
@@ -92,7 +92,7 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
   const { addItem } = useCart();
   const GALLERY = useMemo(() => productImage ? [productImage, "/products/pliante/1.webp", "/products/pliante/2.webp", "/products/pliante/3.webp"] : ["/products/pliante/1.webp", "/products/pliante/2.webp", "/products/pliante/3.webp", "/products/pliante/4.webp"], [productImage]);
   const [weight, setWeight] = useState<PlianteWeightKey>("115");
-  const [quantity, setQuantity] = useState<number>(100);
+  const [quantity, setQuantity] = useState<number>(50);
   const [fold, setFold] = useState<PlianteFoldType>("simplu");
   const [designOption, setDesignOption] = useState<"upload" | "pro">("upload");
   
@@ -177,7 +177,12 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
           </div>
           <div>
             <header className="mb-6">
-              <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Pliante</h1></div>
+              <div className="flex justify-between items-center gap-4 mb-3">
+                <h1 className="text-3xl font-extrabold text-gray-900">Configurator Pliante</h1>
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-red-500 text-white font-bold text-sm animate-pulse">
+                  🔥 -30% REDUCERE
+                </span>
+              </div>
               <div className="flex justify-between items-center"><p className="text-gray-600">Personalizează în 3 pași simpli.</p><button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5"><Info size={16} /><span className="ml-2">Detalii</span></button></div>
             </header>
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4">
@@ -187,7 +192,10 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
                         <label className="field-label">Grosime Hârtie</label>
                         <div className="grid grid-cols-3 gap-2 mt-2">
                             <OptionButton active={weight === "115"} onClick={() => setWeight("115")} title="115g" />
+                            <OptionButton active={weight === "135"} onClick={() => setWeight("135")} title="135g" />
+                            <OptionButton active={weight === "150"} onClick={() => setWeight("150")} title="150g" />
                             <OptionButton active={weight === "170"} onClick={() => setWeight("170")} title="170g" />
+                            <OptionButton active={weight === "200"} onClick={() => setWeight("200")} title="200g" />
                             <OptionButton active={weight === "250"} onClick={() => setWeight("250")} title="250g" />
                         </div>
                     </div>
@@ -230,6 +238,9 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
               </AccordionStep>
             </div>
             <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3 text-center">
+                <p className="text-red-600 font-bold text-sm">🎉 Reducere specială 30% aplicată la toate pliantele!</p>
+              </div>
               <div className="flex justify-between items-center mb-2">
                 <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
                 <button onClick={handleAddToCart} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>

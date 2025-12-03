@@ -4,6 +4,8 @@ import {
   calculateBannerPrice,
   calculateBannerVersoPrice,
   calculateFlyerPrice,
+  calculateWindowGraphicsPrice,
+  calculateRollupPrice,
 } from "@/lib/pricing";
 
 type ToolContext = {
@@ -64,7 +66,41 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
-    // 3. VERIFICARE STATUS COMANDĂ + LINK DPD
+    // 3. CALCUL PREȚ WINDOW GRAPHICS
+    // ============================================================
+    else if (fnName === "calculate_window_graphics_price") {
+      const res = calculateWindowGraphicsPrice({
+        width_cm: args.width_cm,
+        height_cm: args.height_cm,
+        quantity: args.quantity,
+        designOption: args.design_pro ? "pro" : "upload",
+      });
+      return { 
+        pret_total: res.finalPrice, 
+        pret_unitar: res.pricePerSqm,
+        suprafata_mp: res.totalSqm,
+        info: `Window Graphics folie PVC 140μ perforată (${res.totalSqm.toFixed(2)} mp × ${res.pricePerSqm} lei/mp)${args.design_pro ? ' + Design Pro 100 lei' : ''}`
+      };
+    }
+
+    // ============================================================
+    // 4. CALCUL PREȚ ROLLUP BANNER
+    // ============================================================
+    else if (fnName === "calculate_rollup_price") {
+      const res = calculateRollupPrice({
+        width: args.width_cm,
+        quantity: args.quantity,
+        designOption: args.design_pro ? "pro" : "upload",
+      });
+      return { 
+        pret_total: res.finalPrice, 
+        pret_unitar: res.unitPrice,
+        info: `Rollup ${args.width_cm}cm × 200cm (${args.quantity} buc × ${res.unitPrice} lei/buc)${args.design_pro ? ' + Design Pro 100 lei' : ''}. Include: casetă aluminiu + print Blueback 440g + geantă transport`
+      };
+    }
+
+    // ============================================================
+    // 5. VERIFICARE STATUS COMANDĂ + LINK DPD
     // ============================================================
     else if (fnName === "check_order_status") {
       const orderNo = parseInt(args.orderNo);
@@ -107,7 +143,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     }
 
     // ============================================================
-    // 4. GENERARE OFERTĂ PDF (CU NUME CLIENT)
+    // 6. GENERARE OFERTĂ PDF (CU NUME CLIENT)
     // ============================================================
     else if (fnName === "generate_offer") {
       const { customer_details, items } = args;
@@ -186,13 +222,16 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
 
       return { 
           success: true, 
-          link: offerLink, 
-          message: `Am generat oferta de preț (Proformă) pentru ${customer_details.name}.\n\n📄 Descarcă oferta de aici: ${offerLink}\n\nDacă totul este în regulă, confirmă și putem transforma oferta în comandă fermă!` 
+          orderNo: nextOrderNo,
+          link: offerLink,
+          customerName: customer_details.name,
+          total: totalAmount,
+          message: `Oferta PDF a fost generată cu succes pentru ${customer_details.name}!\n\n📄 **Link descărcare:** ${offerLink}\n\n**Detalii ofertă:**\n- Număr ofertă: #${nextOrderNo}\n- Total: ${totalAmount.toFixed(2)} RON\n- Validitate: 30 zile\n- Format: PDF profesional cu logo Prynt.ro\n\nOferta conține toate detaliile produselor discutate. Dacă totul este în regulă, putem transforma oferta în comandă fermă!` 
       };
     }
 
     // ============================================================
-    // 5. CREARE COMANDĂ FERMĂ
+    // 7. CREARE COMANDĂ FERMĂ
     // ============================================================
     else if (fnName === "create_order") {
       const { customer_details, items } = args;

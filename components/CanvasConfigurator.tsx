@@ -48,9 +48,9 @@ const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, 
 const ProductTabs = ({ productSlug }: { productSlug: string }) => {
     const [activeTab, setActiveTab] = useState("descriere");
     const faq: QA[] = [
-        { question: "Ce material folosiți pentru tablouri?", answer: "Folosim pânză canvas din bumbac 100% sau amestec bumbac-poliester de înaltă calitate, texturată, care redă culorile fidel." },
-        { question: "Tabloul vine gata de agățat?", answer: "Da, pânza este întinsă pe un șasiu din lemn uscat, iar tabloul include sistem de prindere. Este gata de pus pe perete imediat ce îl scoateți din cutie." },
-        { question: "Ce înseamnă 'Margine Oglindită'?", answer: "Marginea oglindită înseamnă că imaginea de pe fața tabloului este reflectată pe lateralele șasiului. Astfel, nu se pierde nimic din subiectul principal al imaginii pe canturi." },
+        { question: "Ce material folosiți pentru tablouri?", answer: "Folosim Canvas Fine Art - pânză realizată prin combinația de bumbac și poliester, 330 g/mp, pentru imprimări de cea mai bună calitate. Materialul nu se cutează iar la tăiere țesătura nu se destramă." },
+        { question: "Tabloul vine gata de agățat?", answer: "Da, pânza este întinsă pe un șasiu din lemn uscat, cu margine oglindită (imaginea continuă pe laterale). Tabloul include sistem de prindere și este gata de pus pe perete imediat ce îl scoateți din cutie." },
+        { question: "Pentru ce tipuri de imagini este recomandat?", answer: "Canvas Fine Art este ideal pentru reproduceri de opere de artă, tablouri, portrete, peisaje, decor teatru și film, colaje și decorări speciale de interior." },
     ];
     return (
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
@@ -60,7 +60,7 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
                 <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
             </nav>
             <div className="p-6">
-                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Tablouri Canvas Personalizate</h3><p>Transformă fotografiile preferate în opere de artă. Tablourile noastre sunt imprimate la rezoluție înaltă pe pânză canvas și întinse manual pe șasiu de lemn.</p><h4>Opțiuni Margine</h4><ul><li><strong>Albă:</strong> Lateralele rămân albe.</li><li><strong>Oglindită (Recomandat):</strong> Imaginea continuă pe laterale prin efect de oglindire.</li><li><strong>Wrap:</strong> Imaginea curge natural pe laterale (se pierde o parte din margine).</li></ul></div>}
+                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Tablouri Canvas Fine Art</h3><p>Transformă fotografiile preferate în opere de artă autentice. Tablourile noastre sunt imprimate la rezoluție înaltă pe pânză Canvas Fine Art și întinse manual pe șasiu de lemn.</p><h4>Material Canvas Fine Art</h4><p><strong>Canvas Fine Art</strong> este realizat prin combinația de bumbac și poliester pentru imprimări de cea mai bună calitate. Materialul nu se cutează iar la tăiere țesătura nu se destramă.</p><ul><li><strong>Grosime:</strong> 330 g/mp</li><li><strong>Lățimi disponibile:</strong> 1.03, 1.26, 1.55, 3.10 m</li><li><strong>Lungime rolă:</strong> 50 m</li></ul><h4>Utilizări Recomandate</h4><p>Se recomandă în special pentru:</p><ul><li>Reproduceri de opere de artă</li><li>Tablouri și portrete</li><li>Peisaje</li><li>Decor teatru și film</li><li>Colaje</li><li>Decorări speciale de interior</li></ul><h4>Finisaj</h4><p>Toate tablourile noastre canvas au <strong>margine oglindită</strong> - imaginea de pe fața tabloului este reflectată pe lateralele șasiului, astfel nu se pierde nimic din subiectul principal al imaginii.</p></div>}
                 {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
                 {activeTab === 'faq' && <FaqAccordion qa={faq} />}
             </div>
@@ -93,8 +93,11 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
     width_cm: initW ?? 0,
     height_cm: initH ?? 0,
     quantity: 1,
-    edge_type: "mirror",
+    edge_type: "mirror", // implicit și fix: oglindită
     designOption: "upload",
+    frameType: "framed", // implicit: cu ramă
+    framedSize: "30x40", // dimensiune implicită pentru opțiunea cu ramă
+    framedShape: "rectangle", // formă implicită: dreptunghi
   });
 
   const [lengthText, setLengthText] = useState(initW ? String(initW) : "");
@@ -150,18 +153,36 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
   };
 
   function handleAddToCart() {
-    if (!input.width_cm || !input.height_cm) {
-      toast.warning("Introduceți dimensiunile.");
-      return;
+    // Validare pentru opțiunea cu ramă
+    if (input.frameType === "framed") {
+      if (!input.framedSize) {
+        toast?.warning("Selectați o dimensiune.");
+        return;
+      }
+    } else {
+      // Validare pentru opțiunea fără ramă (dimensiuni personalizate)
+      if (!input.width_cm || !input.height_cm) {
+        toast?.warning("Introduceți dimensiunile.");
+        return;
+      }
     }
+
     if (displayedTotal <= 0) {
-      toast.warning("Prețul trebuie calculat.");
+      toast?.warning("Prețul trebuie calculat.");
       return;
     }
 
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
     const uniqueId = `${productSlug ?? 'canvas'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    const title = `Tablou Canvas ${input.width_cm}x${input.height_cm} cm`;
+    
+    let title = "";
+    if (input.frameType === "framed") {
+      const [w, h] = (input.framedSize || "").split("x");
+      const shapeLabel = input.framedShape === "square" ? "Pătrat" : "Dreptunghi";
+      title = `Tablou Canvas cu Ramă ${shapeLabel} ${w}×${h} cm`;
+    } else {
+      title = `Tablou Canvas ${input.width_cm}×${input.height_cm} cm`;
+    }
 
     const edgeLabels = { white: "Albă", mirror: "Oglindită", wrap: "Continuată (Wrap)" };
 
@@ -170,19 +191,20 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
       productId: productSlug ?? "canvas",
       slug: productSlug ?? "canvas",
       title,
-      width: input.width_cm,
-      height: input.height_cm,
+      width: input.frameType === "framed" ? parseInt((input.framedSize || "").split("x")[0]) : input.width_cm,
+      height: input.frameType === "framed" ? parseInt((input.framedSize || "").split("x")[1]) : input.height_cm,
       price: unitPrice,
       quantity: input.quantity,
       currency: "RON",
       metadata: {
-        "Margine": edgeLabels[input.edge_type],
+        "Tip": input.frameType === "framed" ? "Cu Ramă" : "Fără Ramă",
+        ...(input.frameType === "framed" && { "Formă": input.framedShape === "square" ? "Pătrat" : "Dreptunghi" }),
         "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : 'Grafică proprie',
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(CANVAS_CONSTANTS.PRO_DESIGN_FEE) }),
         artworkUrl,
       },
     });
-    toast.success("Produs adăugat în coș");
+    toast?.success("Produs adăugat în coș");
   }
 
   useEffect(() => {
@@ -191,9 +213,10 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
   }, []);
   useEffect(() => setActiveImage(GALLERY[activeIndex]), [activeIndex]);
 
-  const summaryStep1 = input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}x${input.height_cm}cm, ${input.quantity} buc.` : "Alege";
-  const edgeLabels = { white: "Albă", mirror: "Oglindită", wrap: "Wrap" };
-  const summaryStep2 = `Margine: ${edgeLabels[input.edge_type]}`;
+  const summaryStep1 = input.frameType === "framed" ? "Cu Ramă" : "Fără Ramă";
+  const summaryStep2 = input.frameType === "framed" 
+    ? `${input.framedShape === "square" ? "Pătrat" : "Dreptunghi"} ${input.framedSize?.replace("x", "×")} cm, ${input.quantity} buc.`
+    : (input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}×${input.height_cm} cm, ${input.quantity} buc.` : "Alege dimensiuni");
   const summaryStep3 = input.designOption === 'upload' ? 'Grafică proprie' : 'Design Pro';
 
   return (
@@ -211,29 +234,111 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
           </div>
           <div>
             <header className="mb-6">
-              <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Canvas</h1></div>
+              <div className="flex justify-between items-center gap-4 mb-3">
+                <h1 className="text-3xl font-extrabold text-gray-900">Configurator Canvas</h1>
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-red-500 text-white font-bold text-sm animate-pulse">
+                  🔥 -20% REDUCERE
+                </span>
+              </div>
               <div className="flex justify-between items-center"><p className="text-gray-600">Personalizează tabloul în 3 pași simpli.</p><button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5"><Info size={16} /><span className="ml-2">Detalii</span></button></div>
             </header>
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4">
-              <AccordionStep stepNumber={1} title="Dimensiuni & Cantitate" summary={summaryStep1} isOpen={activeStep === 1} onClick={() => setActiveStep(1)}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div><label className="field-label">Lățime (cm)</label><input type="text" inputMode="numeric" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="40" className="input" /></div>
-                  <div><label className="field-label">Înălțime (cm)</label><input type="text" inputMode="numeric" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="60" className="input" /></div>
-                  <div className="md:col-span-2"><NumberInput label="Cantitate" value={input.quantity} onChange={setQty} /></div>
+              {/* Pas 1: Tip Canvas (Cu Ramă / Fără Ramă) */}
+              <AccordionStep stepNumber={1} title="Tip Canvas" summary={summaryStep1} isOpen={activeStep === 1} onClick={() => setActiveStep(1)}>
+                <div className="mb-4">
+                  <label className="field-label mb-3">Selectează tipul de canvas</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <OptionButton 
+                      active={input.frameType === "framed"} 
+                      onClick={() => updateInput("frameType", "framed")} 
+                      title="Cu Ramă" 
+                      subtitle="Dimensiuni prestabilite" 
+                    />
+                    <OptionButton 
+                      active={input.frameType === "none"} 
+                      onClick={() => updateInput("frameType", "none")} 
+                      title="Fără Ramă" 
+                      subtitle="Dimensiuni personalizate" 
+                    />
+                  </div>
                 </div>
               </AccordionStep>
-              <AccordionStep stepNumber={2} title="Finisaje Margine" summary={summaryStep2} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
-                    <OptionButton active={input.edge_type === "mirror"} onClick={() => updateInput("edge_type", "mirror")} title="Oglindită" subtitle="Recomandat" />
-                    <OptionButton active={input.edge_type === "wrap"} onClick={() => updateInput("edge_type", "wrap")} title="Wrap" subtitle="Imagine continuă" />
-                    <OptionButton active={input.edge_type === "white"} onClick={() => updateInput("edge_type", "white")} title="Albă" subtitle="Margini simple" />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                    {input.edge_type === "mirror" && "Imaginea principală rămâne pe față, iar marginile sunt o reflexie a acesteia. Nu se pierde nimic din cadru."}
-                    {input.edge_type === "wrap" && "Imaginea este mărită și acoperă marginile. Atenție: elementele de la periferie vor ajunge pe cantul tabloului."}
-                    {input.edge_type === "white" && "Imaginea este doar pe față, marginile șasiului rămân albe."}
-                </p>
+
+              {/* Pas 2: Formă & Dimensiuni */}
+              <AccordionStep stepNumber={2} title="Formă & Dimensiuni" summary={summaryStep2} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>
+                {/* Pentru Cu Ramă */}
+                {input.frameType === "framed" && (
+                  <>
+                    {/* Selector Formă */}
+                    <div className="mb-4">
+                      <label className="field-label mb-3">Formă</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <OptionButton 
+                          active={input.framedShape === "rectangle"} 
+                          onClick={() => {
+                            updateInput("framedShape", "rectangle");
+                            updateInput("framedSize", "30x40");
+                          }} 
+                          title="Dreptunghi" 
+                        />
+                        <OptionButton 
+                          active={input.framedShape === "square"} 
+                          onClick={() => {
+                            updateInput("framedShape", "square");
+                            updateInput("framedSize", "30x30");
+                          }} 
+                          title="Pătrat" 
+                        />
+                      </div>
+                    </div>
+
+                    {/* Dimensiuni în funcție de formă */}
+                    <div className="mb-4">
+                      <label className="field-label mb-3">Dimensiune</label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {Object.keys(
+                          input.framedShape === "square" 
+                            ? CANVAS_CONSTANTS.FRAMED_PRICES_SQUARE 
+                            : CANVAS_CONSTANTS.FRAMED_PRICES_RECTANGLE
+                        ).map((size) => (
+                          <button
+                            key={size}
+                            type="button"
+                            onClick={() => updateInput("framedSize", size)}
+                            className={`px-3 py-2 rounded-lg border-2 text-sm font-semibold transition-all ${
+                              input.framedSize === size 
+                                ? "border-indigo-600 bg-indigo-50 text-indigo-600" 
+                                : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                            }`}
+                          >
+                            {size.replace("x", "×")} cm
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Cantitate */}
+                    <div>
+                      <NumberInput label="Cantitate" value={input.quantity} onChange={setQty} />
+                    </div>
+                  </>
+                )}
+
+                {/* Pentru Fără Ramă - Dimensiuni Personalizate */}
+                {input.frameType === "none" && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div><label className="field-label">Lățime (cm)</label><input type="text" inputMode="numeric" value={lengthText} onChange={(e) => onChangeLength(e.target.value)} placeholder="40" className="input" /></div>
+                      <div><label className="field-label">Înălțime (cm)</label><input type="text" inputMode="numeric" value={heightText} onChange={(e) => onChangeHeight(e.target.value)} placeholder="60" className="input" /></div>
+                    </div>
+                    <div>
+                      <NumberInput label="Cantitate" value={input.quantity} onChange={setQty} />
+                    </div>
+                  </div>
+                )}
               </AccordionStep>
+
+              {/* Pas 3: Grafică */}
               <AccordionStep stepNumber={3} title="Grafică" summary={summaryStep3} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
                 <div>
                   <div className="mb-4 border-b border-gray-200">
@@ -266,6 +371,9 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
               </AccordionStep>
             </div>
             <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3 text-center">
+                <p className="text-red-600 font-bold text-sm">🎉 Reducere specială 20% aplicată la toate tablourile canvas!</p>
+              </div>
               <div className="flex justify-between items-center mb-2">
                 <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
                 <button onClick={handleAddToCart} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
@@ -281,12 +389,18 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetailsOpen(false)}>
           <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8" onClick={e => e.stopPropagation()}>
             <button className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100" onClick={() => setDetailsOpen(false)}><X size={20} className="text-gray-600" /></button>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Detalii Canvas</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Detalii Canvas Fine Art</h3>
             <div className="prose prose-sm max-w-none">
-              <h4>Material</h4>
-              <p>Pânză canvas bumbac/poliester, 350g/mp, textură fină, tratată pentru imprimare digitală de înaltă rezoluție.</p>
+              <h4>Material Canvas Fine Art</h4>
+              <p>Pânză realizată prin combinația de bumbac și poliester pentru imprimări de cea mai bună calitate. Materialul nu se cutează iar la tăiere țesătura nu se destramă.</p>
+              <ul>
+                <li><strong>Grosime:</strong> 330 g/mp</li>
+                <li><strong>Dimensiuni rolă:</strong> lățime 1.03, 1.26, 1.55, 3.10 m; lungime 50 m</li>
+              </ul>
+              <h4>Finisaj</h4>
+              <p>Margine oglindită standard - imaginea continuă pe lateralele șasiului pentru un aspect profesional.</p>
               <h4>Șasiu</h4>
-              <p>Lemn de brad uscat, profil 2x4 cm, rezistent la deformare. Pânza este întinsă manual pentru o tensiune perfectă.</p>
+              <p>Lemn de brad uscat, profil 2×4 cm, rezistent la deformare. Pânza este întinsă manual pentru o tensiune perfectă.</p>
             </div>
           </div>
         </div>

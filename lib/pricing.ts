@@ -481,61 +481,103 @@ export const calculateCartonPrice = (input: PriceInputCarton) => {
 // 8. AUTOCOLANTE (GENERIC - SQM BASED)
 // ==========================================
 export const AUTOCOLANTE_CONSTANTS = {
-  PRICES: {
-    base_bands: [
-      { max_sqm: 0.1, price_per_unit: 0.60 },
-      { max_sqm: 0.5, price_per_unit: 0.45 },
-      { max_sqm: 2.0, price_per_unit: 0.35 },
-      { max_sqm: Infinity, price_per_unit: 0.25 },
-    ],
-    multipliers: {
-      vinyl: 1.15,
-      laminated: 1.10,
-      die_cut: 1.12,
-    }
-  },
+  MATERIALS: [
+    { key: "oracal_641", label: "Oracal 641 — Folie economică", bands: [
+      { max_sqm: 1, price_per_sqm: 120 },
+      { max_sqm: 5, price_per_sqm: 90 },
+      { max_sqm: 20, price_per_sqm: 80 },
+      { max_sqm: Infinity, price_per_sqm: 70 },
+    ]},
+    { key: "oracal_351", label: "Oracal 351 — Folie aurie / argintie", bands: [
+      { max_sqm: 1, price_per_sqm: 150 },
+      { max_sqm: 5, price_per_sqm: 120 },
+      { max_sqm: 20, price_per_sqm: 110 },
+      { max_sqm: Infinity, price_per_sqm: 100 },
+    ]},
+    { key: "oracal_451", label: "Oracal 451 — Folie pentru banner", bands: [
+      { max_sqm: 1, price_per_sqm: 130 },
+      { max_sqm: 5, price_per_sqm: 100 },
+      { max_sqm: 20, price_per_sqm: 90 },
+      { max_sqm: Infinity, price_per_sqm: 80 },
+    ]},
+    { key: "oracal_621", label: "Oracal 621 — Folie cu adeziv removabil", bands: [
+      { max_sqm: 1, price_per_sqm: 120 },
+      { max_sqm: 5, price_per_sqm: 90 },
+      { max_sqm: 20, price_per_sqm: 80 },
+      { max_sqm: Infinity, price_per_sqm: 70 },
+    ]},
+    { key: "oracal_638m", label: "Oracal 638M — Folie decorat pereți", bands: [
+      { max_sqm: 1, price_per_sqm: 160 },
+      { max_sqm: 5, price_per_sqm: 130 },
+      { max_sqm: 20, price_per_sqm: 120 },
+      { max_sqm: Infinity, price_per_sqm: 110 },
+    ]},
+    { key: "oracal_651", label: "Oracal 651 — Folie pentru casete luminoase", bands: [
+      { max_sqm: 1, price_per_sqm: 140 },
+      { max_sqm: 5, price_per_sqm: 110 },
+      { max_sqm: 20, price_per_sqm: 100 },
+      { max_sqm: Infinity, price_per_sqm: 90 },
+    ]},
+    { key: "oracal_970", label: "Oracal 970 — Folie car wrapping", bands: [
+      { max_sqm: 1, price_per_sqm: 250 },
+      { max_sqm: 5, price_per_sqm: 220 },
+      { max_sqm: 20, price_per_sqm: 200 },
+      { max_sqm: Infinity, price_per_sqm: 180 },
+    ]},
+  ],
   PRO_DESIGN_FEE: 30,
 };
+
+export type AutocolantesMaterialKey = "oracal_641" | "oracal_351" | "oracal_451" | "oracal_621" | "oracal_638m" | "oracal_651" | "oracal_970";
 
 export type PriceInputAutocolante = {
   width_cm: number;
   height_cm: number;
   quantity: number;
-  material: "paper_gloss" | "paper_matte" | "vinyl";
-  laminated: boolean;
-  shape_diecut: boolean;
+  material: AutocolantesMaterialKey;
+  print_type: "print_cut" | "print_only"; // print+cut sau doar print (-20%)
+  laminated: boolean; // laminare (+10%)
   designOption: "upload" | "text_only" | "pro";
 };
 
 export const calculateAutocolantePrice = (input: PriceInputAutocolante) => {
   if (input.width_cm <= 0 || input.height_cm <= 0 || input.quantity <= 0) {
-      return { finalPrice: 0, total_sqm: 0, pricePerUnit: 0, sqmPerUnit: 0 };
+      return { finalPrice: 0, total_sqm: 0, pricePerSqm: 0, sqmPerUnit: 0 };
   }
 
   const sqmPerUnit = (input.width_cm / 100) * (input.height_cm / 100);
   const totalSqm = roundMoney(sqmPerUnit * input.quantity);
 
-  let pricePerUnitBase = 0.25;
-  for (const band of AUTOCOLANTE_CONSTANTS.PRICES.base_bands) {
+  // Găsim materialul selectat
+  const materialDef = AUTOCOLANTE_CONSTANTS.MATERIALS.find(m => m.key === input.material);
+  if (!materialDef) return { finalPrice: 0, total_sqm: totalSqm, pricePerSqm: 0, sqmPerUnit };
+
+  // Găsim prețul per MP bazat pe totalSqm
+  let pricePerSqm = materialDef.bands[materialDef.bands.length - 1].price_per_sqm;
+  for (const band of materialDef.bands) {
       if (totalSqm <= band.max_sqm) {
-          pricePerUnitBase = band.price_per_unit;
+          pricePerSqm = band.price_per_sqm;
           break;
       }
   }
 
-  let multiplier = 1.0;
-  if (input.material === "vinyl") multiplier *= AUTOCOLANTE_CONSTANTS.PRICES.multipliers.vinyl;
-  if (input.laminated) multiplier *= AUTOCOLANTE_CONSTANTS.PRICES.multipliers.laminated;
-  if (input.shape_diecut) multiplier *= AUTOCOLANTE_CONSTANTS.PRICES.multipliers.die_cut;
+  // Aplicăm reducere de 20% dacă e doar print (fără cut)
+  if (input.print_type === "print_only") {
+      pricePerSqm = roundMoney(pricePerSqm * 0.8);
+  }
 
-  const pricePerUnit = roundMoney(pricePerUnitBase * multiplier);
-  let finalPrice = roundMoney(pricePerUnit * input.quantity);
+  // Aplicăm +10% dacă are laminare
+  if (input.laminated) {
+      pricePerSqm = roundMoney(pricePerSqm * 1.1);
+  }
+
+  let finalPrice = roundMoney(totalSqm * pricePerSqm);
 
   if (input.designOption === "pro") {
       finalPrice += AUTOCOLANTE_CONSTANTS.PRO_DESIGN_FEE;
   }
 
-  return { finalPrice: roundMoney(finalPrice), total_sqm: totalSqm, pricePerUnit, sqmPerUnit };
+  return { finalPrice: roundMoney(finalPrice), total_sqm: totalSqm, pricePerSqm, sqmPerUnit };
 };
 
 // ==========================================
@@ -551,6 +593,43 @@ export const CANVAS_CONSTANTS = {
     ],
     chassis_price_per_ml: 20,
   },
+  FRAMED_PRICES_RECTANGLE: {
+    "20x30": [61.86, 55.66, 50.11, 45.10, 40.59, 37.10],
+    "30x40": [83.36, 75.02, 67.52, 60.77, 57.39, 54.18],
+    "30x50": [102.19, 91.97, 82.77, 74.48, 74.48, 66.43],
+    "40x50": [127.74, 114.96, 103.46, 93.10, 87.94, 83.04],
+    "40x60": [147.90, 133.10, 119.79, 107.81, 101.82, 97.02],
+    "50x70": [169.44, 152.48, 137.23, 123.50, 116.64, 110.14],
+    "50x80": [189.58, 170.62, 153.55, 138.19, 130.51, 123.23],
+    "60x80": [243.36, 219.02, 197.12, 177.41, 167.55, 158.19],
+    "60x90": [248.75, 223.87, 201.49, 181.33, 171.26, 161.70],
+    "70x80": [263.54, 237.18, 213.47, 192.13, 181.46, 171.30],
+    "70x100": [321.36, 305.28, 289.20, 260.29, 234.27, 208.88],
+    "80x100": [330.77, 297.70, 267.94, 241.15, 229.10, 217.63],
+    "80x120": [357.65, 321.89, 289.70, 260.74, 247.71, 235.33],
+    "90x120": [389.92, 350.93, 315.84, 284.26, 270.03, 256.54],
+    "100x120": [540.51, 487.81, 463.42, 440.26, 418.24, 397.33],
+  },
+  FRAMED_PRICES_SQUARE: {
+    "20x20": [52.45, 47.20, 42.48, 38.22, 34.42, 31.46],
+    "30x30": [79.33, 71.41, 64.27, 57.84, 54.64, 51.57],
+    "40x40": [106.22, 95.60, 86.03, 77.42, 73.12, 69.06],
+    "50x50": [133.12, 126.46, 119.81, 107.82, 97.04, 86.53],
+    "60x60": [186.90, 168.21, 151.38, 136.24, 128.67, 121.33],
+    "70x70": [248.75, 223.89, 201.50, 181.34, 171.28, 161.70],
+    "80x80": [275.63, 248.06, 223.26, 200.94, 189.76, 179.17],
+    "90x90": [295.81, 266.22, 239.60, 215.63, 203.65, 192.27],
+    "100x100": [342.86, 308.58, 277.71, 249.94, 236.06, 240.00],
+  },
+  FRAMED_QUANTITY_RANGES: [
+    { min: 1, max: 1, index: 0 },
+    { min: 2, max: 5, index: 1 },
+    { min: 6, max: 15, index: 2 },
+    { min: 16, max: 25, index: 3 },
+    { min: 26, max: 40, index: 4 },
+    { min: 41, max: 50, index: 5 },
+  ],
+  DISCOUNT_PERCENT: 20, // Reducere 20%
   PRO_DESIGN_FEE: 40,
 };
 
@@ -560,10 +639,49 @@ export type PriceInputCanvas = {
   quantity: number;
   edge_type: "white" | "mirror" | "wrap";
   designOption: "upload" | "pro";
+  frameType?: "none" | "framed"; // nou: tip ramă
+  framedSize?: string; // nou: dimensiune pentru opțiunea cu ramă (ex: "20x30")
+  framedShape?: "rectangle" | "square"; // nou: formă pentru opțiunea cu ramă
 };
 
 export const calculateCanvasPrice = (input: PriceInputCanvas) => {
-  if (input.width_cm <= 0 || input.height_cm <= 0 || input.quantity <= 0) {
+  if (input.quantity <= 0) {
+      return { finalPrice: 0, total_sqm: 0, pricePerUnit: 0 };
+  }
+
+  // Dacă este cu ramă, folosim prețurile prestabilite
+  if (input.frameType === "framed" && input.framedSize) {
+    const shape = input.framedShape || "rectangle";
+    const priceTable = shape === "square" 
+      ? CANVAS_CONSTANTS.FRAMED_PRICES_SQUARE 
+      : CANVAS_CONSTANTS.FRAMED_PRICES_RECTANGLE;
+    
+    const priceArray = priceTable[input.framedSize as keyof typeof priceTable];
+    if (!priceArray) {
+      return { finalPrice: 0, total_sqm: 0, pricePerUnit: 0 };
+    }
+
+    // Găsim indexul pentru prețul în funcție de cantitate
+    let priceIndex = 0;
+    for (const range of CANVAS_CONSTANTS.FRAMED_QUANTITY_RANGES) {
+      if (input.quantity >= range.min && input.quantity <= range.max) {
+        priceIndex = range.index;
+        break;
+      }
+    }
+
+    const pricePerUnit = priceArray[priceIndex] || priceArray[priceArray.length - 1];
+    let finalPrice = roundMoney(pricePerUnit * input.quantity);
+
+    if (input.designOption === "pro") {
+      finalPrice += CANVAS_CONSTANTS.PRO_DESIGN_FEE;
+    }
+
+    return { finalPrice: roundMoney(finalPrice), total_sqm: 0, pricePerUnit: roundMoney(pricePerUnit) };
+  }
+
+  // Logic original pentru fără ramă (dimensiuni personalizate)
+  if (input.width_cm <= 0 || input.height_cm <= 0) {
       return { finalPrice: 0, total_sqm: 0, pricePerUnit: 0 };
   }
 
@@ -583,6 +701,10 @@ export const calculateCanvasPrice = (input: PriceInputCanvas) => {
   const chassisCost = totalPerimeter * CANVAS_CONSTANTS.PRICES.chassis_price_per_ml;
 
   let finalPrice = roundMoney(printCost + chassisCost);
+  
+  // Aplicare reducere 20%
+  finalPrice = roundMoney(finalPrice * 0.8);
+  
   if (input.designOption === "pro") {
       finalPrice += CANVAS_CONSTANTS.PRO_DESIGN_FEE;
   }
@@ -611,9 +733,232 @@ export const AFISE_CONSTANTS = {
   ],
   PRO_DESIGN_FEE: 100,
   PRICE_TABLE: {
-    paper_150_lucioasa: { A3: [{ min: 1, price: 3.0 }], A2: [{ min: 1, price: 9.98 }], A1: [{ min: 1, price: 39.96 }], A0: [{ min: 1, price: 80.0 }], S5: [{ min: 1, price: 28.0 }], S7: [{ min: 1, price: 56.0 }] },
-    blueback_115: { A0: [{ min: 1, price: 70.0 }], A1: [{ min: 1, price: 17.48 }], A2: [{ min: 1, price: 17.46 }] },
-    whiteback_150_material: { A0: [{ min: 1, price: 80.0 }] },
+    paper_150_lucioasa: { 
+      A3: [{ min: 1, price: 3.0 }], 
+      A2: [{ min: 1, price: 9.98 }], 
+      A1: [{ min: 1, price: 39.96 }], 
+      A0: [{ min: 1, price: 80.0 }], 
+      S5: [{ min: 1, price: 28.0 }], 
+      S7: [{ min: 1, price: 56.0 }] 
+    },
+    blueback_115: { 
+      A2: [
+        { min: 1, price: 17.46 },
+        { min: 51, price: 14.96 },
+        { min: 100, price: 12.48 },
+        { min: 200, price: 9.98 },
+        { min: 300, price: 7.48 },
+        { min: 400, price: 6.24 },
+        { min: 500, price: 5.74 },
+        { min: 1000, price: 4.98 },
+      ],
+      A1: [
+        { min: 1, price: 34.96 },
+        { min: 51, price: 29.98 },
+        { min: 100, price: 24.98 },
+        { min: 200, price: 19.98 },
+        { min: 300, price: 14.98 },
+        { min: 400, price: 12.48 },
+        { min: 500, price: 11.48 },
+        { min: 1000, price: 10.00 },
+      ],
+      A0: [
+        { min: 1, price: 70.00 },
+        { min: 51, price: 60.00 },
+        { min: 100, price: 50.00 },
+        { min: 200, price: 40.00 },
+        { min: 300, price: 30.00 },
+        { min: 400, price: 25.00 },
+        { min: 500, price: 23.00 },
+        { min: 1000, price: 20.00 },
+      ],
+      S5: [
+        { min: 1, price: 24.50 },
+        { min: 51, price: 21.00 },
+        { min: 100, price: 17.50 },
+        { min: 200, price: 14.00 },
+        { min: 300, price: 10.50 },
+        { min: 400, price: 8.76 },
+        { min: 500, price: 8.06 },
+        { min: 1000, price: 7.00 },
+      ],
+      S7: [
+        { min: 1, price: 49.00 },
+        { min: 51, price: 42.00 },
+        { min: 100, price: 35.00 },
+        { min: 200, price: 28.00 },
+        { min: 300, price: 21.00 },
+        { min: 400, price: 17.50 },
+        { min: 500, price: 16.10 },
+        { min: 1000, price: 14.00 },
+      ]
+    },
+    whiteback_150_material: { 
+      A3: [
+        { min: 1, price: 3.00 },
+        { min: 51, price: 2.50 },
+        { min: 100, price: 2.30 },
+        { min: 200, price: 2.20 },
+        { min: 300, price: 1.98 },
+        { min: 400, price: 1.88 },
+        { min: 500, price: 1.60 },
+        { min: 1000, price: 1.20 },
+      ],
+      A2: [
+        { min: 1, price: 19.96 },
+        { min: 51, price: 17.46 },
+        { min: 100, price: 14.96 },
+        { min: 200, price: 12.48 },
+        { min: 300, price: 9.98 },
+        { min: 400, price: 8.74 },
+        { min: 500, price: 7.48 },
+        { min: 1000, price: 6.24 },
+      ],
+      A1: [
+        { min: 1, price: 39.96 },
+        { min: 51, price: 34.96 },
+        { min: 100, price: 29.98 },
+        { min: 200, price: 24.98 },
+        { min: 300, price: 19.98 },
+        { min: 400, price: 17.48 },
+        { min: 500, price: 14.98 },
+        { min: 1000, price: 12.48 },
+      ],
+      A0: [
+        { min: 1, price: 80.00 },
+        { min: 51, price: 70.00 },
+        { min: 100, price: 60.00 },
+        { min: 200, price: 50.00 },
+        { min: 300, price: 40.00 },
+        { min: 400, price: 35.00 },
+        { min: 500, price: 30.00 },
+        { min: 1000, price: 25.00 },
+      ],
+      S5: [
+        { min: 1, price: 28.00 },
+        { min: 51, price: 24.50 },
+        { min: 100, price: 21.00 },
+        { min: 200, price: 17.50 },
+        { min: 300, price: 14.00 },
+        { min: 400, price: 12.26 },
+        { min: 500, price: 10.50 },
+        { min: 1000, price: 8.76 },
+      ],
+      S7: [
+        { min: 1, price: 56.00 },
+        { min: 51, price: 49.00 },
+        { min: 100, price: 42.00 },
+        { min: 200, price: 35.00 },
+        { min: 300, price: 28.00 },
+        { min: 400, price: 24.50 },
+        { min: 500, price: 21.00 },
+        { min: 1000, price: 17.50 },
+      ]
+    },
+    satin_170: {
+      A2: [
+        { min: 1, price: 22.46 },
+        { min: 51, price: 19.96 },
+        { min: 100, price: 17.46 },
+        { min: 200, price: 14.96 },
+        { min: 300, price: 12.48 },
+        { min: 400, price: 9.98 },
+        { min: 500, price: 8.74 },
+        { min: 1000, price: 8.24 },
+      ],
+      A1: [
+        { min: 1, price: 44.96 },
+        { min: 51, price: 39.96 },
+        { min: 100, price: 34.96 },
+        { min: 200, price: 29.98 },
+        { min: 300, price: 24.98 },
+        { min: 400, price: 19.98 },
+        { min: 500, price: 17.48 },
+        { min: 1000, price: 16.48 },
+      ],
+      A0: [
+        { min: 1, price: 90.00 },
+        { min: 51, price: 80.00 },
+        { min: 100, price: 70.00 },
+        { min: 200, price: 60.00 },
+        { min: 300, price: 50.00 },
+        { min: 400, price: 40.00 },
+        { min: 500, price: 35.00 },
+        { min: 1000, price: 33.00 },
+      ],
+      S5: [
+        { min: 1, price: 31.50 },
+        { min: 51, price: 28.00 },
+        { min: 100, price: 24.50 },
+        { min: 200, price: 21.00 },
+        { min: 300, price: 17.50 },
+        { min: 400, price: 14.00 },
+        { min: 500, price: 12.26 },
+        { min: 1000, price: 11.56 },
+      ],
+      S7: [
+        { min: 1, price: 63.00 },
+        { min: 51, price: 56.00 },
+        { min: 100, price: 49.00 },
+        { min: 200, price: 42.00 },
+        { min: 300, price: 35.00 },
+        { min: 400, price: 28.00 },
+        { min: 500, price: 24.50 },
+        { min: 1000, price: 23.10 },
+      ]
+    },
+    foto_220: {
+      A2: [
+        { min: 1, price: 29.94 },
+        { min: 51, price: 24.94 },
+        { min: 100, price: 22.46 },
+        { min: 200, price: 19.96 },
+        { min: 300, price: 17.46 },
+        { min: 400, price: 14.96 },
+        { min: 500, price: 12.48 },
+        { min: 1000, price: 9.98 },
+      ],
+      A1: [
+        { min: 1, price: 59.94 },
+        { min: 51, price: 49.96 },
+        { min: 100, price: 44.96 },
+        { min: 200, price: 39.96 },
+        { min: 300, price: 34.96 },
+        { min: 400, price: 29.98 },
+        { min: 500, price: 24.98 },
+        { min: 1000, price: 19.98 },
+      ],
+      A0: [
+        { min: 1, price: 120.00 },
+        { min: 51, price: 100.00 },
+        { min: 100, price: 90.00 },
+        { min: 200, price: 80.00 },
+        { min: 300, price: 70.00 },
+        { min: 400, price: 60.00 },
+        { min: 500, price: 50.00 },
+        { min: 1000, price: 40.00 },
+      ],
+      S5: [
+        { min: 1, price: 42.00 },
+        { min: 51, price: 35.00 },
+        { min: 100, price: 31.50 },
+        { min: 200, price: 28.00 },
+        { min: 300, price: 24.50 },
+        { min: 400, price: 21.00 },
+        { min: 500, price: 17.50 },
+        { min: 1000, price: 14.00 },
+      ],
+      S7: [
+        { min: 1, price: 84.00 },
+        { min: 51, price: 70.00 },
+        { min: 100, price: 63.00 },
+        { min: 200, price: 56.00 },
+        { min: 300, price: 49.00 },
+        { min: 400, price: 42.00 },
+        { min: 500, price: 35.00 },
+        { min: 1000, price: 28.00 },
+      ]
+    },
   } as Record<string, Record<string, Array<{ min: number; price: number }>>>
 };
 
@@ -646,24 +991,102 @@ export const calculatePosterPrice = (input: PriceInputAfise) => {
 // ==========================================
 export const FLYER_CONSTANTS = {
   SIZES: [
-    { key: "A6", label: "A6", dims: "105 × 148 mm", brackets: [{ max: 5000, oneSided: 0.22, twoSided: 0.28 }, { max: Infinity, oneSided: 0.22, twoSided: 0.28 }] },
-    { key: "A5", label: "A5", dims: "148 × 210 mm", brackets: [{ max: 5000, oneSided: 0.28, twoSided: 0.32 }, { max: Infinity, oneSided: 0.28, twoSided: 0.32 }] },
-    { key: "21x10", label: "21 × 10 cm", dims: "210 × 100 mm", brackets: [{ max: 5000, oneSided: 0.22, twoSided: 0.28 }, { max: Infinity, oneSided: 0.22, twoSided: 0.28 }] },
+    { 
+      key: "A6", 
+      label: "A6", 
+      dims: "105 × 148 mm", 
+      oneSided: [
+        { min: 1, price: 0.375 },    // 0.50 - 25% = 0.375
+        { min: 101, price: 0.345 },  // 0.46 - 25% = 0.345
+        { min: 501, price: 0.225 },  // 0.30 - 25% = 0.225
+        { min: 2000, price: 0.21 },  // 0.28 - 25% = 0.21
+        { min: 3000, price: 0.195 }, // 0.26 - 25% = 0.195
+        { min: 4000, price: 0.18 },  // 0.24 - 25% = 0.18
+        { min: 5000, price: 0.165 }, // 0.22 - 25% = 0.165
+      ],
+      twoSided: [
+        { min: 1, price: 0.72 },     // 0.96 - 25% = 0.72
+        { min: 101, price: 0.66 },   // 0.88 - 25% = 0.66
+        { min: 501, price: 0.45 },   // 0.60 - 25% = 0.45
+        { min: 2000, price: 0.345 }, // 0.46 - 25% = 0.345
+        { min: 3000, price: 0.30 },  // 0.40 - 25% = 0.30
+        { min: 4000, price: 0.27 },  // 0.36 - 25% = 0.27
+        { min: 5000, price: 0.21 },  // 0.28 - 25% = 0.21
+      ]
+    },
+    { 
+      key: "A5", 
+      label: "A5", 
+      dims: "148 × 210 mm", 
+      oneSided: [
+        { min: 1, price: 0.75 },     // 1.00 - 25% = 0.75
+        { min: 101, price: 0.69 },   // 0.92 - 25% = 0.69
+        { min: 501, price: 0.45 },   // 0.60 - 25% = 0.45
+        { min: 2000, price: 0.39 },  // 0.52 - 25% = 0.39
+        { min: 3000, price: 0.285 }, // 0.38 - 25% = 0.285
+        { min: 4000, price: 0.24 },  // 0.32 - 25% = 0.24
+        { min: 5000, price: 0.21 },  // 0.28 - 25% = 0.21
+      ],
+      twoSided: [
+        { min: 1, price: 1.44 },     // 1.92 - 25% = 1.44
+        { min: 101, price: 1.32 },   // 1.76 - 25% = 1.32
+        { min: 501, price: 0.90 },   // 1.20 - 25% = 0.90
+        { min: 2000, price: 0.48 },  // 0.64 - 25% = 0.48
+        { min: 3000, price: 0.33 },  // 0.44 - 25% = 0.33
+        { min: 4000, price: 0.285 }, // 0.38 - 25% = 0.285
+        { min: 5000, price: 0.24 },  // 0.32 - 25% = 0.24
+      ]
+    },
+    { 
+      key: "21x10", 
+      label: "21 × 10 cm", 
+      dims: "210 × 100 mm", 
+      oneSided: [
+        { min: 1, price: 0.57 },     // 0.76 - 25% = 0.57
+        { min: 101, price: 0.51 },   // 0.68 - 25% = 0.51
+        { min: 501, price: 0.405 },  // 0.54 - 25% = 0.405
+        { min: 2000, price: 0.30 },  // 0.40 - 25% = 0.30
+        { min: 3000, price: 0.27 },  // 0.36 - 25% = 0.27
+        { min: 4000, price: 0.21 },  // 0.28 - 25% = 0.21
+        { min: 5000, price: 0.165 }, // 0.22 - 25% = 0.165
+      ],
+      twoSided: [
+        { min: 1, price: 1.05 },     // 1.40 - 25% = 1.05
+        { min: 101, price: 0.90 },   // 1.20 - 25% = 0.90
+        { min: 501, price: 0.75 },   // 1.00 - 25% = 0.75
+        { min: 2000, price: 0.48 },  // 0.64 - 25% = 0.48
+        { min: 3000, price: 0.39 },  // 0.52 - 25% = 0.39
+        { min: 4000, price: 0.285 }, // 0.38 - 25% = 0.285
+        { min: 5000, price: 0.21 },  // 0.28 - 25% = 0.21
+      ]
+    },
   ],
-  PAPER_WEIGHTS: [{ key: "135", label: "135 g/mp (Standard)", multiplier: 1.0 }, { key: "250", label: "250 g/mp (Premium)", multiplier: 1.2 }],
+  PAPER_WEIGHTS: [
+    { key: "135", label: "135 g/m² (Standard)", multiplier: 1.0 },
+    { key: "250", label: "250 g/m² (Premium +20%)", multiplier: 1.2 }
+  ],
   PRO_FEE_PER_FACE: 50,
+  DISCOUNT_PERCENT: 25, // Reducere 25%
 };
 
 export type PriceInputFlyer = { sizeKey: string; quantity: number; twoSided: boolean; paperWeightKey: string; designOption: "upload" | "pro" };
 
 export const calculateFlyerPrice = (input: PriceInputFlyer) => {
   const sizeDef = FLYER_CONSTANTS.SIZES.find((x) => x.key === input.sizeKey);
-  const bracket = sizeDef?.brackets.find((b) => input.quantity <= b.max) || sizeDef?.brackets[0];
-  if (!bracket) return { finalPrice: 0, unitPrice: 0, proFee: 0 };
+  if (!sizeDef) return { finalPrice: 0, unitPrice: 0, proFee: 0 };
 
-  const baseUnit = input.twoSided ? bracket.twoSided : bracket.oneSided;
-  const multiplier = FLYER_CONSTANTS.PAPER_WEIGHTS.find((p) => p.key === input.paperWeightKey)?.multiplier ?? 1;
+  const tiers = input.twoSided ? sizeDef.twoSided : sizeDef.oneSided;
+  let baseUnit: number = tiers[0].price;
   
+  // Găsim prețul corect în funcție de cantitate
+  for (let i = tiers.length - 1; i >= 0; i--) {
+    if (input.quantity >= tiers[i].min) {
+      baseUnit = tiers[i].price;
+      break;
+    }
+  }
+
+  const multiplier = FLYER_CONSTANTS.PAPER_WEIGHTS.find((p) => p.key === input.paperWeightKey)?.multiplier ?? 1;
   const unitPrice = roundMoney(baseUnit * multiplier);
   const proFee = input.designOption === "pro" ? (input.twoSided ? FLYER_CONSTANTS.PRO_FEE_PER_FACE * 2 : FLYER_CONSTANTS.PRO_FEE_PER_FACE) : 0;
   
@@ -674,7 +1097,7 @@ export const calculateFlyerPrice = (input: PriceInputFlyer) => {
 // 12. PLIANTE
 // ==========================================
 export type PlianteFoldType = "simplu" | "fereastra" | "paralel" | "fluture";
-export type PlianteWeightKey = "115" | "170" | "250";
+export type PlianteWeightKey = "115" | "135" | "150" | "170" | "200" | "250";
 
 export const PLIANTE_CONSTANTS = {
   FOLDS: {
@@ -684,11 +1107,57 @@ export const PLIANTE_CONSTANTS = {
     fluture: { label: "4 biguri (Fluture)", open: "297×210mm", closed: "74.25×210mm" },
   } as Record<PlianteFoldType, { label: string; open: string; closed: string }>,
   PRICE_TABLE: {
-    "115": [{ min: 1, price: 3.2 }],
-    "170": [{ min: 1, price: 3.5 }],
-    "250": [{ min: 1, price: 3.7 }],
+    "115": [
+      { min: 1, price: 2.24 },     // < 100: 3.20 - 30% = 2.24
+      { min: 500, price: 1.386 },  // 500: 1.98 - 30% = 1.386
+      { min: 1000, price: 0.966 }, // 1000: 1.38 - 30% = 0.966
+      { min: 2500, price: 0.574 }, // 2500: 0.82 - 30% = 0.574
+      { min: 5000, price: 0.406 }, // 5000: 0.58 - 30% = 0.406
+      { min: 10000, price: 0.35 }, // 10000: 0.50 - 30% = 0.35
+    ],
+    "135": [
+      { min: 1, price: 2.31 },     // < 100: 3.30 - 30% = 2.31
+      { min: 500, price: 1.456 },  // 500: 2.08 - 30% = 1.456
+      { min: 1000, price: 1.036 }, // 1000: 1.48 - 30% = 1.036
+      { min: 2500, price: 0.644 }, // 2500: 0.92 - 30% = 0.644
+      { min: 5000, price: 0.476 }, // 5000: 0.68 - 30% = 0.476
+      { min: 10000, price: 0.42 }, // 10000: 0.60 - 30% = 0.42
+    ],
+    "150": [
+      { min: 1, price: 2.38 },     // < 100: 3.40 - 30% = 2.38
+      { min: 500, price: 1.526 },  // 500: 2.18 - 30% = 1.526
+      { min: 1000, price: 1.106 }, // 1000: 1.58 - 30% = 1.106
+      { min: 2500, price: 0.714 }, // 2500: 1.02 - 30% = 0.714
+      { min: 5000, price: 0.546 }, // 5000: 0.78 - 30% = 0.546
+      { min: 10000, price: 0.49 }, // 10000: 0.70 - 30% = 0.49
+    ],
+    "170": [
+      { min: 1, price: 2.45 },     // < 100: 3.50 - 30% = 2.45
+      { min: 500, price: 1.596 },  // 500: 2.28 - 30% = 1.596
+      { min: 1000, price: 1.176 }, // 1000: 1.68 - 30% = 1.176
+      { min: 2500, price: 0.784 }, // 2500: 1.12 - 30% = 0.784
+      { min: 5000, price: 0.616 }, // 5000: 0.88 - 30% = 0.616
+      { min: 10000, price: 0.56 }, // 10000: 0.80 - 30% = 0.56
+    ],
+    "200": [
+      { min: 1, price: 2.52 },     // < 100: 3.60 - 30% = 2.52
+      { min: 500, price: 1.666 },  // 500: 2.38 - 30% = 1.666
+      { min: 1000, price: 1.246 }, // 1000: 1.78 - 30% = 1.246
+      { min: 2500, price: 0.854 }, // 2500: 1.22 - 30% = 0.854
+      { min: 5000, price: 0.686 }, // 5000: 0.98 - 30% = 0.686
+      { min: 10000, price: 0.63 }, // 10000: 0.90 - 30% = 0.63
+    ],
+    "250": [
+      { min: 1, price: 2.59 },     // < 100: 3.70 - 30% = 2.59
+      { min: 500, price: 1.736 },  // 500: 2.48 - 30% = 1.736
+      { min: 1000, price: 1.316 }, // 1000: 1.88 - 30% = 1.316
+      { min: 2500, price: 0.924 }, // 2500: 1.32 - 30% = 0.924
+      { min: 5000, price: 0.756 }, // 5000: 1.08 - 30% = 0.756
+      { min: 10000, price: 0.70 }, // 10000: 1.00 - 30% = 0.70
+    ],
   } as Record<PlianteWeightKey, { min: number; price: number }[]>,
   PRO_FEES: { simplu: 100, fereastra: 135, paralel: 175, fluture: 200 } as Record<PlianteFoldType, number>,
+  DISCOUNT_PERCENT: 30, // Reducere 30%
 };
 
 export type PriceInputPliante = { weight: PlianteWeightKey; quantity: number; fold: PlianteFoldType; designOption: "upload" | "pro" };
@@ -696,6 +1165,15 @@ export type PriceInputPliante = { weight: PlianteWeightKey; quantity: number; fo
 export const calculatePliantePrice = (input: PriceInputPliante) => {
   const tiers = PLIANTE_CONSTANTS.PRICE_TABLE[input.weight];
   let unitBasePrice: number = tiers[0].price;
+  
+  // Găsim prețul corect în funcție de cantitate
+  for (let i = tiers.length - 1; i >= 0; i--) {
+    if (input.quantity >= tiers[i].min) {
+      unitBasePrice = tiers[i].price;
+      break;
+    }
+  }
+  
   const subtotal = roundMoney(unitBasePrice * input.quantity);
   const proFee = input.designOption === "pro" ? (PLIANTE_CONSTANTS.PRO_FEES[input.fold] ?? 0) : 0;
   const finalPrice = roundMoney(subtotal + proFee);
@@ -708,7 +1186,12 @@ export const calculatePliantePrice = (input: PriceInputPliante) => {
 // ==========================================
 export const TAPET_CONSTANTS = {
   PRICES: {
-    bands: [{ max_sqm: Infinity, price_per_sqm: 150 }],
+    bands: [
+      { max_sqm: 1, price_per_sqm: 150 },
+      { max_sqm: 5, price_per_sqm: 140 },
+      { max_sqm: 20, price_per_sqm: 130 },
+      { max_sqm: Infinity, price_per_sqm: 120 },
+    ],
     multipliers: { adhesive: 1.10 }
   },
   PRO_DESIGN_FEE: 200,
@@ -720,8 +1203,19 @@ export const calculateTapetPrice = (input: PriceInputTapet) => {
   if (input.width_cm <= 0 || input.height_cm <= 0) return { finalPrice: 0, total_sqm: 0, pricePerUnit: 0 };
   const sqmPerUnit = (input.width_cm / 100) * (input.height_cm / 100);
   const totalSqm = roundMoney(sqmPerUnit * input.quantity);
-  let pricePerSqm = 150; 
+  
+  // Găsim prețul pe mp în funcție de totalul de mp
+  let pricePerSqm = 120; // default pentru > 20 MP
+  for (const band of TAPET_CONSTANTS.PRICES.bands) {
+    if (totalSqm <= band.max_sqm) {
+      pricePerSqm = band.price_per_sqm;
+      break;
+    }
+  }
+  
+  // Aplicăm adaos 10% pentru auto-adeziv
   if (input.want_adhesive) pricePerSqm *= TAPET_CONSTANTS.PRICES.multipliers.adhesive;
+  
   let finalPrice = roundMoney(totalSqm * pricePerSqm);
   if (input.designOption === "pro") finalPrice += TAPET_CONSTANTS.PRO_DESIGN_FEE;
   return { finalPrice: roundMoney(finalPrice), totalSqm, pricePerUnit: roundMoney(finalPrice / input.quantity) };
@@ -816,4 +1310,144 @@ export const calculateFonduriEUPrice = (input: PriceInputFonduriEU) => {
   }
 
   return { finalPrice: roundMoney(finalPrice) };
+};
+
+// ==========================================
+// WINDOW GRAPHICS
+// ==========================================
+export const WINDOW_GRAPHICS_CONSTANTS = {
+  PRICES: {
+    bands: [
+      { max: 1, price: 250 },
+      { max: 5, price: 200 },
+      { max: 20, price: 170 },
+      { max: Infinity, price: 150 },
+    ]
+  },
+  PRO_DESIGN_FEE: 100,
+};
+
+export type PriceInputWindowGraphics = {
+  width_cm: number;
+  height_cm: number;
+  quantity: number;
+  designOption: "upload" | "pro";
+};
+
+export const calculateWindowGraphicsPrice = (input: PriceInputWindowGraphics) => {
+  const { width_cm, height_cm, quantity, designOption } = input;
+  
+  if (width_cm <= 0 || height_cm <= 0) {
+    return {
+      finalPrice: 0,
+      pricePerSqm: 0,
+      total_sqm: 0,
+      designFee: 0,
+    };
+  }
+
+  const total_sqm = (width_cm * height_cm * quantity) / 10000;
+
+  // Find price per sqm based on bands
+  let pricePerSqm = WINDOW_GRAPHICS_CONSTANTS.PRICES.bands[0].price;
+  for (const band of WINDOW_GRAPHICS_CONSTANTS.PRICES.bands) {
+    if (total_sqm <= band.max) {
+      pricePerSqm = band.price;
+      break;
+    }
+  }
+
+  let finalPrice = roundMoney(total_sqm * pricePerSqm);
+
+  // Add design fee if pro option
+  const designFee = designOption === "pro" ? WINDOW_GRAPHICS_CONSTANTS.PRO_DESIGN_FEE : 0;
+  finalPrice += designFee;
+
+  return {
+    finalPrice: roundMoney(finalPrice),
+    pricePerSqm,
+    total_sqm: roundMoney(total_sqm),
+    designFee,
+  };
+};
+
+// ==========================================
+// ROLLUP BANNER
+// ==========================================
+export const ROLLUP_CONSTANTS = {
+  SIZES: [
+    { width_cm: 85, label: "Compact" },
+    { width_cm: 100, label: "Standard" },
+    { width_cm: 120, label: "Mare" },
+    { width_cm: 150, label: "Premium" },
+  ],
+  PRICE_TABLE: {
+    85: [
+      { min: 1, max: 5, price: 220 },
+      { min: 6, max: 10, price: 200 },
+      { min: 11, max: 20, price: 190 },
+      { min: 21, max: Infinity, price: 175 },
+    ],
+    100: [
+      { min: 1, max: 5, price: 250 },
+      { min: 6, max: 10, price: 240 },
+      { min: 11, max: 20, price: 230 },
+      { min: 21, max: Infinity, price: 200 },
+    ],
+    120: [
+      { min: 1, max: 5, price: 290 },
+      { min: 6, max: 10, price: 270 },
+      { min: 11, max: 20, price: 250 },
+      { min: 21, max: Infinity, price: 230 },
+    ],
+    150: [
+      { min: 1, max: 5, price: 390 },
+      { min: 6, max: 10, price: 370 },
+      { min: 11, max: 20, price: 360 },
+      { min: 21, max: Infinity, price: 330 },
+    ],
+  },
+  PRO_DESIGN_FEE: 100,
+};
+
+export type PriceInputRollup = {
+  width_cm: number;
+  quantity: number;
+  designOption: "upload" | "pro";
+};
+
+export const calculateRollupPrice = (input: PriceInputRollup) => {
+  const { width_cm, quantity, designOption } = input;
+  
+  // Get price table for selected width
+  const priceTable = ROLLUP_CONSTANTS.PRICE_TABLE[width_cm as keyof typeof ROLLUP_CONSTANTS.PRICE_TABLE];
+  
+  if (!priceTable) {
+    return {
+      finalPrice: 0,
+      unitPrice: 0,
+      designFee: 0,
+    };
+  }
+
+  // Find price per unit based on quantity
+  let unitPrice = priceTable[0].price;
+  for (const tier of priceTable) {
+    if (quantity >= tier.min && quantity <= tier.max) {
+      unitPrice = tier.price;
+      break;
+    }
+  }
+  
+  let finalPrice = unitPrice * quantity;
+
+  // Add design fee if pro option
+  const designFee = designOption === "pro" ? ROLLUP_CONSTANTS.PRO_DESIGN_FEE : 0;
+  finalPrice += designFee;
+
+  return {
+    finalPrice: roundMoney(finalPrice),
+    unitPrice,
+    designFee,
+  };
 };

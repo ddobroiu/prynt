@@ -15,7 +15,8 @@ import {
   calculateAutocolantePrice, 
   AUTOCOLANTE_CONSTANTS, 
   formatMoneyDisplay, 
-  type PriceInputAutocolante 
+  type PriceInputAutocolante,
+  type AutocolantesMaterialKey
 } from "@/lib/pricing";
 
 const GALLERY_BASE = [
@@ -72,21 +73,9 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
 
 const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
 
-function AutocolanteModeSwitchInline() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const isDiecut = pathname?.includes("/autocolante-diecut");
-  return (
-    <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
-      <button type="button" onClick={() => router.push("/autocolante")} className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${!isDiecut ? "bg-indigo-600 text-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>Standard</button>
-      <button type="button" onClick={() => router.push("/autocolante-diecut")} className={`ml-1 px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${isDiecut ? "bg-indigo-600 text-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>Die-cut</button>
-    </div>
-  );
-}
-
 function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
-  const inc = (d: number) => onChange(Math.max(10, value + d)); // Min 10 qty default
-  return <div><label className="field-label">{label}</label><div className="flex"><button onClick={() => inc(-10)} className="p-3 bg-gray-100 rounded-l-lg hover:bg-gray-200" aria-label={`Scade ${label.toLowerCase()}`}><Minus size={16} /></button><input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-center w-full rounded-none border-x-0" /><button onClick={() => inc(10)} className="p-3 bg-gray-100 rounded-r-lg hover:bg-gray-200" aria-label={`Creşte ${label.toLowerCase()}`}><Plus size={16} /></button></div></div>;
+  const inc = (d: number) => onChange(Math.max(1, value + d)); // Min 1
+  return <div><label className="field-label">{label}</label><div className="flex"><button onClick={() => inc(-10)} className="p-3 bg-gray-100 rounded-l-lg hover:bg-gray-200" aria-label={`Scade ${label.toLowerCase()}`}><Minus size={16} /></button><input type="number" value={value} onChange={(e) => onChange(Math.max(1, parseInt(e.target.value) || 1))} className="input text-center w-full rounded-none border-x-0" min="1" /><button onClick={() => inc(10)} className="p-3 bg-gray-100 rounded-r-lg hover:bg-gray-200" aria-label={`Creşte ${label.toLowerCase()}`}><Plus size={16} /></button></div></div>;
 }
 
 function OptionButton({ active, onClick, title, subtitle }: { active: boolean; onClick: () => void; title: string; subtitle?: string; }) {
@@ -107,10 +96,10 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
   const [input, setInput] = useState<PriceInputAutocolante>({
     width_cm: initW ?? 0,
     height_cm: initH ?? 0,
-    quantity: 50,
-    material: "paper_gloss",
+    quantity: 10,
+    material: "oracal_641",
+    print_type: "print_cut",
     laminated: false,
-    shape_diecut: false,
     designOption: "upload",
   });
 
@@ -152,7 +141,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
   useUserActivityTracking(cartData);
 
   const updateInput = <K extends keyof PriceInputAutocolante>(k: K, v: PriceInputAutocolante[K]) => setInput((p) => ({ ...p, [k]: v }));
-  const setQty = (v: number) => updateInput("quantity", Math.max(10, Math.floor(v))); // Min 10
+  const setQty = (v: number) => updateInput("quantity", Math.max(1, Math.floor(v))); // Min 1
   const onChangeLength = (v: string) => { const d = v.replace(/\D/g, ""); setLengthText(d); updateInput("width_cm", d === "" ? 0 : parseInt(d, 10)); };
   const onChangeHeight = (v: string) => { const d = v.replace(/\D/g, ""); setHeightText(d); updateInput("height_cm", d === "" ? 0 : parseInt(d, 10)); };
 
@@ -183,9 +172,11 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
       return;
     }
 
+    const materialDef = AUTOCOLANTE_CONSTANTS.MATERIALS.find(m => m.key === input.material);
+    const materialLabel = materialDef?.label || input.material;
     const unitPrice = Math.round((displayedTotal / input.quantity) * 100) / 100;
     const uniqueId = `${productSlug ?? 'autocolante'}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    const title = `Autocolant ${input.material === 'vinyl' ? 'Vinyl' : 'Hârtie'} - ${input.width_cm}x${input.height_cm} cm`;
+    const title = `Autocolant ${materialLabel} - ${input.width_cm}x${input.height_cm} cm`;
 
     addItem({
       id: uniqueId,
@@ -198,8 +189,12 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
       quantity: input.quantity,
       currency: "RON",
       metadata: {
-        "Material": input.material === 'vinyl' ? "Vinyl" : (input.material === 'paper_matte' ? "Hârtie Mată" : "Hârtie Lucioasă"),
-        "Finisaje": `${input.laminated ? "Laminat" : "Nelaminat"}, ${input.shape_diecut ? "Die-cut (Contur)" : "Formă Dreptunghiulară"}`,
+        "Material": materialLabel,
+        "Tip producție": input.print_type === "print_only" ? "Doar Print (-20%)" : "Print + Cut",
+        "Laminare": input.laminated ? "Da (+10%)" : "Nu",
+        "Dimensiuni": `${input.width_cm} x ${input.height_cm} cm`,
+        "Suprafață totală": `${priceData.total_sqm.toFixed(2)} mp`,
+        "Preț/mp": `${priceData.pricePerSqm} lei`,
         "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : input.designOption === 'text_only' ? 'Doar text' : 'Grafică proprie',
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(AUTOCOLANTE_CONSTANTS.PRO_DESIGN_FEE) }),
         ...(input.designOption === 'text_only' && { "Text": textDesign }),
@@ -215,8 +210,10 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
   useEffect(() => setActiveImage(GALLERY[activeIndex]), [activeIndex]);
 
   const summaryStep1 = input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}x${input.height_cm}cm, ${input.quantity} buc.` : "Alege";
-  const materialLabel = input.material === 'vinyl' ? "Vinyl" : (input.material === 'paper_matte' ? "Hârtie Mată" : "Hârtie Lucioasă");
-  const summaryStep2 = `${materialLabel}, ${input.laminated ? "Laminat" : "Standard"}`;
+  const materialDef = AUTOCOLANTE_CONSTANTS.MATERIALS.find(m => m.key === input.material);
+  const printTypeLabel = input.print_type === "print_only" ? "Doar Print (-20%)" : "Print + Cut";
+  const laminatedLabel = input.laminated ? ", Laminat (+10%)" : "";
+  const summaryStep2 = `${materialDef?.label.split(' — ')[0] || input.material}, ${printTypeLabel}${laminatedLabel}`;
   const summaryStep3 = input.designOption === 'upload' ? 'Grafică proprie' : input.designOption === 'text_only' ? 'Doar text' : 'Design Pro';
 
   return (
@@ -234,7 +231,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
           </div>
           <div>
             <header className="mb-6">
-              <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Autocolante</h1><AutocolanteModeSwitchInline /></div>
+              <div className="flex justify-between items-center gap-4 mb-3"><h1 className="text-3xl font-extrabold text-gray-900">Configurator Autocolante</h1></div>
               <div className="flex justify-between items-center"><p className="text-gray-600">Personalizează opțiunile în 3 pași simpli.</p><button type="button" onClick={() => setDetailsOpen(true)} className="btn-outline inline-flex items-center text-sm px-3 py-1.5"><Info size={16} /><span className="ml-2">Detalii</span></button></div>
             </header>
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4">
@@ -245,24 +242,45 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                   <div className="md:col-span-2"><NumberInput label="Cantitate" value={input.quantity} onChange={setQty} /></div>
                 </div>
               </AccordionStep>
-              <AccordionStep stepNumber={2} title="Material & Finisaje" summary={summaryStep2} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>
-                <label className="field-label mb-2">Material</label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
-                    <OptionButton active={input.material === "paper_gloss"} onClick={() => updateInput("material", "paper_gloss")} title="Hârtie Lucioasă" subtitle="Standard" />
-                    <OptionButton active={input.material === "paper_matte"} onClick={() => updateInput("material", "paper_matte")} title="Hârtie Mată" subtitle="Elegant" />
-                    <OptionButton active={input.material === "vinyl"} onClick={() => updateInput("material", "vinyl")} title="Vinyl (PVC)" subtitle="Rezistent apă" />
+              <AccordionStep stepNumber={2} title="Material & Tip Print" summary={summaryStep2} isOpen={activeStep === 2} onClick={() => setActiveStep(2)}>
+                <label className="field-label mb-2">Tip folie Oracal</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+                  {AUTOCOLANTE_CONSTANTS.MATERIALS.map((mat) => {
+                    const [name, desc] = mat.label.split(' — ');
+                    return (
+                      <OptionButton 
+                        key={mat.key}
+                        active={input.material === mat.key} 
+                        onClick={() => updateInput("material", mat.key as AutocolantesMaterialKey)} 
+                        title={name} 
+                        subtitle={desc}
+                      />
+                    );
+                  })}
                 </div>
-                <label className="field-label mb-2">Opțiuni Extra</label>
-                <div className="flex flex-col gap-2">
-                    <label className="flex items-center gap-3 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                        <input type="checkbox" className="checkbox" checked={input.laminated} onChange={(e) => updateInput("laminated", e.target.checked)} />
-                        <div><span className="text-sm font-bold text-gray-800">Laminare</span><p className="text-xs text-gray-500">Protecție extra UV și zgârieturi</p></div>
-                    </label>
-                    <label className="flex items-center gap-3 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                        <input type="checkbox" className="checkbox" checked={input.shape_diecut} onChange={(e) => updateInput("shape_diecut", e.target.checked)} />
-                        <div><span className="text-sm font-bold text-gray-800">Die-cut (Tăiere contur)</span><p className="text-xs text-gray-500">Decupare pe forma graficii</p></div>
-                    </label>
+                <label className="field-label mb-2">Tip producție</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+                  <OptionButton 
+                    active={input.print_type === "print_cut"} 
+                    onClick={() => updateInput("print_type", "print_cut")} 
+                    title="Print + Cut" 
+                    subtitle="Tăiere pe contur (standard)"
+                  />
+                  <OptionButton 
+                    active={input.print_type === "print_only"} 
+                    onClick={() => updateInput("print_type", "print_only")} 
+                    title="Doar Print (-20%)" 
+                    subtitle="Fără tăiere, reducere 20%"
+                  />
                 </div>
+                <label className="field-label mb-2">Finisaj</label>
+                <label className="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input type="checkbox" className="checkbox" checked={input.laminated} onChange={(e) => updateInput("laminated", e.target.checked)} />
+                  <div>
+                    <span className="text-sm font-bold text-gray-800">Laminare (+10%)</span>
+                    <p className="text-xs text-gray-500">Protecție extra UV și zgârieturi</p>
+                  </div>
+                </label>
               </AccordionStep>
               <AccordionStep stepNumber={3} title="Grafică" summary={summaryStep3} isOpen={activeStep === 3} onClick={() => setActiveStep(3)} isLast={true}>
                 <div>
