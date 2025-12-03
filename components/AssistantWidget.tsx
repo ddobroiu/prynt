@@ -10,6 +10,7 @@ type Message = {
   role: "user" | "assistant";
   content: string;
   suggestions?: string[];
+  downloadButton?: { text: string; url: string } | null;
 };
 
 interface AssistantWidgetProps {
@@ -54,6 +55,7 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
     let cleanText = rawText;
     let mode: InputMode = "text";
     let suggestions: string[] = [];
+    let downloadButton: { text: string; url: string } | null = null;
 
     // Detectăm tag-urile speciale pentru Județ și Localitate
     if (rawText.includes("||REQUEST: JUDET||")) {
@@ -62,6 +64,17 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
     } else if (rawText.includes("||REQUEST: LOCALITATE||")) {
         mode = "localitate";
         cleanText = cleanText.replace("||REQUEST: LOCALITATE||", "");
+    }
+
+    // Parsăm butonul de download: ||BUTTON:text:url||
+    const buttonRegex = /\|\|BUTTON:([^:]+):([^\|]+)\|\|/i;
+    const buttonMatch = cleanText.match(buttonRegex);
+    if (buttonMatch) {
+      downloadButton = {
+        text: buttonMatch[1].trim(),
+        url: buttonMatch[2].trim()
+      };
+      cleanText = cleanText.replace(buttonMatch[0], "");
     }
 
     // Parsăm opțiunile (butoanele) dacă există: ||OPTIONS: [...]||
@@ -88,7 +101,7 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
         });
     }
 
-    return { cleanText: cleanText.trim(), suggestions, mode };
+    return { cleanText: cleanText.trim(), suggestions, mode, downloadButton };
   };
 
   const sendMessage = async (textOverride?: string, displayLabel?: string) => {
@@ -121,9 +134,9 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
       const data = await res.json();
       
       // Procesăm răspunsul pentru a vedea dacă cere Județ/Localitate sau oferă Opțiuni
-      const { cleanText, suggestions, mode } = parseResponse(data.content || data.message || "");
+      const { cleanText, suggestions, mode, downloadButton } = parseResponse(data.content || data.message || "");
       
-      setMessages((prev) => [...prev, { role: "assistant", content: cleanText, suggestions }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: cleanText, suggestions, downloadButton }]);
       setInputMode(mode);
 
     } catch (error) {
@@ -206,6 +219,23 @@ export default function AssistantWidget({ embedded = false }: AssistantWidgetPro
                       {option}
                     </button>
                   ))}
+               </div>
+            )}
+
+            {/* Buton Download PDF */}
+            {msg.role === 'assistant' && msg.downloadButton && idx === messages.length - 1 && !isLoading && (
+               <div className="pl-10 animate-[fadeIn_0.3s_ease-out]">
+                  <a 
+                    href={msg.downloadButton.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {msg.downloadButton.text}
+                  </a>
                </div>
             )}
           </div>

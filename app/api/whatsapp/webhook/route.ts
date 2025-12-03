@@ -387,6 +387,20 @@ export async function POST(req: Request) {
                   sendResult = await sendWhatsAppMessage(from, replyText);
                }
             }
+            // Caz 1.6: Tag-ul ||BUTTON:text:url|| pentru download link
+            else if (replyText.includes("||BUTTON:")) {
+               const buttonMatch = replyText.match(/\|\|BUTTON:([^:]+):([^\|]+)\|\|/);
+               if (buttonMatch) {
+                  const buttonText = buttonMatch[1].trim();
+                  const buttonUrl = buttonMatch[2].trim();
+                  const cleanText = replyText.replace(/\|\|BUTTON:.*?\|\|/g, "").trim();
+                  
+                  // Trimite mesaj text + link clickabil
+                  sendResult = await sendWhatsAppMessage(from, `${cleanText}\n\n🔗 ${buttonText}: ${buttonUrl}`);
+               } else {
+                  sendResult = await sendWhatsAppMessage(from, replyText);
+               }
+            }
             // Caz 2: Întrebări de tip "Da/Nu"
             else if (
                 lowerReply.includes("?") && 

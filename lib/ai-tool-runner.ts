@@ -299,7 +299,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           link: offerLink,
           customerName: customer_details.name,
           total: totalAmount,
-          message: `Oferta PDF a fost generată cu succes pentru ${customer_details.name}!\n\n📄 **Link descărcare:** ${offerLink}\n\n**Detalii ofertă:**\n- Număr ofertă: #${nextOrderNo}\n- Total: ${totalAmount.toFixed(2)} RON\n- Validitate: 30 zile\n- Format: PDF profesional cu logo Prynt.ro\n\nOferta conține toate detaliile produselor discutate. Dacă totul este în regulă, putem transforma oferta în comandă fermă!` 
+          message: `Oferta PDF a fost generată cu succes pentru ${customer_details.name}!\n\n**Detalii ofertă:**\n- Număr ofertă: #${nextOrderNo}\n- Total: ${totalAmount.toFixed(2)} RON\n- Validitate: 30 zile\n- Format: PDF profesional cu logo Prynt.ro\n\nOferta conține toate detaliile produselor discutate. Dacă totul este în regulă, putem transforma oferta în comandă fermă!\n\n||BUTTON:Descarcă Oferta PDF:${offerLink}||` 
       };
     }
 
