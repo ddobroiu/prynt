@@ -129,10 +129,10 @@ export default function RootLayout({
               name: "Prynt.ro",
               legalName: "Prynt - Tipar Digital & Productie Publicitara",
               url: (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro").replace(/\/$/, ""),
-              logo: new URL("/logo.png", (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro")).toString(),
+              logo: new URL("/logo.jpg", (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro")).toString(),
               description: "Tipar digital, bannere publicitare, autocolante personalizate, pliante, canvas si materiale rigide. Configurare online cu pret instant.",
               priceRange: "$$",
-              image: new URL("/logo.png", (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro")).toString(),
+              image: new URL("/logo.jpg", (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || "https://www.prynt.ro")).toString(),
               telephone: "+40 750 473 111",
               email: "contact@prynt.ro",
               address: {
