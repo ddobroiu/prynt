@@ -68,7 +68,7 @@ export default function Footer() {
               {siteConfig.description} Platforma completă de tipar digital unde configurezi, vizualizezi prețul și comanzi instant.
             </p>
             <div className="flex items-center gap-3">
-              {siteConfig.socialLinks.map((link) => (
+              {siteConfig.socialLinks.filter(l => l.title !== "Twitter").map((link) => (
                 <Link
                   key={link.title}
                   href={link.href}

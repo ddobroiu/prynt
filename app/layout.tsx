@@ -74,6 +74,9 @@ export default function RootLayout({
   return (
     <html lang="ro" data-theme="light">
       <head>
+        <link rel="icon" href="/simbol.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/simbol.jpg" />
+        
         <GlobalStructuredData />
         <LocalBusinessSchema />
         

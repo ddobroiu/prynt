@@ -116,10 +116,10 @@ export const siteConfig = {
   ],
 
   socialLinks: [
-    { title: "Facebook", href: "https://facebook.com", icon: Facebook },
-    { title: "Instagram", href: "https://instagram.com", icon: Instagram },
+    { title: "Facebook", href: "https://www.facebook.com/pryntr", icon: Facebook },
+    { title: "Instagram", href: "https://www.instagram.com/prynt_ro/", icon: Instagram },
+    { title: "TikTok", href: "https://www.tiktok.com/@prynt.ro", icon: Tag },
     { title: "LinkedIn", href: "https://linkedin.com", icon: Linkedin },
-    { title: "Twitter", href: "https://twitter.com", icon: Twitter },
   ],
 };
 

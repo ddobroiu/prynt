@@ -83,8 +83,8 @@ export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
   const category = categoryRaw.toLowerCase();
   const dir = (category === "bannere" ? "banner" : category).toLowerCase();
   
-  // Folosește prima poză din configurator ca fallback
-  const defaultImage = CONFIGURATOR_FIRST_IMAGES[slug] || CONFIGURATOR_FIRST_IMAGES[category] || `/products/${dir}/${slug}.webp`;
+  // Folosește prima poză din configurator ca fallback dacă produsul nu are images
+  const defaultImage = CONFIGURATOR_FIRST_IMAGES[category] || CONFIGURATOR_FIRST_IMAGES[slug] || `/products/${dir}/banner-1.webp`;
   
   return {
     id: p.id ?? `item-${slug}`,
@@ -93,7 +93,7 @@ export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
     title: p.title ?? slug,
     description: p.description ?? "",
     images: toWebpPaths(
-      p.images ?? [defaultImage, `/products/${dir}/${slug}-2.webp`, `/products/${dir}/${slug}-3.webp`, `/products/${dir}/${slug}-4.webp`]
+      p.images ?? [defaultImage]
     ),
     priceBase: p.priceBase ?? 250,
     currency: p.currency ?? "RON",
