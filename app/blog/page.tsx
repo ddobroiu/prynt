@@ -22,7 +22,7 @@ export const metadata = {
     description: "Articole cu sfaturi despre bannere, autocolante, pliante, afișe și materiale de promovare. Ghiduri practice și tips din industrie.",
     type: "website",
     images: [{
-      url: "/logo.png",
+      url: "/logo.jpg",
       width: 1200,
       height: 630,
       alt: "Blog Prynt - Sfaturi tipar digital"

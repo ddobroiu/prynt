@@ -8,7 +8,7 @@ export default function LocalBusinessSchema() {
     "name": "Prynt - Tipografie Digitală",
     "description": "Servicii profesionale de tipar digital: bannere, afișe, autocolante, canvas, materiale rigide. Configurare online, prețuri instant, livrare rapidă în toată România.",
     "url": "https://www.prynt.ro",
-    "logo": "https://www.prynt.ro/logo.png",
+    "logo": "https://www.prynt.ro/logo.jpg",
     "image": "https://www.prynt.ro/og-image.jpg",
     "telephone": "+40-XXX-XXX-XXX", // TODO: Adaugă numărul real
     "email": "contact@prynt.ro",

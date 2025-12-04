@@ -34,7 +34,7 @@ export function generateEnhancedMetadata(config: EnhancedSEOConfig) {
       type: "website",
       images: [
         {
-          url: config.ogImage || `${baseUrl}/logo.png`,
+          url: config.ogImage || `${baseUrl}/logo.jpg`,
           width: 1200,
           height: 630,
           alt: config.title,
@@ -74,7 +74,7 @@ export function generateProductStructuredData(product: any, baseUrl: string) {
     "@type": "Product",
     "name": product.title,
     "description": product.description,
-    "image": product.images?.map((img: string) => `${baseUrl}${img}`) || [`${baseUrl}/logo.png`],
+    "image": product.images?.map((img: string) => `${baseUrl}${img}`) || [`${baseUrl}/logo.jpg`],
     "brand": {
       "@type": "Brand",
       "name": "Prynt.ro"
@@ -113,7 +113,7 @@ export function generateOrganizationStructuredData() {
     "@type": "Organization",
     "name": "Prynt.ro",
     "url": baseUrl,
-    "logo": `${baseUrl}/logo.png`,
+    "logo": `${baseUrl}/logo.jpg`,
     "description": "Tipar digital profesional - bannere, afișe, canvas, autocolante și materiale publicitare",
     "address": {
       "@type": "PostalAddress",
