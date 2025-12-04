@@ -19,6 +19,7 @@ const FREE_SHIPPING_THRESHOLD = 500;
 const STANDARD_SHIPPING_COST = 19.99; 
 
 export default function CartWidget() {
+  // FORCE RELOAD - coșul TREBUIE să fie vizibil cu text-zinc-800
   const { items, removeItem, updateQuantity, cartTotal, cartCount } = useCart();
   const [isOpen, setIsOpen] = React.useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -72,10 +73,11 @@ export default function CartWidget() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <button className="relative p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors group" aria-label="Deschide coșul de cumpărături">
-          <ShoppingCart className="h-5 w-5 text-zinc-800 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+        <button className="relative flex items-center gap-2 px-3 py-2 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-all" aria-label="Deschide coșul de cumpărături">
+          <ShoppingCart size={18} className="text-zinc-700 dark:text-zinc-300" />
+          <span className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Coș</span>
           {cartCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-sm animate-in zoom-in">
+            <span className="absolute -top-1.5 -right-1.5 bg-indigo-600 text-white text-[11px] font-semibold min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full shadow-sm">
               {cartCount}
             </span>
           )}

@@ -169,16 +169,17 @@ const HeaderActions = () => {
   }, [isAccountOpen]);
 
   return (
-    <div className="flex items-center gap-3 sm:gap-5">
+    <div className="flex items-center gap-4">
       {/* Account Dropdown */}
       {session?.user ? (
         <div className="relative account-dropdown">
           <button 
-            className="p-2 text-zinc-800 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" 
+            className="flex items-center gap-2 px-3 py-2 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-all" 
             aria-label="Cont"
             onClick={() => setIsAccountOpen(!isAccountOpen)}
           >
-            <User size={22} />
+            <User size={18} className="text-zinc-700 dark:text-zinc-300" />
+            <span className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Cont</span>
           </button>
           
           {/* Dropdown Menu */}
@@ -281,8 +282,9 @@ const HeaderActions = () => {
           </div>
         </div>
       ) : (
-        <Link href="/login" className="p-2 text-zinc-800 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Cont">
-          <User size={22} />
+        <Link href="/login" className="flex items-center gap-2 px-3 py-2 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-all" aria-label="Cont">
+          <User size={18} className="text-zinc-700 dark:text-zinc-300" />
+          <span className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Login</span>
         </Link>
       )}
 
@@ -293,6 +295,7 @@ const HeaderActions = () => {
 };
 
 export default function Header() {
+  // FORCE RELOAD - iconițele și logo-ul TREBUIE să fie vizibile
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -339,7 +342,7 @@ export default function Header() {
             <img 
               src="/logo.jpg" 
               alt="Prynt.ro" 
-              className="h-7 sm:h-8 w-auto object-contain"
+              className="h-8 w-auto object-contain"
             />
           </Link>
         </div>

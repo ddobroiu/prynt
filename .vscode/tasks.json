@@ -1,0 +1,26 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Restart Dev Server",
+			"type": "shell",
+			"command": "taskkill /F /IM node.exe 2>$null; Start-Sleep -Seconds 2; Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; npm run dev",
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Dev Server",
+			"type": "shell",
+			"command": "npm run dev",
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Kill and Restart",
+			"type": "shell",
+			"command": "Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep 3; npm run dev",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
