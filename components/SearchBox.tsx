@@ -206,7 +206,7 @@ export default function SearchBox({
           ref={inputRef}
           type="text"
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white hover:bg-gray-50 focus:bg-white"
+          className="w-full pl-10 pr-10 py-3 text-sm border-[3px] border-red-500 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all bg-gray-100 dark:bg-zinc-900"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}

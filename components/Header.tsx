@@ -100,7 +100,13 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto p-4">\n            <ul className="space-y-1">
+          {/* Bara de căutare mobilă */}
+          <div className="px-4 pt-4 pb-2">
+            <SearchBox placeholder="Caută produse..." />
+          </div>
+
+          <nav className="flex-1 overflow-y-auto p-4">
+            <ul className="space-y-1">
             {siteConfig.headerNav.map((item) => (
               <li key={item.label}>
                 {item.children ? (
@@ -178,7 +184,10 @@ const HeaderActions = () => {
             aria-label="Cont"
             onClick={() => setIsAccountOpen(!isAccountOpen)}
           >
-            <User size={18} className="text-zinc-700 dark:text-zinc-300" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-zinc-700 dark:text-zinc-300">
+              <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
+              <path d="M5.5 20.5C5.5 17 8.5 14 12 14C15.5 14 18.5 17 18.5 20.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
             <span className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Cont</span>
           </button>
           
@@ -283,7 +292,10 @@ const HeaderActions = () => {
         </div>
       ) : (
         <Link href="/login" className="flex items-center gap-2 px-3 py-2 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-all" aria-label="Cont">
-          <User size={18} className="text-zinc-700 dark:text-zinc-300" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-zinc-700 dark:text-zinc-300">
+            <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
+            <path d="M5.5 20.5C5.5 17 8.5 14 12 14C15.5 14 18.5 17 18.5 20.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
           <span className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Login</span>
         </Link>
       )}
@@ -328,7 +340,8 @@ export default function Header() {
           : "bg-white dark:bg-black border-zinc-200 dark:border-zinc-800"
       }`}
     >
-      <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      {/* PRIMUL RÂND: Logo, Căutare, Cont + Coș */}
+      <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800">
         {/* Left: Mobile Toggle & Logo */}
         <div className="flex items-center gap-3">
            <button 
@@ -342,21 +355,25 @@ export default function Header() {
             <img 
               src="/logo.jpg" 
               alt="Prynt.ro" 
-              className="h-8 w-auto object-contain"
+              className="h-10 max-h-10 w-auto max-w-[140px] object-contain"
             />
           </Link>
         </div>
 
-        {/* Center: Desktop Nav & Search */}
-        <div className="hidden lg:flex items-center gap-8">
-          <DesktopNav />
-          <div className="w-80">
-            <SearchBox placeholder="Caută produse..." />
-          </div>
+        {/* Center: Search */}
+        <div className="hidden lg:block flex-1 max-w-2xl mx-8">
+          <SearchBox placeholder="Caută produse..." />
         </div>
 
         {/* Right: Actions */}
         <HeaderActions />
+      </div>
+
+      {/* AL DOILEA RÂND: Meniu de navigare */}
+      <div className="hidden lg:block border-b border-zinc-100 dark:border-zinc-800">
+        <div className="container mx-auto px-4 sm:px-6">
+          <DesktopNav />
+        </div>
       </div>
 
       <MobileNav isOpen={isMobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
