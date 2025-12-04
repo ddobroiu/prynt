@@ -15,8 +15,10 @@ import {
 } from "@/lib/pricing";
 
 const GALLERY = [
-  "/products/materiale/polipropilena/1.webp",
-  "/products/materiale/polipropilena/1.webp",
+  "/products/materiale/polipropilena/polipropilena-1.webp",
+  "/products/materiale/polipropilena/polipropilena-2.webp",
+  "/products/materiale/polipropilena/polipropilena-3.webp",
+  "/products/materiale/polipropilena/polipropilena-4.webp"
 ] as const;
 
 /* --- UI COMPONENTS --- */

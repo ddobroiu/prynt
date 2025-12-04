@@ -15,8 +15,10 @@ import {
 } from "@/lib/pricing";
 
 const GALLERY = [
-  "/products/materiale/alucobond/1.webp",
-  "/products/materiale/alucobond/1.webp", // Placeholder dacă nu ai mai multe imagini
+  "/products/materiale/alucobond/alucobond-1.webp",
+  "/products/materiale/alucobond/alucobond-2.webp",
+  "/products/materiale/alucobond/alucobond-3.webp",
+  "/products/materiale/alucobond/alucobond-4.webp"
 ] as const;
 
 /* --- UI COMPONENTS --- */

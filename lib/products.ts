@@ -57,11 +57,35 @@ function toWebpPaths(imgs?: string[]): string[] | undefined {
   });
 }
 
+// Mapare prima poză din fiecare configurator pentru fallback
+const CONFIGURATOR_FIRST_IMAGES: Record<string, string> = {
+  'banner': '/products/banner/banner-1.webp',
+  'bannere': '/products/banner/banner-1.webp',
+  'banner-verso': '/products/banner/verso/banner-verso-1.webp',
+  'afise': '/products/afise/afise-1.webp',
+  'autocolante': '/products/autocolante/autocolante-1.webp',
+  'canvas': '/products/canvas/canvas-1.webp',
+  'tapet': '/products/tapet/tapet-1.webp',
+  'rollup': '/products/rollup/rollup-1.webp',
+  'window-graphics': '/products/window-graphics/window-graphics-1.webp',
+  'pliante': '/products/pliante/pliante-1.webp',
+  'flayere': '/products/flayere/flayere-1.webp',
+  'plexiglass': '/products/materiale/plexiglass/plexiglass-1.webp',
+  'pvc-forex': '/products/materiale/PVC-Forex/pvc-forex-1.webp',
+  'alucobond': '/products/materiale/alucobond/alucobond-1.webp',
+  'carton': '/products/materiale/carton/carton-1.webp',
+  'polipropilena': '/products/materiale/polipropilena/polipropilena-1.webp',
+};
+
 export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
   const slug = String(p.slug ?? p.routeSlug ?? p.id ?? "");
   const categoryRaw = String(p.metadata?.category ?? "bannere");
   const category = categoryRaw.toLowerCase();
   const dir = (category === "bannere" ? "banner" : category).toLowerCase();
+  
+  // Folosește prima poză din configurator ca fallback
+  const defaultImage = CONFIGURATOR_FIRST_IMAGES[slug] || CONFIGURATOR_FIRST_IMAGES[category] || `/products/${dir}/${slug}.webp`;
+  
   return {
     id: p.id ?? `item-${slug}`,
     slug: p.slug ?? slug,
@@ -69,7 +93,7 @@ export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
     title: p.title ?? slug,
     description: p.description ?? "",
     images: toWebpPaths(
-      p.images ?? [`/products/${dir}/${slug}.webp`, `/products/${dir}/1.webp`, `/products/${dir}/2.webp`, `/products/${dir}/3.webp`]
+      p.images ?? [defaultImage, `/products/${dir}/${slug}-2.webp`, `/products/${dir}/${slug}-3.webp`, `/products/${dir}/${slug}-4.webp`]
     ),
     priceBase: p.priceBase ?? 250,
     currency: p.currency ?? "RON",

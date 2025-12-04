@@ -15,8 +15,10 @@ import {
 } from "@/lib/pricing";
 
 const GALLERY = [
-  "/products/materiale/plexiglass/1.webp",
-  "/products/materiale/plexiglass/1.webp",
+  "/products/materiale/plexiglass/plexiglass-1.webp",
+  "/products/materiale/plexiglass/plexiglass-2.webp",
+  "/products/materiale/plexiglass/plexiglass-3.webp",
+  "/products/materiale/plexiglass/plexiglass-4.webp"
 ] as const;
 
 /* --- UI COMPONENTS --- */

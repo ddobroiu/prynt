@@ -15,8 +15,10 @@ import {
 } from "@/lib/pricing";
 
 const GALLERY = [
-  "/products/materiale/PVC-Forex/1.webp",
-  "/products/materiale/PVC-Forex/1.webp",
+  "/products/materiale/PVC-Forex/pvc-forex-1.webp",
+  "/products/materiale/PVC-Forex/pvc-forex-2.webp",
+  "/products/materiale/PVC-Forex/pvc-forex-3.webp",
+  "/products/materiale/PVC-Forex/pvc-forex-4.webp"
 ] as const;
 
 /* --- UI COMPONENTS --- */
