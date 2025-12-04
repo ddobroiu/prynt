@@ -377,7 +377,7 @@ function ExpediateCounter() {
   const base = 12000;
   const count = base + days * 7;
   return (
-    <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-lg">
+    <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-lg">
       <svg width="24" height="24" fill="none" viewBox="0 0 24 24" className="text-white"><path d="M5 8h14M5 12h14M5 16h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
       <div className="flex flex-col">
         <span className="text-lg font-bold text-white tracking-wide">{count.toLocaleString()}+</span>
