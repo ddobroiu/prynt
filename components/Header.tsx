@@ -86,8 +86,12 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
         }`}
       >
         <div className="flex items-center justify-between mb-6 sm:mb-8 pb-4 border-b border-zinc-100 dark:border-zinc-800">
-          <Link href="/" className="text-lg sm:text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white touch-manipulation" onClick={onClose}>
-            {siteConfig.name}
+          <Link href="/" className="flex items-center touch-manipulation" onClick={onClose}>
+            <img 
+              src="/logo.jpg" 
+              alt="Prynt.ro" 
+              className="h-8 sm:h-10 w-auto object-contain"
+            />
           </Link>
           <button onClick={onClose} className="p-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-all active:scale-95 min-w-11 min-h-11 flex items-center justify-center" aria-label="Închide meniul">
             <X size={20} />
@@ -330,9 +334,11 @@ export default function Header() {
             <Menu size={24} className="sm:w-6 sm:h-6" />
           </button>
           <Link href="/" className="flex items-center gap-2 group touch-manipulation">
-            <span className="text-xl sm:text-2xl font-extrabold tracking-tighter text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-              Prynt<span className="text-indigo-600">.ro</span>
-            </span>
+            <img 
+              src="/logo.jpg" 
+              alt="Prynt.ro" 
+              className="h-8 sm:h-10 w-auto object-contain"
+            />
           </Link>
         </div>
 

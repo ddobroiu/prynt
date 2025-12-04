@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { Search, Package, Truck, CheckCircle, AlertCircle, Clock, ArrowRight } from "lucide-react";
 import { formatMoneyDisplay } from "@/lib/pricing";
 
@@ -60,6 +61,17 @@ export default function TrackOrderPage() {
   return (
     <main className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
       
+      {/* LOGO */}
+      <div className="mb-8">
+        <Link href="/">
+          <img 
+            src="/logo.jpg" 
+            alt="Prynt.ro" 
+            className="h-10 w-auto object-contain"
+          />
+        </Link>
+      </div>
+
       {/* HEADER */}
       <div className="text-center mb-10 max-w-xl">
         <div className="inline-flex items-center justify-center p-3 bg-white rounded-2xl shadow-sm mb-4 text-indigo-600">

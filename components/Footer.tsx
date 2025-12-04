@@ -58,9 +58,11 @@ export default function Footer() {
           {/* 1. Brand & Socials */}
           <div className="lg:col-span-4 space-y-4 lg:space-y-6">
             <Link href="/" className="inline-flex items-center gap-2 group">
-              <span className="text-xl sm:text-2xl font-extrabold tracking-tighter text-slate-900 group-hover:text-indigo-600 transition-colors">
-                Prynt<span className="text-indigo-600">.ro</span>
-              </span>
+              <img 
+                src="/logo.jpg" 
+                alt="Prynt.ro" 
+                className="h-10 w-auto object-contain"
+              />
             </Link>
             <p className="text-slate-700 text-sm leading-relaxed max-w-sm">
               {siteConfig.description} Platforma completă de tipar digital unde configurezi, vizualizezi prețul și comanzi instant.

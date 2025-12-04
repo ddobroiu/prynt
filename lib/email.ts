@@ -46,7 +46,9 @@ export function getHtmlTemplate({
 <body>
   <div class="container">
     <div class="header">
-       <span style="color: white; font-weight: bold; font-size: 20px;">Prynt</span>
+       <a href="${APP_URL}" style="text-decoration:none;">
+         <img src="${APP_URL}/logo.jpg" alt="Prynt.ro" style="height:40px;width:auto;" />
+       </a>
     </div>
     <div class="content">
       <div class="h1">${title}</div>

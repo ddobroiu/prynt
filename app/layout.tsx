@@ -37,7 +37,7 @@ export const metadata = {
     type: "website",
     images: [
       {
-        url: "/logo.png",
+        url: "/logo.jpg",
         width: 1200,
         height: 630,
         alt: "Prynt.ro - Tipar digital profesional",
@@ -49,7 +49,7 @@ export const metadata = {
     title: "Prynt.ro | Tipar digital & producție publicitară",
     description:
       "Tipar digital profesional în România: bannere PVC, afișe, canvas personalizat, autocolante, materiale rigide. Configuratoare online cu prețuri instant.",
-    images: ["/logo.png"],
+    images: ["/logo.jpg"],
     creator: "@prynt_ro",
     site: "@prynt_ro",
   },

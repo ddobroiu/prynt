@@ -49,7 +49,7 @@ export function generateEnhancedMetadata(config: EnhancedSEOConfig) {
       card: "summary_large_image",
       title: config.title,
       description: config.description,
-      images: [config.ogImage || `${baseUrl}/logo.png`],
+      images: [config.ogImage || `${baseUrl}/logo.jpg`],
       creator: "@prynt_ro",
       site: "@prynt_ro",
     },

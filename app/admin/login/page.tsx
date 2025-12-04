@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 function LoginInner() {
@@ -9,6 +10,15 @@ function LoginInner() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-ui p-6">
       <div className="w-full max-w-sm rounded-2xl border card-bg p-6 text-ui">
+        <div className="flex justify-center mb-6">
+          <Link href="/">
+            <img 
+              src="/logo.jpg" 
+              alt="Prynt.ro" 
+              className="h-10 w-auto object-contain"
+            />
+          </Link>
+        </div>
         <h1 className="text-xl font-bold mb-4">Autentificare Admin</h1>
         {err ? (
           <div className="mb-3 rounded-md bg-red-500/10 border border-red-500/30 text-red-200 px-3 py-2 text-sm">

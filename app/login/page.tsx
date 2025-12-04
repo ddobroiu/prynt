@@ -128,6 +128,15 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-[calc(100vh-100px)] items-center justify-center py-12">
       <div className="w-full max-w-md space-y-6 rounded-xl border border-white/10 bg-gray-800 p-8 shadow-2xl">
+        <div className="flex justify-center mb-4">
+          <Link href="/">
+            <img 
+              src="/logo.jpg" 
+              alt="Prynt.ro" 
+              className="h-12 w-auto object-contain"
+            />
+          </Link>
+        </div>
         <h1 className="text-3xl font-extrabold text-white text-center">
           {isResetView ? 'Resetare Parolă' : 'Contul Meu'}
         </h1>

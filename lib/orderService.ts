@@ -485,7 +485,9 @@ async function sendEmails(
     <span style="display:none !important; visibility:hidden; opacity:0; height:0; width:0; overflow:hidden;">${escapeHtml(preheader)}</span>
     <div class="container" style="max-width:680px;margin:0 auto;padding:24px;">
       <div style="text-align:center; padding:18px 0 10px;">
-        <a href="${baseUrl}" style="text-decoration:none;color:#111;font-size:22px;font-weight:800;">Prynt.ro</a>
+        <a href="${baseUrl}" style="text-decoration:none;">
+          <img src="${baseUrl}/logo.jpg" alt="Prynt.ro" style="height:40px;width:auto;" />
+        </a>
       </div>
       <div style="height:4px;background:linear-gradient(90deg,#4f46e5,#22d3ee);border-radius:999px;margin:8px 0 20px;"></div>
       <div class="card" style="background:#ffffff;border-radius:16px;padding:24px;border:1px solid #e5e7eb;">

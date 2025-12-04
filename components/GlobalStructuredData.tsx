@@ -9,7 +9,7 @@ export default function GlobalStructuredData() {
     "@type": "Organization",
     "name": "Prynt.ro",
     "url": baseUrl,
-    "logo": `${baseUrl}/logo.png`,
+    "logo": `${baseUrl}/logo.jpg`,
     "description": "Tipar digital profesional - bannere, afișe, canvas, autocolante și materiale publicitare",
     "address": {
       "@type": "PostalAddress",
