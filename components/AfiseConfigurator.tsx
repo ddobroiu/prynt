@@ -17,7 +17,7 @@ import {
     type PriceInputAfise 
 } from "@/lib/pricing";
 
-const GALLERY_BASE = ["/products/afise/1.webp", "/products/afise/2.webp", "/products/afise/3.webp", "/products/afise/4.webp"] as const;
+const GALLERY_BASE = ["/products/afise/afise-1.webp", "/products/afise/afise-2.webp", "/products/afise/afise-3.webp", "/products/afise/afise-4.webp"] as const;
 
 /* --- UI COMPONENTS --- */
 const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (

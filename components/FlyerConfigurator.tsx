@@ -78,7 +78,7 @@ type Props = { productSlug?: string; initialWidth?: number; initialHeight?: numb
 
 export default function FlyerConfigurator({ productSlug, productImage }: Props) {
   const { addItem } = useCart();
-  const GALLERY = useMemo(() => productImage ? [productImage, "/products/flayere/1.webp", "/products/flayere/2.webp", "/products/flayere/3.webp"] : ["/products/flayere/1.webp", "/products/flayere/2.webp", "/products/flayere/3.webp", "/products/flayere/4.webp"], [productImage]);
+  const GALLERY = useMemo(() => productImage ? [productImage, "/products/flayere/flayere-1.webp", "/products/flayere/flayere-2.webp", "/products/flayere/flayere-3.webp"] : ["/products/flayere/flayere-1.webp", "/products/flayere/flayere-2.webp", "/products/flayere/flayere-3.webp", "/products/flayere/flayere-4.webp"], [productImage]);
   const [sizeKey, setSizeKey] = useState(FLYER_CONSTANTS.SIZES[0].key);
   const [quantity, setQuantity] = useState<number>(100);
   const [twoSided, setTwoSided] = useState<boolean>(false);

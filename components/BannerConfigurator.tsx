@@ -167,7 +167,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const [lengthText, setLengthText] = useState(input.width_cm ? String(input.width_cm) : "");
   const [heightText, setHeightText] = useState(input.height_cm ? String(input.height_cm) : "");
   
-  const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp"] : ["/products/banner/1.webp", "/products/banner/2.webp", "/products/banner/3.webp", "/products/banner/4.webp"], [productImage]);
+  const galleryImages = useMemo(() => productImage ? [productImage, "/products/banner/banner-1.webp", "/products/banner/banner-2.webp", "/products/banner/banner-3.webp"] : ["/products/banner/banner-1.webp", "/products/banner/banner-2.webp", "/products/banner/banner-3.webp", "/products/banner/banner-4.webp"], [productImage]);
   
   const [viewMode, setViewMode] = useState<ViewMode>('gallery');
 

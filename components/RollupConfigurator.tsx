@@ -17,10 +17,10 @@ import {
 } from "@/lib/pricing";
 
 const GALLERY = [
-  "/products/rollup/1.webp", 
-  "/products/rollup/2.webp", 
-  "/products/rollup/3.webp", 
-  "/products/rollup/4.webp"
+  "/products/rollup/rollup-1.webp", 
+  "/products/rollup/rollup-2.webp", 
+  "/products/rollup/rollup-3.webp", 
+  "/products/rollup/rollup-4.webp"
 ] as const;
 
 /* --- UI COMPONENTS --- */
@@ -123,6 +123,19 @@ export default function RollupConfigurator({ productSlug, initialWidth: initW, p
 
   const [activeImage, setActiveImage] = useState<string>("");
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  
+  // Schimbă poza automat când se schimbă dimensiunea
+  useEffect(() => {
+    const widthToIndex: Record<number, number> = {
+      85: 0,  // rollup-1.webp
+      100: 1, // rollup-2.webp
+      120: 2, // rollup-3.webp
+      150: 3  // rollup-4.webp
+    };
+    const newIndex = widthToIndex[input.width_cm] ?? 0;
+    setActiveIndex(newIndex);
+    setActiveImage(GALLERY_IMAGES[newIndex] || GALLERY_IMAGES[0]);
+  }, [input.width_cm, GALLERY_IMAGES]);
   
   useEffect(() => {
     if (GALLERY_IMAGES.length > 0 && !activeImage) {

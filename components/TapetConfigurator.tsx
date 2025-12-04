@@ -84,7 +84,7 @@ type Props = { productSlug?: string; initialWidth?: number; initialHeight?: numb
 /* --- MAIN COMPONENT --- */
 export default function TapetConfigurator({ productSlug, productImage }: Props) {
   const { addItem } = useCart();
-  const GALLERY = useMemo(() => productImage ? [productImage, "/products/tapet/1.webp", "/products/tapet/2.webp", "/products/tapet/3.webp"] : ["/products/tapet/1.webp", "/products/tapet/2.webp", "/products/tapet/3.webp", "/products/tapet/4.webp"], [productImage]);
+  const GALLERY = useMemo(() => productImage ? [productImage, "/products/tapet/tapet-1.webp", "/products/tapet/tapet-2.webp", "/products/tapet/tapet-3.webp"] : ["/products/tapet/tapet-1.webp", "/products/tapet/tapet-2.webp", "/products/tapet/tapet-3.webp", "/products/tapet/tapet-4.webp"], [productImage]);
   const [input, setInput] = useState<PriceInputTapet>({
     width_cm: 0,
     height_cm: 0,

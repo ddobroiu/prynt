@@ -89,7 +89,7 @@ type Props = { productSlug?: string; initialWidth?: number; initialHeight?: numb
 /* --- MAIN COMPONENT --- */
 export default function CanvasConfigurator({ productSlug, initialWidth: initW, initialHeight: initH, productImage }: Props) {
   const { addItem } = useCart();
-  const GALLERY = useMemo(() => productImage ? [productImage, "/products/canvas/1.webp", "/products/canvas/2.webp", "/products/canvas/3.webp"] : ["/products/canvas/1.webp", "/products/canvas/2.webp", "/products/canvas/3.webp", "/products/canvas/4.webp"], [productImage]);
+  const GALLERY = useMemo(() => productImage ? [productImage, "/products/canvas/canvas-1.webp", "/products/canvas/canvas-2.webp", "/products/canvas/canvas-3.webp"] : ["/products/canvas/canvas-1.webp", "/products/canvas/canvas-2.webp", "/products/canvas/canvas-3.webp", "/products/canvas/canvas-4.webp"], [productImage]);
   const [input, setInput] = useState<PriceInputCanvas>({
     width_cm: initW ?? 0,
     height_cm: initH ?? 0,

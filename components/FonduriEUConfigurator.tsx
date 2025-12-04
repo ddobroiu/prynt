@@ -17,9 +17,9 @@ import {
 } from "@/lib/pricing";
 
 const GALLERY = [
-  "/products/afise/1.webp", 
-  "/products/banner/1.webp",
-  "/products/autocolante/1.webp",
+  "/products/afise/afise-1.webp", 
+  "/products/banner/banner-1.webp",
+  "/products/autocolante/autocolante-1.webp",
 ] as const;
 
 /* --- UI COMPONENTS --- */
