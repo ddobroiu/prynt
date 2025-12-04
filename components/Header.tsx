@@ -81,46 +81,47 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
         role="presentation"
       />
       <div
-        className={`fixed top-0 left-0 h-full w-[90%] max-w-[360px] bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl p-4 sm:p-6 z-50 transition-transform duration-300 ease-out lg:hidden safe-area-inset-left ${
+        className={`fixed top-0 left-0 h-full w-[85%] max-w-[340px] bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl z-50 transition-transform duration-300 ease-out lg:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between mb-6 sm:mb-8 pb-4 border-b border-zinc-100 dark:border-zinc-800">
-          <Link href="/" className="flex items-center touch-manipulation" onClick={onClose}>
-            <img 
-              src="/logo.jpg" 
-              alt="Prynt.ro" 
-              className="h-8 sm:h-10 w-auto object-contain"
-            />
-          </Link>
-          <button onClick={onClose} className="p-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-all active:scale-95 min-w-11 min-h-11 flex items-center justify-center" aria-label="Închide meniul">
-            <X size={20} />
-          </button>
-        </div>
+        <div className="flex flex-col h-full">
+          {/* Header mobil */}
+          <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800">
+            <Link href="/" className="flex items-center" onClick={onClose}>
+              <img 
+                src="/logo.jpg" 
+                alt="Prynt.ro" 
+                className="h-7 w-auto object-contain"
+              />
+            </Link>
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-all" aria-label="Închide meniul">
+              <X size={20} />
+            </button>
+          </div>
 
-        <nav className="flex-1 overflow-y-auto pb-safe">
-          <ul className="space-y-2">
+          <nav className="flex-1 overflow-y-auto p-4">\n            <ul className="space-y-1">
             {siteConfig.headerNav.map((item) => (
               <li key={item.label}>
                 {item.children ? (
-                  <div className="rounded-xl overflow-hidden">
+                  <div className="rounded-lg overflow-hidden">
                     <button
                       onClick={() => setOpenSub(openSub === item.label ? null : item.label)}
-                      className={`w-full flex items-center justify-between p-4 text-left font-semibold transition-all active:bg-zinc-100 dark:active:bg-zinc-800 min-h-12 touch-manipulation ${visibleOpenSub === item.label ? 'bg-zinc-50 dark:bg-zinc-900 text-indigo-600' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 text-left text-sm font-semibold rounded-lg transition-all ${visibleOpenSub === item.label ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
                       aria-label={`${visibleOpenSub === item.label ? 'Închide' : 'Deschide'} submeniul ${item.label}`}
                       aria-expanded={visibleOpenSub === item.label}
                     >
                       {item.label}
-                      <ChevronDown size={18} className={`transition-transform duration-300 ${visibleOpenSub === item.label ? "rotate-180 text-indigo-600" : "text-zinc-400"}`} />
+                      <ChevronDown size={16} className={`transition-transform duration-200 ${visibleOpenSub === item.label ? "rotate-180 text-indigo-600" : "text-zinc-400"}`} />
                     </button>
-                    <div className={`grid transition-all duration-300 ease-in-out ${visibleOpenSub === item.label ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-                      <div className="overflow-hidden bg-zinc-50 dark:bg-zinc-900/50">
+                    <div className={`grid transition-all duration-200 ease-in-out ${visibleOpenSub === item.label ? "grid-rows-[1fr] opacity-100 mt-1" : "grid-rows-[0fr] opacity-0"}`}>
+                      <div className="overflow-hidden">
                         {item.children.map((child) => (
                           <Link 
                             key={child.href} 
                             href={child.href} 
                             onClick={onClose} 
-                            className="flex items-center py-3 pl-6 pr-4 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 border-l-2 border-transparent hover:border-indigo-500 transition-all active:bg-zinc-100 dark:active:bg-zinc-800 min-h-11 touch-manipulation"
+                            className="flex items-center py-2 pl-8 pr-3 text-sm text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                           >
                             {child.label}
                           </Link>
@@ -132,7 +133,7 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   <Link 
                     href={item.href} 
                     onClick={onClose} 
-                    className={`flex items-center p-4 font-semibold rounded-xl transition-all min-h-12 touch-manipulation ${item.highlight ? 'bg-indigo-600 text-white shadow-md mt-4 justify-center' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 active:bg-zinc-100 dark:active:bg-zinc-800'}`}
+                    className={`flex items-center px-3 py-2.5 text-sm font-semibold rounded-lg transition-all ${item.highlight ? 'bg-indigo-600 text-white shadow-md mt-3 justify-center hover:bg-indigo-700' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
                   >
                     {item.label}
                   </Link>
@@ -141,6 +142,7 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
             ))}
           </ul>
         </nav>
+        </div>
       </div>
     </>
   );
@@ -172,11 +174,11 @@ const HeaderActions = () => {
       {session?.user ? (
         <div className="relative account-dropdown">
           <button 
-            className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" 
+            className="p-2 text-zinc-800 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" 
             aria-label="Cont"
             onClick={() => setIsAccountOpen(!isAccountOpen)}
           >
-            <User size={24} />
+            <User size={22} />
           </button>
           
           {/* Dropdown Menu */}
@@ -279,8 +281,8 @@ const HeaderActions = () => {
           </div>
         </div>
       ) : (
-        <Link href="/login" className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Cont">
-          <User size={24} />
+        <Link href="/login" className="p-2 text-zinc-800 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" aria-label="Cont">
+          <User size={22} />
         </Link>
       )}
 
@@ -319,25 +321,25 @@ export default function Header() {
     <header 
       className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
         scrolled 
-          ? "bg-white/90 dark:bg-black/90 backdrop-blur-md border-zinc-200/50 dark:border-white/10 shadow-sm py-2" 
-          : "bg-white dark:bg-black border-transparent py-4"
+          ? "bg-white/95 dark:bg-black/95 backdrop-blur-lg border-zinc-200 dark:border-white/10 shadow-lg" 
+          : "bg-white dark:bg-black border-zinc-200 dark:border-zinc-800"
       }`}
     >
-      <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
+      <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Left: Mobile Toggle & Logo */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-3">
            <button 
              onClick={() => setMobileMenuOpen(true)} 
-             className="lg:hidden p-3 -ml-1 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all active:scale-95 min-w-11 min-h-11 flex items-center justify-center"
+             className="lg:hidden p-2 text-zinc-700 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-all"
              aria-label="Deschide meniul"
            >
-            <Menu size={24} className="sm:w-6 sm:h-6" />
+            <Menu size={22} />
           </button>
-          <Link href="/" className="flex items-center gap-2 group touch-manipulation">
+          <Link href="/" className="flex items-center group">
             <img 
               src="/logo.jpg" 
               alt="Prynt.ro" 
-              className="h-8 sm:h-10 w-auto object-contain"
+              className="h-7 sm:h-8 w-auto object-contain"
             />
           </Link>
         </div>
