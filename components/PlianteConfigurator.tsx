@@ -158,6 +158,18 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
   }, []);
   useEffect(() => setActiveImage(GALLERY[activeIndex]), [activeIndex]);
 
+  // Update image based on fold type
+  useEffect(() => {
+    const foldToImageMap: Record<PlianteFoldType, number> = {
+      simplu: 0,      // pliante-1.webp (1 big)
+      fereastra: 1,   // pliante-2.webp (2 biguri)
+      paralel: 2,     // pliante-3.webp (3 biguri)
+      fluture: 3      // pliante-4.webp (4 biguri)
+    };
+    const imageIndex = foldToImageMap[fold] ?? 0;
+    setActiveIndex(imageIndex);
+  }, [fold]);
+
   const summaryStep1 = `${weight}g, ${quantity} buc.`;
   const summaryStep2 = PLIANTE_CONSTANTS.FOLDS[fold].label;
   const summaryStep3 = designOption === 'upload' ? 'Grafică proprie' : 'Design Pro';
