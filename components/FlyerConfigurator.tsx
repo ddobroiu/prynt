@@ -161,6 +161,17 @@ export default function FlyerConfigurator({ productSlug, productImage }: Props) 
   }, []);
   useEffect(() => setActiveImage(GALLERY[activeIndex]), [activeIndex]);
 
+  // Update image based on size selection
+  useEffect(() => {
+    const sizeToImageMap: Record<string, number> = {
+      "A6": 1,     // flayere-2.webp
+      "A5": 2,     // flayere-3.webp
+      "21x10": 3   // flayere-4.webp
+    };
+    const imageIndex = sizeToImageMap[sizeKey] ?? 1;
+    setActiveIndex(imageIndex);
+  }, [sizeKey]);
+
   const summary1 = `${sizeKey}, ${paperWeightKey}g`;
   const summary2 = `${twoSided ? 'Față-verso' : 'Față'}`;
 
