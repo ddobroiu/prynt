@@ -19,10 +19,10 @@ import {
 } from "@/lib/pricing";
 
 const GALLERY = [
-  "/products/pliante/1.webp",
-  "/products/pliante/2.webp",
-  "/products/pliante/3.webp",
-  "/products/pliante/4.webp"
+  "/products/pliante/pliante-1.webp",
+  "/products/pliante/pliante-2.webp",
+  "/products/pliante/pliante-3.webp",
+  "/products/pliante/pliante-4.webp"
 ] as const;
 
 /* --- UI COMPONENTS --- */

@@ -5,6 +5,7 @@ import { executeTool } from '@/lib/ai-tool-runner';
 import { getAuthSession } from '@/lib/auth'; 
 import { prisma } from "@/lib/prisma";
 import { logConversation } from "@/lib/chat-logger";
+import { getConversationContext } from '@/lib/rag-assistant-integration';
 
 export const runtime = 'nodejs';
 
@@ -17,6 +18,7 @@ INSTRUCȚIUNI SPECIFICE WEB:
 - Când întrebi detalii tehnice, NU scrie variantele în text. Folosește tag-ul ||OPTIONS: [...]||.
 - Pentru Județ folosește tag-ul: ||REQUEST: JUDET||
 - Pentru Localitate folosește tag-ul: ||REQUEST: LOCALITATE||
+- MAX 2 PROPOZIȚII per răspuns pentru viteză
 `;
 
 export async function POST(req: Request) {
@@ -126,13 +128,30 @@ export async function POST(req: Request) {
       ...messages
     ];
 
-    // Primul apel OpenAI
+    // === RAG INTEGRATION: Only for product-related queries (optimize speed) ===
+    const lastMsg = messages[messages.length - 1]?.content?.toLowerCase() || '';
+    const needsRAG = /(banner|afiș|autocolant|canvas|tapet|rollup|window|pliant|flayer|fonduri|plexiglas|forex|alucobond|carton|material|dimensiune|preț)/i.test(lastMsg);
+    
+    if (needsRAG) {
+      try {
+        const ragContext = await getConversationContext(messages, 2); // Reduced from 3 to 2 for speed
+        if (ragContext) {
+          messagesPayload[0].content += `\n\n${ragContext}`;
+          console.log('[AI Assistant] RAG context added');
+        }
+      } catch (error) {
+        console.warn('[AI Assistant] RAG skipped:', error.message);
+      }
+    }
+
+    // Primul apel OpenAI - optimizat pentru viteză
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: messagesPayload as any,
       tools: tools,
       tool_choice: "auto",
-      temperature: 0.2, 
+      temperature: 0.1, // Reduced from 0.2 for more consistent, concise responses
+      max_tokens: 300, // Limit response length for faster replies
     });
 
     const responseMessage = completion.choices[0].message;
@@ -162,6 +181,8 @@ export async function POST(req: Request) {
       const finalRes = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: messagesPayload as any,
+        temperature: 0.1,
+        max_tokens: 300,
       });
 
       finalReply = finalRes.choices[0].message.content;

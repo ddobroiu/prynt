@@ -34,7 +34,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     // 1. CALCUL PREȚ BANNER
     // ============================================================
     if (fnName === "calculate_banner_price") {
-      const hem = args.want_hem_and_grommets !== false;
+      const hem = true; // STANDARD: Tiv și capse sunt INCLUSE automat
       const mat = args.material?.includes("510") ? "frontlit_510" : "frontlit_440";
 
       if (args.type === "verso") {
@@ -70,16 +70,35 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
     else if (fnName === "calculate_standard_print_price") {
       // Verificăm tipul de produs
       if (args.product_type === "afis") {
+        // Validare combinație dimensiune + material
+        const { AFISE_CONSTANTS } = await import('@/lib/pricing');
+        const matKey = args.paper_type || "whiteback_150_material";
+        const sizeKey = args.size || "A2";
+        
+        // Verifică dacă combinația există în PRICE_TABLE
+        if (!AFISE_CONSTANTS.PRICE_TABLE[matKey]?.[sizeKey]) {
+          // Returnează lista materialelor disponibile pentru dimensiunea respectivă
+          const availableMaterials = Object.keys(AFISE_CONSTANTS.PRICE_TABLE)
+            .filter(m => AFISE_CONSTANTS.PRICE_TABLE[m][sizeKey])
+            .map(m => AFISE_CONSTANTS.MATERIALS.find(mat => mat.key === m)?.label || m)
+            .join(', ');
+          
+          return {
+            error: true,
+            message: `Materialul ${matKey} nu este disponibil pentru dimensiunea ${sizeKey}.\n\nMateriale disponibile pentru ${sizeKey}: ${availableMaterials}`
+          };
+        }
+        
         const res = calculatePosterPrice({
-          size: args.size || "A3",
-          material: args.paper_type || "blueback",
+          size: sizeKey,
+          material: matKey,
           quantity: args.quantity,
           designOption: "upload",
         });
         return { 
           pret_total: res.finalPrice,
           pret_unitar: res.unitPrice,
-          info: `Afișe ${args.size} pe ${args.paper_type || 'Blueback'}`
+          info: `Afișe ${sizeKey} pe ${AFISE_CONSTANTS.MATERIALS.find(m => m.key === matKey)?.label || matKey}`
         };
       } else if (args.product_type === "pliant") {
         const res = calculatePliantePrice({
@@ -552,11 +571,48 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
       const offerRecord = await prisma.order.create({ data: offerData });
 
       // Generăm link-ul public către PDF
-      const baseUrl = process.env.NEXTAUTH_URL || "https://prynt.ro";
-      // Ruta /api/pdf/offer va folosi ID-ul pentru a prelua datele din DB (inclusiv numele clientului)
+      const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro";
       const offerLink = `${baseUrl}/api/pdf/offer?id=${offerRecord.id}`;
 
       console.log("✅ Ofertă creată cu ID:", offerRecord.id);
+
+      // Dacă avem email, trimitem PDF automat
+      let emailSent = false;
+      if (customer_details.email) {
+        try {
+          const { sendOfferEmail } = await import('@/lib/email-service');
+          await sendOfferEmail({
+            to: customer_details.email,
+            customerName: customer_details.name,
+            orderNo: nextOrderNo,
+            total: totalAmount,
+            pdfLink: offerLink,
+            items: items.map((item: any) => ({
+              name: item.title,
+              quantity: item.quantity,
+              price: item.price,
+              details: item.details
+            }))
+          });
+          emailSent = true;
+          console.log(`📧 Email ofertă trimis la ${customer_details.email}`);
+        } catch (emailError) {
+          console.error('Eroare trimitere email ofertă:', emailError);
+        }
+      }
+
+      // Format optimizat pentru conversație
+      let message = `✅ Oferta #${nextOrderNo} generată! (${totalAmount.toFixed(2)} RON)\n\n`;
+      
+      if (emailSent) {
+        message += `📧 Oferta a fost trimisă la **${customer_details.email}**\n\n`;
+      } else if (customer_details.email) {
+        message += `⚠️ Nu am putut trimite emailul. Îți las link-ul aici:\n📄 ${offerLink}\n\n`;
+      } else {
+        message += `📄 Link ofertă: ${offerLink}\n\n💡 **Sugestie:** Dă-mi un email și îți trimit PDF-ul automat!\n\n`;
+      }
+      
+      message += `Validitate: 30 zile. Dacă totul e OK, o transformăm în comandă!`;
 
       return { 
           success: true, 
@@ -564,7 +620,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           link: offerLink,
           customerName: customer_details.name,
           total: totalAmount,
-          message: `Oferta PDF a fost generată cu succes pentru ${customer_details.name}!\n\n**Detalii ofertă:**\n- Număr ofertă: #${nextOrderNo}\n- Total: ${totalAmount.toFixed(2)} RON\n- Validitate: 30 zile\n- Format: PDF profesional cu logo Prynt.ro\n\nOferta conține toate detaliile produselor discutate. Dacă totul este în regulă, putem transforma oferta în comandă fermă!\n\n||BUTTON:Descarcă Oferta PDF:${offerLink}||` 
+          emailSent,
+          message
       };
     }
 

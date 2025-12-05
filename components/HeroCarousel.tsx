@@ -8,22 +8,22 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// --- DATELE (14 PRODUSE) ---
+// --- DATELE (TOATE CONFIGURATOARELE - 18) ---
 const HERO_ITEMS = [
   {
     id: 'banner',
     title: 'Bannere Outdoor',
-    description: 'Vizibilitate maximă outdoor. Rezistente UV.',
-    image: '/products/banner/1.webp',
+    description: 'Rezistente UV, tiv & capse incluse. Vizibilitate maximă.',
+    image: '/products/banner/banner-1.webp',
     link: '/banner',
     gradient: 'from-blue-600 to-cyan-500',
-    badge: 'Top'
+    badge: 'Top Vânzări'
   },
   {
     id: 'autocolante',
-    title: 'Autocolante',
+    title: 'Autocolante & Stickere',
     description: 'Print & Cut pe contur. Orice formă.',
-    image: '/products/autocolante/1.webp',
+    image: '/products/autocolante/autocolante-1.webp',
     link: '/autocolante',
     gradient: 'from-emerald-600 to-teal-500',
     badge: 'Popular'
@@ -31,8 +31,8 @@ const HERO_ITEMS = [
   {
     id: 'tapet',
     title: 'Tapet Personalizat',
-    description: 'Textură premium, lavabil.',
-    image: '/products/tapet/1.webp',
+    description: 'Textură premium, lavabil, dintr-o bucată.',
+    image: '/products/tapet/tapet-1.webp',
     link: '/tapet',
     gradient: 'from-orange-600 to-amber-500',
     badge: 'Nou'
@@ -40,90 +40,122 @@ const HERO_ITEMS = [
   {
     id: 'afise',
     title: 'Afișe & Postere',
-    description: 'Calitate HD pe hârtie foto.',
-    image: '/products/afise/1.webp',
+    description: 'Calitate HD pe hârtie foto sau blueback.',
+    image: '/products/afise/afise-1.webp',
     link: '/afise',
     gradient: 'from-purple-600 to-pink-500'
   },
   {
     id: 'canvas',
     title: 'Tablouri Canvas',
-    description: 'Pânză bumbac pe șasiu lemn.',
-    image: '/products/canvas/1.webp',
+    description: 'Transformă fotografiile în artă. Pânză bumbac.',
+    image: '/products/canvas/canvas-1.webp',
     link: '/canvas',
     gradient: 'from-pink-600 to-rose-500'
   },
   {
     id: 'pliante',
     title: 'Pliante & Flyere',
-    description: 'Promovare eficientă.',
-    image: '/products/pliante/1.webp',
+    description: 'Promovare eficientă. Tiraje mici sau mari.',
+    image: '/products/pliante/pliante-1.webp',
     link: '/pliante',
     gradient: 'from-indigo-600 to-violet-500'
   },
   {
+    id: 'flayere',
+    title: 'Flyere',
+    description: 'Promovare rapidă și eficientă. Format compact.',
+    image: '/products/flayere/flayere-1.webp',
+    link: '/flayere',
+    gradient: 'from-violet-600 to-purple-500'
+  },
+  {
+    id: 'banner-verso',
+    title: 'Banner Față-Verso',
+    description: 'Vizibilitate din ambele sensuri. Blockout.',
+    image: '/products/banner/verso/banner-verso-1.webp',
+    link: '/banner-verso',
+    gradient: 'from-blue-700 to-indigo-600'
+  },
+  {
+    id: 'rollup',
+    title: 'Rollup Banner',
+    description: 'Sistem retractabil portabil. Perfect evenimente.',
+    image: '/products/rollup/rollup-1.webp',
+    link: '/rollup',
+    gradient: 'from-cyan-600 to-blue-600'
+  },
+  {
+    id: 'window-graphics',
+    title: 'Window Graphics',
+    description: 'Folie perforată pentru geamuri. Vizibilitate dublă.',
+    image: '/products/window-graphics/window-graphics-1.webp',
+    link: '/window-graphics',
+    gradient: 'from-sky-600 to-cyan-500'
+  },
+  {
     id: 'pvc',
     title: 'Plăci PVC / Forex',
-    description: 'Panouri rigide semnalistică.',
-    image: '/products/materiale/PVC-Forex/1.webp',
+    description: 'Panouri rigide pentru semnalistică durabilă.',
+    image: '/products/materiale/PVC-Forex/pvc-forex-1.webp',
     link: '/materiale/pvc-forex',
     gradient: 'from-slate-600 to-gray-500'
   },
   {
     id: 'plexiglass',
     title: 'Plexiglass',
-    description: 'Aspect sticlă, elegant.',
-    image: '/products/materiale/plexiglass/1.webp',
+    description: 'Aspect sticlă, elegant și durabil.',
+    image: '/products/materiale/plexiglass/plexiglass-1.webp',
     link: '/materiale/plexiglass',
     gradient: 'from-cyan-600 to-blue-500'
   },
   {
     id: 'alucobond',
     title: 'Alucobond',
-    description: 'Sandwich aluminiu exterior.',
-    image: '/products/materiale/alucobond/1.webp',
+    description: 'Sandwich aluminiu pentru exterior.',
+    image: '/products/materiale/alucobond/alucobond-1.webp',
     link: '/materiale/alucobond',
     gradient: 'from-gray-700 to-slate-800'
   },
   {
     id: 'carton',
     title: 'Carton Ondulat',
-    description: 'Ambalaje și prototipuri.',
-    image: '/products/materiale/carton/1.webp',
+    description: 'Ambalaje și prototipuri rezistente.',
+    image: '/products/materiale/carton/carton-1.webp',
     link: '/materiale/carton',
     gradient: 'from-amber-700 to-orange-600'
   },
   {
     id: 'polipropilena',
     title: 'Polipropilenă',
-    description: 'Material celular ușor.',
-    image: '/products/materiale/polipropilena/1.webp',
+    description: 'Material celular ușor și rezistent.',
+    image: '/products/materiale/polipropilena/polipropilena-1.webp',
     link: '/materiale/polipropilena',
     gradient: 'from-lime-600 to-green-500'
   },
   {
     id: 'fonduri-pnrr',
     title: 'Panouri PNRR',
-    description: 'Obligatorii proiecte.',
-    image: '/products/banner/1.webp',
+    description: 'Obligatorii pentru proiecte UE.',
+    image: '/products/fonduri/pnrr/pnrr-1.webp',
     link: '/fonduri-pnrr',
     gradient: 'from-blue-800 to-yellow-500'
   },
   {
-    id: 'banner-verso',
-    title: 'Banner Față-Verso',
-    description: 'Blockout 650g.',
-    image: '/products/banner/verso/1.webp',
-    link: '/banner-verso',
-    gradient: 'from-blue-700 to-indigo-600'
-  },
-  {
     id: 'fonduri-regio',
     title: 'Panouri Regio',
-    description: 'Vizibilitate UE.',
-    image: '/products/banner/1.webp',
+    description: 'Vizibilitate proiecte regionale UE.',
+    image: '/products/fonduri/regio/regio-1.webp',
     link: '/fonduri-regio',
     gradient: 'from-blue-600 to-blue-400'
+  },
+  {
+    id: 'fonduri-nationale',
+    title: 'Panouri Fonduri Naționale',
+    description: 'Conformitate proiecte fonduri naționale.',
+    image: '/products/fonduri/nationale/nationale-1.webp',
+    link: '/fonduri-nationale',
+    gradient: 'from-red-600 to-yellow-500'
   }
 ];
 

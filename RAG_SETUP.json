@@ -1,0 +1,23 @@
+{
+  "scripts": {
+    "rag:install": "npm install && npm run prisma:generate",
+    "rag:migrate": "npx prisma migrate dev --name add_pgvector",
+    "rag:index": "tsx scripts/index-configurators.ts",
+    "rag:test": "tsx scripts/test-rag.ts"
+  },
+  "instructions": [
+    "1. Rulează extensia pgvector în PostgreSQL:",
+    "   Conectează-te la DB și execută: CREATE EXTENSION IF NOT EXISTS vector;",
+    "",
+    "2. Rulează migrarea Prisma:",
+    "   npm run rag:migrate",
+    "",
+    "3. Indexează configuratoarele în vector DB:",
+    "   npm run rag:index",
+    "",
+    "4. Testează search-ul RAG:",
+    "   npm run rag:test",
+    "",
+    "5. AI Assistant va folosi automat RAG pentru recomandări inteligente!"
+  ]
+}

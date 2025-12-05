@@ -291,7 +291,14 @@ export async function POST(req: Request) {
         }
 
         // 3. Prompt System
-        let systemContent = SYSTEM_PROMPT + "\nIMPORTANT: Clientul este pe WhatsApp. Fii concis. Folosește liste scurte.";
+        let systemContent = SYSTEM_PROMPT + `
+
+🔴 IMPORTANT WhatsApp:
+- MAX 2 PROPOZIȚII per răspuns!
+- Folosește OBLIGATORIU ||OPTIONS: [...]|| pentru orice alegere
+- WhatsApp LIMITĂ: Max 3 butoane (alege cele mai importante)
+- Exemplu corect: "Ce material? ||OPTIONS: [\"Frontlit 440g\", \"Frontlit 510g\", \"Verso\"]||"
+- NU scrie opțiunile în text, doar în ||OPTIONS||!`;
         if (contextName || orderHistoryText) {
             systemContent += `\n\nDATE CLIENT: Nume: ${contextName || 'Necunoscut'}`;
             if (contextAddress) systemContent += `, Adresă: ${contextAddress}`;
@@ -304,13 +311,29 @@ export async function POST(req: Request) {
           { role: "user", content: textBody },
         ];
 
-        // 4. OpenAI Call
+        // === RAG INTEGRATION: Only for product queries ===
+        const needsRAG = /(banner|afiș|autocolant|canvas|tapet|rollup|window|pliant|flayer|fonduri|plexiglas|forex|alucobond|carton|material|dimensiune|preț)/i.test(textBody.toLowerCase());
+        if (needsRAG) {
+          try {
+            const { getConversationContext } = await import('@/lib/rag-assistant-integration');
+            const ragContext = await getConversationContext([...history, {role: 'user', content: textBody}], 2);
+            if (ragContext) {
+              messagesPayload[0].content += `\n\n${ragContext}`;
+              console.log('[WhatsApp] RAG context added');
+            }
+          } catch (error: any) {
+            console.warn('[WhatsApp] RAG skipped:', error.message);
+          }
+        }
+
+        // 4. OpenAI Call - optimizat pentru WhatsApp
         const completion = await openai.chat.completions.create({
           model: "gpt-4o",
           messages: messagesPayload as any,
+          temperature: 0.1,
+          max_tokens: 300,
           tools: tools,
           tool_choice: "auto",
-          temperature: 0.2,
         });
 
         const responseMessage: any = completion.choices[0].message;
@@ -333,6 +356,8 @@ export async function POST(req: Request) {
           const finalCompletion = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: messagesPayload as any,
+            temperature: 0.1,
+            max_tokens: 300,
           });
           finalReply = finalCompletion.choices[0].message.content ?? "";
         }

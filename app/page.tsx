@@ -11,20 +11,26 @@ import {
 import HeroCarousel from '@/components/HeroCarousel';
 import AssistantSection from '@/components/AssistantSection';
 
-// --- NAVIGARE RAPIDĂ (Reintrodusă aici) ---
+// --- NAVIGARE RAPIDĂ - TOATE CONFIGURATOARELE (18) ---
 const QUICK_NAV_ITEMS: { name: string; icon: LucideIcon; href: string; color: string; bg: string }[] = [
   { name: "Bannere", icon: FileImage, href: "/banner", color: "text-blue-600", bg: "bg-blue-50" },
   { name: "Autocolante", icon: StickyNote, href: "/autocolante", color: "text-emerald-600", bg: "bg-emerald-50" },
-  { name: "Afișe", icon: LayoutTemplate, href: "/afise", color: "text-purple-600", bg: "bg-purple-50" },
   { name: "Tapet", icon: Scroll, href: "/tapet", color: "text-orange-600", bg: "bg-orange-50" },
+  { name: "Afișe", icon: LayoutTemplate, href: "/afise", color: "text-purple-600", bg: "bg-purple-50" },
   { name: "Canvas", icon: Frame, href: "/canvas", color: "text-pink-600", bg: "bg-pink-50" },
   { name: "Pliante", icon: Layers, href: "/pliante", color: "text-indigo-600", bg: "bg-indigo-50" },
-  { name: "Rigide", icon: Box, href: "/materiale/pvc-forex", color: "text-slate-600", bg: "bg-slate-50" },
+  { name: "Flyere", icon: Layers, href: "/flayere", color: "text-violet-600", bg: "bg-violet-50" },
+  { name: "Banner Verso", icon: FileImage, href: "/banner-verso", color: "text-blue-700", bg: "bg-blue-100" },
+  { name: "Rollup", icon: FileImage, href: "/rollup", color: "text-cyan-600", bg: "bg-cyan-50" },
+  { name: "Window Graphics", icon: Scan, href: "/window-graphics", color: "text-sky-600", bg: "bg-sky-50" },
+  { name: "PVC Forex", icon: Box, href: "/materiale/pvc-forex", color: "text-slate-600", bg: "bg-slate-50" },
   { name: "Plexiglass", icon: Scan, href: "/materiale/plexiglass", color: "text-cyan-600", bg: "bg-cyan-50" },
-  { name: "Bond", icon: Box, href: "/materiale/alucobond", color: "text-gray-600", bg: "bg-gray-100" },
+  { name: "Alucobond", icon: Box, href: "/materiale/alucobond", color: "text-gray-600", bg: "bg-gray-100" },
   { name: "Carton", icon: Package, href: "/materiale/carton", color: "text-amber-700", bg: "bg-amber-50" },
   { name: "Polipropilenă", icon: Box, href: "/materiale/polipropilena", color: "text-lime-600", bg: "bg-lime-50" },
-  { name: "Proiecte", icon: Flag, href: "/fonduri-pnrr", color: "text-blue-800", bg: "bg-blue-50" },
+  { name: "PNRR", icon: Flag, href: "/fonduri-pnrr", color: "text-blue-800", bg: "bg-blue-50" },
+  { name: "Regio", icon: Flag, href: "/fonduri-regio", color: "text-blue-600", bg: "bg-blue-50" },
+  { name: "Fonduri Naționale", icon: Flag, href: "/fonduri-nationale", color: "text-red-600", bg: "bg-red-50" },
 ];
 
 export default function HomePage() {

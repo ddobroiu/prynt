@@ -22,7 +22,7 @@ export const metadata = {
     title: "Bannere Publicitare Personalizate | Print Outdoor & Indoor",
     description: "Configurează online bannere publicitare (frontlit). Prețuri de la 9€/mp, finisaje incluse (tiv, capse). Livrare rapidă în toată țara.",
     images: [{
-      url: "/products/banner/1.webp",
+      url: "/products/banner/banner-1.webp",
       width: 1200,
       height: 630,
       alt: "Bannere publicitare outdoor rezistente"

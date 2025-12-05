@@ -18,9 +18,9 @@ import {
 } from "@/lib/pricing";
 
 const GALLERY = [
-  "/products/flayere/1.webp",
-  "/products/flayere/2.webp",
-  "/products/flayere/3.webp",
+  "/products/flayere/flayere-1.webp",
+  "/products/flayere/flayere-2.webp",
+  "/products/flayere/flayere-3.webp",
 ] as const;
 
 const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (

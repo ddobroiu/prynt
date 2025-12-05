@@ -19,9 +19,9 @@ import {
 } from "@/lib/pricing";
 
 const GALLERY = [
-  "/products/canvas/1.webp",
-  "/products/canvas/2.webp", // Asigură-te că ai aceste imagini sau înlocuiește cu placeholder
-  "/products/canvas/3.webp", 
+  "/products/canvas/canvas-1.webp",
+  "/products/canvas/canvas-2.webp",
+  "/products/canvas/canvas-3.webp", 
 ] as const;
 
 /* --- UI COMPONENTS --- */

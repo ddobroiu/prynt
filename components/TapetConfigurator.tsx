@@ -17,7 +17,7 @@ import {
   type PriceInputTapet 
 } from "@/lib/pricing";
 
-const GALLERY = ["/products/tapet/1.webp", "/products/tapet/1.webp", "/products/tapet/1.webp", "/products/tapet/1.webp"] as const;
+const GALLERY = ["/products/tapet/tapet-1.webp", "/products/tapet/tapet-2.webp", "/products/tapet/tapet-3.webp", "/products/tapet/tapet-4.webp"] as const;
 
 /* --- UI COMPONENTS --- */
 const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
