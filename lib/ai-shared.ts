@@ -291,8 +291,9 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
           options: { type: "object", properties: { laminated: {type:"boolean"}, diecut: {type:"boolean"}, adhesive: {type:"boolean"} } }
         },
         required: ["product_type", "quantity"]
-      },
-    },
+      }
+    }
+  },
     {
     type: "function",
     function: {

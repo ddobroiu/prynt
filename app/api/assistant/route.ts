@@ -140,7 +140,7 @@ export async function POST(req: Request) {
           console.log('[AI Assistant] RAG context added');
         }
       } catch (error) {
-        console.warn('[AI Assistant] RAG skipped:', error.message);
+        console.warn('[AI Assistant] RAG skipped:', error instanceof Error ? error.message : String(error));
       }
     }
 

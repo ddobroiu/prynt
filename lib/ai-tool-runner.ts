@@ -584,7 +584,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
           await sendOfferEmail({
             to: customer_details.email,
             customerName: customer_details.name,
-            orderNo: nextOrderNo,
+            orderNo: String(nextOrderNo),
             total: totalAmount,
             pdfLink: offerLink,
             items: items.map((item: any) => ({
