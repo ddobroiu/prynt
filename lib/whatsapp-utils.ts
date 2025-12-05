@@ -1,4 +1,5 @@
-const WHATSAPP_API_URL = `https://graph.facebook.com/v20.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`;
+const WHATSAPP_API_VERSION = process.env.WHATSAPP_API_VERSION || 'v24.0';
+const WHATSAPP_API_URL = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`;
 const WHATSAPP_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 
 /**
@@ -17,6 +18,7 @@ export async function sendWhatsAppMessage(to: string, body: string) {
   };
 
   try {
+    console.log(`📤 Trimit mesaj WhatsApp către ${to}: ${body.substring(0, 50)}...`);
     const res = await fetch(WHATSAPP_API_URL, {
       method: 'POST',
       headers: {
@@ -29,10 +31,13 @@ export async function sendWhatsAppMessage(to: string, body: string) {
     if (!res.ok) {
       const errorData = await res.json();
       console.error('❌ WhatsApp API Error (Text):', JSON.stringify(errorData, null, 2));
+      console.error('❌ Status:', res.status, res.statusText);
       return null;
     }
 
-    return await res.json();
+    const result = await res.json();
+    console.log(`✅ Mesaj WhatsApp trimis cu succes către ${to}`);
+    return result;
   } catch (error) {
     console.error('❌ Network Error sending WhatsApp message:', error);
     return null;
