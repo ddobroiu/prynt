@@ -21,7 +21,7 @@ export const metadata = {
     title: "Flyere Ieftine | A6, A5, DL | Tipografie Online",
     description: "Comandă flyere pentru promovare stradală sau evenimente. Prețuri mici, tiraje flexibile și livrare rapidă.",
     images: [{
-      url: "/products/flayere/1.webp",
+      url: "/products/flayere/flayere-1.webp",
       width: 1200,
       height: 630,
       alt: "Flyere ieftine A6 A5 DL"

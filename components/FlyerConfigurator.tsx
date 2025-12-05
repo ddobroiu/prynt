@@ -224,7 +224,7 @@ export default function FlyerConfigurator({ productSlug, productImage }: Props) 
                 {upsellOpportunity && (
                   <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors" onClick={() => setQuantity(upsellOpportunity.requiredQty)}>
                     <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 mt-0.5">
+                      <div className="shrink-0 mt-0.5">
                         <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
                           <TrendingUp className="w-4 h-4 text-white" />
                         </div>
@@ -238,7 +238,7 @@ export default function FlyerConfigurator({ productSlug, productImage }: Props) 
                           Economisești {upsellOpportunity.discountPercent}% la prețul per unitate!
                         </p>
                       </div>
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <span className="text-xs font-bold text-amber-600">-{upsellOpportunity.discountPercent}%</span>
                       </div>
                     </div>

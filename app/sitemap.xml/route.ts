@@ -17,29 +17,33 @@ export async function GET() {
 
   const pages = [
     { url: `${base}/`, priority: 1.0, lastmod: formatDateISO(new Date()) },
-    // Fonduri UE subpagini
-    { url: `${base}/fonduri-pnrr`, priority: 0.9, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/fonduri-regio`, priority: 0.9, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/fonduri-nationale`, priority: 0.9, lastmod: formatDateISO(new Date()) },
-    // Categorii principale
+    // Configuratoare principale (outdoor)
     { url: `${base}/banner`, priority: 0.9, lastmod: formatDateISO(new Date()) },
     { url: `${base}/banner-verso`, priority: 0.8, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/rollup`, priority: 0.8, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/window-graphics`, priority: 0.8, lastmod: formatDateISO(new Date()) },
+    // Print & indoor
     { url: `${base}/afise`, priority: 0.8, lastmod: formatDateISO(new Date()) },
     { url: `${base}/flayere`, priority: 0.8, lastmod: formatDateISO(new Date()) },
     { url: `${base}/pliante`, priority: 0.8, lastmod: formatDateISO(new Date()) },
     { url: `${base}/autocolante`, priority: 0.8, lastmod: formatDateISO(new Date()) },
+    // Interior
     { url: `${base}/canvas`, priority: 0.7, lastmod: formatDateISO(new Date()) },
     { url: `${base}/tapet`, priority: 0.7, lastmod: formatDateISO(new Date()) },
     // Materiale rigide
     { url: `${base}/materiale`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/materiale/pvc-forex`, priority: 0.7, lastmod: formatDateISO(new Date()) },
     { url: `${base}/materiale/plexiglass`, priority: 0.7, lastmod: formatDateISO(new Date()) },
     { url: `${base}/materiale/alucobond`, priority: 0.7, lastmod: formatDateISO(new Date()) },
     { url: `${base}/materiale/carton`, priority: 0.7, lastmod: formatDateISO(new Date()) },
     { url: `${base}/materiale/polipropilena`, priority: 0.7, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/materiale/pvc-forex`, priority: 0.7, lastmod: formatDateISO(new Date()) },
+    // Fonduri UE
+    { url: `${base}/fonduri-pnrr`, priority: 0.9, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/fonduri-regio`, priority: 0.9, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/fonduri-nationale`, priority: 0.9, lastmod: formatDateISO(new Date()) },
     // Shop și configuratoare
     { url: `${base}/shop`, priority: 0.7, lastmod: formatDateISO(new Date()) },
-    { url: `${base}/configuratoare`, priority: 0.6, lastmod: formatDateISO(new Date()) },
+    { url: `${base}/configuratoare`, priority: 0.8, lastmod: formatDateISO(new Date()) },
     // Blog și info
     { url: `${base}/blog`, priority: 0.7, lastmod: formatDateISO(new Date()) },
     { url: `${base}/livrare`, priority: 0.6, lastmod: formatDateISO(new Date()) },

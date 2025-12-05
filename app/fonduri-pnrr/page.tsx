@@ -4,8 +4,29 @@ import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 
 export const metadata = {
   title: "Kit Vizibilitate PNRR | Panouri, Plăci, Autocolante",
-  description: "Comandă online kitul complet de vizibilitate pentru proiecte PNRR. Materiale obligatorii conform manualului de identitate vizuală.",
+  description: "Comandă online kitul complet de vizibilitate pentru proiecte PNRR. Materiale obligatorii conform manualului de identitate vizuală. Panouri, plăci rigide, autocolante.",
+  keywords: [
+    "panouri PNRR",
+    "kit vizibilitate PNRR",
+    "materiale PNRR",
+    "identitate vizuală PNRR",
+    "proiecte PNRR",
+    "fonduri europene",
+    "plăci PNRR",
+    "autocolante PNRR"
+  ],
   alternates: { canonical: "/fonduri-pnrr" },
+  openGraph: {
+    title: "Kit Vizibilitate PNRR | Panouri, Plăci, Autocolante",
+    description: "Comandă online kitul complet de vizibilitate pentru proiecte PNRR. Materiale obligatorii conform manualului de identitate vizuală.",
+    images: [{
+      url: "/products/banner/banner-1.webp",
+      width: 1200,
+      height: 630,
+      alt: "Kit vizibilitate PNRR"
+    }],
+    type: "website"
+  }
 };
 
 export default function FonduriPnrrPage() {

@@ -15,11 +15,17 @@ export const metadata: Metadata = {
     "folie perforata PVC",
     "publicitate outdoor",
   ],
+  alternates: { canonical: "/window-graphics" },
   openGraph: {
     title: "Window Graphics - Folie Perforată Ferestre",
     description:
       "Folie PVC perforată 140μ cu vizibilitate unidirecțională. Perfectă pentru vitrine, birouri și autovehicule.",
-    images: ["/products/window-graphics/1.webp"],
+    images: [{
+      url: "/products/window-graphics/window-graphics-1.webp",
+      width: 1200,
+      height: 630,
+      alt: "Window graphics folie perforată ferestre"
+    }],
     type: "website",
   },
 };

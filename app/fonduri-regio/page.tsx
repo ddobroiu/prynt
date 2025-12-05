@@ -4,8 +4,28 @@ import BreadcrumbsJsonLd from "@/components/BreadcrumbsJsonLd";
 
 export const metadata = {
   title: "Kit Vizibilitate Regio (POR) | Panouri Temporare",
-  description: "Materiale de vizibilitate pentru Programul Operațional Regional (Regio). Panouri temporare și plăci permanente.",
+  description: "Materiale de vizibilitate pentru Programul Operațional Regional (Regio). Panouri temporare și plăci permanente conform normelor UE.",
+  keywords: [
+    "panouri regio",
+    "kit vizibilitate POR",
+    "program operațional regional",
+    "materiale regio",
+    "panouri temporare UE",
+    "fonduri europene regio",
+    "identitate vizuală POR"
+  ],
   alternates: { canonical: "/fonduri-regio" },
+  openGraph: {
+    title: "Kit Vizibilitate Regio (POR) | Panouri Temporare",
+    description: "Materiale de vizibilitate pentru Programul Operațional Regional (Regio). Panouri temporare și plăci permanente.",
+    images: [{
+      url: "/products/banner/banner-1.webp",
+      width: 1200,
+      height: 630,
+      alt: "Kit vizibilitate Regio POR"
+    }],
+    type: "website"
+  }
 };
 
 export default function FonduriRegioPage() {

@@ -17,11 +17,17 @@ export const metadata: Metadata = {
     "caseta aluminiu",
     "blueback 440g",
   ],
+  alternates: { canonical: "/rollup" },
   openGraph: {
     title: "Rollup Banner - Sistem Retractabil Premium",
     description:
       "Banner retractabil profesional cu casetă aluminiu. Include print Blueback 440g și geantă transport. Montaj rapid, fără unelte.",
-    images: ["/products/rollup/1.webp"],
+    images: [{
+      url: "/products/rollup/rollup-1.webp",
+      width: 1200,
+      height: 630,
+      alt: "Rollup banner retractabil profesional"
+    }],
     type: "website",
   },
 };
