@@ -160,18 +160,6 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
 
   // Update image based on fold selection
   useEffect(() => {
-    const foldToImageMap: Record<string, number> = {
-      "1": 0,    // pliante-1.webp (1 big)
-      "2": 1,    // pliante-2.webp (2 biguri)
-      "3": 2,    // pliante-3.webp (3 biguri)
-      "4": 3     // pliante-4.webp (4 biguri)
-    };
-    const imageIndex = foldToImageMap[foldType] ?? 0;
-    setActiveIndex(imageIndex);
-  }, [foldType]);
-
-  // Update image based on fold type
-  useEffect(() => {
     const foldToImageMap: Record<PlianteFoldType, number> = {
       simplu: 0,      // pliante-1.webp (1 big)
       fereastra: 1,   // pliante-2.webp (2 biguri)
