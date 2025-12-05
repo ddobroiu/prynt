@@ -352,12 +352,15 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
     const id = setInterval(() => {
       setActiveIndex((i) => {
         const next = (i + 1) % galleryImages.length;
-        setActiveImage(galleryImages[next]);
         return next;
       });
     }, 3000);
     return () => clearInterval(id);
   }, [galleryImages, viewMode, artworkUrl]);
+
+  useEffect(() => {
+    setActiveImage(galleryImages[activeIndex]);
+  }, [activeIndex, galleryImages]);
   
   const canAdd = displayedTotal > 0 && input.width_cm > 0 && input.height_cm > 0;
   const summaryStep1 = input.width_cm > 0 && input.height_cm > 0 ? `${input.width_cm}x${input.height_cm}cm, ${input.quantity} buc.` : "Alege";
