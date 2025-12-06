@@ -428,7 +428,7 @@ export default function CheckoutPage() {
                                     Ramburs (Plata la livrare)
                                 </span>
                             </div>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 ml-8">
+                            <p className="text-sm font-semibold text-slate-950 dark:text-slate-300 ml-8">
                                 {isRambursDisabled 
                                     ? "Indisponibil pentru comenzi mari" 
                                     : "Plătești curierului numerar la primirea coletului"
@@ -475,7 +475,7 @@ export default function CheckoutPage() {
                                     Recomandat
                                 </span>
                             </div>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 ml-8">Plătești instant prin Stripe. Securitate maximă garantată.</p>
+                            <p className="text-sm font-semibold text-slate-950 dark:text-slate-300 ml-8">Plătești instant prin Stripe. Securitate maximă garantată.</p>
                         </div>
                         {paymentMethod === 'card' && (
                             <div className="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">
@@ -508,7 +508,7 @@ export default function CheckoutPage() {
                                 </div>
                                 <span className="text-sm font-semibold text-slate-900 dark:text-white">Transfer Bancar (OP)</span>
                             </div>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 ml-8">
+                            <p className="text-sm font-semibold text-slate-950 dark:text-slate-300 ml-8">
                                 Vei primi factura și datele bancare pe email. Comanda intră în producție după confirmarea plății.
                             </p>
                             {paymentMethod === 'op' && (

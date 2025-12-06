@@ -74,10 +74,10 @@ export default function CartWidget() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <button className="relative flex items-center gap-2 px-3 py-2 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-all" aria-label="Deschide coșul de cumpărături">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-zinc-700 dark:text-zinc-300">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-slate-950 dark:text-zinc-300">
             <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.2 16.5H17M17 16.5C15.9 16.5 15 17.4 15 18.5C15 19.6 15.9 20.5 17 20.5C18.1 20.5 19 19.6 19 18.5C19 17.4 18.1 16.5 17 16.5ZM9 18.5C9 19.6 8.1 20.5 7 20.5C5.9 20.5 5 19.6 5 18.5C5 17.4 5.9 16.5 7 16.5C8.1 16.5 9 17.4 9 18.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Coș</span>
+          <span className="text-slate-950 dark:text-zinc-300 text-sm font-medium">Coș</span>
           {cartCount > 0 && (
             <span className="absolute -top-1.5 -right-1.5 bg-indigo-600 text-white text-[11px] font-semibold min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full shadow-sm">
               {cartCount}
