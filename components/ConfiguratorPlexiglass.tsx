@@ -206,7 +206,6 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
                 {GALLERY.map((src, i) => <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
               </div>
             </div>
-            <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'plexiglass'} /></div>
           </div>
           <div>
             <header className="mb-6">
@@ -345,8 +344,9 @@ export default function ConfiguratorPlexiglass({ productSlug, initialWidth: init
               </div>
             </div>
           </div>
-          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'plexiglass'} /></div>
         </div>
+
+        <div className="mt-8 lg:mt-12"><ProductTabs productSlug={productSlug || 'plexiglass'} /></div>
       </div>
 
       {detailsOpen && (

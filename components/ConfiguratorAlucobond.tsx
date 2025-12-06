@@ -198,10 +198,9 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
               <div className="aspect-square"><img src={activeImage} alt="Alucobond" className="h-full w-full object-cover" /></div>
               <div className="p-2 grid grid-cols-4 gap-2">
-                {GALLERY.map((src, i) => <button key={i} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
+                {GALLERY.map((src, i) => <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
               </div>
             </div>
-            <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'alucobond'} /></div>
           </div>
           <div>
             <header className="mb-6">
@@ -335,8 +334,9 @@ export default function ConfiguratorAlucobond({ productSlug, initialWidth: initW
               </div>
             </div>
           </div>
-          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'alucobond'} /></div>
         </div>
+
+        <div className="mt-8 lg:mt-12"><ProductTabs productSlug={productSlug || 'alucobond'} /></div>
       </div>
 
       {detailsOpen && (
