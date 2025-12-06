@@ -70,7 +70,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Link',
-            value: '</globals.css>; rel=preload; as=style, <https://www.googletagmanager.com>; rel=preconnect, <https://res.cloudinary.com>; rel=preconnect',
+            value: '</_next/static/css/app/layout.css>; rel=preload; as=style, <https://www.googletagmanager.com>; rel=preconnect, <https://res.cloudinary.com>; rel=preconnect',
           },
           {
             key: 'X-Content-Type-Options',
@@ -83,6 +83,32 @@ const nextConfig: NextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
+          },
+        ],
+      },
+      {
+        source: '/globals.css',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/css; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/css/:path*',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/css; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },

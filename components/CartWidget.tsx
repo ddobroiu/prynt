@@ -88,6 +88,7 @@ export default function CartWidget() {
       
       {/* DIALOG CONTENT - FIXARE DREAPTA FORTATA */}
       <DialogContent
+        aria-describedby="cart-description"
         className={
           // 1. SUPRASCRIERE TOTALA A POZITIONARII (folosim ! pentru a bate stilurile implicite)
           "fixed! right-0! left-auto! top-0! bottom-0! translate-x-0! translate-y-0! m-0! " +
@@ -102,6 +103,9 @@ export default function CartWidget() {
         }
         style={{zIndex: 9999}}
       >
+        
+        {/* Hidden description for accessibility */}
+        <p id="cart-description" className="sr-only">Coșul tău de cumpărături cu produsele adăugate</p>
         
         {/* HEADER - FIX (Nu se misca) */}
         <div className="shrink-0 z-20 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
