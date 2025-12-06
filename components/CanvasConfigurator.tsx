@@ -421,6 +421,30 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
               </div>
               <DeliveryEstimation />
             </div>
+
+            {/* BUTOANE SECUNDARE - WHATSAPP ȘI CERERE OFERTĂ */}
+            <div className="mt-4 lg:mt-6 bg-gray-50 rounded-xl border border-gray-200 p-4">
+              <p className="text-xs text-gray-500 mb-3 text-center">Ai nevoie de ajutor sau o ofertă personalizată?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a 
+                  href="https://wa.me/40750473111?text=Ma%20intereseaza%20configuratorul%20canvas" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <MessageCircle size={18} />
+                  <span className="text-sm">WhatsApp</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => window.location.href = '/contact'}
+                  className="inline-flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <Info size={18} />
+                  <span className="text-sm">Cerere Ofertă</span>
+                </button>
+              </div>
+            </div>
             
             {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
             <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
