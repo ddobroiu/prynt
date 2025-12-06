@@ -58,31 +58,20 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   // LOGICA IMAGINE ROBUSTĂ
-  // Încercăm să găsim imaginea specifică a produsului în .jpg
-  // Dacă nu există, folosim imaginea configuratorului în .webp
-  const slugKey = String(product.slug ?? product.id ?? "").toLowerCase();
+  // Folosim imaginile definite explicit în product.images
+  // Acestea sunt deja corect setate în extraProducts.ts cu .jpg lowercase
   const imgs = product.images ?? [];
-  
-  // Încercăm imaginea specifică a produsului (.jpg)
   const categoryPath = category === "bannere" ? "banner" : category;
-  const productSpecificImageJpg = `/products/${categoryPath}/${slugKey}.jpg`;
   
-  // Fallback la imaginea configuratorului (.webp)
+  // Fallback la imaginea configuratorului (.webp) - pentru configuratoare fără imagini specifice
   const configuratorImageWebp = `/products/${categoryPath}/1.webp`;
   
-  // Pentru produse: încercăm .jpg, fallback la .webp configurator
-  // Pentru configuratoare: rămâne .webp
-  let img = productSpecificImageJpg;
+  // Preferăm imaginile definite explicit (din extraProducts.ts)
+  let img = configuratorImageWebp;
   
-  // Dacă produsul are imagini definite explicit, le folosim
   if (imgs.length > 0) {
-    const specificImg = imgs.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
-    if (specificImg) {
-      img = specificImg;
-    } else {
-      // Dacă nu găsim imaginea specifică, folosim configuratorul
-      img = imgs[0] ?? configuratorImageWebp;
-    }
+    // Folosim prima imagine definită - acestea sunt deja cu calea completă și extensia corectă
+    img = imgs[0];
   }
   
   // Dacă a fost eroare la încărcare, folosim fallback-ul
@@ -102,7 +91,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
-          unoptimized={finalImg.startsWith('http')}
+          unoptimized={finalImg.endsWith('.jpg') || finalImg.startsWith('http')}
           onError={() => setImgError(true)}
         />
         {/* Badge Preț */}

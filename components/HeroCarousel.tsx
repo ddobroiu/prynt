@@ -97,7 +97,7 @@ const HERO_ITEMS = [
     id: 'pvc',
     title: 'Plăci PVC / Forex',
     description: 'Panouri rigide pentru semnalistică durabilă.',
-    image: '/products/pvc-forex/pvc-forex-1.webp',
+    image: '/products/materiale/pvc-forex/pvc-forex-1.webp',
     link: '/materiale/pvc-forex',
     gradient: 'from-slate-600 to-gray-500'
   },
@@ -105,7 +105,7 @@ const HERO_ITEMS = [
     id: 'plexiglass',
     title: 'Plexiglass',
     description: 'Aspect sticlă, elegant și durabil.',
-    image: '/products/plexiglass/plexiglass-1.webp',
+    image: '/products/materiale/plexiglass/plexiglass-1.webp',
     link: '/materiale/plexiglass',
     gradient: 'from-cyan-600 to-blue-500'
   },
@@ -113,7 +113,7 @@ const HERO_ITEMS = [
     id: 'alucobond',
     title: 'Alucobond',
     description: 'Sandwich aluminiu pentru exterior.',
-    image: '/products/alucobond/alucobond-1.webp',
+    image: '/products/materiale/alucobond/alucobond-1.webp',
     link: '/materiale/alucobond',
     gradient: 'from-gray-700 to-slate-800'
   },
@@ -121,7 +121,7 @@ const HERO_ITEMS = [
     id: 'carton',
     title: 'Carton Ondulat',
     description: 'Ambalaje și prototipuri rezistente.',
-    image: '/products/carton/carton-1.webp',
+    image: '/products/materiale/carton/carton-1.webp',
     link: '/materiale/carton',
     gradient: 'from-amber-700 to-orange-600'
   },
@@ -129,7 +129,7 @@ const HERO_ITEMS = [
     id: 'polipropilena',
     title: 'Polipropilenă',
     description: 'Material celular ușor și rezistent.',
-    image: '/products/polipropilena/polipropilena-1.webp',
+    image: '/products/materiale/polipropilena/polipropilena-1.webp',
     link: '/materiale/polipropilena',
     gradient: 'from-lime-600 to-green-500'
   },
