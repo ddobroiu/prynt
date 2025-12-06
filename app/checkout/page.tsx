@@ -556,7 +556,7 @@ export default function CheckoutPage() {
               />
               
               <div className="text-center">
-                <a href="/" className="text-sm text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 underline decoration-dotted">
+                <a href="/" className="text-sm text-black dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 underline decoration-dotted font-medium">
                   Continuă cumpărăturile
                 </a>
               </div>
@@ -667,12 +667,12 @@ function SummaryCard({
         <DeliveryInfo county={county} variant="text" size="xs" showCod={false} showShippingFrom={false} />
         
         <div className="flex items-center justify-between">
-          <span className="text-slate-700 dark:text-slate-400">Produse</span>
-          <span className="font-semibold text-slate-900 dark:text-white">{fmt(subtotal)}</span>
+          <span className="text-black dark:text-slate-400 font-medium">Produse</span>
+          <span className="font-semibold text-black dark:text-white">{fmt(subtotal)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-slate-700 dark:text-slate-400">
-            <Truck size={16} className="text-slate-600 dark:text-slate-400" />
+          <span className="flex items-center gap-2 text-black dark:text-slate-400 font-medium">
+            <Truck size={16} className="text-gray-900 dark:text-slate-400" />
             Livrare
           </span>
           <span className="font-semibold text-emerald-600 dark:text-emerald-500">{shipping === 0 ? "Gratuit" : fmt(shipping)}</span>
@@ -689,7 +689,7 @@ function SummaryCard({
         {/* Afișez reducerea aplicată */}
         {discount && discountAmount && discountAmount > 0 && (
           <div className="flex items-center justify-between">
-            <span className="text-slate-700 dark:text-slate-400">Reducere</span>
+            <span className="text-black dark:text-slate-400 font-medium">Reducere</span>
             <span className="font-semibold text-emerald-600 dark:text-emerald-500">-{fmt(discountAmount)}</span>
           </div>
         )}
@@ -709,7 +709,7 @@ function SummaryCard({
               onChange={(e) => setCreateAccount(e.target.checked)}
               className="mt-1 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white"
             />
-            <span className="text-slate-700 dark:text-slate-300 leading-relaxed">
+            <span className="text-black dark:text-slate-300 leading-relaxed font-medium">
               Vreau cont nou (parola vine pe email).
             </span>
           </label>
@@ -723,7 +723,7 @@ function SummaryCard({
             onChange={(e) => setSubscribeNewsletter(e.target.checked)}
             className="mt-1 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white"
           />
-          <span className="text-slate-700 dark:text-slate-300 leading-relaxed">
+          <span className="text-black dark:text-slate-300 leading-relaxed font-medium">
             Vreau să primesc oferte și noutăți pe email.
           </span>
         </label>
@@ -874,11 +874,11 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
     if (details.length === 0) return null;
 
     return (
-      <div className="mt-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs text-slate-700 dark:text-slate-300">
+      <div className="mt-2 rounded-md border border-slate-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-2 text-xs text-black dark:text-slate-300">
         {details.map((d, idx) => (
           <div key={idx} className="flex gap-2 py-0.5">
-            <span className="opacity-80">{d.label}:</span>
-            <span className="font-medium text-slate-900 dark:text-white">{d.value}</span>
+            <span className="opacity-90 font-medium">{d.label}:</span>
+            <span className="font-bold text-black dark:text-white">{d.value}</span>
           </div>
         ))}
       </div>
@@ -902,20 +902,20 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
-                    <button onClick={() => onRemove(item.id)} className="inline-flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"><X size={16} /></button>
-                    <p className="font-semibold truncate pr-2 text-slate-900 dark:text-white">{title}</p>
+                    <button onClick={() => onRemove(item.id)} className="inline-flex items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-2 text-black dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"><X size={16} /></button>
+                    <p className="font-semibold truncate pr-2 text-black dark:text-white">{title}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="inline-flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800">
-                      <button onClick={() => updateQuantity(item.id, Math.max(1, qty - 1))} className="px-2 py-1 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"><Minus size={14} /></button>
-                      <div className="px-3 text-sm font-bold text-slate-900 dark:text-white">{qty}</div>
-                      <button onClick={() => updateQuantity(item.id, qty + 1)} className="px-2 py-1 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"><Plus size={14} /></button>
+                    <div className="inline-flex items-center border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-slate-800">
+                      <button onClick={() => updateQuantity(item.id, Math.max(1, qty - 1))} className="px-2 py-1 text-sm text-black dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold"><Minus size={14} /></button>
+                      <div className="px-3 text-sm font-bold text-black dark:text-white">{qty}</div>
+                      <button onClick={() => updateQuantity(item.id, qty + 1)} className="px-2 py-1 text-sm text-black dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold"><Plus size={14} /></button>
                     </div>
                   </div>
                 </div>
                 {renderDetails(item)}
                 <div className="mt-2 text-right">
-                    <div className="text-sm font-medium text-slate-900 dark:text-white">{fmt(Number(lineTotal))}</div>
+                    <div className="text-sm font-bold text-black dark:text-white">{fmt(Number(lineTotal))}</div>
                 </div>
               </div>
             </li>
