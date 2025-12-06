@@ -122,6 +122,20 @@ export default function RootLayout({
         }} />
         
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Prynt Blog" />
+        
+        {/* Google tag (gtag.js) - Google Ads */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17725546932"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-17725546932');
+            `,
+          }}
+        />
+        
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -175,35 +189,20 @@ export default function RootLayout({
             }),
           }}
         />
-        {/* Google Analytics */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-TR68M2QTPK"
-          strategy="afterInteractive"
+        {/* Google Analytics - în head pentru mai bun tracking */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-TR68M2QTPK"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-TR68M2QTPK', {
+                page_path: window.location.pathname,
+              });
+            `,
+          }}
         />
-        <Script id="gtag-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-TR68M2QTPK', {
-              page_path: window.location.pathname,
-            });
-          `}
-        </Script>
-
-        {/* Google Ads Conversion Tracking */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17725546932"
-          strategy="afterInteractive"
-        />
-        <Script id="google-ads-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'AW-17725546932');
-          `}
-        </Script>
         
         <Script
           id="tiktok-pixel"
