@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, ShoppingCart } from "lucide-react";
@@ -19,6 +21,9 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   // LOGICA DE RUTARE: Determinăm link-ul corect bazat pe categorie
   const category = (product.category || "").toLowerCase();
+  
+  // State pentru fallback la imaginea configuratorului
+  const [imgError, setImgError] = useState(false);
   
   let href = `/product/${product.slug}`; // Fallback
 
@@ -53,11 +58,32 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   // LOGICA IMAGINE ROBUSTĂ
+  // Încercăm să găsim imaginea specifică a produsului în .jpg
+  // Dacă nu există, folosim imaginea configuratorului în .webp
   const slugKey = String(product.slug ?? product.id ?? "").toLowerCase();
-  const genericSet = new Set<string>(["/products/banner/1.webp","/products/banner/2.webp","/products/banner/3.webp","/products/banner/4.webp","/placeholder.png"]);
   const imgs = product.images ?? [];
-  let img = imgs.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
-  if (!img) img = imgs.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgs[0] ?? "/products/banner/1.webp";
+  
+  // Încercăm imaginea specifică a produsului (.jpg)
+  const categoryPath = category === "bannere" ? "banner" : category;
+  const productSpecificImageJpg = `/products/${categoryPath}/${slugKey}.jpg`;
+  
+  // Fallback la imaginea configuratorului (.webp)
+  const configuratorImageWebp = `/products/${categoryPath}/1.webp`;
+  
+  // Pentru produse: încercăm .jpg, fallback la .webp configurator
+  // Pentru configuratoare: rămâne .webp
+  let img = productSpecificImageJpg;
+  
+  // Dacă produsul are imagini definite explicit, le folosim
+  if (imgs.length > 0) {
+    const specificImg = imgs.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
+    if (specificImg) {
+      img = specificImg;
+    } else {
+      // Dacă nu găsim imaginea specifică, folosim configuratorul
+      img = imgs[0] ?? configuratorImageWebp;
+    }
+  }
 
   return (
     <Link 
