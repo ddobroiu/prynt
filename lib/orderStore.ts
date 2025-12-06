@@ -228,6 +228,7 @@ export async function listOrders(limit = 200): Promise<StoredOrder[]> {
   if (process.env.DATABASE_URL) {
     try {
       const recs = await prisma.order.findMany({
+        where: { type: "order" }, // Doar comenzi, nu oferte
         orderBy: { createdAt: 'desc' },
         take: limit,
         include: { items: true },
@@ -283,6 +284,47 @@ export async function listOrders(limit = 200): Promise<StoredOrder[]> {
   }
   orders.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   return orders;
+}
+
+export async function listOffers(limit = 200): Promise<StoredOrder[]> {
+  if (process.env.DATABASE_URL) {
+    try {
+      const recs = await prisma.order.findMany({
+        where: { type: "offer" }, // Doar oferte
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        include: { items: true },
+      });
+      return recs.map((r) => ({
+        orderNo: r.orderNo,
+        id: r.id,
+        createdAt: r.createdAt.toISOString(),
+        paymentType: r.paymentType as any,
+        address: (r.address || {}) as any,
+        billing: (r.billing || {}) as any,
+        items: (r.items || []).map((it: any) => ({ 
+          name: it.name, 
+          qty: it.qty, 
+          unit: Number(it.unit), 
+          total: Number(it.total),
+          artworkUrl: it.artworkUrl,
+          metadata: it.metadata 
+        })),
+        shippingFee: Number(r.shippingFee ?? 0),
+        total: Number(r.total ?? 0),
+        invoiceLink: r.invoiceLink || null,
+        awbNumber: r.awbNumber || null,
+        awbCarrier: r.awbCarrier || null,
+        marketing: (r.marketing || undefined) as any,
+        userId: r.userId || null,
+        status: (r.status as any) || undefined,
+        canceledAt: r.canceledAt ? r.canceledAt.toISOString() : null,
+      }));
+    } catch (e) {
+      console.warn('[orderStore] DB listOffers failed:', ((e as Error)?.message) || String(e));
+    }
+  }
+  return [];
 }
 
 export async function getOrder(id: string): Promise<StoredOrder | null> {

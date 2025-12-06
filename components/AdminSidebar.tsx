@@ -11,14 +11,15 @@ import {
   Menu,
   X,
   FileText,
-  MessageSquare // <--- Am adăugat importul aici
+  MessageSquare,
+  Receipt
 } from "lucide-react";
 
 const menuItems = [
   { href: "/admin/orders", label: "Comenzi", icon: ShoppingCart, disabled: false },
+  { href: "/admin/offers", label: "Oferte", icon: Receipt, disabled: false },
   { href: "/admin/users", label: "Clienți", icon: Users, disabled: false },
   { href: "/admin/invoices", label: "Facturi", icon: FileText, disabled: false },
-  // <--- Am adăugat elementul nou aici
   { href: "/admin/chats", label: "Conversații AI", icon: MessageSquare, disabled: false }, 
 ];
 
