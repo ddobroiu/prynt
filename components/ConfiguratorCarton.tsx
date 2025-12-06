@@ -57,8 +57,55 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
                 <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
                 <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
             </nav>
-            <div className="p-6">
-                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Soluții Carton Personalizate</h3><p>Producem ambalaje, standuri și elemente de signalistică din carton ondulat sau carton structural (fagure) reciclabil. Imprimare directă UV de înaltă calitate.</p></div>}
+            <div className="p-6 lg:p-8">
+                {activeTab === 'descriere' && (
+                    <>
+                        <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Soluții Carton Personalizate</h2>
+                        <p className="text-gray-700 mb-8 leading-relaxed">Producem ambalaje, standuri și elemente de signalistică din carton ondulat sau carton structural (fagure) reciclabil. Imprimare directă UV de înaltă calitate.</p>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Carton Prespahn Rigid</h3>
+                                <p className="text-sm text-gray-600">Grosime 1.5mm-3mm, rezistență structură</p>
+                            </div>
+                            
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Preț Mic</h3>
+                                <p className="text-sm text-gray-600">Soluție economică pentru interior, temporar</p>
+                            </div>
+                            
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Ușor de Montat</h3>
+                                <p className="text-sm text-gray-600">Lipsă ușor, ideal standuri, evenimente, PLV</p>
+                            </div>
+                            
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Print Full-Color</h3>
+                                <p className="text-sm text-gray-600">Calitate excelentă, finisaj mat sau lucios</p>
+                            </div>
+                        </div>
+                    </>
+                )}
                 {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
                 {activeTab === 'faq' && <FaqAccordion qa={faq} />}
             </div>
@@ -311,58 +358,6 @@ export default function ConfiguratorCarton({ productSlug, initialWidth: initW, i
               <DeliveryEstimation />
             </div>
             
-            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
-            <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Carton Prespahn Rigid</h3>
-                    <p className="text-sm text-gray-600">Grosime 1.5mm-3mm, rezistență structură</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Preț Mic</h3>
-                    <p className="text-sm text-gray-600">Soluție economică pentru interior, temporar</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Ușor de Montat</h3>
-                    <p className="text-sm text-gray-600">Lipsă ușor, ideal standuri, evenimente, PLV</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Print Full-Color</h3>
-                    <p className="text-sm text-gray-600">Calitate excelentă, finisaj mat sau lucios</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 

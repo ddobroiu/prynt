@@ -57,8 +57,55 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
                 <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
                 <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
             </nav>
-            <div className="p-6">
-                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Polipropilenă Celulară (Akyplac)</h3><p>Plăci ușoare și rigide din plastic celular, perfecte pentru panouri temporare, imobiliare și de șantier. O alternativă rezistentă la apă pentru cartonul clasic.</p></div>}
+            <div className="p-6 lg:p-8">
+                {activeTab === 'descriere' && (
+                    <>
+                        <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Polipropilenă Celulară (Akyplac)</h2>
+                        <p className="text-gray-700 mb-8 leading-relaxed">Plăci ușoare și rigide din plastic celular, perfecte pentru panouri temporare, imobiliare și de șantier. O alternativă rezistentă la apă pentru cartonul clasic.</p>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Polipropilena Rezistentă</h3>
+                                <p className="text-sm text-gray-600">Material plastic rigid, nu se rupe, foarte ușor</p>
+                            </div>
+                            
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Ideal Exterior</h3>
+                                <p className="text-sm text-gray-600">Rezistă perfect la ploaie și umiditate, durabil</p>
+                            </div>
+                            
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Raport Calitate/Preț</h3>
+                                <p className="text-sm text-gray-600">Alternativă economică la PVC Forex sau alucobond</p>
+                            </div>
+                            
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Print UV Direct</h3>
+                                <p className="text-sm text-gray-600">Culori rezistente, suprafață albă strălucitoare</p>
+                            </div>
+                        </div>
+                    </>
+                )}
                 {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
                 {activeTab === 'faq' && <FaqAccordion qa={faq} />}
             </div>
@@ -269,58 +316,6 @@ export default function ConfiguratorPolipropilena({ productSlug, initialWidth: i
               <DeliveryEstimation />
             </div>
             
-            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
-            <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Polipropilena Rezistentă</h3>
-                    <p className="text-sm text-gray-600">Material plastic rigid, nu se rupe, foarte ușor</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Ideal Exterior</h3>
-                    <p className="text-sm text-gray-600">Rezistă perfect la ploaie și umiditate, durabil</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Raport Calitate/Preț</h3>
-                    <p className="text-sm text-gray-600">Alternativă economică la PVC Forex sau alucobond</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Print UV Direct</h3>
-                    <p className="text-sm text-gray-600">Culori rezistente, suprafață albă strălucitoare</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 

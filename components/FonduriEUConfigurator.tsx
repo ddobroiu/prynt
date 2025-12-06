@@ -58,8 +58,55 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
                 <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
                 <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
             </nav>
-            <div className="p-6">
-                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Kit Vizibilitate Fonduri Europene</h3><p>Soluție completă pentru beneficiarii de fonduri nerambursabile. Oferim toate elementele obligatorii de vizibilitate, personalizate pentru proiectul tău, conform manualului de identitate vizuală aplicabil (PNRR, POC, POR, etc.).</p></div>}
+            <div className="p-6 lg:p-8">
+                {activeTab === 'descriere' && (
+                    <>
+                        <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Kit Vizibilitate Fonduri Europene</h2>
+                        <p className="text-gray-700 mb-8 leading-relaxed">Soluție completă pentru beneficiarii de fonduri nerambursabile. Oferim toate elementele obligatorii de vizibilitate, personalizate pentru proiectul tău, conform manualului de identitate vizuală aplicabil (PNRR, POC, POR, etc.).</p>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-linear-to-br from-indigo-50 to-purple-50 border border-indigo-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Conforme Legislație UE</h3>
+                                <p className="text-sm text-gray-600">100% conform ghidurilor oficiale de publicitate</p>
+                            </div>
+                            
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-linear-to-br from-emerald-50 to-teal-50 border border-emerald-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Toate Opțiunile PNRR/REGIO</h3>
+                                <p className="text-sm text-gray-600">Logo-uri și textele actualizate pentru orice program</p>
+                            </div>
+                            
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-linear-to-br from-amber-50 to-orange-50 border border-amber-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Materiale Rezistente</h3>
+                                <p className="text-sm text-gray-600">Alucobond, PVC, banner - alegerea ta</p>
+                            </div>
+                            
+                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-linear-to-br from-blue-50 to-cyan-50 border border-blue-100">
+                                <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg mb-3">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 mb-2">Livrare Rapidă</h3>
+                                <p className="text-sm text-gray-600">Producție urgentă pentru termenele tale</p>
+                            </div>
+                        </div>
+                    </>
+                )}
                 {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
                 {activeTab === 'faq' && <FaqAccordion qa={faq} />}
             </div>
@@ -286,58 +333,6 @@ export default function FonduriEUConfigurator({ productSlug }: Props) {
               </div>
             </div>
 
-            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
-            <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Conforme Legislație UE</h3>
-                    <p className="text-sm text-gray-600">100% conform ghidurilor oficiale de publicitate</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Toate Opțiunile PNRR/REGIO</h3>
-                    <p className="text-sm text-gray-600">Logo-uri și textele actualizate pentru orice program</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Materiale Rezistente</h3>
-                    <p className="text-sm text-gray-600">Alucobond, PVC, banner - alegerea ta</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Livrare Rapidă</h3>
-                    <p className="text-sm text-gray-600">Producție urgentă pentru termenele tale</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
