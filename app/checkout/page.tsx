@@ -886,7 +886,7 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-slate-900 dark:text-white">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-black sm:text-slate-900 dark:text-white">
       <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
         <Package size={20} className="text-indigo-600 dark:text-indigo-400" />
         Produse în coș
