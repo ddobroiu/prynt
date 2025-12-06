@@ -556,7 +556,7 @@ export default function CheckoutPage() {
               />
               
               <div className="text-center">
-                <a href="/" className="text-sm text-muted hover:text-white underline decoration-dotted">
+                <a href="/" className="text-sm text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 underline decoration-dotted">
                   Continuă cumpărăturile
                 </a>
               </div>
@@ -571,13 +571,13 @@ export default function CheckoutPage() {
 
 function EmptyCart() {
   return (
-    <div className="rounded-2xl border card-bg p-12 text-center text-ui max-w-lg mx-auto">
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-4">
-        <Truck size={32} className="text-muted" opacity={0.5} />
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-12 text-center text-slate-900 dark:text-white max-w-lg mx-auto">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+        <Truck size={32} className="text-slate-500 dark:text-slate-400" opacity={0.5} />
       </div>
-      <h2 className="text-xl font-bold mb-2">Coșul tău este gol</h2>
-      <p className="text-muted mb-8">Nu ai adăugat încă niciun produs.</p>
-      <a href="/" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-8 py-3 font-semibold text-white hover:bg-indigo-500 transition shadow-lg shadow-indigo-900/20">
+      <h2 className="text-xl font-bold mb-2 text-slate-900 dark:text-white">Coșul tău este gol</h2>
+      <p className="text-slate-700 dark:text-slate-300 mb-8">Nu ai adăugat încă niciun produs.</p>
+      <a href="/" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-8 py-3 font-semibold text-white hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/20 dark:shadow-indigo-900/20">
         Mergi la Magazin
       </a>
     </div>
@@ -667,15 +667,15 @@ function SummaryCard({
         <DeliveryInfo county={county} variant="text" size="xs" showCod={false} showShippingFrom={false} />
         
         <div className="flex items-center justify-between">
-          <span className="text-slate-500">Produse</span>
-          <span className="font-semibold text-slate-900">{fmt(subtotal)}</span>
+          <span className="text-slate-700 dark:text-slate-400">Produse</span>
+          <span className="font-semibold text-slate-900 dark:text-white">{fmt(subtotal)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-slate-500">
-            <Truck size={16} className="text-slate-400" />
+          <span className="flex items-center gap-2 text-slate-700 dark:text-slate-400">
+            <Truck size={16} className="text-slate-600 dark:text-slate-400" />
             Livrare
           </span>
-          <span className="font-semibold text-emerald-600">{shipping === 0 ? "Gratuit" : fmt(shipping)}</span>
+          <span className="font-semibold text-emerald-600 dark:text-emerald-500">{shipping === 0 ? "Gratuit" : fmt(shipping)}</span>
         </div>
 
         {/* Cod de reducere */}
@@ -688,9 +688,9 @@ function SummaryCard({
 
         {/* Afișez reducerea aplicată */}
         {discount && discountAmount && discountAmount > 0 && (
-          <div className="flex items-center justify-between text-emerald-600">
-            <span className="text-slate-500">Reducere</span>
-            <span className="font-semibold">-{fmt(discountAmount)}</span>
+          <div className="flex items-center justify-between">
+            <span className="text-slate-700 dark:text-slate-400">Reducere</span>
+            <span className="font-semibold text-emerald-600 dark:text-emerald-500">-{fmt(discountAmount)}</span>
           </div>
         )}
         
@@ -709,21 +709,21 @@ function SummaryCard({
               onChange={(e) => setCreateAccount(e.target.checked)}
               className="mt-1 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white"
             />
-            <span className="text-slate-600 leading-relaxed">
+            <span className="text-slate-700 dark:text-slate-300 leading-relaxed">
               Vreau cont nou (parola vine pe email).
             </span>
           </label>
         )}
 
         {/* Newsletter Subscription */}
-        <label className="flex items-start gap-3 mb-4 text-sm cursor-pointer select-none opacity-90 hover:opacity-100 transition-opacity touch-manipulation p-2 rounded-lg hover:bg-slate-50">
+        <label className="flex items-start gap-3 mb-4 text-sm cursor-pointer select-none opacity-90 hover:opacity-100 transition-opacity touch-manipulation p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
           <input
             type="checkbox"
             checked={subscribeNewsletter}
             onChange={(e) => setSubscribeNewsletter(e.target.checked)}
             className="mt-1 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 bg-white"
           />
-          <span className="text-slate-600 leading-relaxed">
+          <span className="text-slate-700 dark:text-slate-300 leading-relaxed">
             Vreau să primesc oferte și noutăți pe email.
           </span>
         </label>
@@ -874,11 +874,11 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
     if (details.length === 0) return null;
 
     return (
-      <div className="mt-2 rounded-md border border-white/10 bg-white/5 p-2 text-xs text-muted">
+      <div className="mt-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs text-slate-700 dark:text-slate-300">
         {details.map((d, idx) => (
           <div key={idx} className="flex gap-2 py-0.5">
             <span className="opacity-80">{d.label}:</span>
-            <span className="font-medium text-ui">{d.value}</span>
+            <span className="font-medium text-slate-900 dark:text-white">{d.value}</span>
           </div>
         ))}
       </div>
@@ -886,12 +886,12 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
   }
 
   return (
-    <div className="rounded-2xl border card-bg p-4 text-ui">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-slate-900 dark:text-white">
       <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-        <Package size={20} className="text-indigo-400" />
+        <Package size={20} className="text-indigo-600 dark:text-indigo-400" />
         Produse în coș
       </h2>
-      <ul className="divide-y divide-white/10">
+      <ul className="divide-y divide-slate-200 dark:divide-slate-700">
         {(items ?? []).map((item) => {
           const title = item.title ?? item.name ?? item.slug ?? 'Produs';
           const qty = Number(item.quantity ?? 1) || 1;
@@ -902,20 +902,20 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
-                    <button onClick={() => onRemove(item.id)} className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 p-2 text-muted hover:bg-white/10 transition"><X size={16} /></button>
-                    <p className="font-semibold truncate pr-2">{title}</p>
+                    <button onClick={() => onRemove(item.id)} className="inline-flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"><X size={16} /></button>
+                    <p className="font-semibold truncate pr-2 text-slate-900 dark:text-white">{title}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="inline-flex items-center border border-white/10 rounded-lg overflow-hidden bg-white/5">
-                      <button onClick={() => updateQuantity(item.id, Math.max(1, qty - 1))} className="px-2 py-1 text-sm hover:bg-white/10"><Minus size={14} /></button>
-                      <div className="px-3 text-sm font-bold">{qty}</div>
-                      <button onClick={() => updateQuantity(item.id, qty + 1)} className="px-2 py-1 text-sm hover:bg-white/10"><Plus size={14} /></button>
+                    <div className="inline-flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800">
+                      <button onClick={() => updateQuantity(item.id, Math.max(1, qty - 1))} className="px-2 py-1 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"><Minus size={14} /></button>
+                      <div className="px-3 text-sm font-bold text-slate-900 dark:text-white">{qty}</div>
+                      <button onClick={() => updateQuantity(item.id, qty + 1)} className="px-2 py-1 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"><Plus size={14} /></button>
                     </div>
                   </div>
                 </div>
                 {renderDetails(item)}
                 <div className="mt-2 text-right">
-                    <div className="text-sm font-medium text-ui">{fmt(Number(lineTotal))}</div>
+                    <div className="text-sm font-medium text-slate-900 dark:text-white">{fmt(Number(lineTotal))}</div>
                 </div>
               </div>
             </li>

@@ -570,8 +570,8 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
 
       const offerRecord = await prisma.order.create({ data: offerData });
 
-      // Generăm link-ul public către PDF
-      const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro";
+      // Generăm link-ul public către PDF (prioritizăm SITE_URL pentru producție)
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXTAUTH_URL || "https://www.prynt.ro";
       const offerLink = `${baseUrl}/api/pdf/offer?id=${offerRecord.id}`;
 
       console.log("✅ Ofertă creată cu ID:", offerRecord.id);

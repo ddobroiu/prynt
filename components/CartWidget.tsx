@@ -173,13 +173,13 @@ export default function CartWidget() {
         {/* flex-1 si min-h-0 sunt critice pentru a ocupa tot spatiul ramas */}
         <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4 bg-white dark:bg-slate-900 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
           {items.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-60">
-              <div className="h-20 w-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center">
-                 <ShoppingCart className="h-8 w-8 text-slate-400 dark:text-slate-500" />
+            <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
+              <div className="h-20 w-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+                 <ShoppingCart className="h-8 w-8 text-slate-500 dark:text-slate-500" />
               </div>
               <div className="space-y-1">
                 <p className="text-lg font-bold text-slate-900 dark:text-white">Coșul este gol</p>
-                <p className="text-slate-600 dark:text-slate-300 text-sm">Nu ai adăugat încă niciun produs.</p>
+                <p className="text-slate-700 dark:text-slate-300 text-sm">Nu ai adăugat încă niciun produs.</p>
               </div>
               <Button onClick={() => setIsOpen(false)} variant="outline" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
                 Continuă Cumpărăturile
@@ -236,12 +236,12 @@ export default function CartWidget() {
                     
                     <div className="flex flex-wrap gap-1.5 mt-1.5">
                        {item.width && item.height && (
-                         <span className="text-[10px] text-slate-500 font-medium bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                         <span className="text-[10px] text-slate-700 dark:text-slate-400 font-medium bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
                            {item.width}x{item.height}cm
                          </span>
                        )}
                        {item.metadata?.Material && (
-                         <span className="text-[10px] text-slate-500 font-medium bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded truncate max-w-[100px]">
+                         <span className="text-[10px] text-slate-700 dark:text-slate-400 font-medium bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded truncate max-w-[100px]">
                            {item.metadata.Material}
                          </span>
                        )}
@@ -253,7 +253,7 @@ export default function CartWidget() {
                     <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 h-7">
                       <button 
                         onClick={() => updateQuantity(item.id, item.quantity - 1)} 
-                        className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-500 hover:text-indigo-600 rounded-l-md transition-colors disabled:opacity-30" 
+                        className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-l-md transition-colors disabled:opacity-30" 
                         disabled={item.quantity <= 1}
                       >
                         <Minus size={12} />
@@ -261,7 +261,7 @@ export default function CartWidget() {
                       <span className="w-6 text-center text-xs font-bold text-slate-900 dark:text-white">{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(item.id, item.quantity + 1)} 
-                        className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-500 hover:text-indigo-600 rounded-r-md transition-colors"
+                        className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-r-md transition-colors"
                       >
                         <Plus size={12} />
                       </button>
@@ -281,8 +281,8 @@ export default function CartWidget() {
                 {/* TOTALURI */}
                 <div className="flex justify-between items-end mb-4">
                     <div>
-                      <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total Estimat</p>
-                      <p className="text-[10px] text-slate-600">(TVA inclus)</p>
+                      <p className="text-xs text-slate-700 dark:text-slate-400 uppercase tracking-wider font-semibold">Total Estimat</p>
+                      <p className="text-[10px] text-slate-600 dark:text-slate-400">(TVA inclus)</p>
                     </div>
                     <p className="text-2xl font-extrabold text-slate-900 dark:text-white">{formatMoneyDisplay(cartTotal)}</p>
                 </div>

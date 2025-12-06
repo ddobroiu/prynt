@@ -22,6 +22,9 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
+// Verificare validitate API key
+const OPENAI_ENABLED = Boolean(process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.startsWith('sk-'));
+
 // FIX: Memory leak prevention - TTL și limitare
 const MAX_CONVERSATIONS = 1000;
 const CONVERSATION_TTL = 30 * 60 * 1000; // 30 minute
@@ -340,12 +343,15 @@ export async function POST(req: Request) {
         let finalReply: string | null = responseMessage.content ?? null;
 
         if (responseMessage.tool_calls) {
+          console.log(`🔧 AI requested ${responseMessage.tool_calls.length} tool calls`);
           messagesPayload.push(responseMessage);
           for (const toolCall of responseMessage.tool_calls) {
             const fnName = (toolCall as any).function.name; 
             let args = {};
             try { args = JSON.parse((toolCall as any).function.arguments); } catch (e) {}
+            console.log(`🔨 Executing tool: ${fnName}`, args);
             const result = await executeTool(fnName, args, { source: 'whatsapp', identifier: from });
+            console.log(`✅ Tool ${fnName} result:`, result);
             messagesPayload.push({
               tool_call_id: toolCall.id,
               role: "tool",
