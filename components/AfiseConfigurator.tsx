@@ -431,6 +431,7 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
           {activeProductTab === 'faq' && <FaqAccordion qa={afiseFaqs} />}
         </div>
       </div>
+    </div>
 
       {/* Smart Newsletter Popup */}
       <SmartNewsletterPopup 
