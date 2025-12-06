@@ -112,7 +112,7 @@ export default function CartWidget() {
         {/* HEADER - FIX (Nu se misca) */}
         <div className="shrink-0 z-20 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
           <div className="px-4 py-3 flex items-center justify-between">
-            <DialogTitle className="text-lg font-extrabold text-slate-950 dark:text-white flex items-center gap-2">
+            <DialogTitle className="text-lg font-extrabold text-black sm:text-slate-950 dark:text-white flex items-center gap-2">
               Coșul Tău <span className="text-slate-800 dark:text-slate-400 text-sm font-medium font-sans">({cartCount})</span>
             </DialogTitle>
 
@@ -235,7 +235,7 @@ export default function CartWidget() {
                           className="font-bold text-[15px] sm:text-base text-black sm:text-slate-950 dark:text-white leading-snug flex-1 min-w-0"
                           style={{overflow: 'visible', whiteSpace: 'normal', wordBreak: 'break-word', display: 'block'}}
                         >
-                          <Link href={`/${item.slug || 'shop'}`} onClick={() => setIsOpen(false)} className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                          <Link href={`/${item.slug || 'shop'}`} onClick={() => setIsOpen(false)} className="text-black sm:text-inherit hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                             {item.title}
                           </Link>
                         </h3>
