@@ -187,6 +187,93 @@ export default function CheckoutPage() {
   const MAX_RAMBURS_LIMIT = 500;
   const isRambursDisabled = totalWithShipping > MAX_RAMBURS_LIMIT;
 
+  // Map local address/billing to CheckoutForm expected shapes
+  function toFormAddress(a: Address) {
+    const fullName = [a.firstName || "", a.lastName || ""].join(" ").trim();
+    return {
+      nume_prenume: fullName,
+      email: a.email || "",
+      telefon: a.phone || "",
+      judet: a.county || "",
+      localitate: a.city || "",
+      strada_nr: a.street || "",
+      postCode: a.postalCode || "",
+    };
+  }
+
+  function fromFormAddress(prev: Address, formAddr: any): Address {
+    const name = (formAddr?.nume_prenume || "").trim();
+    const [firstName, ...rest] = name.split(" ");
+    const lastName = rest.join(" ").trim();
+    return {
+      ...prev,
+      firstName: firstName || prev.firstName || "",
+      lastName: lastName || prev.lastName || "",
+      email: formAddr?.email ?? prev.email,
+      phone: formAddr?.telefon ?? prev.phone,
+      county: formAddr?.judet ?? prev.county,
+      city: formAddr?.localitate ?? prev.city,
+      street: formAddr?.strada_nr ?? prev.street,
+      postalCode: formAddr?.postCode ?? prev.postalCode,
+    };
+  }
+
+  function toFormBilling(b: BillingInfo) {
+    const fullName = [b.firstName || "", b.lastName || ""].join(" ").trim();
+    const tip_factura = b.type === "company" ? "persoana_juridica" : "persoana_fizica";
+    return {
+      tip_factura,
+      name: tip_factura === "persoana_fizica" ? fullName : undefined,
+      denumire_companie: tip_factura === "persoana_juridica" ? (b.companyName || "") : undefined,
+      cui: tip_factura === "persoana_juridica" ? (b.cui || "") : undefined,
+      reg_com: tip_factura === "persoana_juridica" ? (b.regCom || "") : undefined,
+      judet: b.county || "",
+      localitate: b.city || "",
+      strada_nr: b.street || "",
+      postCode: b.postalCode || "",
+    };
+  }
+
+  function fromFormBilling(prev: BillingInfo, formBill: any): BillingInfo {
+    const tip_factura = formBill?.tip_factura === "persoana_juridica" ? "company" : "individual";
+    const name = (formBill?.name || "").trim();
+    const [firstName, ...rest] = name.split(" ");
+    const lastName = rest.join(" ").trim();
+    return {
+      ...prev,
+      type: tip_factura,
+      firstName: tip_factura === "individual" ? (firstName || prev.firstName || "") : prev.firstName,
+      lastName: tip_factura === "individual" ? (lastName || prev.lastName || "") : prev.lastName,
+      companyName: tip_factura === "company" ? (formBill?.denumire_companie ?? prev.companyName) : prev.companyName,
+      cui: tip_factura === "company" ? (formBill?.cui ?? prev.cui) : prev.cui,
+      regCom: tip_factura === "company" ? (formBill?.reg_com ?? prev.regCom) : prev.regCom,
+      county: formBill?.judet ?? prev.county,
+      city: formBill?.localitate ?? prev.city,
+      street: formBill?.strada_nr ?? prev.street,
+      postalCode: formBill?.postCode ?? prev.postalCode,
+    };
+  }
+
+  // Map our validation errors to CheckoutForm's flat keys
+  const formErrors: Record<string, string> = useMemo(() => {
+    const out: Record<string, string> = {};
+    const a = errors.address || {};
+    const b = errors.billing || {};
+    if (a.firstName) out["address.nume_prenume"] = a.firstName;
+    if (a.lastName) out["address.nume_prenume"] = a.lastName;
+    if (a.email) out["address.email"] = a.email;
+    if (a.phone) out["address.telefon"] = a.phone;
+    if (a.county) out["address.judet"] = a.county;
+    if (a.city) out["address.localitate"] = a.city;
+    if (a.street) out["address.strada_nr"] = a.street;
+    if (a.postalCode) out["address.postCode"] = a.postalCode;
+    if (b.companyName) out["billing.denumire_companie"] = b.companyName as string;
+    if (b.cui) out["billing.cui"] = b.cui as string;
+    if (b.regCom) out["billing.reg_com"] = b.regCom as string;
+    if (errors.global) out["global"] = errors.global;
+    return out;
+  }, [errors]);
+
   useEffect(() => {
     if (sameAsDelivery) {
       setBilling((prev) =>
@@ -585,13 +672,25 @@ export default function CheckoutPage() {
             <ReturningCustomerLogin />
 
             <CheckoutForm
-              address={address}
-              setAddress={(updater) => setAddress((prev) => updater(prev))}
-              billing={billing}
-              setBilling={(updater) => setBilling((prev) => updater(prev))}
+              address={toFormAddress(address)}
+              setAddress={(updater) =>
+                setAddress((prev) => {
+                  const formPrev = toFormAddress(prev);
+                  const formNext = updater(formPrev);
+                  return fromFormAddress(prev, formNext);
+                })
+              }
+              billing={toFormBilling(billing)}
+              setBilling={(updater) =>
+                setBilling((prev) => {
+                  const formPrev = toFormBilling(prev);
+                  const formNext = updater(formPrev);
+                  return fromFormBilling(prev, formNext);
+                })
+              }
               sameAsDelivery={sameAsDelivery}
               setSameAsDelivery={setSameAsDelivery}
-              errors={errors}
+              errors={formErrors}
             />
           </section>
 

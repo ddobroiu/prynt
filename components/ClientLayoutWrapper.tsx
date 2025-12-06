@@ -26,6 +26,7 @@ export default function ClientLayoutWrapper({
   return (
     <>
       <Header />
+      <CartWidget />
       <main className="mx-auto max-w-7xl px-0 md:px-0">{children}</main>
       <Footer />
       <ContactButton />
