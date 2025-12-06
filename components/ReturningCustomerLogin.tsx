@@ -160,8 +160,8 @@ export default function ReturningCustomerLogin() {
             </button>
           </div>
           
-          {/* Social Login Section */}
-          <div className="flex flex-col sm:flex-row gap-2">
+          {/* Social Login Section - hidden on mobile */}
+          <div className="hidden md:flex md:flex-row gap-2">
             <button
               onClick={googleLogin}
               type="button"
