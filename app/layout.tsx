@@ -175,23 +175,21 @@ export default function RootLayout({
             }),
           }}
         />
-        {/* Google Analytics - încărcat după LCP */}
+        {/* Google Analytics */}
         <Script
-          strategy="lazyOnload"
-          src="https://www.googletagmanager.com/gtag/js?id=G-VG21Z7L33S"
+          src="https://www.googletagmanager.com/gtag/js?id=G-TR68M2QTPK"
+          strategy="afterInteractive"
         />
-        <Script
-          id="google-analytics"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-VG21Z7L33S');
-            `,
-          }}
-        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-TR68M2QTPK', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
         
         <Script
           id="tiktok-pixel"
