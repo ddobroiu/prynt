@@ -74,7 +74,7 @@ export default function ReturningCustomerLogin() {
 
   if (loggedIn) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+      <div className="rounded-2xl border border-slate-200 sm:border-white/10 bg-white sm:bg-white/5 p-4 space-y-3 text-black sm:text-inherit">
         <div className="text-xs text-emerald-400">
           Autentificat ca <strong>{session.user?.email}</strong>.
         </div>
@@ -83,11 +83,11 @@ export default function ReturningCustomerLogin() {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+    <div className="rounded-2xl border border-slate-200 sm:border-white/10 bg-white sm:bg-white/5 p-4 space-y-3 text-black sm:text-inherit">
       
       {/* Header dinamic - Butonul de resetare este aliniat la dreapta */}
       <div className="flex justify-between items-center">
-        <div className="text-sm font-semibold text-ui">
+        <div className="text-sm font-semibold text-black sm:text-ui">
           {view === 'login' ? 'Autentificare' : 'Resetare Parolă'}
         </div>
         

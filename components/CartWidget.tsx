@@ -96,6 +96,8 @@ export default function CartWidget() {
           "h-dvh w-full md:max-w-[450px] flex flex-col p-0 gap-0 focus:outline-none " +
           // 3. STILURI VIZUALE
           "bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl " +
+          // 3.1 CONTRAST TEXT PE MOBIL
+          "text-black sm:text-slate-900 dark:text-white " +
           // 4. ANIMATII INTRARE/IESIRE (Slide din dreapta)
           "duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right " +
           // 5. ASCUNDE BUTONUL X DEFAULT
@@ -184,7 +186,7 @@ export default function CartWidget() {
               </div>
               <div className="space-y-1">
                 <p className="text-lg font-bold text-slate-900 dark:text-white">Coșul este gol</p>
-                <p className="text-slate-700 dark:text-slate-300 text-sm">Nu ai adăugat încă niciun produs.</p>
+                <p className="text-black sm:text-slate-700 dark:text-slate-300 text-sm">Nu ai adăugat încă niciun produs.</p>
               </div>
               <Button onClick={() => setIsOpen(false)} variant="outline" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
                 Continuă Cumpărăturile
