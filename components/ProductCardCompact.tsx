@@ -1,16 +1,22 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import type { Product as LibProduct } from "@/lib/products";
 
 type Product = LibProduct & { category?: string };
 
 export default function ProductCardCompact({ product }: { product: Product }) {
-  // LOGICA IMAGINE ROBUSTĂ
+  const [imgError, setImgError] = useState(false);
+  
+  // LOGICA IMAGINE: Încearcă .jpg pentru produs specific, fallback la .webp configurator
   const slugKey = String(product.slug ?? (product as any).routeSlug ?? product.id ?? "").toLowerCase();
-  const genericSet = new Set<string>(["/products/banner/1.webp","/products/banner/2.webp","/products/banner/3.webp","/products/banner/4.webp","/placeholder.png"]);
-  const imgs = product.images ?? [];
-  let img = imgs.find((x) => !!x && slugKey && x.toLowerCase().includes(slugKey));
-  if (!img) img = imgs.find((x) => !!x && !genericSet.has(x.toLowerCase())) ?? imgs[0] ?? "/products/banner/1.webp";
+  const categoryPath = String((product.metadata as any)?.category ?? product.category ?? "banner").toLowerCase();
+  
+  const productSpecificImageJpg = `/products/${categoryPath}/${slugKey}.jpg`;
+  const configuratorImageWebp = `/products/${categoryPath}/1.webp`;
+  
+  let img = productSpecificImageJpg; // Încearcă mai întâi .jpg specific produsului
+  const finalImg = imgError ? configuratorImageWebp : img;
 
   const isBanner = String((product.metadata as any)?.category ?? product.category ?? "").toLowerCase() === "bannere";
   const priceDisplay = isBanner ? "De la 50 RON" : "Detalii";
@@ -21,17 +27,11 @@ export default function ProductCardCompact({ product }: { product: Product }) {
       <Link href={href} className="block group" aria-label={`Configurează ${product.title}`}>
         <div className="relative aspect-square">
           <img
-            src={img}
+            src={finalImg}
             alt={product.title ?? "Imagine produs"}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
             loading="lazy"
-            onError={(e) => {
-              const el = e.currentTarget as HTMLImageElement;
-              if (!el.dataset.fallback) {
-                el.dataset.fallback = "1";
-                el.src = "/products/banner/1.webp";
-              }
-            }}
+            onError={() => setImgError(true)}
           />
           {/* top subtle gradient */}
           <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/10 via-transparent to-transparent" />
