@@ -131,6 +131,7 @@ model Order {
   id               String      @id @default(cuid())
   orderNo          Int         @unique
   userId           String?
+  type             String      @default("order") // "order" | "offer"
   paymentType      String
   address          Json
   billing          Json

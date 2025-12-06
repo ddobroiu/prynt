@@ -542,6 +542,7 @@ export async function executeTool(fnName: string, args: any, context: ToolContex
 
       const offerData: any = {
         orderNo: nextOrderNo,
+        type: "offer",
         status: "pending_verification",
         paymentType: "Ramburs", // Ramburs pentru oferte
         total: totalAmount,
