@@ -105,13 +105,13 @@ export default function CartWidget() {
         {/* HEADER - FIX (Nu se misca) */}
         <div className="shrink-0 z-20 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
           <div className="px-4 py-3 flex items-center justify-between">
-            <DialogTitle className="text-lg font-extrabold text-black dark:text-white flex items-center gap-2">
-              Coșul Tău <span className="text-gray-800 dark:text-slate-400 text-sm font-medium font-sans">({cartCount})</span>
+            <DialogTitle className="text-lg font-extrabold text-slate-950 dark:text-white flex items-center gap-2">
+              Coșul Tău <span className="text-slate-800 dark:text-slate-400 text-sm font-medium font-sans">({cartCount})</span>
             </DialogTitle>
 
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 bg-slate-50 dark:bg-slate-800 text-gray-900 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all duration-200"
+              className="p-2 bg-slate-50 dark:bg-slate-800 text-slate-950 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all duration-200"
               aria-label="Închide coșul"
             >
               <X size={20} />
@@ -144,11 +144,11 @@ export default function CartWidget() {
             {remainingForFreeShipping > 0 ? (
               <div>
                 <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-xs font-bold text-gray-900 dark:text-slate-300 flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-slate-950 dark:text-slate-300 flex items-center gap-1.5">
                     <Truck size={12} className="text-indigo-600" />
                     Livrare Gratuită
                   </span>
-                  <span className="text-[10px] text-gray-800 dark:text-slate-400 font-semibold">
+                  <span className="text-[10px] text-slate-800 dark:text-slate-400 font-semibold">
                     încă <span className="text-indigo-600 dark:text-indigo-400">{formatMoneyDisplay(remainingForFreeShipping)}</span>
                   </span>
                 </div>
@@ -224,24 +224,24 @@ export default function CartWidget() {
                 <div className="flex flex-1 flex-col justify-between py-0.5">
                   <div>
                     <div className="flex justify-between items-start gap-2">
-                        <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2 leading-tight hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+                        <h3 className="font-bold text-sm text-slate-950 dark:text-white line-clamp-2 leading-tight hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
                           <Link href={`/${item.slug || 'shop'}`} onClick={() => setIsOpen(false)}>
                             {item.title}
                           </Link>
                         </h3>
-                        <button onClick={() => removeItem(item.id)} className="text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                        <button onClick={() => removeItem(item.id)} className="text-slate-800 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
                             <Trash2 size={16} />
                         </button>
                     </div>
                     
                     <div className="flex flex-wrap gap-1.5 mt-1.5">
                        {item.width && item.height && (
-                         <span className="text-[10px] text-black dark:text-slate-300 font-bold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                         <span className="text-[10px] text-slate-950 dark:text-slate-300 font-bold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
                            {item.width}x{item.height}cm
                          </span>
                        )}
                        {item.metadata?.Material && (
-                         <span className="text-[10px] text-black dark:text-slate-300 font-bold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded truncate max-w-[100px]">
+                         <span className="text-[10px] text-slate-950 dark:text-slate-300 font-bold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded truncate max-w-[100px]">
                            {item.metadata.Material}
                          </span>
                        )}
@@ -253,15 +253,15 @@ export default function CartWidget() {
                     <div className="flex items-center border border-slate-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 h-7">
                       <button 
                         onClick={() => updateQuantity(item.id, item.quantity - 1)} 
-                        className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-black dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-l-md transition-colors disabled:opacity-30" 
+                        className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-950 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-l-md transition-colors disabled:opacity-30" 
                         disabled={item.quantity <= 1}
                       >
                         <Minus size={12} />
                       </button>
-                      <span className="w-6 text-center text-xs font-bold text-black dark:text-white">{item.quantity}</span>
+                      <span className="w-6 text-center text-xs font-bold text-slate-950 dark:text-white">{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(item.id, item.quantity + 1)} 
-                        className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-black dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-r-md transition-colors"
+                        className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-950 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-r-md transition-colors"
                       >
                         <Plus size={12} />
                       </button>
@@ -281,10 +281,10 @@ export default function CartWidget() {
                 {/* TOTALURI */}
                 <div className="flex justify-between items-end mb-4">
                     <div>
-                      <p className="text-xs text-black dark:text-slate-400 uppercase tracking-wider font-semibold">Total Estimat</p>
-                      <p className="text-[10px] text-gray-800 dark:text-slate-400">(TVA inclus)</p>
+                      <p className="text-xs text-slate-950 dark:text-slate-400 uppercase tracking-wider font-semibold">Total Estimat</p>
+                      <p className="text-[10px] text-slate-800 dark:text-slate-400">(TVA inclus)</p>
                     </div>
-                    <p className="text-2xl font-extrabold text-black dark:text-white">{formatMoneyDisplay(cartTotal)}</p>
+                    <p className="text-2xl font-extrabold text-slate-950 dark:text-white">{formatMoneyDisplay(cartTotal)}</p>
                 </div>
                 
                 {/* BUTOANE ACȚIUNE */}
@@ -297,7 +297,7 @@ export default function CartWidget() {
                   
                   <button 
                     onClick={() => setIsOpen(false)}
-                    className="w-full py-2 text-sm font-semibold text-gray-900 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-colors flex items-center justify-center gap-1"
+                    className="w-full py-2 text-sm font-semibold text-slate-950 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-colors flex items-center justify-center gap-1"
                   >
                     <ChevronLeft size={16} /> Continuă Cumpărăturile
                   </button>
