@@ -84,6 +84,9 @@ export default function ProductCard({ product }: ProductCardProps) {
       img = imgs[0] ?? configuratorImageWebp;
     }
   }
+  
+  // Dacă a fost eroare la încărcare, folosim fallback-ul
+  const finalImg = imgError ? configuratorImageWebp : img;
 
   return (
     <Link 
@@ -93,13 +96,14 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* Imagine */}
       <div className="relative aspect-4/3 overflow-hidden bg-zinc-100 dark:bg-zinc-800">
         <Image
-          src={img}
+          src={finalImg}
           alt={product.title}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
-          unoptimized={img.startsWith('http')}
+          unoptimized={finalImg.startsWith('http')}
+          onError={() => setImgError(true)}
         />
         {/* Badge Preț */}
         <div className="absolute bottom-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm z-10">
