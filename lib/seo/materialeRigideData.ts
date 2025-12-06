@@ -9,7 +9,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Panouri rigide din PVC expandat (3mm, 5mm). Cea mai populară soluție pentru semnalistică.",
     seoTitle: "Panouri Publicitare PVC Forex | Print UV Direct | Prynt",
     seoDescription: "Printăm panouri publicitare pe Forex la orice dimensiune. Rezistente indoor/outdoor, culori vii.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Reclama ta pe suport rigid</h2><p>Forex-ul este materialul ideal pentru panouri publicitare: este ușor, are o suprafață perfect netedă și preia culorile excelent.</p>`
   },
   "tablou": {
@@ -18,7 +18,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Fotografii printate pe placă rigidă. Aspect minimalist, fără ramă.",
     seoTitle: "Tablouri Forex & Multicanvas Rigid | Decor | Prynt",
     seoDescription: "Decorează pereții cu tablouri pe Forex. O alternativă modernă și economică la canvas.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Decor minimalist</h2><p>Tablourile pe Forex sunt subțiri, elegante și se montează ușor cu bandă dublu adezivă.</p>`
   },
   "semnalistica": {
@@ -27,7 +27,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Plăcuțe pentru uși, săgeți direcționale, indicatoare etaj.",
     seoTitle: "Semnalistica Interioara PVC | Placute Usi | Prynt",
     seoDescription: "Ghidează vizitatorii cu semnalistică clară printată pe PVC rigid.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Organizare și claritate</h2><p>Esențial pentru clădiri de birouri, spitale sau școli.</p>`
   },
   "meniu-rigid": {
@@ -36,7 +36,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Meniuri tip placă, rezistente la apă și murdărie.",
     seoTitle: "Meniu Restaurant Rigid | Placa PVC | Prynt",
     seoDescription: "Meniuri care nu se rup și se curăță ușor. Print direct pe plastic.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Meniuri durabile</h2><p>Perfecte pentru terase sau baruri aglomerate unde meniurile de hârtie se deteriorează rapid.</p>`
   },
 
@@ -47,7 +47,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Panouri pentru afișaje interne și externe.",
     seoTitle: "Panou Afisaj PVC Forex | Print UV | Prynt",
     seoDescription: "Afișează informații importante pe suport rigid și rezistent.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Vizibilitate maximă</h2><p>Panourile din Forex sunt ideale pentru afișaje care trebuie să reziste în timp.</p><ul><li>Rezistente la umiditate</li><li>Culori vii</li><li>Ușor de montat</li></ul>`
   },
   "tablou-decorativ": {
@@ -56,7 +56,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Decorațiuni interioare pe placă rigidă.",
     seoTitle: "Tablou Decorativ PVC | Artă Modernă | Prynt",
     seoDescription: "Adaugă un strop de culoare pereților cu tablouri pe Forex.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Decor simplu și elegant</h2><p>Tablourile pe Forex sunt o alternativă economică la picturi.</p><ul><li>Aspect minimalist</li><li>Fără ramă necesară</li><li>Print de calitate</li></ul>`
   },
   "semnalistica-exterior": {
@@ -65,7 +65,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Indicatoare pentru exterior, rezistente la vreme.",
     seoTitle: "Semnalistica Exterior PVC | Indicatoare | Prynt",
     seoDescription: "Ghidează vizitatorii cu plăcuțe rezistente la intemperii.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Rezistență la exterior</h2><p>Perfecte pentru parcări, străzi sau zone expuse.</p><ul><li>Rezistente la UV</li><li>Citibile de la distanță</li><li>Montaj ușor</li></ul>`
   },
   "meniu-bar": {
@@ -74,7 +74,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Meniuri pentru baruri și cafenele.",
     seoTitle: "Meniu Bar PVC Rigid | Print Profesional | Prynt",
     seoDescription: "Meniuri care rezistă la băuturi vărsate și murdărie.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Durabilitate în baruri</h2><p>Nu se rup și se curăță ușor cu apă și săpun.</p><ul><li>Rezistente la lichide</li><li>Print clar</li><li>Aspect profesional</li></ul>`
   },
   "panou-eveniment": {
@@ -83,7 +83,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Panouri pentru evenimente, conferințe.",
     seoTitle: "Panou Eveniment PVC | Afișaj Rigid | Prynt",
     seoDescription: "Atrage atenția participanților cu panouri vizibile.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Impact vizual</h2><p>Panourile rigide sunt ideale pentru evenimente mari.</p><ul><li>Stabile și vizibile</li><li>Print de calitate</li><li>Ușor de transportat</li></ul>`
   },
   "tablou-personalizat": {
@@ -92,7 +92,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Fotografii personalizate pe placă rigidă.",
     seoTitle: "Tablou Personalizat PVC | Foto Rigid | Prynt",
     seoDescription: "Transformă amintirile în decor permanent.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Amintiri eterne</h2><p>Tablourile pe Forex păstrează culorile vii ani de zile.</p><ul><li>Rezistente la decolorare</li><li>Aspect elegant</li><li>Montaj simplu</li></ul>`
   },
   "semnalistica-birou": {
@@ -101,7 +101,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Indicatoare pentru birouri și clădiri de afaceri.",
     seoTitle: "Semnalistica Birou PVC | Placute Profesionale | Prynt",
     seoDescription: "Organizează spațiul cu plăcuțe clare și elegante.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Profesionalism</h2><p>Esențiale pentru navigarea în clădiri mari.</p><ul><li>Design corporate</li><li>Rezistente</li><li>Citibile</li></ul>`
   },
   "meniu-cafenea": {
@@ -110,7 +110,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Meniuri pentru cafenele și restaurante mici.",
     seoTitle: "Meniu Cafenea PVC | Print Ieftin | Prynt",
     seoDescription: "Meniuri care nu se murdăresc ușor și sunt ușor de înlocuit.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Practic și ieftin</h2><p>Perfecte pentru mese mici sau baruri.</p><ul><li>Rezistente la cafea</li><li>Print rapid</li><li>Aspect curat</li></ul>`
   },
   "panou-promotional": {
@@ -119,7 +119,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Panouri pentru promoții și campanii.",
     seoTitle: "Panou Promotional PVC | Reclama Rigid | Prynt",
     seoDescription: "Atrage clienții cu oferte vizibile pe suport rigid.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Vânzări mai mari</h2><p>Panourile rigide sunt mai vizibile decât hârtia.</p><ul><li>Impact puternic</li><li>Rezistente la vreme</li><li>Print color</li></ul>`
   },
   "tablou-arta": {
@@ -128,7 +128,7 @@ export const PVC_FOREX_DATA: Record<string, LandingInfo> = {
     shortDescription: "Reproduceri de artă pe placă rigidă.",
     seoTitle: "Tablou Arta PVC | Reproduceri | Prynt",
     seoDescription: "Decorează cu opere de artă pe suport modern.",
-    images: ["/products/materiale/PVC-Forex/1.webp"],
+    images: ["/products/materiale/pvc-forex/1.webp"],
     contentHtml: `<h2>Artă accesibilă</h2><p>Reproduceri de calitate pe Forex.</p><ul><li>Aspect artistic</li><li>Rezistente</li><li>Ușor de curățat</li></ul>`
   }
 };

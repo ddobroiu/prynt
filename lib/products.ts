@@ -71,7 +71,7 @@ const CONFIGURATOR_FIRST_IMAGES: Record<string, string> = {
   'pliante': '/products/pliante/pliante-1.webp',
   'flayere': '/products/flayere/flayere-1.webp',
   'plexiglass': '/products/materiale/plexiglass/plexiglass-1.webp',
-  'pvc-forex': '/products/materiale/PVC-Forex/pvc-forex-1.webp',
+  'pvc-forex': '/products/materiale/pvc-forex/pvc-forex-1.webp',
   'alucobond': '/products/materiale/alucobond/alucobond-1.webp',
   'carton': '/products/materiale/carton/carton-1.webp',
   'polipropilena': '/products/materiale/polipropilena/polipropilena-1.webp',
