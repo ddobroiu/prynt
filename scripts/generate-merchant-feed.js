@@ -89,7 +89,8 @@ const rows = [headers.join(',')];
 for (const product of productsWithImages) {
   const category = product.metadata?.category || 'bannere';
   const slug = product.slug || product.routeSlug || product.id;
-  const image = product.images[0].replace('.jpg', '.webp').replace('.jpeg', '.webp');
+  // Use original image extension (mostly .jpg) without forcing .webp
+  const image = product.images[0];
   
   // Preț minim 55 RON pentru bannere (format Google Merchant: decimal cu 2 zecimale)
   const price = '55.00';
