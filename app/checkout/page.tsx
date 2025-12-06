@@ -330,7 +330,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <main className="min-h-screen bg-white sm:bg-linear-to-br sm:from-slate-50 sm:via-white sm:to-slate-100 dark:bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Header modern */}
         <div className="mb-4">
