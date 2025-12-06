@@ -190,14 +190,14 @@ export default function RootLayout({
           }}
         />
         {/* Google Analytics - în head pentru mai bun tracking */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-TR68M2QTPK"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-VG21Z7L33S"></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-TR68M2QTPK', {
+              gtag('config', 'G-VG21Z7L33S', {
                 page_path: window.location.pathname,
               });
             `,
