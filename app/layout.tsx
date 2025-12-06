@@ -190,6 +190,20 @@ export default function RootLayout({
             });
           `}
         </Script>
+
+        {/* Google Ads Conversion Tracking */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17725546932"
+          strategy="afterInteractive"
+        />
+        <Script id="google-ads-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17725546932');
+          `}
+        </Script>
         
         <Script
           id="tiktok-pixel"
