@@ -230,7 +230,7 @@ export default function CartWidget() {
                   <div>
                     <div className="flex justify-between items-start gap-2">
                         <h3
-                          className="font-bold text-base text-slate-950 dark:text-white leading-snug flex-1 min-w-0"
+                          className="font-bold text-[15px] sm:text-base text-black sm:text-slate-950 dark:text-white leading-snug flex-1 min-w-0"
                           style={{overflow: 'visible', whiteSpace: 'normal', wordBreak: 'break-word', display: 'block'}}
                         >
                           <Link href={`/${item.slug || 'shop'}`} onClick={() => setIsOpen(false)} className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">

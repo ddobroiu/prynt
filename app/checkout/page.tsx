@@ -904,7 +904,7 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <button onClick={() => onRemove(item.id)} className="inline-flex items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-slate-950 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition shrink-0" aria-label="Șterge produs"><X size={16} /></button>
-                    <p className="font-bold text-base text-slate-950 dark:text-white leading-snug flex-1 min-w-0" style={{wordBreak: 'break-word', overflow: 'visible'}}>{title}</p>
+                    <p className="font-bold text-[15px] sm:text-base text-black sm:text-slate-950 dark:text-white leading-snug flex-1 min-w-0" style={{wordBreak: 'break-word', overflow: 'visible'}}>{title}</p>
                   </div>
                   
                   <div className="flex items-center gap-2 shrink-0">
