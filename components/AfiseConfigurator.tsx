@@ -431,8 +431,16 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
           {activeProductTab === 'faq' && <FaqAccordion qa={afiseFaqs} />}
         </div>
       </div>
-      </main>
-      
+
+      {/* Smart Newsletter Popup */}
+      <SmartNewsletterPopup 
+        onSubscribe={(email) => setUserEmail(email)}
+        delay={30}
+      />
+
+      {/* Related Products Section */}
+      <RelatedProducts category="afise" />
+
       {detailsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetailsOpen(false)}>
           <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8" onClick={e => e.stopPropagation()}>

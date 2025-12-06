@@ -764,7 +764,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
             </div>
           </div>
         </div>
-      </main>
 
       {detailsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetailsOpen(false)}>
