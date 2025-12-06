@@ -900,16 +900,14 @@ function CartItems({ items, onRemove }: { items: Array<any> | undefined; onRemov
           return (
             <li key={item.id} className="py-4 flex items-start gap-4">
               <div className="flex-1 min-w-0">
-                {/* Titlu produs - pe linia lui, vizibil pe mobil */}
-                <div className="mb-3">
-                  <p className="font-bold text-base text-slate-950 dark:text-white leading-snug" style={{wordBreak: 'break-word', overflow: 'visible'}}>{title}</p>
-                </div>
-                
-                {/* Butoane acțiune */}
-                <div className="flex items-center justify-between gap-3">
-                  <button onClick={() => onRemove(item.id)} className="inline-flex items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-slate-950 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition" aria-label="Șterge produs"><X size={16} /></button>
+                {/* Butoane acțiune și titlu */}
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <button onClick={() => onRemove(item.id)} className="inline-flex items-center justify-center rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-slate-950 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition shrink-0" aria-label="Șterge produs"><X size={16} /></button>
+                    <p className="font-bold text-base text-slate-950 dark:text-white leading-snug flex-1 min-w-0" style={{wordBreak: 'break-word', overflow: 'visible'}}>{title}</p>
+                  </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <div className="inline-flex items-center border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800">
                       <button onClick={() => updateQuantity(item.id, Math.max(1, qty - 1))} className="px-2 py-1 text-sm text-slate-950 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold" aria-label="Scade cantitatea"><Minus size={14} /></button>
                       <div className="px-3 text-sm font-bold text-slate-950 dark:text-white">{qty}</div>
