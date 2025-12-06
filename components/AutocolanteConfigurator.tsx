@@ -375,10 +375,12 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
                 </button>
               </div>
             </div>
-            
-            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
-            <div className="mt-8 lg:mt-12 bg-white rounded-2xl shadow-lg border border-gray-200">
-              <nav className="border-b border-gray-200 flex">
+          </div>
+        </div>
+
+        {/* SECȚIUNE FEATURES - FULL WIDTH JOS */}
+        <div className="mt-8 lg:mt-12 bg-white rounded-2xl shadow-lg border border-gray-200">
+          <nav className="border-b border-gray-200 flex">
                 <TabButtonSEO active={activeProductTab === "descriere"} onClick={() => setActiveProductTab("descriere")}>Descriere</TabButtonSEO>
                 <TabButtonSEO active={activeProductTab === "recenzii"} onClick={() => setActiveProductTab("recenzii")}>Recenzii</TabButtonSEO>
                 <TabButtonSEO active={activeProductTab === "faq"} onClick={() => setActiveProductTab("faq")}>FAQ</TabButtonSEO>

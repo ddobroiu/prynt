@@ -267,14 +267,18 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
                 </button>
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* SECȚIUNE DESCRIERE & FEATURES */}
-            <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              <div className="flex gap-4 mb-6 border-b border-gray-200">
-                <button onClick={() => setActiveProductTab('descriere')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'descriere' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Descriere</button>
-                <button onClick={() => setActiveProductTab('recenzii')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'recenzii' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Recenzii</button>
-                <button onClick={() => setActiveProductTab('faq')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'faq' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>FAQ</button>
-              </div>
+        {/* SECȚIUNE DESCRIERE & FEATURES - FULL WIDTH JOS */}
+        <div className="mt-8 lg:mt-12 bg-white rounded-2xl shadow-lg border border-gray-200">
+          <nav className="border-b border-gray-200 flex">
+            <button onClick={() => setActiveProductTab('descriere')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'descriere' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Descriere</button>
+            <button onClick={() => setActiveProductTab('recenzii')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'recenzii' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Recenzii</button>
+            <button onClick={() => setActiveProductTab('faq')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'faq' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>FAQ</button>
+          </nav>
+
+          <div className="p-6 lg:p-8">
 
               {activeProductTab === 'descriere' && (
                 <>
