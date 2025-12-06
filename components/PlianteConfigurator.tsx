@@ -259,6 +259,59 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
               </div>
               <DeliveryEstimation />
             </div>
+            
+            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
+            <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Pliere Profesională</h3>
+                    <p className="text-sm text-gray-600">A5 pliat din A4 - prezentare elegantă și compactă</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Hârtie Premium</h3>
+                    <p className="text-sm text-gray-600">150-350g lucioasă sau mată, la alegere</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Ideal Promoții</h3>
+                    <p className="text-sm text-gray-600">Perfect pentru meniuri, broșuri, cataloage mici</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Prețuri Competitive</h3>
+                    <p className="text-sm text-gray-600">Comenzi de la 100 buc, preț pe bucăță accesibil</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'pliante'} /></div>
         </div>

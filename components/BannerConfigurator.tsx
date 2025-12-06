@@ -4,7 +4,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useCart } from "@/components/CartContext";
 import { useToast } from "@/components/ToastProvider";
-import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon, PlayCircle, TrendingUp, Percent } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon, PlayCircle, TrendingUp, Percent, MessageCircle } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from 'next/link';
@@ -49,15 +49,16 @@ const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, 
     </div>
 );
 
+const bannerFaqs: QA[] = [
+    { question: "Ce materiale sunt disponibile?", answer: "Oferim Frontlit 440g (Standard) și Frontlit 510g (Premium), ambele fiind materiale PVC durabile, special concepute pentru uz exterior." },
+    { question: "Ce finisaje sunt incluse?", answer: "Toate bannerele vin cu tiv de rezistență pe tot perimetrul și capse metalice de prindere, aplicate de obicei la o distanță de 50 cm una de cealaltă." },
+    { question: "Cum trimit grafica pentru imprimare?", answer: "Puteți încărca fișierul grafic direct în configurator, în pasul 3. Acceptăm formate precum PDF, AI, CDR, TIFF sau JPG la o rezoluție bună." },
+    { question: "Cât durează producția și livrarea?", answer: "Producția durează în mod normal 1-2 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile, în funcție de localitatea de destinație." },
+    { question: "Bannerele sunt rezistente la exterior?", answer: "Da, absolut. Materialele folosite sunt special tratate pentru a rezista la apă, vânt și radiații UV, asigurând o durată de viață îndelungată." },
+];
+
 const ProductTabs = ({ productSlug }: { productSlug: string }) => {
     const [activeTab, setActiveTab] = useState("descriere");
-    const bannerFaqs: QA[] = [
-        { question: "Ce materiale sunt disponibile?", answer: "Oferim Frontlit 440g (Standard) și Frontlit 510g (Premium), ambele fiind materiale PVC durabile, special concepute pentru uz exterior." },
-        { question: "Ce finisaje sunt incluse?", answer: "Toate bannerele vin cu tiv de rezistență pe tot perimetrul și capse metalice de prindere, aplicate de obicei la o distanță de 50 cm una de cealaltă." },
-        { question: "Cum trimit grafica pentru imprimare?", answer: "Puteți încărca fișierul grafic direct în configurator, în pasul 3. Acceptăm formate precum PDF, AI, CDR, TIFF sau JPG la o rezoluție bună." },
-        { question: "Cât durează producția și livrarea?", answer: "Producția durează în mod normal 1-2 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile, în funcție de localitatea de destinație." },
-        { question: "Bannerele sunt rezistente la exterior?", answer: "Da, absolut. Materialele folosite sunt special tratate pentru a rezista la apă, vânt și radiații UV, asigurând o durată de viață îndelungată." },
-    ];
     return (
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
             <nav className="border-b border-gray-200 flex">
@@ -95,6 +96,22 @@ const ProductTabs = ({ productSlug }: { productSlug: string }) => {
 };
 
 const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
+
+const ProductTabsIntegrated = ({ productSlug }: { productSlug: string }) => {
+    const [activeTab, setActiveTab] = useState("recenzii");
+    return (
+        <div>
+            <nav className="border-b border-gray-200 flex">
+                <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
+                <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
+            </nav>
+            <div className="py-6">
+                {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
+                {activeTab === 'faq' && <FaqAccordion qa={bannerFaqs} />}
+            </div>
+        </div>
+    );
+};
 
 function BannerModeSwitchInline() {
   const pathname = usePathname();
@@ -181,6 +198,7 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
   const [textDesign, setTextDesign] = useState<string>("");
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
+  const [activeProductTab, setActiveProductTab] = useState("descriere");
   const toast = useToast();
 
   // Email marketing hooks
@@ -458,7 +476,6 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
                   </div>
               )}
             </div>
-            <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'banner'} /></div>
           </div>
 
           {/* DREAPTA - CONFIGURATOR */}
@@ -601,12 +618,150 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
             <div className="sticky bottom-0 lg:static bg-white/95 lg:bg-white backdrop-blur-md lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 p-3 sm:p-4 lg:p-6 lg:mt-8 safe-area-inset-bottom">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-2 mb-2">
                 <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 order-2 sm:order-1">{formatMoneyDisplay(displayedTotal)}</p>
-                <button onClick={handleAddToCart} className="btn-primary w-full sm:w-1/2 py-3 text-base font-bold order-1 sm:order-2"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
+                <button onClick={handleAddToCart} className="btn-primary w-full sm:w-1/2 py-3 text-base font-bold order-1 sm:order-2">
+                  <ShoppingCart size={20} />
+                  <span className="ml-2">Adaugă în Coș</span>
+                </button>
               </div>
               <DeliveryEstimation />
             </div>
+
+            {/* BUTOANE SECUNDARE - WHATSAPP ȘI CERERE OFERTĂ */}
+            <div className="mt-4 lg:mt-6 bg-gray-50 rounded-xl border border-gray-200 p-4">
+              <p className="text-xs text-gray-500 mb-3 text-center">Ai nevoie de ajutor sau o ofertă personalizată?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a 
+                  href="https://wa.me/40750473111?text=Ma%20intereseaza%20configuratorul%20banner" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <MessageCircle size={18} />
+                  <span className="text-sm">WhatsApp</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => window.location.href = '/contact'}
+                  className="inline-flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <Info size={18} />
+                  <span className="text-sm">Cerere Ofertă</span>
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'banner'} /></div>
+        </div>
+
+        {/* SECȚIUNE DESCRIERE & FEATURES - FULL WIDTH JOS */}
+        <div className="mt-8 lg:mt-12 bg-white rounded-2xl shadow-lg border border-gray-200">
+          {/* TABURI SUS */}
+          <nav className="border-b border-gray-200 flex">
+            <TabButtonSEO active={activeProductTab === "descriere"} onClick={() => setActiveProductTab("descriere")}>Descriere</TabButtonSEO>
+            <TabButtonSEO active={activeProductTab === "recenzii"} onClick={() => setActiveProductTab("recenzii")}>Recenzii</TabButtonSEO>
+            <TabButtonSEO active={activeProductTab === "faq"} onClick={() => setActiveProductTab("faq")}>FAQ</TabButtonSEO>
+          </nav>
+
+          <div className="p-6 lg:p-8">
+            {/* TAB DESCRIERE */}
+            {activeProductTab === 'descriere' && (
+              <>
+                <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Bannere Publicitare Outdoor (Frontlit)</h2>
+                <p className="text-gray-700 mb-6 leading-relaxed text-base lg:text-lg">
+                  Atrageți toate privirile cu bannere imprimate la rezoluție fotografică. Fie că dorești să anunți o promoție, o deschidere de magazin sau să îți faci brandul cunoscut, bannerele noastre personalizate sunt soluția ideală pentru vizibilitate maximă la un cost eficient.
+                </p>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-3">Materiale & Calitate</h3>
+                    <ul className="space-y-3 text-gray-700">
+                      <li className="flex items-start">
+                        <span className="text-indigo-600 font-bold mr-2 mt-1">•</span>
+                        <span><strong>Frontlit 440g (Standard):</strong> Un material PVC flexibil și economic, perfect pentru campanii pe termen scurt și mediu.</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-indigo-600 font-bold mr-2 mt-1">•</span>
+                        <span><strong>Frontlit 510g (Premium):</strong> Varianta "Coated" (turnată), mult mai rezistentă la rupere și diferențe de temperatură (iarnă/vară), recomandată pentru expunere îndelungată.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-3">De ce să alegi bannerele noastre?</h3>
+                    <ul className="space-y-3 text-gray-700">
+                      <li className="flex items-start">
+                        <span className="text-emerald-600 font-bold mr-2 mt-1">✓</span>
+                        <span><strong>Rezistență UV și Apă:</strong> Folosim cerneluri Eco-Solvent de ultimă generație care nu se decolorează.</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-emerald-600 font-bold mr-2 mt-1">✓</span>
+                        <span><strong>Finisaje Incluse:</strong> Tivul perimetral și capsele de prindere sunt incluse standard în preț.</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-emerald-600 font-bold mr-2 mt-1">✓</span>
+                        <span><strong>Orice Dimensiune:</strong> Putem realiza bannere de la mici dimensiuni până la formate gigant (prin termosudare).</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-6 border-b border-gray-200">
+                  <div className="flex items-start gap-4">
+                    <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-base font-bold text-gray-900 mb-1">Print UV Full-Color</h3>
+                      <p className="text-sm text-gray-600">Imprimare fotografică de înaltă rezoluție</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-base font-bold text-gray-900 mb-1">Rezistent Ploaie & Soare</h3>
+                      <p className="text-sm text-gray-600">Material Frontlit tratat UV</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-base font-bold text-gray-900 mb-1">Orice Dimensiune</h3>
+                      <p className="text-sm text-gray-600">De la mici la formate gigant</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-base font-bold text-gray-900 mb-1">Livrare Rapidă</h3>
+                      <p className="text-sm text-gray-600">Producție în 1-2 zile</p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* TAB RECENZII */}
+            {activeProductTab === 'recenzii' && <Reviews productSlug="banner" />}
+
+            {/* TAB FAQ */}
+            {activeProductTab === 'faq' && <FaqAccordion qa={bannerFaqs} />}
+          </div>
         </div>
       </div>
 

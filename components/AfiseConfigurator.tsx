@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { useToast } from "@/components/ToastProvider";
-import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud } from "lucide-react";
+import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, MessageCircle } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
@@ -18,6 +18,14 @@ import {
 } from "@/lib/pricing";
 
 const GALLERY_BASE = ["/products/afise/afise-1.webp", "/products/afise/afise-2.webp", "/products/afise/afise-3.webp", "/products/afise/afise-4.webp"] as const;
+
+const afiseFaqs: QA[] = [
+  { question: "Ce tipuri de hârtie pot alege?", answer: "Oferim o varietate de hârtii, de la cele subțiri (150g) pentru volume mari, la cartoane de 300g pentru un aspect premium. De asemenea, avem materiale speciale precum Blueback pentru lipire pe panouri sau hârtie foto." },
+  { question: "Care este diferența dintre Blueback și Whiteback?", answer: "Hârtia Blueback are spatele albastru și este opacă, fiind ideală pentru lipirea peste alte afișe. Whiteback are spatele alb și este folosită pentru postere de interior." },
+  { question: "Ce înseamnă preț în funcție de tiraj?", answer: "Prețul pe bucata scade pe măsură ce comandați o cantitate mai mare. Puteți vedea exact prețul unitar calculat în sumarul comenzii." },
+  { question: "Cât durează producția?", answer: "Producția durează 1-2 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile, în funcție de localitatea de destinație." },
+  { question: "Cum trimit grafica?", answer: "Încărcați fișierul direct în configurator. Acceptăm formate PDF, AI, CDR, TIFF sau JPG la rezoluție bună (300 dpi recomandat)." },
+];
 
 /* --- UI COMPONENTS --- */
 const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
@@ -81,6 +89,7 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
   const [size, setSize] = useState<string>("A2");
   const [material, setMaterial] = useState<string>("whiteback_150_material");
   const [quantity, setQuantity] = useState<number>(50);
+  const [activeProductTab, setActiveProductTab] = useState("descriere");
   // Setează dimensiuni inițiale dacă sunt furnizate
   useEffect(() => {
     if (initialWidth) {
@@ -215,7 +224,6 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
                 {GALLERY.map((src, i) => <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
               </div>
             </div>
-            <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'afise'} /></div>
           </div>
           <div>
             <header className="mb-6">
@@ -279,8 +287,140 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
               </div>
               <DeliveryEstimation />
             </div>
+
+            {/* BUTOANE SECUNDARE - WHATSAPP ȘI CERERE OFERTĂ */}
+            <div className="mt-4 lg:mt-6 bg-gray-50 rounded-xl border border-gray-200 p-4">
+              <p className="text-xs text-gray-500 mb-3 text-center">Ai nevoie de ajutor sau o ofertă personalizată?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a 
+                  href="https://wa.me/40750473111?text=Ma%20intereseaza%20configuratorul%20afise" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <MessageCircle size={18} />
+                  <span className="text-sm">WhatsApp</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => window.location.href = '/contact'}
+                  className="inline-flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <Info size={18} />
+                  <span className="text-sm">Cerere Ofertă</span>
+                </button>
+              </div>
+            </div>
+            
+            {/* SECȚIUNE DESCRIERE & FEATURES */}
+            <div className="mt-8 lg:mt-12 bg-white rounded-2xl shadow-lg border border-gray-200">
+              {/* TABURI SUS */}
+              <nav className="border-b border-gray-200 flex">
+                <TabButtonSEO active={activeProductTab === "descriere"} onClick={() => setActiveProductTab("descriere")}>Descriere</TabButtonSEO>
+                <TabButtonSEO active={activeProductTab === "recenzii"} onClick={() => setActiveProductTab("recenzii")}>Recenzii</TabButtonSEO>
+                <TabButtonSEO active={activeProductTab === "faq"} onClick={() => setActiveProductTab("faq")}>FAQ</TabButtonSEO>
+              </nav>
+
+              <div className="p-6 lg:p-8">
+                {/* TAB DESCRIERE */}
+                {activeProductTab === 'descriere' && (
+                  <>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Afișe și Postere Personalizate</h2>
+                    <p className="text-gray-600 mb-6">
+                      Promovează-ți evenimentele sau ofertele cu afișe de înaltă calitate, imprimate pe o gamă variată de materiale. 
+                      Alege dimensiunea și hârtia potrivită pentru mesajul tău.
+                    </p>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Materiale & Calitate</h3>
+                        <ul className="space-y-2 text-sm text-gray-600">
+                          <li className="flex items-start">
+                            <span className="text-indigo-600 mr-2">✓</span>
+                            <span><strong>Whiteback 150g-300g:</strong> Hârtie standard pentru postere de interior, de la subțire la carton gros</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-indigo-600 mr-2">✓</span>
+                            <span><strong>Blueback:</strong> Hârtie opacă cu spate albastru, ideală pentru lipire pe panouri outdoor</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-indigo-600 mr-2">✓</span>
+                            <span><strong>Hârtie Foto 220g:</strong> Finish lucios pentru imagini de impact maxim</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">De ce să alegi afișele noastre?</h3>
+                        <ul className="space-y-2 text-sm text-gray-600">
+                          <li className="flex items-start">
+                            <span className="text-green-600 mr-2">✓</span>
+                            <span><strong>Print Offset & Digital:</strong> Calitate fotografică garantată</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-green-600 mr-2">✓</span>
+                            <span><strong>Reduceri la Volum:</strong> Prețul scade automat la cantități mari</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-green-600 mr-2">✓</span>
+                            <span><strong>Livrare Rapidă:</strong> Producție 1-2 zile + curier express</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    {/* 4 SIMBOLURI */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Print Offset & Digital</h3>
+                    <p className="text-sm text-gray-600">Calitate fotografică pe hârtie premium 150-350g</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Materiale Diverse</h3>
+                    <p className="text-sm text-gray-600">De la hârtie standard la foto lucioasă sau blueback outdoor</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Prețuri Mici, Cantități Mari</h3>
+                    <p className="text-sm text-gray-600">Reduceri automate la comenzi mai mari, calcul instant</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-gray-900 mb-1">Livrare Rapidă</h3>
+                    <p className="text-sm text-gray-600">Producție rapidă + curier național express</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'afise'} /></div>
         </div>
       </div>
       

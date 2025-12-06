@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { useToast } from "@/components/ToastProvider";
-import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, TrendingUp, Percent } from "lucide-react";
+import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, TrendingUp, Percent, MessageCircle } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { usePathname, useRouter } from "next/navigation";
 import FaqAccordion from "./FaqAccordion";
@@ -27,6 +27,15 @@ const GALLERY_BASE = [
   "/products/autocolante/autocolante-4.webp"
 ] as const;
 
+/* --- FAQs SPECIFIC PRODUSULUI --- */
+const productFaqs: QA[] = [
+  { question: "Care este diferența dintre hârtie și vinyl?", answer: "Hârtia este economică și potrivită pentru interior sau etichete de produs de scurtă durată. Vinyl-ul (PVC) este plastic, rezistent la apă și rupere, ideal pentru exterior sau produse care intră în contact cu umezeala." },
+  { question: "Ce înseamnă 'Die-cut' (tăiere pe contur)?", answer: "Die-cut înseamnă că autocolantul este tăiat exact pe forma graficii tale (ex: rotund, stea, formă liberă), nu doar dreptunghiular. Este perfect pentru logo-uri și forme personalizate." },
+  { question: "Laminarea este necesară?", answer: "Laminarea adaugă un strat de protecție transparent. Recomandăm laminarea pentru autocolantele expuse la soare, frecare sau umezeală intensă, pentru a prelungi durata de viață." },
+  { question: "Pe ce suprafețe pot aplica autocolantele?", answer: "Autocolantele noastre aderă excelent pe sticlă, metal, plastic, lemn vopsit, pereți netezi. Pentru suprafețe cu texturi rugose sau poroase (cărămidă, beton nefinisit), recomandăm testare prealabilă." },
+  { question: "Cât timp rezistă autocolantele în exterior?", answer: "Cu material vinyl și laminare, autocolantele rezistă 5-7 ani în exterior, păstrându-și culorile vibrante datorită cernelurilor UV-rezistente." },
+];
+
 /* --- UI COMPONENTS --- */
 const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
     <div className="relative pl-12">
@@ -49,28 +58,7 @@ const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, 
     </div>
 );
 
-const ProductTabs = ({ productSlug }: { productSlug: string }) => {
-    const [activeTab, setActiveTab] = useState("descriere");
-    const faq: QA[] = [
-        { question: "Care este diferența dintre hârtie și vinyl?", answer: "Hârtia este economică și potrivită pentru interior sau etichete de produs de scurtă durată. Vinyl-ul (PVC) este plastic, rezistent la apă și rupere, ideal pentru exterior sau produse care intră în contact cu umezeala." },
-        { question: "Ce înseamnă 'Die-cut'?", answer: "Die-cut (tăiere pe contur) înseamnă că autocolantul este tăiat exact pe forma graficii tale (ex: rotund, stea, formă liberă), nu doar dreptunghiular." },
-        { question: "Laminarea este necesară?", answer: "Laminarea adaugă un strat de protecție transparent. Recomandăm laminarea pentru autocolantele expuse la soare, frecare sau umezeală intensă, pentru a prelungi durata de viață." },
-    ];
-    return (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
-            <nav className="border-b border-gray-200 flex">
-                <TabButtonSEO active={activeTab === "descriere"} onClick={() => setActiveTab("descriere")}>Descriere</TabButtonSEO>
-                <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
-                <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
-            </nav>
-            <div className="p-6">
-                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Autocolante și Etichete</h3><p>Personalizează orice suprafață cu autocolantele noastre de înaltă calitate. Disponibile pe hârtie sau vinyl, cu opțiuni de laminare și tăiere pe contur.</p><h4>Aplicații</h4><ul><li>Etichete de produs (borcane, sticle, cutii)</li><li>Promoții și marketing</li><li>Decorare laptopuri, telefoane</li><li>Stickere auto (varianta Vinyl + Laminare)</li></ul></div>}
-                {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
-                {activeTab === 'faq' && <FaqAccordion qa={faq} />}
-            </div>
-        </div>
-    );
-};
+
 
 const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
 
@@ -123,6 +111,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
   
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
+  const [activeProductTab, setActiveProductTab] = useState("descriere");
   const [userEmail, setUserEmail] = useState<string>('');
   const toast = useToast();
 
@@ -363,8 +352,138 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
               </div>
               <DeliveryEstimation />
             </div>
+
+            {/* BUTOANE SECUNDARE - WHATSAPP ȘI CERERE OFERTĂ */}
+            <div className="mt-4 lg:mt-6 bg-gray-50 rounded-xl border border-gray-200 p-4">
+              <p className="text-xs text-gray-500 mb-3 text-center">Ai nevoie de ajutor sau o ofertă personalizată?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a 
+                  href="https://wa.me/40750473111?text=Ma%20intereseaza%20configuratorul%20autocolante" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <MessageCircle size={18} />
+                  <span className="text-sm">WhatsApp</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => window.location.href = '/contact'}
+                  className="inline-flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <Info size={18} />
+                  <span className="text-sm">Cerere Ofertă</span>
+                </button>
+              </div>
+            </div>
+            
+            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
+            <div className="mt-8 lg:mt-12 bg-white rounded-2xl shadow-lg border border-gray-200">
+              <nav className="border-b border-gray-200 flex">
+                <TabButtonSEO active={activeProductTab === "descriere"} onClick={() => setActiveProductTab("descriere")}>Descriere</TabButtonSEO>
+                <TabButtonSEO active={activeProductTab === "recenzii"} onClick={() => setActiveProductTab("recenzii")}>Recenzii</TabButtonSEO>
+                <TabButtonSEO active={activeProductTab === "faq"} onClick={() => setActiveProductTab("faq")}>FAQ</TabButtonSEO>
+              </nav>
+
+              <div className="p-6 lg:p-8">
+                {activeProductTab === 'descriere' && (
+                  <>
+                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Autocolante și Etichete Personalizate</h2>
+                    <p className="text-gray-700 mb-6 leading-relaxed text-base lg:text-lg">
+                      Personalizează orice suprafață cu autocolantele noastre de înaltă calitate. Disponibile pe hârtie sau vinyl, cu opțiuni de laminare și tăiere pe contur. Perfecte pentru branding, marketing, decorare sau etichete de produs.
+                    </p>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-3">Materiale & Calitate</h3>
+                        <ul className="space-y-3 text-gray-700">
+                          <li className="flex items-start">
+                            <span className="text-indigo-600 font-bold mr-2 mt-1">•</span>
+                            <span><strong>Hârtie (Mată/Lucioasă):</strong> Ideală pentru etichete de interior, ambalaje de produs, cutii. Soluție economică pentru aplicații de scurtă durată.</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-indigo-600 font-bold mr-2 mt-1">•</span>
+                            <span><strong>Vinyl Cast (PVC):</strong> Material plastic premium, rezistent la apă, rupere și UV. Ideal pentru exterior sau produse expuse la umezeală. Durabilitate 5-7 ani.</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-3">De ce să alegi autocolantele noastre?</h3>
+                        <ul className="space-y-3 text-gray-700">
+                          <li className="flex items-start">
+                            <span className="text-emerald-600 font-bold mr-2 mt-1">✓</span>
+                            <span><strong>Tăiere la Contur (Die-Cut):</strong> Plotter digital de precizie pentru orice formă custom.</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-emerald-600 font-bold mr-2 mt-1">✓</span>
+                            <span><strong>Laminare Protectoare:</strong> Strat transparent UV-rezistent care prelungește durata de viață.</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-emerald-600 font-bold mr-2 mt-1">✓</span>
+                            <span><strong>Aplicații Multiple:</strong> Etichete de produs, stickere auto, decorare gadget-uri, marketing și promoții.</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="flex items-start gap-4">
+                        <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-bold text-gray-900 mb-1">Vinyl Cast Premium</h3>
+                          <p className="text-sm text-gray-600">Material profesional, rezistent 5-7 ani exterior</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-4">
+                        <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-bold text-gray-900 mb-1">Tăiere la Contur</h3>
+                          <p className="text-sm text-gray-600">Opțional - orice formă custom, plotter digital de precizie</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-4">
+                        <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-bold text-gray-900 mb-1">Rezistent Apă & UV</h3>
+                          <p className="text-sm text-gray-600">Laminare protectoare, ideal interior/exterior</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-4">
+                        <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-bold text-gray-900 mb-1">Orice Dimensiune</h3>
+                          <p className="text-sm text-gray-600">De la mini-stickere până la foi mari personalizate</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                {activeProductTab === 'recenzii' && <Reviews productSlug={productSlug || 'autocolante'} />}
+                {activeProductTab === 'faq' && <FaqAccordion qa={productFaqs} />}
+              </div>
+            </div>
           </div>
-          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'autocolante'} /></div>
         </div>
       </div>
 

@@ -4,7 +4,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useCart } from "@/components/CartContext";
 import { useToast } from "@/components/ToastProvider";
-import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon, PlayCircle, TrendingUp, Percent } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Image as ImageIcon, Ruler, AlertTriangle, Link as LinkIcon, PlayCircle, TrendingUp, Percent, MessageCircle } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from 'next/link';
@@ -23,6 +23,24 @@ import {
   type PriceInputBannerVerso 
 } from "@/lib/pricing";
 import { QA } from "@/types";
+
+/* --- FAQs SPECIFIC PRODUSULUI --- */
+const productFaqs: QA[] = [
+  { question: "Ce material este folosit pentru bannerele față-verso?", answer: "Folosim material tip Blockout (650g/mp), special conceput pentru a bloca lumina, asigurând vizibilitate perfectă a graficii pe ambele fețe." },
+  { question: "Care este diferența de preț față de cel cu o singură față?", answer: "Bannerele față-verso sunt calculate cu o bază de preț de aproximativ 1.5x față de cele standard, datorită materialului mai scump și procesului de imprimare mai complex." },
+  { question: "Finisajele sunt incluse în preț?", answer: "Da, tivul de rezistență perimetral și capsele metalice sunt incluse standard. Puteți opta și pentru găuri de vânt." },
+  { question: "Pot avea grafică diferită pe față și pe verso?", answer: "Da. Puteți alege să încărcați două grafici diferite sau să solicitați un design profesional separat pentru fiecare față, cu o taxă suplimentară (100 RON pentru grafică diferită)." },
+  { question: "Cât durează producția și livrarea?", answer: "Producția durează în mod normal 1-3 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile, în funcție de localitatea de destinație." },
+];
+
+/* --- FAQs SPECIFIC PRODUSULUI --- */
+const productFaqs: QA[] = [
+  { question: "Ce material este folosit pentru bannerele față-verso?", answer: "Folosim material tip Blockout (650g/mp), special conceput pentru a bloca lumina, asigurând vizibilitate perfectă a graficii pe ambele fețe." },
+  { question: "Care este diferența de preț față de cel cu o singură față?", answer: "Bannerele față-verso sunt calculate cu o bază de preț de aproximativ 1.5x față de cele standard, datorită materialului mai scump și procesului de imprimare mai complex." },
+  { question: "Finisajele sunt incluse în preț?", answer: "Da, tivul de rezistență perimetral și capsele metalice sunt incluse standard. Puteți opta și pentru găuri de vânt." },
+  { question: "Pot avea grafică diferită pe față și pe verso?", answer: "Da. Puteți alege să încărcați două grafici diferite sau să solicitați un design profesional separat pentru fiecare față, cu o taxă suplimentară (100 RON pentru grafică diferită)." },
+  { question: "Cât durează producția și livrarea?", answer: "Producția durează în mod normal 1-3 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile, în funcție de localitatea de destinație." },
+];
 
 /* --- UI COMPONENTS --- */
 const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
@@ -182,6 +200,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
   
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
+  const [activeProductTab, setActiveProductTab] = useState("descriere");
   const [userEmail, setUserEmail] = useState<string>('');
   const toast = useToast();
 
@@ -624,8 +643,134 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
               </div>
               <DeliveryEstimation />
             </div>
+
+            {/* BUTOANE SECUNDARE - WHATSAPP ȘI CERERE OFERTĂ */}
+            <div className="mt-4 lg:mt-6 bg-gray-50 rounded-xl border border-gray-200 p-4">
+              <p className="text-xs text-gray-500 mb-3 text-center">Ai nevoie de ajutor sau o ofertă personalizată?</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a 
+                  href="https://wa.me/40750473111?text=Ma%20intereseaza%20configuratorul%20banner-verso" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <MessageCircle size={18} />
+                  <span className="text-sm">WhatsApp</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => window.location.href = '/contact'}
+                  className="inline-flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <Info size={18} />
+                  <span className="text-sm">Cerere Ofertă</span>
+                </button>
+              </div>
+            </div>
+            
+            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
+            <div className="mt-8 lg:mt-12 bg-white rounded-2xl shadow-lg border border-gray-200">
+              <nav className="border-b border-gray-200 flex">
+                <TabButtonSEO active={activeProductTab === "descriere"} onClick={() => setActiveProductTab("descriere")}>Descriere</TabButtonSEO>
+                <TabButtonSEO active={activeProductTab === "recenzii"} onClick={() => setActiveProductTab("recenzii")}>Recenzii</TabButtonSEO>
+                <TabButtonSEO active={activeProductTab === "faq"} onClick={() => setActiveProductTab("faq")}>FAQ</TabButtonSEO>
+              </nav>
+
+              <div className="p-6 lg:p-8">
+                {activeProductTab === 'descriere' && (
+                  <>
+                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Bannere Publicitare Față-Verso (Blockout)</h2>
+                    <p className="text-gray-700 mb-6 leading-relaxed text-base lg:text-lg">
+                      Vizibilitate maximă în ambele direcții de mers. Bannerele Blockout sunt realizate dintr-un material special, opac, care împiedică trecerea luminii, asigurând vizibilitate perfectă a graficii pe ambele fețe. Soluția ideală pentru expunerea perpendiculară pe sensul de mers (ex: pe stâlpi sau balcoane).
+                    </p>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-3">Materiale & Calitate</h3>
+                        <ul className="space-y-3 text-gray-700">
+                          <li className="flex items-start">
+                            <span className="text-indigo-600 font-bold mr-2 mt-1">•</span>
+                            <span><strong>Blockout 650g:</strong> Material PVC foarte gros, cu inserție neagră la interior, care blochează lumina. Imprimare la rezoluție fotografică pe ambele fețe.</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-3">De ce să alegi bannerele noastre față-verso?</h3>
+                        <ul className="space-y-3 text-gray-700">
+                          <li className="flex items-start">
+                            <span className="text-emerald-600 font-bold mr-2 mt-1">✓</span>
+                            <span><strong>Opacitate 100%:</strong> Grăție stratului de blocare, nu veți avea probleme de 'ghosting' (vizibilitatea textului de pe partea opusă).</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-emerald-600 font-bold mr-2 mt-1">✓</span>
+                            <span><strong>Rezistență UV și Apă:</strong> Folosim cerneluri Eco-Solvent de ultimă generație care nu se decolorează.</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="text-emerald-600 font-bold mr-2 mt-1">✓</span>
+                            <span><strong>Finisaje Incluse:</strong> Tivul perimetral și capsele de prindere sunt incluse standard în preț.</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="flex items-start gap-4">
+                        <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-bold text-gray-900 mb-1">Print Dublu-Față UV</h3>
+                          <p className="text-sm text-gray-600">Imprimare foto pe ambele fețe, vizibilitate maximă</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-4">
+                        <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-bold text-gray-900 mb-1">Aceeași sau Grafică Diferită</h3>
+                          <p className="text-sm text-gray-600">Flexibilitate maximă - alegi ce afișezi pe fiecare față</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-4">
+                        <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-bold text-gray-900 mb-1">Rezistent Exterior</h3>
+                          <p className="text-sm text-gray-600">Material Frontlit tratat UV, perfect pentru outdoor</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-4">
+                        <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-bold text-gray-900 mb-1">Livrare Rapidă</h3>
+                          <p className="text-sm text-gray-600">Producție în 1-2 zile + curier rapid oriunde în România</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                {activeProductTab === 'recenzii' && <Reviews productSlug={productSlug || 'banner-verso'} />}
+                {activeProductTab === 'faq' && <FaqAccordion qa={productFaqs} />}
+              </div>
+            </div>
           </div>
-          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'banner-verso'} /></div>
         </div>
       </div>
 
