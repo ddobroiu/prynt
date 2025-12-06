@@ -42,19 +42,10 @@ export type Product = {
   contentHtml?: string; // <--- CÂMP NOU PENTRU SEO LANDING PAGES
 };
 
-function toWebpPaths(imgs?: string[]): string[] | undefined {
+// IMPORTANT: Do not auto-convert to .webp; many assets are .jpg
+function normalizeImagePaths(imgs?: string[]): string[] | undefined {
   if (!imgs) return undefined;
-  return imgs.map((src) => {
-    try {
-      const s = String(src);
-      if (s.startsWith("/products/") && /\.(jpg|jpeg)$/i.test(s)) {
-        return s.replace(/\.(jpg|jpeg)$/i, ".webp");
-      }
-      return s;
-    } catch {
-      return src as string;
-    }
-  });
+  return imgs.map((src) => String(src));
 }
 
 // Mapare prima poză din fiecare configurator pentru fallback
@@ -92,9 +83,7 @@ export const PRODUCTS: Product[] = EXTRA_PRODUCTS_RAW.map((p) => {
     routeSlug: p.routeSlug ?? p.slug ?? slug,
     title: p.title ?? slug,
     description: p.description ?? "",
-    images: toWebpPaths(
-      p.images ?? [defaultImage]
-    ),
+    images: normalizeImagePaths(p.images ?? [defaultImage]),
     priceBase: p.priceBase ?? 250,
     currency: p.currency ?? "RON",
     tags: p.tags ?? [],
