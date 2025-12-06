@@ -159,7 +159,7 @@ export default function CheckoutPage() {
   );
 
   const [sameAsDelivery, setSameAsDelivery] = useState(true);
-  const [createAccount, setCreateAccount] = useState(false);
+  const [createAccount, setCreateAccount] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [newsletter, setNewsletter] = useState(false);
@@ -183,6 +183,9 @@ export default function CheckoutPage() {
     () => Math.max(0, subtotal + shippingCost - discountAmount),
     [subtotal, shippingCost, discountAmount]
   );
+
+  const MAX_RAMBURS_LIMIT = 500;
+  const isRambursDisabled = totalWithShipping > MAX_RAMBURS_LIMIT;
 
   useEffect(() => {
     if (sameAsDelivery) {
@@ -482,11 +485,11 @@ export default function CheckoutPage() {
             setPlacing(false);
             return;
           }
-          const { error } = await stripe.redirectToCheckout({
+          const result = await (stripe as any).redirectToCheckout({
             sessionId: data.sessionId,
           });
-          if (error) {
-            showToast(error.message || "Eroare la plata cu cardul.", "error");
+          if (result?.error) {
+            showToast(result.error.message || "Eroare la plata cu cardul.", "error");
             setPlacing(false);
           }
         } else {
@@ -661,6 +664,7 @@ export default function CheckoutPage() {
                     </div>
                   </label>
 
+                  {!isRambursDisabled && (
                   <label
                     className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition ${
                       paymentMethod === "cash_on_delivery"
@@ -689,6 +693,7 @@ export default function CheckoutPage() {
                       </p>
                     </div>
                   </label>
+                  )}
                 </div>
 
                 <DiscountCodeInput
@@ -766,6 +771,20 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-3 pt-2">
+                  {!session?.user && (
+                    <label className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
+                      <input
+                        type="checkbox"
+                        checked={createAccount}
+                        onChange={(e) => setCreateAccount(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>
+                        Creează-mi un cont automat și trimite parola pe email
+                        (poți schimba ulterior parola din contul tău).
+                      </span>
+                    </label>
+                  )}
                   <label className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
                     <input
                       type="checkbox"
