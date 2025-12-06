@@ -419,7 +419,16 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
                   </div>
                 </div>
               </div>
-            </div>
+            </>
+          )}
+          
+          {/* TAB RECENZII */}
+          {activeProductTab === 'recenzii' && <Reviews productSlug={productSlug || 'afise'} />}
+          
+          {/* TAB FAQ */}
+          {activeProductTab === 'faq' && <FaqAccordion qa={afiseFaqs} />}
+        </div>
+      </div>
           </div>
         </div>
       </div>

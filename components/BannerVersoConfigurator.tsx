@@ -33,15 +33,6 @@ const productFaqs: QA[] = [
   { question: "Cât durează producția și livrarea?", answer: "Producția durează în mod normal 1-3 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile, în funcție de localitatea de destinație." },
 ];
 
-/* --- FAQs SPECIFIC PRODUSULUI --- */
-const productFaqs: QA[] = [
-  { question: "Ce material este folosit pentru bannerele față-verso?", answer: "Folosim material tip Blockout (650g/mp), special conceput pentru a bloca lumina, asigurând vizibilitate perfectă a graficii pe ambele fețe." },
-  { question: "Care este diferența de preț față de cel cu o singură față?", answer: "Bannerele față-verso sunt calculate cu o bază de preț de aproximativ 1.5x față de cele standard, datorită materialului mai scump și procesului de imprimare mai complex." },
-  { question: "Finisajele sunt incluse în preț?", answer: "Da, tivul de rezistență perimetral și capsele metalice sunt incluse standard. Puteți opta și pentru găuri de vânt." },
-  { question: "Pot avea grafică diferită pe față și pe verso?", answer: "Da. Puteți alege să încărcați două grafici diferite sau să solicitați un design profesional separat pentru fiecare față, cu o taxă suplimentară (100 RON pentru grafică diferită)." },
-  { question: "Cât durează producția și livrarea?", answer: "Producția durează în mod normal 1-3 zile lucrătoare. Livrarea prin curier rapid mai adaugă încă 1-2 zile, în funcție de localitatea de destinație." },
-];
-
 /* --- UI COMPONENTS --- */
 const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, isLast = false }: { stepNumber: number; title: string; summary: string; isOpen: boolean; onClick: () => void; children: React.ReactNode; isLast?: boolean; }) => (
     <div className="relative pl-12">
@@ -504,7 +495,6 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
                 </div>
                 )}
             </div>
-            <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'banner-verso'} /></div>
           </div>
 
           {/* DREAPTA - CONFIGURATOR */}

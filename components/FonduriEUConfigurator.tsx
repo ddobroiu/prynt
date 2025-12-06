@@ -286,8 +286,8 @@ export default function FonduriEUConfigurator({ productSlug }: Props) {
                 </button>
               </div>
             </div>
-            
-            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}}
+
+            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
             <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="flex items-start gap-4">
