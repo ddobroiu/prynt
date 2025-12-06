@@ -47,30 +47,14 @@ const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, 
     </div>
 );
 
-const ProductTabs = ({ productSlug }: { productSlug: string }) => {
-    const [activeTab, setActiveTab] = useState("descriere");
-    const faqs: QA[] = [
-        { question: "Ce înseamnă 'big'?", answer: "'Big' este termenul tehnic pentru linia de îndoire. Un pliant cu 1 big este îndoit o singură dată (de obicei la mijloc)." },
-        { question: "Cum aleg tipul de împăturire?", answer: "Alegeți în funcție de cantitatea de informație. Fereastră sau Fluture oferă o deschidere mai spectaculoasă, în timp ce Simplu sau Paralel sunt standard pentru meniuri sau liste de prețuri." },
-        { question: "Ce hârtie recomandați?", answer: "115g este economică, ideală pentru volume mari. 170g este standardul de calitate. 250g oferă o rigiditate superioară, similară unui carton subțire." },
-    ];
-    return (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
-            <nav className="border-b border-gray-200 flex">
-                <TabButtonSEO active={activeTab === "descriere"} onClick={() => setActiveTab("descriere")}>Descriere</TabButtonSEO>
-                <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
-                <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
-            </nav>
-            <div className="p-6">
-                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Pliante Personalizate</h3><p>Pliantele (broșurile îndoite) permit structurarea informației pe mai multe pagini/secțiuni. Sunt esențiale pentru meniuri, prezentări de servicii sau ghiduri turistice.</p></div>}
-                {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
-                {activeTab === 'faq' && <FaqAccordion qa={faqs} />}
-            </div>
-        </div>
-    );
-};
+const productFaqs: QA[] = [
+  { question: "Ce înseamnă 'big'?", answer: "'Big' este termenul tehnic pentru linia de îndoire. Un pliant cu 1 big este îndoit o singură dată (de obicei la mijloc)." },
+  { question: "Cum aleg tipul de împăturire?", answer: "Alegeți în funcție de cantitatea de informație. Fereastră sau Fluture oferă o deschidere mai spectaculoasă, în timp ce Simplu sau Paralel sunt standard pentru meniuri sau liste de prețuri." },
+  { question: "Ce hârtie recomandați?", answer: "115g este economică, ideală pentru volume mari. 170g este standardul de calitate. 250g oferă o rigiditate superioară, similară unui carton subțire." },
+];
 
 const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
+
 
 function NumberInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   const inc = (d: number) => onChange(Math.max(1, value + d));
@@ -102,6 +86,7 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
   
   const [activeStep, setActiveStep] = useState(1);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [activeProductTab, setActiveProductTab] = useState<'descriere' | 'recenzii' | 'faq'>('descriere');
   const toast = useToast();
   
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -284,60 +269,124 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
               </div>
             </div>
 
-            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
+            {/* SECȚIUNE DESCRIERE & FEATURES */}
             <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Pliere Profesională</h3>
-                    <p className="text-sm text-gray-600">A5 pliat din A4 - prezentare elegantă și compactă</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Hârtie Premium</h3>
-                    <p className="text-sm text-gray-600">150-350g lucioasă sau mată, la alegere</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Ideal Promoții</h3>
-                    <p className="text-sm text-gray-600">Perfect pentru meniuri, broșuri, cataloage mici</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Prețuri Competitive</h3>
-                    <p className="text-sm text-gray-600">Comenzi de la 100 buc, preț pe bucăță accesibil</p>
-                  </div>
-                </div>
+              <div className="flex gap-4 mb-6 border-b border-gray-200">
+                <button onClick={() => setActiveProductTab('descriere')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'descriere' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Descriere</button>
+                <button onClick={() => setActiveProductTab('recenzii')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'recenzii' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Recenzii</button>
+                <button onClick={() => setActiveProductTab('faq')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'faq' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>FAQ</button>
               </div>
+
+              {activeProductTab === 'descriere' && (
+                <>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Pliante Personalizate</h2>
+                  <p className="text-gray-600 mb-6">
+                    Pliantele (broșurile îndoite) permit structurarea informației pe mai multe pagini/secțiuni. Sunt esențiale pentru meniuri, prezentări de servicii sau ghiduri turistice.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">Materiale & Calitate</h3>
+                      <ul className="space-y-3 text-sm text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Hârtie premium</strong> - 115g, 170g sau 250g lucioasă/mată</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Pliere profesională</strong> - simplu, fereastră, paralel, fluture</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Format A5</strong> pliat din A4 - compact și elegant</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Print offset</strong> - culori vibrante, finisaj impecabil</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">De ce să alegi Pliante?</h3>
+                      <ul className="space-y-3 text-sm text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Perfect pentru meniuri, broșuri, cataloage mici</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Prețuri competitive - comenzi de la 100 buc</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Multe opțiuni de împăturire adaptate nevoilor tale</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Distribuție ușoară - format convenabil pentru distribuire</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Pliere Profesională</h3>
+                        <p className="text-sm text-gray-600">A5 pliat din A4 - prezentare elegantă și compactă</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Hârtie Premium</h3>
+                        <p className="text-sm text-gray-600">150-350g lucioasă sau mată, la alegere</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Ideal Promoții</h3>
+                        <p className="text-sm text-gray-600">Perfect pentru meniuri, broșuri, cataloage mici</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Prețuri Competitive</h3>
+                        <p className="text-sm text-gray-600">Comenzi de la 100 buc, preț pe bucăță accesibil</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeProductTab === 'recenzii' && <Reviews productSlug={productSlug || 'pliante'} />}
+              
+              {activeProductTab === 'faq' && <FaqAccordion qa={productFaqs} />}
             </div>
           </div>
-          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'pliante'} /></div>
         </div>
       </div>
 

@@ -41,28 +41,11 @@ const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, 
     </div>
 );
 
-const ProductTabs = ({ productSlug }: { productSlug: string }) => {
-    const [activeTab, setActiveTab] = useState("descriere");
-    const faqs: QA[] = [
-        { question: "Ce material folosiți pentru tapet?", answer: "Folosim tapet Dreamscape Vinilic, un material premium din țesătură de poliester cu un coating vinilic, cu o grosime de 400 g/mp. Este ideal pentru un decor interior de înaltă calitate." },
-        { question: "Care este diferența dintre varianta cu și fără adeziv?", answer: "Varianta standard necesită aplicarea unui adeziv pentru tapet pe perete. Varianta cu adeziv are un strat auto-adeziv pe spate, similar cu un autocolant, facilitând montajul." },
-        { question: "Pot comanda o grafică personalizată?", answer: "Da, puteți încărca propria grafică sau puteți opta pentru serviciul nostru de design profesional, contra unui cost suplimentar de 200 RON." },
-    ];
-    return (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
-            <nav className="border-b border-gray-200 flex">
-                <TabButtonSEO active={activeTab === "descriere"} onClick={() => setActiveTab("descriere")}>Descriere</TabButtonSEO>
-                <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
-                <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
-            </nav>
-            <div className="p-6">
-                {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Tapet Personalizat Dreamscape Vinilic</h3><p>Creați un ambient unic cu tapetul nostru personalizat. Ideal pentru spații rezidențiale, birouri sau comerciale, tapetul Dreamscape Vinilic transformă orice perete într-o operă de artă. Imprimat la calitate fotografică, este rezistent și ușor de întreținut.</p></div>}
-                {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
-                {activeTab === 'faq' && <FaqAccordion qa={faqs} />}
-            </div>
-        </div>
-    );
-};
+const productFaqs: QA[] = [
+  { question: "Ce material folosiți pentru tapet?", answer: "Folosim tapet Dreamscape Vinilic, un material premium din țesătură de poliester cu un coating vinilic, cu o grosime de 400 g/mp. Este ideal pentru un decor interior de înaltă calitate." },
+  { question: "Care este diferența dintre varianta cu și fără adeziv?", answer: "Varianta standard necesită aplicarea unui adeziv pentru tapet pe perete. Varianta cu adeziv are un strat auto-adeziv pe spate, similar cu un autocolant, facilitând montajul." },
+  { question: "Pot comanda o grafică personalizată?", answer: "Da, puteți încărca propria grafică sau puteți opta pentru serviciul nostru de design profesional, contra unui cost suplimentar de 200 RON." },
+];
 
 const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
 
@@ -102,6 +85,7 @@ export default function TapetConfigurator({ productSlug, productImage }: Props) 
   
   const [activeStep, setActiveStep] = useState(1);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [activeProductTab, setActiveProductTab] = useState<'descriere' | 'recenzii' | 'faq'>('descriere');
   const toast = useToast();
   
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -301,60 +285,124 @@ export default function TapetConfigurator({ productSlug, productImage }: Props) 
               </div>
             </div>
 
-            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
+            {/* SECȚIUNE DESCRIERE & FEATURES */}
             <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Print HD Personalizat</h3>
-                    <p className="text-sm text-gray-600">Orice imagine, rezoluție fotografică, design unic</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Material Textil Premium</h3>
-                    <p className="text-sm text-gray-600">Tapet textil non-woven, rezistent și ecologic</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Dimensiuni Personalizate</h3>
-                    <p className="text-sm text-gray-600">Măsurăm exact peretele tău, fără limite</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Montaj Ușor</h3>
-                    <p className="text-sm text-gray-600">Include adeziv special, montare rapidă DIY</p>
-                  </div>
-                </div>
+              <div className="flex gap-4 mb-6 border-b border-gray-200">
+                <button onClick={() => setActiveProductTab('descriere')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'descriere' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Descriere</button>
+                <button onClick={() => setActiveProductTab('recenzii')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'recenzii' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Recenzii</button>
+                <button onClick={() => setActiveProductTab('faq')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'faq' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>FAQ</button>
               </div>
+
+              {activeProductTab === 'descriere' && (
+                <>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Tapet Personalizat Dreamscape Vinilic</h2>
+                  <p className="text-gray-600 mb-6">
+                    Creați un ambient unic cu tapetul nostru personalizat. Ideal pentru spații rezidențiale, birouri sau comerciale, tapetul Dreamscape Vinilic transformă orice perete într-o operă de artă. Imprimat la calitate fotografică, este rezistent și ușor de întreținut.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">Materiale & Calitate</h3>
+                      <ul className="space-y-3 text-sm text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Dreamscape Vinilic</strong> - țesătură poliester + coating vinilic 400 g/mp</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Print HD</strong> - imprimare fotografică, culori vibrante</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Textil non-woven</strong> - rezistent, lavabil, ecologic</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Cu sau fără adeziv</strong> - alegi varianta potrivită pentru tine</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">De ce să alegi Tapet?</h3>
+                      <ul className="space-y-3 text-sm text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Dimensiuni personalizate - măsurăm exact peretele tău</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Montaj ușor DIY - cu sau fără adeziv inclus</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Perfect pentru decor interior rezidențial sau comercial</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Livrare în fâșii numerotate pentru îmbinare perfectă</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Print HD Personalizat</h3>
+                        <p className="text-sm text-gray-600">Orice imagine, rezoluție fotografică, design unic</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Material Textil Premium</h3>
+                        <p className="text-sm text-gray-600">Tapet textil non-woven, rezistent și ecologic</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Dimensiuni Personalizate</h3>
+                        <p className="text-sm text-gray-600">Măsurăm exact peretele tău, fără limite</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Montaj Ușor</h3>
+                        <p className="text-sm text-gray-600">Include adeziv special, montare rapidă DIY</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeProductTab === 'recenzii' && <Reviews productSlug={productSlug || 'tapet'} />}
+              
+              {activeProductTab === 'faq' && <FaqAccordion qa={productFaqs} />}
             </div>
           </div>
-          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug || 'tapet'} /></div>
         </div>
       </div>
 

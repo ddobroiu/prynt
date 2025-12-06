@@ -44,28 +44,11 @@ const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, 
   </div>
 );
 
-const ProductTabs = ({ productSlug }: { productSlug: string }) => {
-  const [activeTab, setActiveTab] = useState("descriere");
-  const faq: QA[] = [
-    { question: "Ce dimensiuni sunt disponibile?", answer: "Standard: A6, A5 și variante personalizate (21×10)." },
-    { question: "Pot alege față/dos?", answer: "Da — selectați două fețe pentru imprimare față-verso." },
-    { question: "Care este timpul de livrare?", answer: "Depinde de tiraj; estimarea apare înainte de a adăuga în coș." },
-  ];
-  return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
-      <nav className="border-b border-gray-200 flex">
-        <TabButtonSEO active={activeTab === "descriere"} onClick={() => setActiveTab("descriere")}>Descriere</TabButtonSEO>
-        <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
-        <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
-      </nav>
-      <div className="p-6">
-        {activeTab === 'descriere' && <div className="prose max-w-none text-sm"><h3>Flyere Personalizate</h3><p>Flyere rapide și eficiente pentru campanii, promoții și evenimente. Alegeți dimensiunea, hârtia și imprimarea față-verso.</p></div>}
-        {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
-        {activeTab === 'faq' && <FaqAccordion qa={faq} />}
-      </div>
-    </div>
-  );
-};
+const productFaqs: QA[] = [
+  { question: "Ce dimensiuni sunt disponibile?", answer: "Standard: A6, A5 și variante personalizate (21×10)." },
+  { question: "Pot alege față/dos?", answer: "Da — selectați două fețe pentru imprimare față-verso." },
+  { question: "Care este timpul de livrare?", answer: "Depinde de tiraj; estimarea apare înainte de a adăuga în coș." },
+];
 
 const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (<button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button>);
 
@@ -93,6 +76,7 @@ export default function FlyerConfigurator({ productSlug, productImage }: Props) 
   type GalleryImage = typeof GALLERY[number];
   const [activeImage, setActiveImage] = useState<GalleryImage>(GALLERY[0]);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [activeProductTab, setActiveProductTab] = useState<'descriere' | 'recenzii' | 'faq'>('descriere');
   const toast = useToast();
   const [userEmail, setUserEmail] = useState<string>('');
   
@@ -310,60 +294,124 @@ export default function FlyerConfigurator({ productSlug, productImage }: Props) 
               </div>
             </div>
             
-            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
+            {/* SECȚIUNE DESCRIERE & FEATURES */}
             <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Print Offset Profesional</h3>
-                    <p className="text-sm text-gray-600">Calitate superioară, culorile perfect reproducte</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Format A5 Standard</h3>
-                    <p className="text-sm text-gray-600">Dimensiunea perfectă pentru distribuție și impact</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Preț pe Bucăță Mic</h3>
-                    <p className="text-sm text-gray-600">Reduceri automate la cantități mari (min 100 buc)</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Producție Rapidă</h3>
-                    <p className="text-sm text-gray-600">Livrare în 2-3 zile lucrătoare național</p>
-                  </div>
-                </div>
+              <div className="flex gap-4 mb-6 border-b border-gray-200">
+                <button onClick={() => setActiveProductTab('descriere')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'descriere' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Descriere</button>
+                <button onClick={() => setActiveProductTab('recenzii')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'recenzii' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Recenzii</button>
+                <button onClick={() => setActiveProductTab('faq')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'faq' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>FAQ</button>
               </div>
+
+              {activeProductTab === 'descriere' && (
+                <>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Flyere Personalizate</h2>
+                  <p className="text-gray-600 mb-6">
+                    Flyere rapide și eficiente pentru campanii, promoții și evenimente. Alegeți dimensiunea, hârtia și imprimarea față-verso.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">Materiale & Calitate</h3>
+                      <ul className="space-y-3 text-sm text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Print Offset</strong> - tehnologie profesională, culori vibrante</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Format A5</strong> - dimensiunea ideală pentru impact maxim</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Hârtie premium</strong> - finisaj lucios sau mat disponibil</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Față-verso</strong> - opțiune imprimare ambele fețe</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">De ce să alegi Flyere?</h3>
+                      <ul className="space-y-3 text-sm text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Perfect pentru campanii publicitare și evenimente</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Reduceri automate la cantități mari (min 100 buc)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Producție rapidă - livrare în 2-3 zile lucrătoare</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Distribuție ușoară - format convenabil și atractiv</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Print Offset Profesional</h3>
+                        <p className="text-sm text-gray-600">Calitate superioară, culorile perfect reproducte</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Format A5 Standard</h3>
+                        <p className="text-sm text-gray-600">Dimensiunea perfectă pentru distribuție și impact</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Preț pe Bucăță Mic</h3>
+                        <p className="text-sm text-gray-600">Reduceri automate la cantități mari (min 100 buc)</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Producție Rapidă</h3>
+                        <p className="text-sm text-gray-600">Livrare în 2-3 zile lucrătoare național</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeProductTab === 'recenzii' && <Reviews productSlug={productSlug || 'flayere'} />}
+              
+              {activeProductTab === 'faq' && <FaqAccordion qa={productFaqs} />}
             </div>
           </div>
-          <div className="lg:hidden col-span-1"><ProductTabs productSlug={productSlug ?? 'flayere'} /></div>
         </div>
       </div>
 

@@ -45,57 +45,12 @@ const AccordionStep = ({ stepNumber, title, summary, isOpen, onClick, children, 
     </div>
 );
 
-const ProductTabs = ({ productSlug }: { productSlug: string }) => {
-    const [activeTab, setActiveTab] = useState("descriere");
-    const faq: QA[] = [
-        { question: "Ce este un rollup banner?", answer: "Roll-up (sau banner retractabil) este un sistem de afișaj portabil perfect pentru evenimente, expoziții, prezentări. Se rulează și se derulează ușor într-o casetă din aluminiu." },
-        { question: "Ce include prețul?", answer: "Prețul include caseta din aluminiu de calitate premium, printuri pe material Blueback 440g și geantă de transport." },
-        { question: "Cât de rezistent este?", answer: "Sistemul rollup este foarte durabil - caseta din aluminiu rezistă la transport și utilizare repetată, iar printul Blueback este opac și rezistent." },
-        { question: "Cum se montează?", answer: "Extrem de simplu: scoți din geantă, tragi printul în sus și îl fixezi pe bara superioară. Montaj sub 1 minut, fără unelte!" },
-    ];
-    return (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
-            <nav className="border-b border-gray-200 flex">
-                <TabButtonSEO active={activeTab === "descriere"} onClick={() => setActiveTab("descriere")}>Descriere</TabButtonSEO>
-                <TabButtonSEO active={activeTab === "recenzii"} onClick={() => setActiveTab("recenzii")}>Recenzii</TabButtonSEO>
-                <TabButtonSEO active={activeTab === "faq"} onClick={() => setActiveTab("faq")}>FAQ</TabButtonSEO>
-            </nav>
-            <div className="p-6">
-                {activeTab === 'descriere' && (
-                    <div className="prose max-w-none text-sm">
-                        <h3>Rollup Banner - Afișaj Portabil Premium</h3>
-                        <p>Sistem complet de afișaj retractabil pentru evenimente, expoziții, showroom-uri și prezentări profesionale.</p>
-                        <h4>Ce include:</h4>
-                        <ul>
-                            <li><strong>Casetă aluminiu</strong> premium cu mecanism retractabil</li>
-                            <li><strong>Print Blueback 440g</strong> opac, culori vibrante</li>
-                            <li><strong>Geantă transport</strong> rezistentă</li>
-                            <li><strong>Bară superioară</strong> pentru fixare</li>
-                        </ul>
-                        <h4>Dimensiuni disponibile:</h4>
-                        <ul>
-                            <li><strong>85 cm</strong> lățime - compact, ideal spații mici</li>
-                            <li><strong>100 cm</strong> lățime - standard, cel mai popular</li>
-                            <li><strong>120 cm</strong> lățime - vizibilitate excelentă</li>
-                            <li><strong>150 cm</strong> lățime - impact maxim</li>
-                        </ul>
-                        <p className="text-xs text-gray-500"><em>Înălțime standard: 200 cm pentru toate modelele</em></p>
-                        <h4>Avantaje:</h4>
-                        <ul>
-                            <li>✅ Portabil și ușor de transportat</li>
-                            <li>✅ Montaj rapid (sub 1 minut)</li>
-                            <li>✅ Fără unelte necesare</li>
-                            <li>✅ Refolosibil - schimbi doar printul</li>
-                            <li>✅ Print opac, dublu strat Blueback</li>
-                        </ul>
-                    </div>
-                )}
-                {activeTab === 'recenzii' && <Reviews productSlug={productSlug} />}
-                {activeTab === 'faq' && <FaqAccordion qa={faq} />}
-            </div>
-        </div>
-    );
-};
+const productFaqs: QA[] = [
+  { question: "Ce este un rollup banner?", answer: "Roll-up (sau banner retractabil) este un sistem de afișaj portabil perfect pentru evenimente, expoziții, prezentări. Se rulează și se derulează ușor într-o casetă din aluminiu." },
+  { question: "Ce include prețul?", answer: "Prețul include caseta din aluminiu de calitate premium, printuri pe material Blueback 440g și geantă de transport." },
+  { question: "Cât de rezistent este?", answer: "Sistemul rollup este foarte durabil - caseta din aluminiu rezistă la transport și utilizare repetată, iar printul Blueback este opac și rezistent." },
+  { question: "Cum se montează?", answer: "Extrem de simplu: scoți din geantă, tragi printul în sus și îl fixezi pe bara superioară. Montaj sub 1 minut, fără unelte!" },
+];
 
 const TabButtonSEO = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => ( <button onClick={onClick} className={`flex-1 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${active ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{children}</button> );
 
@@ -149,6 +104,7 @@ export default function RollupConfigurator({ productSlug, initialWidth: initW, p
   
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
+  const [activeProductTab, setActiveProductTab] = useState<'descriere' | 'recenzii' | 'faq'>('descriere');
   const [userEmail, setUserEmail] = useState<string>('');
   const toast = useToast();
 
@@ -241,7 +197,6 @@ export default function RollupConfigurator({ productSlug, initialWidth: initW, p
                 {GALLERY_IMAGES.map((src, i) => <button key={src} onClick={() => setActiveIndex(i)} className={`relative rounded-lg aspect-square ${activeIndex === i ? "ring-2 ring-offset-2 ring-indigo-500" : "hover:opacity-80"}`}><img src={src} alt="Thumb" className="w-full h-full object-cover" /></button>)}
               </div>
             </div>
-            <div className="hidden lg:block"><ProductTabs productSlug={productSlug || 'rollup'} /></div>
           </div>
           <div>
             <header className="mb-6">
@@ -346,61 +301,125 @@ export default function RollupConfigurator({ productSlug, initialWidth: initW, p
               </div>
             </div>
 
-            {/* SECȚIUNE FEATURES - 4 ICONIȚE */}
+            {/* SECȚIUNE DESCRIERE & FEATURES */}
             <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Casetă Premium Inclusă</h3>
-                    <p className="text-sm text-gray-600">Sistem retractabil profesional, stabil și elegant</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Montaj în 30 Secunde</h3>
-                    <p className="text-sm text-gray-600">Extrem de ușor de instalat, transportabil</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Geantă Transport</h3>
-                    <p className="text-sm text-gray-600">Inclusă în preț - transport ușor la evenimente</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900 mb-1">Print Anti-Curl</h3>
-                    <p className="text-sm text-gray-600">Banner special tratat, rămâne perfect plat</p>
-                  </div>
-                </div>
+              <div className="flex gap-4 mb-6 border-b border-gray-200">
+                <button onClick={() => setActiveProductTab('descriere')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'descriere' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Descriere</button>
+                <button onClick={() => setActiveProductTab('recenzii')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'recenzii' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Recenzii</button>
+                <button onClick={() => setActiveProductTab('faq')} className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeProductTab === 'faq' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>FAQ</button>
               </div>
+
+              {activeProductTab === 'descriere' && (
+                <>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Rollup Banner - Afișaj Portabil Premium</h2>
+                  <p className="text-gray-600 mb-6">
+                    Sistem complet de afișaj retractabil pentru evenimente, expoziții, showroom-uri și prezentări profesionale. Include casetă aluminiu, print Blueback 440g și geantă transport.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">Materiale & Calitate</h3>
+                      <ul className="space-y-3 text-sm text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Casetă aluminiu premium</strong> - mecanism retractabil profesional</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Print Blueback 440g</strong> - material opac, dublu strat anti-curl</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>Geantă transport</strong> inclusă - rezistentă cu mâner</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span><strong>4 dimensiuni</strong> - 85cm, 100cm, 120cm, 150cm (toate H:200cm)</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">De ce să alegi Rollup?</h3>
+                      <ul className="space-y-3 text-sm text-gray-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Portabil și ușor - perfect pentru evenimente mobile</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Montaj rapid sub 1 minut - fără unelte necesare</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Refolosibil - schimbi doar printul când vrei</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-indigo-600 mt-1">✓</span>
+                          <span>Ideal expoziții, târguri, showroom, prezentări</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Casetă Premium Inclusă</h3>
+                        <p className="text-sm text-gray-600">Sistem retractabil profesional, stabil și elegant</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Montaj în 30 Secunde</h3>
+                        <p className="text-sm text-gray-600">Extrem de ușor de instalat, transportabil</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Geantă Transport</h3>
+                        <p className="text-sm text-gray-600">Inclusă în preț - transport ușor la evenimente</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-gray-900 mb-1">Print Anti-Curl</h3>
+                        <p className="text-sm text-gray-600">Banner special tratat, rămâne perfect plat</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeProductTab === 'recenzii' && <Reviews productSlug={productSlug || 'rollup'} />}
+              
+              {activeProductTab === 'faq' && <FaqAccordion qa={productFaqs} />}
             </div>
           </div>
         </div>
-        <div className="lg:hidden mt-12"><ProductTabs productSlug={productSlug || 'rollup'} /></div>
       </div>
       <SmartNewsletterPopup />
       {detailsOpen && (
