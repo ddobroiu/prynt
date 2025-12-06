@@ -220,7 +220,7 @@ export default function SearchBox({
         {query && (
           <button
             onClick={clearSearch}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-gray-600 transition-colors"
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -266,7 +266,7 @@ export default function SearchBox({
                     <div className="font-medium text-sm text-gray-900 truncate">
                       {highlightMatch(result.title, query)}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+                    <div className="text-xs text-slate-800 dark:text-gray-500 mt-1 line-clamp-2">
                       {highlightMatch(result.description.slice(0, 80), query)}
                       {result.description.length > 80 && "..."}
                     </div>
@@ -276,7 +276,7 @@ export default function SearchBox({
                           {getCategoryDisplayName(result.category)}
                         </span>
                         {result.priceBase && (
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-slate-800 dark:text-gray-500">
                             de la {result.priceBase} RON
                           </span>
                         )}
@@ -296,7 +296,7 @@ export default function SearchBox({
               </Link>
             </>
           ) : query.length >= 2 ? (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-slate-800 dark:text-gray-500">
               <Search className="h-8 w-8 mx-auto mb-2 text-gray-300" />
               <p className="text-sm">Niciun rezultat pentru &quot;{query}&quot;</p>
               <Link 

@@ -14,7 +14,7 @@ import SearchBox from "./SearchBox";
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
   <Link
     href={href}
-    className="relative font-medium text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+    className="relative font-medium text-slate-950 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
   >
     {children}
   </Link>
@@ -35,7 +35,7 @@ const DesktopNav = () => {
         ) : item.children ? (
           <div key={item.label} className="relative group">
           <button 
-            className="flex items-center gap-1 font-medium text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors outline-none py-4"
+            className="flex items-center gap-1 font-medium text-slate-950 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors outline-none py-4"
             aria-haspopup="true"
             aria-expanded="false"
             aria-label={`Deschide meniul ${item.label}`}
@@ -49,7 +49,7 @@ const DesktopNav = () => {
                   <Link
                     key={child.href}
                     href={child.href}
-                    className="block px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-950 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                   >
                     {child.label}
                   </Link>
@@ -95,7 +95,7 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                 className="h-7 w-auto object-contain"
               />
             </Link>
-            <button onClick={onClose} className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-all" aria-label="Închide meniul">
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-slate-950 dark:text-zinc-500 transition-all" aria-label="Închide meniul">
               <X size={20} />
             </button>
           </div>
@@ -113,7 +113,7 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   <div className="rounded-lg overflow-hidden">
                     <button
                       onClick={() => setOpenSub(openSub === item.label ? null : item.label)}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 text-left text-sm font-semibold rounded-lg transition-all ${visibleOpenSub === item.label ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 text-left text-sm font-semibold rounded-lg transition-all ${visibleOpenSub === item.label ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600' : 'text-slate-950 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
                       aria-label={`${visibleOpenSub === item.label ? 'Închide' : 'Deschide'} submeniul ${item.label}`}
                       aria-expanded={visibleOpenSub === item.label}
                     >
@@ -127,7 +127,7 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                             key={child.href} 
                             href={child.href} 
                             onClick={onClose} 
-                            className="flex items-center py-2 pl-8 pr-3 text-sm text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                            className="flex items-center py-2 pl-8 pr-3 text-sm text-slate-950 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                           >
                             {child.label}
                           </Link>
@@ -139,7 +139,7 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   <Link 
                     href={item.href} 
                     onClick={onClose} 
-                    className={`flex items-center px-3 py-2.5 text-sm font-semibold rounded-lg transition-all ${item.highlight ? 'bg-indigo-600 text-white shadow-md mt-3 justify-center hover:bg-indigo-700' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+                    className={`flex items-center px-3 py-2.5 text-sm font-semibold rounded-lg transition-all ${item.highlight ? 'bg-indigo-600 text-white shadow-md mt-3 justify-center hover:bg-indigo-700' : 'text-slate-950 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
                   >
                     {item.label}
                   </Link>
@@ -184,11 +184,11 @@ const HeaderActions = () => {
             aria-label="Cont"
             onClick={() => setIsAccountOpen(!isAccountOpen)}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-zinc-700 dark:text-zinc-300">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-slate-950 dark:text-zinc-300">
               <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
               <path d="M5.5 20.5C5.5 17 8.5 14 12 14C15.5 14 18.5 17 18.5 20.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-            <span className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Cont</span>
+            <span className="text-slate-950 dark:text-zinc-300 text-sm font-medium">Cont</span>
           </button>
           
           {/* Dropdown Menu */}
@@ -213,7 +213,7 @@ const HeaderActions = () => {
                 <Link
                   href="/account"
                   onClick={() => setIsAccountOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-950 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <User size={18} />
                   Profilul meu
@@ -222,7 +222,7 @@ const HeaderActions = () => {
                 <Link
                   href="/account?tab=orders"
                   onClick={() => setIsAccountOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-950 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <Package size={18} />
                   Comenzile mele
@@ -231,7 +231,7 @@ const HeaderActions = () => {
                 <Link
                   href="/account?tab=billing"
                   onClick={() => setIsAccountOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-950 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <CreditCard size={18} />
                   Facturi & Plăți
@@ -240,7 +240,7 @@ const HeaderActions = () => {
                 <Link
                   href="/account?tab=addresses"
                   onClick={() => setIsAccountOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-950 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <MapPin size={18} />
                   Adrese livrare
@@ -249,7 +249,7 @@ const HeaderActions = () => {
                 <Link
                   href="/account?tab=payment-methods"
                   onClick={() => setIsAccountOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-950 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <CreditCard size={18} />
                   Metode de plată
@@ -258,7 +258,7 @@ const HeaderActions = () => {
                 <Link
                   href="/account?tab=favorites"
                   onClick={() => setIsAccountOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-950 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <Heart size={18} />
                   Favorite
@@ -267,7 +267,7 @@ const HeaderActions = () => {
                 <Link
                   href="/account?tab=security"
                   onClick={() => setIsAccountOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-950 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <ShieldCheck size={18} />
                   Securitate
@@ -292,11 +292,11 @@ const HeaderActions = () => {
         </div>
       ) : (
         <Link href="/login" className="flex items-center gap-2 px-3 py-2 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-all" aria-label="Cont">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-zinc-700 dark:text-zinc-300">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-slate-950 dark:text-zinc-300">
             <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
             <path d="M5.5 20.5C5.5 17 8.5 14 12 14C15.5 14 18.5 17 18.5 20.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
           </svg>
-          <span className="text-zinc-700 dark:text-zinc-300 text-sm font-medium">Login</span>
+          <span className="text-slate-950 dark:text-zinc-300 text-sm font-medium">Login</span>
         </Link>
       )}
 
@@ -346,7 +346,7 @@ export default function Header() {
         <div className="flex items-center gap-3">
            <button 
              onClick={() => setMobileMenuOpen(true)} 
-             className="lg:hidden p-2 text-zinc-700 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-all"
+             className="lg:hidden p-2 text-slate-950 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-all"
              aria-label="Deschide meniul"
            >
             <Menu size={22} />

@@ -224,9 +224,14 @@ export default function CartWidget() {
                 <div className="flex flex-1 flex-col justify-between py-0.5">
                   <div>
                     <div className="flex justify-between items-start gap-2">
-                        <h3 className="font-bold text-sm text-slate-950 dark:text-white line-clamp-2 leading-tight hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+                        <h3
+                          className="font-extrabold text-lg text-slate-950 dark:text-white bg-white border-2 border-red-500 p-2"
+                          style={{overflow: 'visible', whiteSpace: 'normal', wordBreak: 'break-word', zIndex: 9999}}
+                          aria-label="Nume produs"
+                          role="text"
+                        >
                           <Link href={`/${item.slug || 'shop'}`} onClick={() => setIsOpen(false)}>
-                            {item.title}
+                            <span style={{color: '#111', fontSize: '20px', background: '#fff', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold', border: '1px solid #d00', display: 'inline-block'}}>{item.title}</span>
                           </Link>
                         </h3>
                         <button onClick={() => removeItem(item.id)} className="text-slate-800 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
