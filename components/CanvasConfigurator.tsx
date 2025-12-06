@@ -104,6 +104,7 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
   
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
+  const [activeProductTab, setActiveProductTab] = useState<'descriere' | 'recenzii' | 'faq'>('descriere');
   const [userEmail, setUserEmail] = useState<string>('');
   const toast = useToast();
 
