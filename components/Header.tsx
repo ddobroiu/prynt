@@ -76,14 +76,16 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   return (
     <>
       <div 
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`} 
         onClick={onClose} 
         role="presentation"
+        style={{willChange: 'opacity'}}
       />
       <div
         className={`fixed top-0 left-0 h-full w-[85%] max-w-[340px] bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl z-50 transition-transform duration-300 ease-out lg:hidden ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          isOpen ? "translate-x-0 visible" : "-translate-x-full invisible"
         }`}
+        style={{willChange: 'transform', transform: isOpen ? 'translateX(0) translateZ(0)' : 'translateX(-100%) translateZ(0)'}}
       >
         <div className="flex flex-col h-full">
           {/* Header mobil */}

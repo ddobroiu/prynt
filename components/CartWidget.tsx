@@ -92,7 +92,7 @@ export default function CartWidget() {
           // 1. SUPRASCRIERE TOTALA A POZITIONARII (folosim ! pentru a bate stilurile implicite)
           "fixed! right-0! left-auto! top-0! bottom-0! translate-x-0! translate-y-0! m-0! " +
           // 2. DIMENSIUNI & LAYOUT
-          "h-dvh w-full md:max-w-[450px] flex flex-col p-0 gap-0 z-60 focus:outline-none " +
+          "h-dvh w-full md:max-w-[450px] flex flex-col p-0 gap-0 focus:outline-none " +
           // 3. STILURI VIZUALE
           "bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl " +
           // 4. ANIMATII INTRARE/IESIRE (Slide din dreapta)
@@ -100,6 +100,7 @@ export default function CartWidget() {
           // 5. ASCUNDE BUTONUL X DEFAULT
           "[&>button:last-child]:hidden"
         }
+        style={{zIndex: 9999}}
       >
         
         {/* HEADER - FIX (Nu se misca) */}
@@ -225,13 +226,11 @@ export default function CartWidget() {
                   <div>
                     <div className="flex justify-between items-start gap-2">
                         <h3
-                          className="font-extrabold text-lg text-slate-950 dark:text-white bg-white border-2 border-red-500 p-2"
-                          style={{overflow: 'visible', whiteSpace: 'normal', wordBreak: 'break-word', zIndex: 9999}}
-                          aria-label="Nume produs"
-                          role="text"
+                          className="font-bold text-base text-slate-950 dark:text-white leading-snug flex-1 min-w-0"
+                          style={{overflow: 'visible', whiteSpace: 'normal', wordBreak: 'break-word', display: 'block'}}
                         >
-                          <Link href={`/${item.slug || 'shop'}`} onClick={() => setIsOpen(false)}>
-                            <span style={{color: '#111', fontSize: '20px', background: '#fff', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold', border: '1px solid #d00', display: 'inline-block'}}>{item.title}</span>
+                          <Link href={`/${item.slug || 'shop'}`} onClick={() => setIsOpen(false)} className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                            {item.title}
                           </Link>
                         </h3>
                         <button onClick={() => removeItem(item.id)} className="text-slate-800 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
