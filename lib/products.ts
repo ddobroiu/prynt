@@ -212,7 +212,7 @@ export async function resolveProductForRequestedSlug(requestedSlug: string, cate
           description: landingInfo.seoDescription
         },
         contentHtml: landingInfo.contentHtml,
-        images: landingInfo.images ? toWebpPaths(landingInfo.images) : (baseProduct?.images || []),
+        images: landingInfo.images ? normalizeImagePaths(landingInfo.images) : (baseProduct?.images || []),
         priceBase: baseProduct?.priceBase ?? 0,
         currency: baseProduct?.currency ?? "RON",
         materials: baseProduct?.materials ?? [],
