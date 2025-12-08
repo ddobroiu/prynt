@@ -341,6 +341,7 @@ export default function Header() {
           ? "bg-white/95 dark:bg-black/95 backdrop-blur-lg border-zinc-200 dark:border-white/10 shadow-lg" 
           : "bg-white dark:bg-black border-zinc-200 dark:border-zinc-800"
       }`}
+      style={{ pointerEvents: 'auto', isolation: 'isolate' }}
     >
       {/* PRIMUL RÂND: Logo, Căutare, Cont + Coș */}
       <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800">

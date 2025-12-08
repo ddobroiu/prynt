@@ -23,6 +23,7 @@ import {
 import CheckoutForm from "./CheckoutForm";
 import DeliveryInfo from "@/components/DeliveryInfo";
 import DiscountCodeInput from "@/components/DiscountCodeInput";
+import "./checkout-debug.css";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -275,21 +276,33 @@ export default function CheckoutPage() {
   }, [errors]);
 
   useEffect(() => {
-    if (sameAsDelivery) {
-      setBilling((prev) =>
-        mergeBilling(prev, {
-          firstName: address.firstName,
-          lastName: address.lastName,
-          email: address.email,
-          phone: address.phone,
-          county: address.county,
-          city: address.city,
-          street: address.street,
-          postalCode: address.postalCode,
-        })
-      );
-    }
-  }, [sameAsDelivery, address, setBilling]);
+    if (!sameAsDelivery) return;
+    setBilling((prev) => {
+      const needsUpdate = 
+        prev.firstName !== address.firstName ||
+        prev.lastName !== address.lastName ||
+        prev.email !== address.email ||
+        prev.phone !== address.phone ||
+        prev.county !== address.county ||
+        prev.city !== address.city ||
+        prev.street !== address.street ||
+        prev.postalCode !== address.postalCode;
+      
+      if (!needsUpdate) return prev;
+      
+      return mergeBilling(prev, {
+        firstName: address.firstName,
+        lastName: address.lastName,
+        email: address.email,
+        phone: address.phone,
+        county: address.county,
+        city: address.city,
+        street: address.street,
+        postalCode: address.postalCode,
+      });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sameAsDelivery, address.firstName, address.lastName, address.email, address.phone, address.county, address.city, address.street, address.postalCode]);
 
   useEffect(() => {
     if (session?.user) {
@@ -618,8 +631,29 @@ export default function CheckoutPage() {
   const freeShippingRemaining = Math.max(0, 500 - subtotal);
   const hasFreeShipping = freeShippingRemaining === 0;
 
+  // DEBUG: Log pentru a verifica dacă există probleme de render
+  useEffect(() => {
+    console.log('[CHECKOUT] Page loaded, checking header accessibility...');
+    
+    // Add class to body for CSS targeting
+    document.body.classList.add('checkout-page');
+    
+    const header = document.querySelector('header');
+    if (header) {
+      const styles = window.getComputedStyle(header);
+      console.log('[CHECKOUT] Header z-index:', styles.zIndex);
+      console.log('[CHECKOUT] Header pointer-events:', styles.pointerEvents);
+      console.log('[CHECKOUT] Header position:', styles.position);
+    }
+    
+    // Cleanup
+    return () => {
+      document.body.classList.remove('checkout-page');
+    };
+  }, []);
+
   return (
-    <main className="bg-slate-50 dark:bg-slate-950 min-h-screen pb-12">
+    <main className="bg-slate-50 dark:bg-slate-950 min-h-screen pb-12" style={{ isolation: 'isolate' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10">
         <nav className="mb-6 text-sm text-slate-600 dark:text-slate-300 flex items-center gap-1 flex-wrap">
           <Link
