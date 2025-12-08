@@ -55,7 +55,7 @@ export default function DeliveryInfo({ county, className = "", shippingFrom, sho
   if (variant === "text") {
     const sizeCls = size === 'xs' ? 'text-[11px]' : size === 'md' ? 'text-sm' : 'text-xs';
     return (
-      <span className={`whitespace-nowrap ${sizeCls} text-white ${className}`}>
+      <span className={`whitespace-nowrap ${sizeCls} text-black dark:text-white ${className}`}>
         Livrare estimată: {loading ? "Se calculează…" : label}
       </span>
     );
