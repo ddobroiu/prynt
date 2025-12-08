@@ -18,6 +18,11 @@ export default function SmartNewsletterPopup({
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
+    // Do not show on checkout page
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/checkout')) {
+      setIsDismissed(true);
+      return;
+    }
     // Don't show if already dismissed this session
     const dismissed = sessionStorage.getItem('newsletter-popup-dismissed');
     if (dismissed) {
@@ -160,8 +165,8 @@ export default function SmartNewsletterPopup({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="relative max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="relative pointer-events-auto max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
         {/* Close button */}
         <button
           onClick={handleClose}
