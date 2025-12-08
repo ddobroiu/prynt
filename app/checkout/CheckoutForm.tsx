@@ -77,7 +77,7 @@ export default function CheckoutForm({
         postCode: address.postCode,
       };
     });
-  }, [sameAsDelivery, address.nume_prenume, address.judet, address.localitate, address.strada_nr, address.postCode, setBilling]);
+  }, [sameAsDelivery, address.nume_prenume, address.judet, address.localitate, address.strada_nr, address.postCode]);
 
   function copyBillingFromDeliveryOnce() {
     setBilling((b) => ({
