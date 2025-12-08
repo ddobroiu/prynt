@@ -204,12 +204,15 @@ export default function CheckoutPage() {
 
   function fromFormAddress(prev: Address, formAddr: any): Address {
     const name = (formAddr?.nume_prenume || "").trim();
-    const [firstName, ...rest] = name.split(" ");
-    const lastName = rest.join(" ").trim();
+    // Split pe spații pentru a separa firstName și lastName
+    const parts = name.split(/\s+/); // folosim regex pentru a gestiona spații multiple
+    const firstName = parts[0] || "";
+    const lastName = parts.slice(1).join(" ");
+    
     return {
       ...prev,
-      firstName: firstName || prev.firstName || "",
-      lastName: lastName || prev.lastName || "",
+      firstName: firstName,
+      lastName: lastName,
       email: formAddr?.email ?? prev.email,
       phone: formAddr?.telefon ?? prev.phone,
       county: formAddr?.judet ?? prev.county,
@@ -238,13 +241,16 @@ export default function CheckoutPage() {
   function fromFormBilling(prev: BillingInfo, formBill: any): BillingInfo {
     const tip_factura = formBill?.tip_factura === "persoana_juridica" ? "company" : "individual";
     const name = (formBill?.name || "").trim();
-    const [firstName, ...rest] = name.split(" ");
-    const lastName = rest.join(" ").trim();
+    // Split pe spații pentru a separa firstName și lastName
+    const parts = name.split(/\s+/);
+    const firstName = parts[0] || "";
+    const lastName = parts.slice(1).join(" ");
+    
     return {
       ...prev,
       type: tip_factura,
-      firstName: tip_factura === "individual" ? (firstName || prev.firstName || "") : prev.firstName,
-      lastName: tip_factura === "individual" ? (lastName || prev.lastName || "") : prev.lastName,
+      firstName: tip_factura === "individual" ? firstName : prev.firstName,
+      lastName: tip_factura === "individual" ? lastName : prev.lastName,
       companyName: tip_factura === "company" ? (formBill?.denumire_companie ?? prev.companyName) : prev.companyName,
       cui: tip_factura === "company" ? (formBill?.cui ?? prev.cui) : prev.cui,
       regCom: tip_factura === "company" ? (formBill?.reg_com ?? prev.regCom) : prev.regCom,
@@ -1289,24 +1295,64 @@ function CartItems({
             <li key={item.id} className="py-3 first:pt-0 last:pb-0">
               <div className="flex items-start gap-3">
                 <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700">
-                  {item.metadata?.artworkUrl ||
-                  (item as any).artworkUrl ||
-                  (item as any).image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={
-                        item.metadata?.artworkUrl ||
-                        (item as any).artworkUrl ||
-                        (item as any).image
+                  {(() => {
+                    // Căutăm imaginea în mai multe locuri, similar cu CartWidget
+                    let imgSrc = item.metadata?.productImage || 
+                                 item.metadata?.artworkUrl ||
+                                 (item as any).artworkUrl ||
+                                 (item as any).image ||
+                                 (item as any).src ||
+                                 (item as any).imageUrl ||
+                                 (item as any).thumbnail;
+
+                    // Dacă nu găsim imagine, încercăm să generăm una default bazată pe slug
+                    if (!imgSrc && (item.slug || item.productId)) {
+                      const slug = item.slug || item.productId || '';
+                      
+                      // Mapăm slug-uri la imagini default
+                      const defaultImages: Record<string, string> = {
+                        'banner': '/products/banner/banner-1.webp',
+                        'afise': '/products/afise/afise-1.webp',
+                        'autocolante': '/products/autocolante/autocolante-1.webp',
+                        'flayere': '/products/flayere/flayere-1.webp',
+                        'pliante': '/products/pliante/pliante-1.webp',
+                        'canvas': '/products/canvas/canvas-1.webp',
+                        'rollup': '/products/rollup/rollup-1.webp',
+                        'tapet': '/products/tapet/tapet-1.webp',
+                        'window-graphics': '/products/window-graphics/window-graphics-1.webp',
+                      };
+                      
+                      // Căutăm imaginea default bazată pe slug
+                      for (const [key, defaultImg] of Object.entries(defaultImages)) {
+                        if (slug.toLowerCase().includes(key)) {
+                          imgSrc = defaultImg;
+                          break;
+                        }
                       }
-                      alt={title}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold text-center px-1">
-                      Fără previzualizare
-                    </span>
-                  )}
+                    }
+
+                    if (!imgSrc) {
+                      return (
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold text-center px-1">
+                          Fără previzualizare
+                        </span>
+                      );
+                    }
+
+                    return (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={imgSrc}
+                        alt={title}
+                        className="object-cover w-full h-full"
+                        onError={(e) => {
+                          const el = e.currentTarget as HTMLImageElement;
+                          el.onerror = null;
+                          el.style.display = "none";
+                        }}
+                      />
+                    );
+                  })()}
                 </div>
 
                 <div className="flex-1 min-w-0">

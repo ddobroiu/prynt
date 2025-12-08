@@ -246,13 +246,45 @@ export default function CartWidget() {
                   {/* IMAGINE PRODUS */}
                   <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                     {(() => {
-                      // Folosim DOAR imaginea principală a produsului
-                      const imgSrc = item.metadata?.productImage || anyItem.image || anyItem.src || anyItem.imageUrl || anyItem.thumbnail;
+                      // Căutăm imaginea în mai multe locuri
+                      let imgSrc = item.metadata?.productImage || 
+                                   anyItem.image || 
+                                   anyItem.src || 
+                                   anyItem.imageUrl || 
+                                   anyItem.thumbnail ||
+                                   item.metadata?.artworkUrl;
+
+                      // Dacă nu găsim imagine, încercăm să generăm una default bazată pe slug
+                      if (!imgSrc && (item.slug || item.productId)) {
+                        const slug = item.slug || item.productId || '';
+                        
+                        // Mapăm slug-uri la imagini default
+                        const defaultImages: Record<string, string> = {
+                          'banner': '/products/banner/banner-1.webp',
+                          'afise': '/products/afise/afise-1.webp',
+                          'autocolante': '/products/autocolante/autocolante-1.webp',
+                          'flayere': '/products/flayere/flayere-1.webp',
+                          'pliante': '/products/pliante/pliante-1.webp',
+                          'canvas': '/products/canvas/canvas-1.webp',
+                          'rollup': '/products/rollup/rollup-1.webp',
+                          'tapet': '/products/tapet/tapet-1.webp',
+                          'window-graphics': '/products/window-graphics/window-graphics-1.webp',
+                        };
+                        
+                        // Căutăm imaginea default bazată pe slug
+                        for (const [key, defaultImg] of Object.entries(defaultImages)) {
+                          if (slug.toLowerCase().includes(key)) {
+                            imgSrc = defaultImg;
+                            break;
+                          }
+                        }
+                      }
 
                       if (!imgSrc) {
                         return (
                           <div className="h-full w-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800">
-                            <span className="text-[10px] font-bold">NO IMG</span>
+                            <ShoppingCart className="h-6 w-6 mb-1" />
+                            <span className="text-[10px] font-medium">Produs</span>
                           </div>
                         );
                       }
@@ -265,7 +297,20 @@ export default function CartWidget() {
                           onError={(e) => {
                             const el = e.currentTarget as HTMLImageElement;
                             el.onerror = null;
+                            // Înlocuim cu placeholder în loc să ascundem
                             el.style.display = "none";
+                            const parent = el.parentElement;
+                            if (parent) {
+                              parent.innerHTML = `
+                                <div class="h-full w-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
+                                  <svg class="h-6 w-6 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                                  </svg>
+                                  <span class="text-[10px] font-medium">Produs</span>
+                                </div>
+                              `;
+                            }
                           }}
                         />
                       );
