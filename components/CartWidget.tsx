@@ -348,12 +348,12 @@ export default function CartWidget() {
 
                       <div className="flex flex-wrap gap-1.5 mt-1.5">
                         {item.width && item.height && (
-                          <span className="text-[10px] text-slate-900 dark:text-slate-300 font-bold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] text-black dark:text-slate-300 font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded">
                             {item.width}x{item.height}cm
                           </span>
                         )}
                         {item.metadata?.Material && (
-                          <span className="text-[10px] text-slate-900 dark:text-slate-300 font-bold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded truncate max-w-[100px]">
+                          <span className="text-[10px] text-black dark:text-slate-300 font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded truncate max-w-[100px]">
                             {item.metadata.Material}
                           </span>
                         )}
@@ -367,19 +367,19 @@ export default function CartWidget() {
                           onClick={() =>
                             updateQuantity(item.id, item.quantity - 1)
                           }
-                          className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-l-md transition-colors disabled:opacity-30"
+                          className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-black dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-l-md transition-colors disabled:opacity-30"
                           disabled={item.quantity <= 1}
                         >
                           <Minus size={12} />
                         </button>
-                        <span className="w-6 text-center text-xs font-bold text-slate-900 dark:text-white">
+                        <span className="w-6 text-center text-xs font-bold text-black dark:text-white">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() =>
                             updateQuantity(item.id, item.quantity + 1)
                           }
-                          className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-r-md transition-colors"
+                          className="px-2 h-full hover:bg-slate-50 dark:hover:bg-slate-700 text-black dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-r-md transition-colors"
                         >
                           <Plus size={12} />
                         </button>

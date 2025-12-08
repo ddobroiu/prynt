@@ -1321,24 +1321,24 @@ function CartItems({
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <div className="inline-flex items-center border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800">
+                      <div className="inline-flex items-center border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
                         <button
                           onClick={() =>
                             updateQuantity(item.id, Math.max(1, qty - 1))
                           }
-                          className="px-2 py-1 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold"
+                          className="px-2 py-1 text-xs text-black dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold"
                           aria-label="Scade cantitatea"
                         >
                           <Minus size={14} />
                         </button>
-                        <div className="px-3 text-sm font-bold text-slate-950 dark:text-white">
+                        <div className="px-3 text-sm font-bold text-black dark:text-white">
                           {qty}
                         </div>
                         <button
                           onClick={() =>
                             updateQuantity(item.id, qty + 1)
                           }
-                          className="px-2 py-1 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold"
+                          className="px-2 py-1 text-xs text-black dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold"
                           aria-label="Crește cantitatea"
                         >
                           <Plus size={14} />
