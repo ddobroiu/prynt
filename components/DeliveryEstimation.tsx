@@ -45,11 +45,11 @@ export default function DeliveryEstimation({ county }: Props) {
   return (
     <div className="text-sm mt-3 flex items-center gap-2 bg-linear-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg px-3 py-2.5">
       <Truck className="w-4 h-4 text-green-600" strokeWidth={2.5} />
-      <span className="text-gray-600">Livrare estimată:</span>
+      <span className="text-black dark:text-gray-400">Livrare estimată:</span>
       {loading ? (
         <span className="animate-pulse bg-gray-200 h-4 w-20 rounded inline-block align-middle"></span>
       ) : (
-        <span className="font-bold text-green-700">{label}</span>
+        <span className="font-bold text-green-700 dark:text-green-600">{label}</span>
       )}
     </div>
   );

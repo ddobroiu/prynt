@@ -1199,11 +1199,11 @@ function CartItems({
     if (details.length === 0) return null;
 
     return (
-      <div className="mt-2 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs text-slate-950 dark:text-slate-300">
+      <div className="mt-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 text-xs text-black dark:text-slate-300">
         {details.map((d, idx) => (
           <div key={idx} className="flex gap-2 py-0.5">
             <span className="opacity-90 font-medium">{d.label}:</span>
-            <span className="font-bold text-slate-950 dark:text-white">
+            <span className="font-bold text-black dark:text-white">
               {d.value}
             </span>
           </div>
@@ -1359,7 +1359,7 @@ function CartItems({
                     <span className="text-xs text-slate-700 dark:text-slate-300">
                       Total produs
                     </span>
-                    <span className="text-base font-bold text-slate-950 dark:text-white">
+                    <span className="text-base font-bold text-black dark:text-white">
                       {fmt(unit * qty)}
                     </span>
                   </div>

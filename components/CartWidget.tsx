@@ -372,7 +372,7 @@ export default function CartWidget() {
                         >
                           <Minus size={12} />
                         </button>
-                        <span className="w-6 text-center text-xs font-bold text-black dark:text-white">
+                        <span className="w-6 text-center text-xs font-bold text-black dark:text-white" style={{color: '#000000'}}>
                           {item.quantity}
                         </span>
                         <button
