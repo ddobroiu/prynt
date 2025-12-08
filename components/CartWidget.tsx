@@ -125,19 +125,7 @@ export default function CartWidget() {
 
       <DialogContent
         aria-describedby="cart-description"
-        className={
-          // POZIȚIE: drawer pe dreapta
-          "fixed right-0 left-auto top-0 bottom-0 translate-x-0 translate-y-0 m-0 " +
-          "h-dvh w-full md:max-w-[450px] flex flex-col p-0 gap-0 focus:outline-none " +
-          "bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl " +
-          // foarte important: text închis la culoare pe mobil
-          "text-slate-900 dark:text-white " +
-          // animație slide
-          "duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right " +
-          // ascunde butonul X default din dialog (nu pe al tău)
-          "[&>button:last-child]:hidden"
-        }
-        style={{ zIndex: 9999 }}
+        className="fixed inset-y-0 right-0 left-auto h-full w-full sm:max-w-[450px] max-w-none flex flex-col p-0 gap-0 rounded-none border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right duration-300 m-0 translate-x-0 translate-y-0"
       >
         <p id="cart-description" className="sr-only">
           Coșul tău de cumpărături cu produsele adăugate
