@@ -601,7 +601,7 @@ export default function CheckoutPage() {
   }, []);
 
   return (
-    <main className="bg-slate-50 dark:bg-slate-950 min-h-screen pb-12" style={{ isolation: 'isolate' }}>
+    <main className="bg-slate-100 dark:bg-slate-950 min-h-screen pb-12" style={{ isolation: 'isolate' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10">
         <nav className="mb-6 text-sm text-slate-700 dark:text-slate-300 flex items-center gap-1 flex-wrap">
           <Link
@@ -627,9 +627,9 @@ export default function CheckoutPage() {
           <section className="space-y-6">
             <header className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm">
               <div>
-                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950 dark:text-white flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-black dark:text-white flex items-center gap-2">
                   Finalizare Comandă
-                  <span className="inline-flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold px-2 py-0.5">
+                  <span className="inline-flex items-center justify-center rounded-full bg-indigo-600 text-white text-xs font-bold px-3 py-1 shadow-sm">
                     {items?.length ?? 0} produse
                   </span>
                 </h1>
@@ -1213,10 +1213,10 @@ function CartItems({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-black sm:text-slate-900 dark:text-white">
-      <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+    <div className="rounded-2xl border-2 border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-md">
+      <h2 className="text-lg sm:text-xl font-black text-black dark:text-white mb-4 flex items-center gap-2">
         <Package
-          size={20}
+          size={22}
           className="text-indigo-600 dark:text-indigo-400"
         />
         Produse în coș
@@ -1310,7 +1310,7 @@ function CartItems({
                         <X size={16} />
                       </button>
                       <p
-                        className="font-bold text-[15px] sm:text-base text-black sm:text-slate-950 dark:text-white leading-snug flex-1 min-w-0"
+                        className="font-black text-base sm:text-lg text-black dark:text-white leading-snug flex-1 min-w-0"
                         style={{
                           wordBreak: "break-word",
                           overflow: "visible",
