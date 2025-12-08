@@ -266,8 +266,8 @@ export default function CheckoutPage() {
     const out: Record<string, string> = {};
     const a = errors.address || {};
     const b = errors.billing || {};
+    // firstName error se mapează la câmpul nume_prenume (nu mai avem lastName separat)
     if (a.firstName) out["address.nume_prenume"] = a.firstName;
-    if (a.lastName) out["address.nume_prenume"] = a.lastName;
     if (a.email) out["address.email"] = a.email;
     if (a.phone) out["address.telefon"] = a.phone;
     if (a.county) out["address.judet"] = a.county;
@@ -311,30 +311,36 @@ export default function CheckoutPage() {
   }, [sameAsDelivery, address.firstName, address.lastName, address.email, address.phone, address.county, address.city, address.street, address.postalCode]);
 
   useEffect(() => {
-    if (session?.user) {
-      const user = session.user as any;
-      setAddress((prev) =>
-        mergeAddress(prev, {
-          firstName:
-            sanitizeString(user.firstName) ?? sanitizeString(user.name),
-          lastName: sanitizeString(user.lastName),
-          email:
-            sanitizeString(user.email) ??
-            sanitizeString((user as any).emailAddress),
-        })
-      );
-      setBilling((prev) =>
-        mergeBilling(prev, {
-          firstName:
-            sanitizeString(user.firstName) ?? sanitizeString(user.name),
-          lastName: sanitizeString(user.lastName),
-          email:
-            sanitizeString(user.email) ??
-            sanitizeString((user as any).emailAddress),
-        })
-      );
-    }
-  }, [session?.user, setAddress, setBilling]);
+    if (!session?.user) return;
+    
+    const user = session.user as any;
+    
+    // Populăm datele din sesiune DOAR dacă câmpurile sunt goale
+    // Acest lucru permite user-ului să editeze câmpurile chiar dacă este logat
+    setAddress((prev) => {
+      // Dacă user-ul a completat deja datele, nu le suprascriem
+      if (prev.firstName || prev.lastName || prev.email) return prev;
+      
+      return mergeAddress(prev, {
+        firstName: sanitizeString(user.firstName) ?? sanitizeString(user.name),
+        lastName: sanitizeString(user.lastName),
+        email: sanitizeString(user.email) ?? sanitizeString((user as any).emailAddress),
+      });
+    });
+    
+    setBilling((prev) => {
+      // Dacă user-ul a completat deja datele, nu le suprascriem
+      if (prev.firstName || prev.lastName || prev.email) return prev;
+      
+      return mergeBilling(prev, {
+        firstName: sanitizeString(user.firstName) ?? sanitizeString(user.name),
+        lastName: sanitizeString(user.lastName),
+        email: sanitizeString(user.email) ?? sanitizeString((user as any).emailAddress),
+      });
+    });
+  // Rulăm DOAR când session.user devine disponibil (nu la fiecare schimbare)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.email]); // folosim email ca dependency pentru a detecta schimbarea user-ului
 
   // REMOVED: Fetch la /api/user/profile - endpoint-ul nu există și cauzează 404-uri în buclă
   // Datele user-ului sunt deja disponibile în session.user (useEffect de mai sus)
@@ -448,7 +454,6 @@ export default function CheckoutPage() {
       setErrors(newErrors);
       const firstError =
         newErrors.address?.firstName ||
-        newErrors.address?.lastName ||
         newErrors.address?.email ||
         newErrors.address?.phone ||
         newErrors.address?.county ||
