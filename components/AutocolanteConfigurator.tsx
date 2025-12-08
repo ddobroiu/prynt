@@ -196,6 +196,7 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(AUTOCOLANTE_CONSTANTS.PRO_DESIGN_FEE) }),
         ...(input.designOption === 'text_only' && { "Text": textDesign }),
         artworkUrl,
+        productImage,
       },
     });
   }

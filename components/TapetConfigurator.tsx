@@ -147,6 +147,7 @@ export default function TapetConfigurator({ productSlug, productImage }: Props) 
         "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : 'Grafică proprie',
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(TAPET_CONSTANTS.PRO_DESIGN_FEE) }),
         artworkUrl,
+        productImage,
       },
     });
   }

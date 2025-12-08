@@ -193,6 +193,7 @@ export default function AfiseConfigurator({ productSlug, initialWidth, initialHe
         "Grafică": designOption === 'pro' ? "Vreau grafică" : "Grafică proprie",
         ...(designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(priceData.proFee) }),
         artworkUrl,
+        productImage,
       },
     });
     toast.success("Produs adăugat în coș");

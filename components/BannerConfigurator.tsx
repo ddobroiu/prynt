@@ -342,7 +342,8 @@ export default function BannerConfigurator({ productSlug, initialWidth: initW, i
         textDesign: input.designOption === 'text_only' ? textDesign : undefined,
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(BANNER_CONSTANTS.PRO_DESIGN_FEE) }),
         ...(input.designOption === 'text_only' && { "Text": textDesign }),
-        artworkUrl, 
+        artworkUrl,
+        productImage,
       },
     });
   }

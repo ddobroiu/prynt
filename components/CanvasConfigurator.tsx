@@ -202,6 +202,7 @@ export default function CanvasConfigurator({ productSlug, initialWidth: initW, i
         "Grafică": input.designOption === 'pro' ? 'Vreau grafică' : 'Grafică proprie',
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(CANVAS_CONSTANTS.PRO_DESIGN_FEE) }),
         artworkUrl,
+        productImage,
       },
     });
     toast?.success("Produs adăugat în coș");

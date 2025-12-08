@@ -130,9 +130,10 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
       metadata: {
         "Tip Împăturire": PLIANTE_CONSTANTS.FOLDS[fold].label,
         "Hârtie": `${weight} g/mp`,
-        "Grafică": designOption === 'pro' ? "Vreau grafică" : "Grafică proprie",
+        "Grafică": designOption === 'pro' ? 'Vreau grafică' : 'Grafică proprie',
         ...(designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(priceData.proFee) }),
-        artworkUrl
+        artworkUrl,
+        productImage,
       },
     });
   }

@@ -125,7 +125,7 @@ export default function CartWidget() {
 
       <DialogContent
         aria-describedby="cart-description"
-        className="fixed inset-y-0 right-0 left-auto h-full w-full sm:max-w-[450px] max-w-none flex flex-col p-0 gap-0 rounded-none border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right duration-300 m-0 translate-x-0 translate-y-0 [&>button]:hidden"
+        className="fixed! inset-y-0! right-0! left-auto! top-0! bottom-0! h-full! w-full! sm:max-w-[450px]! max-w-none! flex! flex-col! p-0! gap-0! rounded-none! border-l! border-slate-200! dark:border-slate-800! bg-white! dark:bg-slate-900! shadow-2xl! data-[state=open]:slide-in-from-right! data-[state=closed]:slide-out-to-right! duration-300! m-0! translate-x-0! translate-y-0! [&>button]:hidden!"
       >
         <p id="cart-description" className="sr-only">
           Coșul tău de cumpărături cu produsele adăugate

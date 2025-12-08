@@ -351,7 +351,7 @@ export default function BannerVersoConfigurator({ productSlug, initialWidth: ini
       price: unitPrice,
       quantity: input.quantity,
       currency: "RON",
-      metadata,
+      metadata: { ...metadata, productImage },
     });
     toast.success("Produs adăugat în coș");
   }

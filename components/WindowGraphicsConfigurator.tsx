@@ -208,6 +208,7 @@ export default function WindowGraphicsConfigurator({ productSlug, initialWidth: 
         "Grafică": input.designOption === 'pro' ? 'Design Pro' : 'Grafică proprie',
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(WINDOW_GRAPHICS_CONSTANTS.PRO_DESIGN_FEE) }),
         artworkUrl,
+        productImage,
       },
     });
     toast.success("Produs adăugat în coș!");

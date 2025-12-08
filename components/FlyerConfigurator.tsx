@@ -135,6 +135,7 @@ export default function FlyerConfigurator({ productSlug, productImage }: Props) 
         'Față-verso': twoSided ? 'Da' : 'Nu',
         'Grafică': designOption === 'pro' ? 'Vreau grafică' : 'Grafică proprie',
         artworkUrl,
+        productImage,
       }
     });
   }
