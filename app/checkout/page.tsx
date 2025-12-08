@@ -567,15 +567,8 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (paymentMethod === "card") {
-        if (data.checkoutUrl) {
-          setEmbedUrl(data.checkoutUrl);
-          setShowEmbed(true);
-          setTimeout(() => {
-            if (embedRef.current) {
-              embedRef.current.scrollIntoView({ behavior: "smooth" });
-            }
-          }, 100);
-        } else if (data.sessionId) {
+        // Dacă primim sessionId, redirecționăm către Stripe Checkout
+        if (data.sessionId) {
           const stripe = await stripePromise;
           if (!stripe) {
             showToast(
@@ -585,13 +578,18 @@ export default function CheckoutPage() {
             setPlacing(false);
             return;
           }
+          
+          // Folosim redirectToCheckout pentru a deschide Stripe Checkout
           const result = await (stripe as any).redirectToCheckout({
             sessionId: data.sessionId,
           });
+          
           if (result?.error) {
             showToast(result.error.message || "Eroare la plata cu cardul.", "error");
             setPlacing(false);
           }
+          // Dacă redirect-ul reușește, utilizatorul va fi dus la Stripe
+          // și apoi înapoi la success_url după plată
         } else {
           showToast(
             "Răspuns invalid de la server pentru plata cu cardul.",
