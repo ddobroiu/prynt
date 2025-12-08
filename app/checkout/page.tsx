@@ -603,7 +603,7 @@ export default function CheckoutPage() {
   return (
     <main className="bg-slate-50 dark:bg-slate-950 min-h-screen pb-12" style={{ isolation: 'isolate' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10">
-        <nav className="mb-6 text-sm text-slate-600 dark:text-slate-300 flex items-center gap-1 flex-wrap">
+        <nav className="mb-6 text-sm text-slate-700 dark:text-slate-300 flex items-center gap-1 flex-wrap">
           <Link
             href="/"
             className="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium"
@@ -696,7 +696,7 @@ export default function CheckoutPage() {
                       <p className="font-semibold text-slate-900 dark:text-white">
                         Plată online cu cardul
                       </p>
-                      <p className="text-xs text-slate-600 dark:text-slate-300">
+                      <p className="text-xs text-slate-700 dark:text-slate-300">
                         Procesată securizat prin Stripe (Visa, Mastercard).
                       </p>
                     </div>
@@ -724,7 +724,7 @@ export default function CheckoutPage() {
                       <p className="font-semibold text-slate-900 dark:text-white">
                         Transfer bancar (ordin de plată)
                       </p>
-                      <p className="text-xs text-slate-600 dark:text-slate-300">
+                      <p className="text-xs text-slate-700 dark:text-slate-300">
                         Primești factura proformă pe email, iar comanda se
                         procesează după confirmarea plății.
                       </p>
@@ -754,7 +754,7 @@ export default function CheckoutPage() {
                       <p className="font-semibold text-slate-900 dark:text-white">
                         Ramburs la curier
                       </p>
-                      <p className="text-xs text-slate-600 dark:text-slate-300">
+                      <p className="text-xs text-slate-700 dark:text-slate-300">
                         Plătești numerar sau cu POS direct la curier, la
                         livrare.
                       </p>
@@ -802,7 +802,7 @@ export default function CheckoutPage() {
                   </div>
 
                   {!hasFreeShipping && (
-                    <p className="text-xs text-slate-600 dark:text-slate-300 flex items-start gap-1 mt-1">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 flex items-start gap-1 mt-1">
                       <AlertCircle className="h-3.5 w-3.5 mt-0.5 text-indigo-500" />
                       <span>
                         Mai adaugă{" "}
@@ -835,7 +835,7 @@ export default function CheckoutPage() {
                       <p className="text-xl font-extrabold text-slate-950 dark:text-white">
                         {fmt(totalWithShipping)}
                       </p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      <p className="text-[11px] text-slate-700 dark:text-slate-400">
                         TVA inclus • {hasFreeShipping ? "livrare gratuită" : "include transport"}
                       </p>
                     </div>
@@ -1348,7 +1348,7 @@ function CartItems({
                   </div>
                   {renderDetails(item)}
                   <div className="flex justify-between items-center mt-1.5">
-                    <span className="text-xs text-slate-600 dark:text-slate-300">
+                    <span className="text-xs text-slate-700 dark:text-slate-300">
                       Preț unitar
                     </span>
                     <span className="text-sm font-semibold text-slate-900 dark:text-white">
@@ -1356,7 +1356,7 @@ function CartItems({
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate-600 dark:text-slate-300">
+                    <span className="text-xs text-slate-700 dark:text-slate-300">
                       Total produs
                     </span>
                     <span className="text-base font-bold text-slate-950 dark:text-white">

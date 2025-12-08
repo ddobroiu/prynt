@@ -209,7 +209,7 @@ export default function CartWidget() {
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
               <div className="h-20 w-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
-                <ShoppingCart className="h-8 w-8 text-slate-500 dark:text-slate-500" />
+                <ShoppingCart className="h-8 w-8 text-slate-400 dark:text-slate-500" />
               </div>
               <div className="space-y-1">
                 <p className="text-lg font-bold text-slate-900 dark:text-white">
@@ -400,10 +400,10 @@ export default function CartWidget() {
           <div className="border-t border-slate-100 dark:border-slate-800 p-4 pb-safe bg-white dark:bg-slate-900 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
             <div className="flex justify-between items-end mb-4">
               <div>
-                <p className="text-xs text-slate-700 dark:text-slate-400 uppercase tracking-wider font-semibold">
+                <p className="text-xs text-slate-800 dark:text-slate-400 uppercase tracking-wider font-semibold">
                   Total Estimat
                 </p>
-                <p className="text-[10px] text-slate-600 dark:text-slate-400">
+                <p className="text-[10px] text-slate-700 dark:text-slate-400">
                   (TVA inclus)
                 </p>
               </div>

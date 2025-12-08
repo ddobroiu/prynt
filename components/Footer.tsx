@@ -47,7 +47,7 @@ export default function Footer() {
     }
   };
 
-  const linkClass = "text-slate-700 hover:text-indigo-600 transition-colors text-sm flex items-center gap-2";
+  const linkClass = "text-slate-900 hover:text-indigo-600 transition-colors text-sm flex items-center gap-2";
 
   return (
     <footer className="bg-white border-t border-slate-200 pt-8 sm:pt-12 lg:pt-16 xl:pt-24 pb-6 sm:pb-8">
@@ -64,7 +64,7 @@ export default function Footer() {
                 className="h-10 w-auto object-contain"
               />
             </Link>
-            <p className="text-slate-700 text-sm leading-relaxed max-w-sm">
+            <p className="text-slate-900 text-sm leading-relaxed max-w-sm">
               {siteConfig.description} Platforma completă de tipar digital unde configurezi, vizualizezi prețul și comanzi instant.
             </p>
             <div className="flex items-center gap-3">
@@ -117,7 +117,7 @@ export default function Footer() {
             <div className="sm:col-span-2 lg:col-span-1">
                  <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-3 sm:mb-4">Contact</h3>
                  <ul className="space-y-2 sm:space-y-3">
-                     <li className="flex items-start gap-3 text-sm text-slate-500">
+                     <li className="flex items-start gap-3 text-sm text-slate-900">
                         <MapPin className="h-4 w-4 text-indigo-500 mt-0.5 shrink-0" />
                         <span>București, Sector 1<br/>Calea Griviței</span>
                      </li>
@@ -138,7 +138,7 @@ export default function Footer() {
           <div className="lg:col-span-3">
             <div className="bg-slate-50 rounded-xl lg:rounded-2xl p-4 sm:p-6 border border-slate-200">
                 <h3 className="font-bold text-slate-900 mb-2 text-sm sm:text-base">Abonează-te la Newsletter</h3>
-                <p className="text-xs text-slate-500 mb-3 sm:mb-4">
+                <p className="text-xs text-slate-700 mb-3 sm:mb-4">
                   Primești oferte exclusive și reduceri. Nu facem spam.
                 </p>
                 <form className="flex flex-col gap-2 sm:gap-3" onSubmit={handleNewsletterSubmit}>
@@ -169,10 +169,10 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-6 sm:pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
           <div className="flex flex-col items-center md:items-start gap-1 sm:gap-2">
-            <p className="text-xs text-slate-600 text-center md:text-left">
+            <p className="text-xs text-slate-900 text-center md:text-left">
               &copy; {new Date().getFullYear()} {siteConfig.name}. Toate drepturile rezervate.
             </p>
-            <p className="text-xs text-slate-600 text-center md:text-left">
+            <p className="text-xs text-slate-900 text-center md:text-left">
               Site realizat de{" "}
               <a 
                 href="https://www.e-web.ro/" 
@@ -186,7 +186,7 @@ export default function Footer() {
           </div>
           
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-            <Link href="/stergere-date" className="text-xs text-slate-700 hover:text-indigo-600 transition-colors touch-manipulation font-medium">
+            <Link href="/stergere-date" className="text-xs text-slate-900 hover:text-indigo-600 transition-colors touch-manipulation font-medium">
               Ștergere date
             </Link>
             <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noopener noreferrer" title="Soluționarea Alternativă a Litigiilor" className="touch-manipulation">
