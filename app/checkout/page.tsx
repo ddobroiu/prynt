@@ -336,76 +336,8 @@ export default function CheckoutPage() {
     }
   }, [session?.user, setAddress, setBilling]);
 
-  useEffect(() => {
-    if (!session?.user) return;
-    fetch("/api/user/profile")
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data || !data.profile) return;
-        const profile = data.profile;
-        setAddress((prev) =>
-          mergeAddress(prev, {
-            firstName:
-              sanitizeString(profile.firstName) ??
-              sanitizeString(profile.name),
-            lastName: sanitizeString(profile.lastName),
-            email:
-              sanitizeString(profile.email) ??
-              sanitizeString((profile as any).emailAddress),
-            phone: sanitizeString(profile.phone),
-            county: sanitizeString(profile.county),
-            city: sanitizeString(profile.city),
-            street: sanitizeString(profile.street),
-            postalCode: sanitizeString(profile.postalCode),
-            company: sanitizeString(profile.company),
-          })
-        );
-        setBilling((prev) =>
-          mergeBilling(prev, {
-            firstName:
-              sanitizeString(profile.billingFirstName) ??
-              sanitizeString(profile.firstName) ??
-              sanitizeString(profile.name),
-            lastName:
-              sanitizeString(profile.billingLastName) ??
-              sanitizeString(profile.lastName),
-            email:
-              sanitizeString(profile.billingEmail) ??
-              sanitizeString(profile.email) ??
-              sanitizeString((profile as any).emailAddress),
-            phone:
-              sanitizeString(profile.billingPhone) ??
-              sanitizeString(profile.phone),
-            county:
-              sanitizeString(profile.billingCounty) ??
-              sanitizeString(profile.county),
-            city:
-              sanitizeString(profile.billingCity) ??
-              sanitizeString(profile.city),
-            street:
-              sanitizeString(profile.billingStreet) ??
-              sanitizeString(profile.street),
-            postalCode:
-              sanitizeString(profile.billingPostalCode) ??
-              sanitizeString(profile.postalCode),
-            companyName: sanitizeString(profile.billingCompanyName),
-            cui: sanitizeString(profile.billingCui),
-            regCom: sanitizeString(profile.billingRegCom),
-            bank: sanitizeString(profile.billingBank),
-            iban: sanitizeString(profile.billingIban),
-          })
-        );
-        if (
-          profile.billingCounty ||
-          profile.billingCity ||
-          profile.billingStreet ||
-          profile.billingPostalCode
-        ) {
-          setSameAsDelivery(false);
-        }
-      })
-      .catch(() => {});
-  }, [session?.user, setAddress, setBilling]);
+  // REMOVED: Fetch la /api/user/profile - endpoint-ul nu există și cauzează 404-uri în buclă
+  // Datele user-ului sunt deja disponibile în session.user (useEffect de mai sus)
 
   useEffect(() => {
     if (session?.user) setCreateAccount(false);
@@ -449,16 +381,15 @@ export default function CheckoutPage() {
 
     const newErrors: CheckoutErrors = {};
 
-    if (!sanitizeString(address.firstName))
+    // Verificăm că există cel puțin firstName sau lastName (nu amândouă goale)
+    const hasName = sanitizeString(address.firstName) || sanitizeString(address.lastName);
+    if (!hasName) {
       newErrors.address = {
         ...(newErrors.address ?? {}),
-        firstName: "Prenumele este obligatoriu.",
+        firstName: "Numele este obligatoriu.",
       };
-    if (!sanitizeString(address.lastName))
-      newErrors.address = {
-        ...(newErrors.address ?? {}),
-        lastName: "Numele este obligatoriu.",
-      };
+    }
+    
     if (!sanitizeString(address.email))
       newErrors.address = {
         ...(newErrors.address ?? {}),
