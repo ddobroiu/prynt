@@ -346,9 +346,14 @@ export default function AutocolanteConfigurator({ productSlug, initialWidth: ini
               </AccordionStep>
             </div>
             <div className="sticky bottom-0 lg:static bg-white/80 lg:bg-white backdrop-blur-sm lg:backdrop-blur-none border-t-2 lg:border lg:rounded-2xl lg:shadow-lg border-gray-200 py-4 lg:p-6 lg:mt-8">
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
-                <button onClick={handleAddToCart} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
+              <div className="flex flex-col gap-3 mb-2">
+                <button onClick={handleAddToCart} className="btn-primary w-full py-4 text-lg font-bold shadow-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-200">
+                  <ShoppingCart size={24} />
+                  <span className="ml-2">Adaugă în Coș</span>
+                </button>
+                <div className="flex justify-between items-center">
+                  <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
+                </div>
               </div>
               <DeliveryEstimation />
             </div>

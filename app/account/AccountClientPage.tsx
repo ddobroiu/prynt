@@ -58,7 +58,7 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-indigo-50/30 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 py-8 px-4">
+    <div className="min-h-screen bg-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 animate-in fade-in slide-in-from-top-4">
@@ -73,18 +73,18 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl lg:text-4xl font-bold bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-800 dark:from-indigo-400 dark:via-purple-400 dark:to-indigo-600 bg-clip-text text-transparent">
+                <h1 className="text-3xl lg:text-4xl font-bold text-black dark:text-white">
                   Bun venit înapoi!
                 </h1>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-                  <span className="font-semibold text-gray-800 dark:text-white">{session.user?.name || session.user?.email}</span>
+                <p className="text-gray-700 dark:text-gray-400 text-sm mt-1">
+                  <span className="font-semibold text-black dark:text-white">{session.user?.name || session.user?.email}</span>
                 </p>
               </div>
             </div>
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+              <div className="bg-white dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 dark:border-gray-700/50">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                     <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,13 +92,13 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                     </svg>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalOrders}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Comenzi totale</p>
+                    <p className="text-2xl font-bold text-black dark:text-white">{stats.totalOrders}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Comenzi totale</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+              <div className="bg-white dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 dark:border-gray-700/50">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
                     <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,13 +106,13 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                     </svg>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.activeOrders}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">În progres</p>
+                    <p className="text-2xl font-bold text-black dark:text-white">{stats.activeOrders}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">În progres</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+              <div className="bg-white dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 dark:border-gray-700/50">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
                     <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,15 +120,15 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                     </svg>
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
+                    <p className="text-lg font-bold text-black dark:text-white">
                       {new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' }).format(stats.totalSpent)}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Total cheltuit</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Total cheltuit</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+              <div className="bg-white dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 dark:border-gray-700/50">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
                     <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,8 +136,8 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white">{stats.lastOrderDate || 'N/A'}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Ultima comandă</p>
+                    <p className="text-sm font-bold text-black dark:text-white">{stats.lastOrderDate || 'N/A'}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Ultima comandă</p>
                   </div>
                 </div>
               </div>
@@ -158,7 +158,7 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
           </aside>
 
           {/* MAIN CONTENT AREA */}
-          <main className="flex-1 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-2xl border border-gray-200/60 dark:border-gray-700/60">
+          <main className="flex-1 bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-2xl border border-gray-200 dark:border-gray-700/60">
             {tab === 'profile' && (
               <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
                 <div className="space-y-8">
@@ -169,8 +169,8 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                       </svg>
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Profilul meu</h2>
-                      <p className="text-gray-600 dark:text-gray-400">Gestionează informațiile personale</p>
+                      <h2 className="text-3xl font-bold text-black dark:text-white">Profilul meu</h2>
+                      <p className="text-gray-700 dark:text-gray-400">Gestionează informațiile personale</p>
                     </div>
                   </div>
                   <AccountDetailsForm />
@@ -188,8 +188,8 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                       </svg>
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Comenzile mele</h2>
-                      <p className="text-gray-600 dark:text-gray-400">Vizionează și urmărește toate comenzile tale</p>
+                      <h2 className="text-3xl font-bold text-black dark:text-white">Comenzile mele</h2>
+                      <p className="text-gray-700 dark:text-gray-400">Vizionează și urmărește toate comenzile tale</p>
                     </div>
                   </div>
                   <AccountOrdersList orders={orders} />
@@ -207,8 +207,8 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                       </svg>
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Facturi & Plăți</h2>
-                      <p className="text-gray-600 dark:text-gray-400">Istoric financiar și facturi descărcabile</p>
+                      <h2 className="text-3xl font-bold text-black dark:text-white">Facturi & Plăți</h2>
+                      <p className="text-gray-700 dark:text-gray-400">Istoric financiar și facturi descărcabile</p>
                     </div>
                   </div>
                   <BillingSection orders={orders} />
@@ -227,8 +227,8 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                       </svg>
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Adrese de livrare</h2>
-                      <p className="text-gray-600 dark:text-gray-400">Gestionează adresele tale de livrare</p>
+                      <h2 className="text-3xl font-bold text-black dark:text-white">Adrese de livrare</h2>
+                      <p className="text-gray-700 dark:text-gray-400">Gestionează adresele tale de livrare</p>
                     </div>
                   </div>
                   <AddressesManager />
@@ -252,8 +252,8 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                       </svg>
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Produse favorite</h2>
-                      <p className="text-gray-600 dark:text-gray-400">Configurații și produse salvate pentru mai târziu</p>
+                      <h2 className="text-3xl font-bold text-black dark:text-white">Produse favorite</h2>
+                      <p className="text-gray-700 dark:text-gray-400">Configurații și produse salvate pentru mai târziu</p>
                     </div>
                   </div>
                   <div className="bg-linear-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 rounded-2xl p-8 border border-rose-200/50 dark:border-rose-700/50">
@@ -263,8 +263,8 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                       </div>
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Niciun produs favorit încă</h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      <h3 className="text-xl font-semibold text-black dark:text-white mb-2">Niciun produs favorit încă</h3>
+                      <p className="text-gray-700 dark:text-gray-400 mb-6">
                         Salvează produsele și configurațiile tale preferate pentru a le accesa rapid.
                       </p>
                       <button className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl">
@@ -289,8 +289,8 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                       </svg>
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Securitate</h2>
-                      <p className="text-gray-600 dark:text-gray-400">Gestionează setările de securitate ale contului</p>
+                      <h2 className="text-3xl font-bold text-black dark:text-white">Securitate</h2>
+                      <p className="text-gray-700 dark:text-gray-400">Gestionează setările de securitate ale contului</p>
                     </div>
                   </div>
                   <div className="space-y-6">

@@ -238,22 +238,29 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3 text-center">
                 <p className="text-red-600 font-bold text-sm">🎉 Reducere specială 30% aplicată la toate pliantele!</p>
               </div>
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
-                <button onClick={handleAddToCart} className="btn-primary w-1/2 py-3 text-base font-bold"><ShoppingCart size={20} /><span className="ml-2">Adaugă în Coș</span></button>
+              <div className="flex flex-col gap-3">
+                <button onClick={handleAddToCart} className="btn-primary w-full py-4 text-lg font-bold shadow-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-200">
+                  <ShoppingCart size={24} />
+                  <span className="ml-2">Adaugă în Coș</span>
+                </button>
+                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-2">
+                  <p className="text-3xl font-extrabold text-gray-900">{formatMoneyDisplay(displayedTotal)}</p>
+                  <div className="lg:ml-auto">
+                    <DeliveryEstimation />
+                  </div>
+                </div>
               </div>
-              <DeliveryEstimation />
             </div>
 
             {/* BUTOANE SECUNDARE - WHATSAPP ȘI CERERE OFERTĂ */}
-            <div className="mt-4 lg:mt-6 bg-gray-50 rounded-xl border border-gray-200 p-4">
-              <p className="text-xs text-gray-500 mb-3 text-center">Ai nevoie de ajutor sau o ofertă personalizată?</p>
+            <div className="mt-4 lg:mt-6 bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 text-center font-medium">Ai nevoie de ajutor sau o ofertă personalizată?</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <a 
                   href="https://wa.me/40750473111?text=Ma%20intereseaza%20configuratorul%20pliante" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                 >
                   <MessageCircle size={18} />
                   <span className="text-sm">WhatsApp</span>
@@ -261,7 +268,7 @@ export default function PlianteConfigurator({ productSlug, productImage }: Props
                 <button
                   type="button"
                   onClick={() => window.location.href = '/contact'}
-                  className="inline-flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                 >
                   <Info size={18} />
                   <span className="text-sm">Cerere Ofertă</span>
