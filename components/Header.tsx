@@ -43,7 +43,7 @@ const DesktopNav = () => {
             {item.label}
             <ChevronDown size={16} className="transition-transform duration-300 group-hover:rotate-180" />
           </button>            {/* Dropdown Container */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 w-56 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 ease-out z-110">
+            <div className="absolute top-full left-1/2 -translate-x-1/2 w-56 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 ease-out z-50">
               <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-2 overflow-hidden">
                 {item.children.map((child) => (
                   <Link
@@ -194,7 +194,7 @@ const HeaderActions = () => {
           </button>
           
           {/* Dropdown Menu */}
-          <div className={`absolute top-full right-0 w-56 pt-2 transition-all duration-200 ease-out z-110 ${
+          <div className={`absolute top-full right-0 w-56 pt-2 transition-all duration-200 ease-out z-50 ${
             isAccountOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'
           }`}>
             <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
@@ -336,7 +336,7 @@ export default function Header() {
 
   return (
     <header 
-      className={`sticky top-0 z-100 w-full border-b transition-all duration-300 ${
+      className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
         scrolled 
           ? "bg-white/95 dark:bg-black/95 backdrop-blur-lg border-zinc-200 dark:border-white/10 shadow-lg" 
           : "bg-white dark:bg-black border-zinc-200 dark:border-zinc-800"

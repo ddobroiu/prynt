@@ -677,7 +677,7 @@ export default function CheckoutPage() {
 
         <div className="grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1.25fr)] gap-6 lg:gap-8">
           <section className="space-y-6">
-            <header className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <header className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm">
               <div>
                 <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950 dark:text-white flex items-center gap-2">
                   Finalizare Comandă
@@ -685,20 +685,6 @@ export default function CheckoutPage() {
                     {items?.length ?? 0} produse
                   </span>
                 </h1>
-                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
-                  Completează detaliile de livrare și facturare pentru a plasa
-                  comanda.
-                </p>
-              </div>
-              <div className="mt-2 sm:mt-0 text-sm text-slate-700 dark:text-slate-300 flex flex-col items-start sm:items-end gap-1">
-                <div className="inline-flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                  <span>Plată 100% sigură prin Stripe</span>
-                </div>
-                <div className="inline-flex items-center gap-2">
-                  <Truck className="h-4 w-4 text-indigo-500" />
-                  <span>Livrare rapidă oriunde în țară</span>
-                </div>
               </div>
             </header>
 
