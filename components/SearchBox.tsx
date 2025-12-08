@@ -206,7 +206,7 @@ export default function SearchBox({
           ref={inputRef}
           type="text"
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-3 text-sm border-[3px] border-red-500 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all bg-gray-100 dark:bg-zinc-900"
+          className="w-full pl-10 pr-10 py-3 text-sm text-black dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 border border-slate-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all bg-white dark:bg-zinc-900"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -220,7 +220,7 @@ export default function SearchBox({
         {query && (
           <button
             onClick={clearSearch}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-gray-600 transition-colors"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-700 dark:text-gray-400 hover:text-black dark:hover:text-gray-200 transition-colors"
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

@@ -42,136 +42,209 @@ html, body {
    TOATE textele vizibile pe fundal alb
    ============================================ */
 
-/* LIGHT MODE - forțează culori închise */
+/* LIGHT MODE - forțează culori închise DOAR pe fundaluri deschise */
 :root:not(.dark) {
-  /* Toate textele slate sunt forțate la culori foarte închise */
-  
   /* Headers - BOLD BLACK */
-  h1, h2, h3, h4, h5, h6,
-  [class*="font-bold"],
-  [class*="font-extrabold"],
-  [class*="font-black"] {
+  h1, h2, h3, h4, h5, h6 {
     color: #000000 !important;
   }
   
-  /* Override TOATE culorile slate în light mode */
-  .text-slate-950,
-  .text-slate-900,
-  .text-slate-800 {
+  /* INPUT și FORM ELEMENTS - text NEGRU pe fundal ALB */
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+  }
+  
+  input::placeholder,
+  textarea::placeholder {
+    color: #64748b !important; /* slate-500 */
+    opacity: 1 !important;
+  }
+  
+  /* Override culorile slate în light mode pe fundal ALB/DESCHIS */
+  .bg-white .text-slate-950,
+  .bg-white .text-slate-900,
+  .bg-white .text-slate-800,
+  .bg-slate-50 .text-slate-950,
+  .bg-slate-50 .text-slate-900,
+  .bg-slate-50 .text-slate-800,
+  .bg-slate-100 .text-slate-950,
+  .bg-slate-100 .text-slate-900,
+  .bg-slate-100 .text-slate-800,
+  /* Direct pe body/root pentru elemente fără wrapper explicit */
+  body .text-slate-950,
+  body .text-slate-900,
+  body .text-slate-800 {
     color: #000000 !important;
   }
   
-  .text-slate-700 {
-    color: #1e293b !important; /* foarte închis - vizibil */
-  }
-  
-  .text-slate-600 {
-    color: #334155 !important; /* slate-700 pentru vizibilitate */
-  }
-  
-  .text-slate-500 {
-    color: #475569 !important; /* slate-600 pentru vizibilitate */
-  }
-  
-  .text-slate-400 {
-    color: #64748b !important; /* slate-500 pentru vizibilitate */
-  }
-  
-  /* Gray scale */
-  .text-gray-900,
-  .text-gray-800 {
-    color: #000000 !important;
-  }
-  
-  .text-gray-700 {
+  .bg-white .text-slate-700,
+  .bg-slate-50 .text-slate-700,
+  .bg-slate-100 .text-slate-700,
+  body .text-slate-700 {
     color: #1e293b !important;
   }
   
-  .text-gray-600 {
+  .bg-white .text-slate-600,
+  .bg-slate-50 .text-slate-600,
+  .bg-slate-100 .text-slate-600,
+  body .text-slate-600 {
     color: #334155 !important;
   }
   
-  .text-gray-500 {
+  .bg-white .text-slate-500,
+  .bg-slate-50 .text-slate-500,
+  .bg-slate-100 .text-slate-500,
+  body .text-slate-500 {
     color: #475569 !important;
   }
   
-  /* Zinc scale */
-  .text-zinc-900,
-  .text-zinc-800 {
+  .bg-white .text-slate-400,
+  .bg-slate-50 .text-slate-400,
+  .bg-slate-100 .text-slate-400,
+  body .text-slate-400 {
+    color: #64748b !important;
+  }
+  
+  /* Gray/Zinc scale pe fundal alb */
+  .bg-white .text-gray-900,
+  .bg-white .text-gray-800,
+  .bg-white .text-zinc-900,
+  .bg-white .text-zinc-800,
+  .bg-slate-50 .text-gray-900,
+  .bg-slate-50 .text-zinc-900,
+  body .text-gray-900,
+  body .text-zinc-900 {
     color: #000000 !important;
   }
   
-  .text-zinc-700 {
-    color: #1e293b !important;
-  }
-  
-  .text-zinc-600 {
-    color: #334155 !important;
-  }
-  
-  .text-zinc-500 {
+  .bg-white .text-zinc-400,
+  .bg-white .text-zinc-300,
+  .bg-slate-50 .text-zinc-400,
+  .bg-slate-50 .text-zinc-300,
+  body .text-zinc-400,
+  body .text-zinc-300 {
     color: #475569 !important;
   }
   
-  .text-zinc-400,
-  .text-zinc-300 {
-    color: #475569 !important;
-  }
-  
-  /* Borders mai închise pentru vizibilitate */
+  /* Borders mai închise */
   .border-slate-200,
   .border-slate-300,
   .border-gray-200,
   .border-gray-300,
   .border-zinc-200,
   .border-zinc-300 {
-    border-color: #94a3b8 !important; /* slate-400 vizibil */
+    border-color: #94a3b8 !important;
   }
   
-  /* SVG icons - negre implicit */
-  svg {
+  /* SVG icons - negre DOAR pe fundal alb */
+  .bg-white svg:not([class*="text-indigo"]):not([class*="text-red"]):not([class*="text-green"]):not([class*="text-emerald"]):not([class*="text-purple"]):not([class*="text-blue"]),
+  .bg-slate-50 svg:not([class*="text-indigo"]):not([class*="text-red"]):not([class*="text-green"]):not([class*="text-emerald"]):not([class*="text-purple"]):not([class*="text-blue"]),
+  .bg-slate-100 svg:not([class*="text-indigo"]):not([class*="text-red"]):not([class*="text-green"]):not([class*="text-emerald"]):not([class*="text-purple"]):not([class*="text-blue"]),
+  body > * svg:not([class*="text-indigo"]):not([class*="text-red"]):not([class*="text-green"]):not([class*="text-emerald"]):not([class*="text-purple"]):not([class*="text-blue"]):not([class*="bg-"]) {
     color: #000000 !important;
-  }
-  
-  /* Păstrează culorile branded (indigo, red, green, etc.) */
-  [class*="text-indigo"] svg,
-  [class*="text-red"] svg,
-  [class*="text-green"] svg,
-  [class*="text-emerald"] svg,
-  [class*="text-purple"] svg,
-  [class*="text-blue"] svg,
-  [class*="text-amber"] svg,
-  [class*="text-orange"] svg {
-    color: inherit !important;
   }
 }
 
-/* Text ALB forțat pe fundaluri colorate */
+/* ============================================
+   EXCEPȚII - Text ALB/DESCHIS pe fundaluri ÎNCHISE
+   ============================================ */
+
+/* Fundaluri colorate - text ALB */
 .bg-indigo-600,
 .bg-indigo-700,
+.bg-indigo-800,
+.bg-indigo-900,
 .bg-purple-600,
+.bg-purple-700,
 .bg-red-600,
 .bg-green-600,
 .bg-emerald-600,
+.bg-emerald-700,
+.bg-amber-600,
+.bg-orange-600,
+.bg-blue-600,
 [class*="bg-gradient-"] {
   color: #ffffff !important;
 }
 
 .bg-indigo-600 *,
 .bg-indigo-700 *,
+.bg-indigo-800 *,
+.bg-indigo-900 *,
 .bg-purple-600 *,
+.bg-purple-700 *,
 .bg-red-600 *,
 .bg-green-600 *,
 .bg-emerald-600 *,
+.bg-emerald-700 *,
+.bg-amber-600 *,
+.bg-orange-600 *,
+.bg-blue-600 *,
 [class*="bg-gradient-"] * {
   color: #ffffff !important;
 }
 
+/* Fundaluri SLATE ÎNCHISE - text DESCHIS */
+.bg-slate-800,
+.bg-slate-900,
+.bg-gray-800,
+.bg-gray-900,
+.bg-zinc-800,
+.bg-zinc-900 {
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
+.bg-slate-800 *,
+.bg-slate-900 *,
+.bg-gray-800 *,
+.bg-gray-900 *,
+.bg-zinc-800 *,
+.bg-zinc-900 * {
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
+/* Badge-uri și fundal mediu - text ALB */
+.bg-indigo-100,
+.bg-indigo-50,
+.bg-emerald-50,
+.bg-emerald-100 {
+  /* Păstrează textul original pentru badge-uri */
+}
+
+/* Override pentru text pe fundal ÎNCHIS - trebuie să fie DESCHIS */
+.bg-slate-800 .text-slate-900,
+.bg-slate-800 .text-slate-950,
+.bg-slate-900 .text-slate-900,
+.bg-slate-900 .text-slate-950,
+.bg-gray-800 .text-gray-900,
+.bg-gray-900 .text-gray-900,
+.bg-zinc-800 .text-zinc-900,
+.bg-zinc-900 .text-zinc-900 {
+  color: #f1f5f9 !important; /* slate-100 ALB */
+}
+
+/* SVG pe fundal închis - trebuie ALB */
+.bg-slate-800 svg,
+.bg-slate-900 svg,
+.bg-gray-800 svg,
+.bg-gray-900 svg,
+.bg-zinc-800 svg,
+.bg-zinc-900 svg {
+  color: #ffffff !important;
+}
+
 /* Exception pentru icon-uri colorate pe fundal colorat */
-.bg-indigo-600 [class*="text-"],
-.bg-indigo-700 [class*="text-"],
-.bg-purple-600 [class*="text-"],
-[class*="bg-gradient-"] [class*="text-"] {
+.bg-indigo-600 [class*="text-indigo"],
+.bg-indigo-600 [class*="text-white"],
+.bg-indigo-700 [class*="text-indigo"],
+.bg-indigo-700 [class*="text-white"],
+.bg-purple-600 [class*="text-purple"],
+.bg-purple-600 [class*="text-white"],
+[class*="bg-gradient-"] [class*="text-white"],
+[class*="bg-gradient-"] [class*="text-indigo"] {
   color: inherit !important;
 }
 
