@@ -141,7 +141,7 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 type Props = { productSlug?: string; initialWidth?: number; initialHeight?: number; productType?: string };
 
 /* --- MAIN COMPONENT --- */
-export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW, initialHeight: initH }: Props) {
+export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW, initialHeight: initH, productImage }: Props) {
   const { addItem } = useCart();
   const [input, setInput] = useState<PriceInputPVCForex>({
     width_cm: initW ?? 0,
@@ -226,6 +226,7 @@ export default function ConfiguratorPVCForex({ productSlug, initialWidth: initW,
         ...(input.designOption === 'pro' && { "Cost grafică": formatMoneyDisplay(PVC_FOREX_CONSTANTS.PRO_DESIGN_FEE) }),
         ...(input.designOption === 'text_only' && { "Text": textDesign }),
         artworkUrl,
+        productImage,
       },
     });
   }
