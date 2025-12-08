@@ -220,7 +220,7 @@ export default function CheckoutPage() {
 
   function toFormBilling(b: BillingInfo) {
     const fullName = [b.firstName || "", b.lastName || ""].join(" ").trim();
-    const tip_factura = b.type === "company" ? "persoana_juridica" : "persoana_fizica";
+    const tip_factura = b.type === "company" ? ("persoana_juridica" as const) : ("persoana_fizica" as const);
     return {
       tip_factura,
       name: tip_factura === "persoana_fizica" ? fullName : undefined,
@@ -797,9 +797,14 @@ export default function CheckoutPage() {
 
                 <DiscountCodeInput
                   subtotal={subtotal}
-                  onDiscountChange={(code, amount) => {
-                    setDiscountCode(code);
-                    setDiscountAmount(amount);
+                  onDiscountApplied={(discount) => {
+                    if (discount) {
+                      setDiscountCode(discount.type);
+                      setDiscountAmount(discount.amount);
+                    } else {
+                      setDiscountCode(null);
+                      setDiscountAmount(0);
+                    }
                   }}
                 />
 
