@@ -12,13 +12,14 @@ export const metadata = {
 export default async function PolipropilenaPage() {
   const product = getProductBySlug("polipropilena");
   const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro"}/materiale/polipropilena`;
+  const productImage = product?.images?.[0] || "/products/materiale/polipropilena/polipropilena-1.webp";
 
   return (
     <main className="min-h-screen bg-gray-50">
       {product && <ProductJsonLd product={product} url={url} />}
       
       <Suspense fallback={<div className="h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>}>
-        <ConfiguratorPolipropilena productSlug="polipropilena" />
+        <ConfiguratorPolipropilena productSlug="polipropilena" productImage={productImage} />
       </Suspense>
     </main>
   );

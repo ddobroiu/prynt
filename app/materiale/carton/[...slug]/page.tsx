@@ -41,6 +41,7 @@ export default async function Page({ params }: Props) {
   if (!product) return notFound();
 
   const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/materiale/carton/${joinedSlug}`;
+  const productImage = product.images?.[0] || "/products/materiale/carton/carton-1.webp";
 
   return (
     <>
@@ -52,6 +53,7 @@ export default async function Page({ params }: Props) {
             productSlug={product.slug ?? product.routeSlug}
             initialWidth={initialWidth ?? undefined}
             initialHeight={initialHeight ?? undefined}
+            productImage={productImage}
           />
         </Suspense>
 

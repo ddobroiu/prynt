@@ -12,13 +12,14 @@ export const metadata = {
 export default async function AlucobondPage() {
   const product = getProductBySlug("alucobond");
   const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro"}/materiale/alucobond`;
+  const productImage = product?.images?.[0] || "/products/materiale/alucobond/alucobond-1.webp";
 
   return (
     <main className="min-h-screen bg-gray-50">
       {product && <ProductJsonLd product={product} url={url} />}
       
       <Suspense fallback={<div className="h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>}>
-        <ConfiguratorAlucobond productSlug="alucobond" />
+        <ConfiguratorAlucobond productSlug="alucobond" productImage={productImage} />
       </Suspense>
     </main>
   );

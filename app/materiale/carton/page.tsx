@@ -12,13 +12,14 @@ export const metadata = {
 export default async function CartonPage() {
   const product = getProductBySlug("carton");
   const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.prynt.ro"}/materiale/carton`;
+  const productImage = product?.images?.[0] || "/products/materiale/carton/carton-1.webp";
 
   return (
     <main className="min-h-screen bg-gray-50">
       {product && <ProductJsonLd product={product} url={url} />}
       
       <Suspense fallback={<div className="h-screen flex justify-center items-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>}>
-        <ConfiguratorCarton productSlug="carton" />
+        <ConfiguratorCarton productSlug="carton" productImage={productImage} />
       </Suspense>
     </main>
   );
