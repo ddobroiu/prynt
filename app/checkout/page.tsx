@@ -241,9 +241,10 @@ export default function CheckoutPage() {
 
   function fromFormBilling(prev: BillingInfo, formBill: any): BillingInfo {
     const tip_factura = formBill?.tip_factura === "persoana_juridica" ? "company" : "individual";
-    const name = (formBill?.name || "").trim();
+    const name = formBill?.name || "";
+    // Nu facem trim aici pentru a păstra spațiile în timp ce user-ul tastează
     // Split pe spații pentru a separa firstName și lastName
-    const parts = name.split(/\s+/);
+    const parts = name.split(/\s+/).filter(Boolean);
     const firstName = parts[0] || "";
     const lastName = parts.slice(1).join(" ");
     
