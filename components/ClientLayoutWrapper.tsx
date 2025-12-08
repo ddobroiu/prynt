@@ -4,7 +4,6 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
-import CartWidget from "./CartWidget";
 import ContactButton from "./ContactButton";
 import CookieConsentBanner from "./CookieConsentBanner";
 
@@ -26,7 +25,6 @@ export default function ClientLayoutWrapper({
   return (
     <>
       <Header />
-      <CartWidget />
       <main className="mx-auto max-w-7xl px-0 md:px-0">{children}</main>
       <Footer />
       <ContactButton />
