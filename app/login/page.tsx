@@ -126,8 +126,8 @@ export default function LoginPage() {
 
   // Aplicăm stilul modern (centrat, card închis, margini rotunjite)
   return (
-    <div className="flex min-h-[calc(100vh-100px)] items-center justify-center py-12">
-      <div className="w-full max-w-md space-y-6 rounded-xl border border-white/10 bg-gray-800 p-8 shadow-2xl">
+    <div className="flex min-h-[calc(100vh-100px)] items-center justify-center py-12 bg-gray-50 dark:bg-gray-900">
+      <div className="w-full max-w-md space-y-6 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-800 p-8 shadow-2xl">
         <div className="flex justify-center mb-4">
           <Link href="/">
             <img 
@@ -137,20 +137,20 @@ export default function LoginPage() {
             />
           </Link>
         </div>
-        <h1 className="text-3xl font-extrabold text-white text-center">
+        <h1 className="text-3xl font-extrabold text-black dark:text-white text-center">
           {isResetView ? 'Resetare Parolă' : 'Contul Meu'}
         </h1>
         
         {/* Tab-uri Principale */}
         {!isResetView && (
-          <div className="flex gap-2 p-1 rounded-xl bg-gray-700/50 shadow-inner">
+          <div className="flex gap-2 p-1 rounded-xl bg-gray-100 dark:bg-gray-700/50 shadow-inner">
             <button
               type="button"
               onClick={() => setTab('login')}
               className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
                 tab==='login' 
                   ? 'bg-indigo-600 text-white shadow-md' 
-                  : 'text-gray-300 hover:bg-gray-700/70'
+                  : 'text-black dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/70'
               }`}
             >Autentificare</button>
             <button
@@ -159,7 +159,7 @@ export default function LoginPage() {
               className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
                 tab==='register' 
                   ? 'bg-indigo-600 text-white shadow-md' 
-                  : 'text-gray-300 hover:bg-gray-700/70'
+                  : 'text-black dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/70'
               }`}
             >Creează cont</button>
           </div>
@@ -171,12 +171,12 @@ export default function LoginPage() {
           {tab === 'login' && !isResetView && (
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+              <label className="block text-sm font-medium text-black dark:text-gray-300 mb-1">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-black dark:text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 placeholder="email@exemplu.ro"
                 required
                 autoComplete="email"
@@ -185,13 +185,13 @@ export default function LoginPage() {
             
             {mode === 'password' && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Parolă</label>
+                <label className="block text-sm font-medium text-black dark:text-gray-300 mb-1">Parolă</label>
                 <div className="relative">
                   <input
                     type={showLoginPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 pr-10 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-black dark:text-white placeholder-gray-400 pr-10 focus:ring-indigo-500 focus:border-indigo-500 transition"
                     placeholder="••••••••"
                     required
                     autoComplete="current-password"
@@ -199,7 +199,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowLoginPassword(!showLoginPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                   >
                     {showLoginPassword ? <EyeOffIcon /> : <EyeIcon />}
                   </button>
@@ -219,7 +219,7 @@ export default function LoginPage() {
             <div className="flex items-center justify-between text-xs pt-1">
               <button
                 type="button"
-                className="text-indigo-300 hover:text-indigo-200 hover:underline transition-colors"
+                className="text-indigo-600 dark:text-indigo-300 hover:text-indigo-700 dark:hover:text-indigo-200 hover:underline transition-colors"
                 onClick={() => setMode(m => m === 'password' ? 'magic' : 'password')}
               >
                 {mode === 'password' ? 'Login cu link pe email' : 'Login cu parolă'}
@@ -228,7 +228,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => { setError(null); setSuccess(null); setIsResetView(true); }}
-                className="text-gray-400 hover:text-white hover:underline transition-colors"
+                className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white hover:underline transition-colors"
               >
                 Resetare parolă
               </button>
@@ -239,16 +239,16 @@ export default function LoginPage() {
           {/* --- RESET PASSWORD FORM --- */}
           {isResetView && (
             <form onSubmit={handleResetRequest} className="space-y-4">
-              <div className="p-4 rounded-lg bg-gray-700 border border-gray-600 text-center">
-                  <p className="text-sm text-gray-300 mb-4">Introdu adresa de email și îți vom trimite un link pentru a seta o parolă nouă.</p>
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-center">
+                  <p className="text-sm text-black dark:text-gray-300 mb-4">Introdu adresa de email și îți vom trimite un link pentru a seta o parolă nouă.</p>
                   
                   <div className="text-left mb-4">
-                    <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                    <label className="block text-sm font-medium text-black dark:text-gray-300 mb-1">Email</label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-black dark:text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
                       placeholder="email@exemplu.ro"
                       required
                       autoComplete="email"
@@ -266,7 +266,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setIsResetView(false)}
-                    className="mt-4 text-xs text-gray-400 hover:text-white hover:underline"
+                    className="mt-4 text-xs text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white hover:underline"
                   >
                     ← Înapoi la autentificare
                   </button>
@@ -278,36 +278,36 @@ export default function LoginPage() {
           {tab === 'register' && !isResetView && (
             <form onSubmit={onRegister} className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Nume (opțional)</label>
+                <label className="block text-sm font-medium text-black dark:text-gray-300 mb-1">Nume (opțional)</label>
                 <input
                   type="text"
                   value={regName}
                   onChange={(e) => setRegName(e.target.value)}
-                  className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-black dark:text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   placeholder="Nume și prenume"
                   autoComplete="name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                <label className="block text-sm font-medium text-black dark:text-gray-300 mb-1">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-black dark:text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   placeholder="email@exemplu.ro"
                   required
                   autoComplete="email"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Parolă</label>
+                <label className="block text-sm font-medium text-black dark:text-gray-300 mb-1">Parolă</label>
                 <div className="relative">
                   <input
                     type={showRegisterPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 pr-10 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-black dark:text-white placeholder-gray-400 pr-10 focus:ring-indigo-500 focus:border-indigo-500 transition"
                     placeholder="Minim 8 caractere"
                     required
                     autoComplete="new-password"
@@ -315,20 +315,20 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                   >
                     {showRegisterPassword ? <EyeOffIcon /> : <EyeIcon />}
                   </button>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Confirmă parola</label>
+                <label className="block text-sm font-medium text-black dark:text-gray-300 mb-1">Confirmă parola</label>
                 <div className="relative">
                   <input
                     type={showRegisterPassword ? "text" : "password"}
                     value={regConfirm}
                     onChange={(e) => setRegConfirm(e.target.value)}
-                    className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 pr-10 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-black dark:text-white placeholder-gray-400 pr-10 focus:ring-indigo-500 focus:border-indigo-500 transition"
                     placeholder="Repetă parola"
                     required
                     autoComplete="new-password"
@@ -336,7 +336,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                   >
                     {showRegisterPassword ? <EyeOffIcon /> : <EyeIcon />}
                   </button>
@@ -357,8 +357,8 @@ export default function LoginPage() {
           {!isResetView && (
             <>
               <div className="relative text-center py-2">
-                <span className="text-sm text-gray-400 bg-gray-800 px-2 relative z-10">sau continuă cu</span>
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-700"></div></div>
+                <span className="text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 px-2 relative z-10">sau continuă cu</span>
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300 dark:border-gray-700"></div></div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
                   <button
@@ -379,7 +379,7 @@ export default function LoginPage() {
             </>
           )}
            {!isResetView && tab === 'login' && mode === 'password' && (
-             <p className="text-xs text-gray-400 text-center pt-2">Nu ai cont? Îl poți crea rapid aici sau la checkout.</p>
+             <p className="text-xs text-gray-600 dark:text-gray-400 text-center pt-2">Nu ai cont? Îl poți crea rapid aici sau la checkout.</p>
            )}
         </div>
       </div>
