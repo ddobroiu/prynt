@@ -165,14 +165,17 @@ const HeaderActions = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
+      // Verificăm dacă click-ul este în afara dropdown-ului
+      // DAR nu pe un link din dropdown (pentru a permite navigarea)
       if (isAccountOpen && !target.closest('.account-dropdown')) {
         setIsAccountOpen(false);
       }
     };
 
     if (isAccountOpen) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
+      // Folosim capture phase pentru a prinde evenimentul înainte
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isAccountOpen]);
 
@@ -194,7 +197,7 @@ const HeaderActions = () => {
           </button>
           
           {/* Dropdown Menu */}
-          <div className={`absolute top-full right-0 w-56 pt-2 transition-all duration-200 ease-out z-50 ${
+          <div className={`absolute top-full right-0 w-56 pt-2 transition-all duration-200 ease-out z-60 ${
             isAccountOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'
           }`}>
             <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">

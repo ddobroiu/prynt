@@ -203,9 +203,10 @@ export default function CheckoutPage() {
   }
 
   function fromFormAddress(prev: Address, formAddr: any): Address {
-    const name = (formAddr?.nume_prenume || "").trim();
+    const name = formAddr?.nume_prenume || "";
+    // Nu facem trim aici pentru a păstra spațiile în timp ce user-ul tastează
     // Split pe spații pentru a separa firstName și lastName
-    const parts = name.split(/\s+/); // folosim regex pentru a gestiona spații multiple
+    const parts = name.split(/\s+/).filter(Boolean); // eliminăm doar părțile goale
     const firstName = parts[0] || "";
     const lastName = parts.slice(1).join(" ");
     
