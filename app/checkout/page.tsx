@@ -509,29 +509,18 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (paymentMethod === "card") {
-        // Dacă primim sessionId, redirecționăm către Stripe Checkout
-        if (data.sessionId) {
-          const stripe = await stripePromise;
-          if (!stripe) {
-            showToast(
-              "Nu s-a putut inițializa procesatorul de plăți. Încearcă mai târziu.",
-              "error"
-            );
-            setPlacing(false);
-            return;
-          }
-          
-          // Folosim redirectToCheckout pentru a deschide Stripe Checkout
-          const result = await (stripe as any).redirectToCheckout({
-            sessionId: data.sessionId,
-          });
-          
-          if (result?.error) {
-            showToast(result.error.message || "Eroare la plata cu cardul.", "error");
-            setPlacing(false);
-          }
-          // Dacă redirect-ul reușește, utilizatorul va fi dus la Stripe
-          // și apoi înapoi la success_url după plată
+        // Dacă primim url, redirecționăm direct către Stripe Checkout
+        if (data.url) {
+          // Redirect direct către Stripe Checkout folosind URL-ul
+          window.location.href = data.url;
+          // Nu mai setăm setPlacing(false) pentru că pagina se va reîncărca
+        } else if (data.sessionId) {
+          // Fallback pentru compatibilitate - ar trebui să avem mereu url
+          showToast(
+            "Eroare la inițializarea plății. Te rugăm să încerci din nou.",
+            "error"
+          );
+          setPlacing(false);
         } else {
           showToast(
             "Răspuns invalid de la server pentru plata cu cardul.",
