@@ -203,12 +203,22 @@ export default function CheckoutPage() {
   }
 
   function fromFormAddress(prev: Address, formAddr: any): Address {
+    // Păstrăm valoarea exactă din câmpul nume_prenume pentru a permite editare liberă
     const name = formAddr?.nume_prenume || "";
-    // Nu facem trim aici pentru a păstra spațiile în timp ce user-ul tastează
-    // Split pe spații pentru a separa firstName și lastName
-    const parts = name.split(/\s+/).filter(Boolean); // eliminăm doar părțile goale
-    const firstName = parts[0] || "";
-    const lastName = parts.slice(1).join(" ");
+    
+    // Separăm firstName și lastName doar când facem submit/validare
+    // În timpul editării, păstrăm întregul text în firstName
+    // și vom face split-ul corect doar la final
+    const trimmedName = name.trim();
+    let firstName = trimmedName;
+    let lastName = "";
+    
+    // Dacă există cel puțin un spațiu, facem split
+    if (trimmedName.includes(" ")) {
+      const spaceIndex = trimmedName.indexOf(" ");
+      firstName = trimmedName.substring(0, spaceIndex);
+      lastName = trimmedName.substring(spaceIndex + 1);
+    }
     
     return {
       ...prev,
@@ -242,11 +252,18 @@ export default function CheckoutPage() {
   function fromFormBilling(prev: BillingInfo, formBill: any): BillingInfo {
     const tip_factura = formBill?.tip_factura === "persoana_juridica" ? "company" : "individual";
     const name = formBill?.name || "";
-    // Nu facem trim aici pentru a păstra spațiile în timp ce user-ul tastează
-    // Split pe spații pentru a separa firstName și lastName
-    const parts = name.split(/\s+/).filter(Boolean);
-    const firstName = parts[0] || "";
-    const lastName = parts.slice(1).join(" ");
+    
+    // Separăm firstName și lastName doar când facem submit/validare
+    const trimmedName = name.trim();
+    let firstName = trimmedName;
+    let lastName = "";
+    
+    // Dacă există cel puțin un spațiu, facem split
+    if (trimmedName.includes(" ")) {
+      const spaceIndex = trimmedName.indexOf(" ");
+      firstName = trimmedName.substring(0, spaceIndex);
+      lastName = trimmedName.substring(spaceIndex + 1);
+    }
     
     return {
       ...prev,
