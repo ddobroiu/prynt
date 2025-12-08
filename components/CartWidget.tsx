@@ -125,7 +125,7 @@ export default function CartWidget() {
 
       <DialogContent
         aria-describedby="cart-description"
-        className="fixed inset-y-0 right-0 left-auto h-full w-full sm:max-w-[450px] max-w-none flex flex-col p-0 gap-0 rounded-none border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right duration-300 m-0 translate-x-0 translate-y-0"
+        className="fixed inset-y-0 right-0 left-auto h-full w-full sm:max-w-[450px] max-w-none flex flex-col p-0 gap-0 rounded-none border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right duration-300 m-0 translate-x-0 translate-y-0 [&>button]:hidden"
       >
         <p id="cart-description" className="sr-only">
           Coșul tău de cumpărături cu produsele adăugate
@@ -246,16 +246,23 @@ export default function CartWidget() {
                   {/* IMAGINE PRODUS */}
                   <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                     {(() => {
-                      const imgSrc =
+                      // Prioritate: artwork încărcat de client
+                      const artworkSrc =
                         anyItem.artworkUrl ||
+                        item.metadata?.artworkUrl ||
+                        item.metadata?.artworkLink ||
+                        item.metadata?.artwork;
+
+                      // Fallback: imaginea principală a produsului
+                      const productSrc =
                         anyItem.image ||
                         anyItem.src ||
                         anyItem.imageUrl ||
                         anyItem.thumbnail ||
-                        item.metadata?.artworkUrl ||
-                        item.metadata?.artworkLink ||
-                        item.metadata?.artwork ||
-                        null;
+                        item.metadata?.image ||
+                        item.metadata?.productImage;
+
+                      const imgSrc = artworkSrc || productSrc;
 
                       if (!imgSrc) {
                         return (
