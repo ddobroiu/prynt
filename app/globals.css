@@ -36,3 +36,161 @@ html, body {
 }
 
 /* Încărcat dinamic după primul paint */
+
+/* ============================================
+   SOLUȚIE UNIVERSALĂ VIZIBILITATE MOBILE
+   TOATE textele vizibile pe fundal alb
+   ============================================ */
+
+/* LIGHT MODE - forțează culori închise */
+:root:not(.dark) {
+  /* Toate textele slate sunt forțate la culori foarte închise */
+  
+  /* Headers - BOLD BLACK */
+  h1, h2, h3, h4, h5, h6,
+  [class*="font-bold"],
+  [class*="font-extrabold"],
+  [class*="font-black"] {
+    color: #000000 !important;
+  }
+  
+  /* Override TOATE culorile slate în light mode */
+  .text-slate-950,
+  .text-slate-900,
+  .text-slate-800 {
+    color: #000000 !important;
+  }
+  
+  .text-slate-700 {
+    color: #1e293b !important; /* foarte închis - vizibil */
+  }
+  
+  .text-slate-600 {
+    color: #334155 !important; /* slate-700 pentru vizibilitate */
+  }
+  
+  .text-slate-500 {
+    color: #475569 !important; /* slate-600 pentru vizibilitate */
+  }
+  
+  .text-slate-400 {
+    color: #64748b !important; /* slate-500 pentru vizibilitate */
+  }
+  
+  /* Gray scale */
+  .text-gray-900,
+  .text-gray-800 {
+    color: #000000 !important;
+  }
+  
+  .text-gray-700 {
+    color: #1e293b !important;
+  }
+  
+  .text-gray-600 {
+    color: #334155 !important;
+  }
+  
+  .text-gray-500 {
+    color: #475569 !important;
+  }
+  
+  /* Zinc scale */
+  .text-zinc-900,
+  .text-zinc-800 {
+    color: #000000 !important;
+  }
+  
+  .text-zinc-700 {
+    color: #1e293b !important;
+  }
+  
+  .text-zinc-600 {
+    color: #334155 !important;
+  }
+  
+  .text-zinc-500 {
+    color: #475569 !important;
+  }
+  
+  .text-zinc-400,
+  .text-zinc-300 {
+    color: #475569 !important;
+  }
+  
+  /* Borders mai închise pentru vizibilitate */
+  .border-slate-200,
+  .border-slate-300,
+  .border-gray-200,
+  .border-gray-300,
+  .border-zinc-200,
+  .border-zinc-300 {
+    border-color: #94a3b8 !important; /* slate-400 vizibil */
+  }
+  
+  /* SVG icons - negre implicit */
+  svg {
+    color: #000000 !important;
+  }
+  
+  /* Păstrează culorile branded (indigo, red, green, etc.) */
+  [class*="text-indigo"] svg,
+  [class*="text-red"] svg,
+  [class*="text-green"] svg,
+  [class*="text-emerald"] svg,
+  [class*="text-purple"] svg,
+  [class*="text-blue"] svg,
+  [class*="text-amber"] svg,
+  [class*="text-orange"] svg {
+    color: inherit !important;
+  }
+}
+
+/* Text ALB forțat pe fundaluri colorate */
+.bg-indigo-600,
+.bg-indigo-700,
+.bg-purple-600,
+.bg-red-600,
+.bg-green-600,
+.bg-emerald-600,
+[class*="bg-gradient-"] {
+  color: #ffffff !important;
+}
+
+.bg-indigo-600 *,
+.bg-indigo-700 *,
+.bg-purple-600 *,
+.bg-red-600 *,
+.bg-green-600 *,
+.bg-emerald-600 *,
+[class*="bg-gradient-"] * {
+  color: #ffffff !important;
+}
+
+/* Exception pentru icon-uri colorate pe fundal colorat */
+.bg-indigo-600 [class*="text-"],
+.bg-indigo-700 [class*="text-"],
+.bg-purple-600 [class*="text-"],
+[class*="bg-gradient-"] [class*="text-"] {
+  color: inherit !important;
+}
+
+/* Text explicit alb */
+.text-white {
+  color: #ffffff !important;
+}
+
+/* Dark mode - nu schimbăm nimic */
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-slate-400,
+.dark .text-slate-300 {
+  color: inherit !important;
+}
+
+/* ============================================
+   FIN SOLUȚIE UNIVERSALĂ
+   ============================================ */
