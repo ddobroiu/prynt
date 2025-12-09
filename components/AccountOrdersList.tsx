@@ -22,8 +22,8 @@ interface AccountOrdersListProps {
 export default function AccountOrdersList({ orders }: AccountOrdersListProps) {
   if (orders.length === 0) {
     return (
-      <div className="text-center py-16 bg-linear-to-b from-gray-50 to-white dark:from-slate-900 dark:to-slate-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600">
-        <div className="mx-auto w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center mb-4">
+      <div className="text-center py-12 sm:py-16 bg-white dark:bg-slate-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600">
+        <div className="mx-auto w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center mb-4">
           <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
           </svg>

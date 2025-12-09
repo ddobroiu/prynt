@@ -177,7 +177,7 @@ export default function AccountNavTab({ activeTab, onTabChange }: AccountNavTabP
   }, {} as Record<string, NavTabItem[]>);
 
   return (
-    <nav className="flex flex-col gap-6 bg-linear-to-br from-white via-gray-50/80 to-indigo-50/30 dark:from-slate-800 dark:via-slate-800/90 dark:to-slate-900 p-6 rounded-3xl border border-gray-200/60 dark:border-gray-700/60 shadow-xl backdrop-blur-sm">
+    <nav className="flex flex-col gap-4 sm:gap-6 bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-gray-200 dark:border-gray-700 shadow-lg">
       {/* Header */}
       <div className="flex items-center gap-3 px-1 pb-2 border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
@@ -213,7 +213,7 @@ export default function AccountNavTab({ activeTab, onTabChange }: AccountNavTabP
                   <button
                     key={item.id}
                     onClick={() => onTabChange(item.id)}
-                    className={`relative w-full text-left px-4 py-3 rounded-2xl font-medium transition-all duration-300 flex items-center gap-3 group ${
+                    className={`relative w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-medium transition-all duration-300 flex items-center gap-2 sm:gap-3 group ${
                       isActive
                         ? `bg-linear-to-r ${item.color.activeGradient} text-white shadow-lg shadow-${item.color.activeGradient.split('-')[1]}-500/25 transform scale-[1.02]`
                         : "text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-slate-700/60 hover:shadow-md"

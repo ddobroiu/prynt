@@ -81,7 +81,7 @@ export default function AccountOrderCard({ order, onTrackingClick }: AccountOrde
   }).format(order.total);
 
   return (
-    <li className="p-6 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 hover:shadow-md dark:hover:shadow-xl transition-all duration-200 hover:border-indigo-300 dark:hover:border-indigo-700">
+    <li className="p-4 sm:p-6 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 hover:shadow-lg transition-all duration-200 hover:border-indigo-400 dark:hover:border-indigo-600">
       {/* Header: Order No + Status + Date */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">

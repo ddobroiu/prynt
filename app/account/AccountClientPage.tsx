@@ -58,7 +58,7 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
   };
 
   return (
-    <div className="min-h-screen bg-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 py-8 px-4">
+    <div className="min-h-screen bg-white dark:bg-slate-900 py-4 sm:py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 animate-in fade-in slide-in-from-top-4">
@@ -83,8 +83,8 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 dark:border-gray-700/50">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 border-2 border-gray-200 dark:border-gray-700 shadow-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                     <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,9 +98,9 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 dark:border-gray-700/50">
+              <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 border-2 border-gray-200 dark:border-gray-700 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center">
                     <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
@@ -112,9 +112,9 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 dark:border-gray-700/50">
+              <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 border-2 border-gray-200 dark:border-gray-700 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center">
                     <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                     </svg>
@@ -128,9 +128,9 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 dark:border-gray-700/50">
+              <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 border-2 border-gray-200 dark:border-gray-700 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/50 rounded-lg flex items-center justify-center">
                     <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -158,7 +158,7 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
           </aside>
 
           {/* MAIN CONTENT AREA */}
-          <main className="flex-1 bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-2xl border border-gray-200 dark:border-gray-700/60">
+          <main className="flex-1 bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-lg border-2 border-gray-200 dark:border-gray-700">
             {tab === 'profile' && (
               <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
                 <div className="space-y-8">

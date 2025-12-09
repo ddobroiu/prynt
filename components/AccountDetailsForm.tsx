@@ -45,7 +45,7 @@ export default function AccountDetailsForm() {
   }
 
   return (
-    <div className="bg-linear-to-br from-white to-gray-50/50 dark:from-slate-800 dark:to-slate-900/50 rounded-2xl p-6 border border-gray-200/60 dark:border-gray-700/60 shadow-sm">
+    <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-gray-200 dark:border-gray-700 shadow-sm">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
