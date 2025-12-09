@@ -94,57 +94,36 @@ export default function CartWidget() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <button
-          className="relative flex flex-col items-start gap-0.5 px-3 py-2 border-2 border-indigo-500 dark:border-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all shadow-sm hover:shadow-md"
+          className="relative flex items-center gap-2 px-3 py-2 border-2 border-indigo-500 dark:border-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all shadow-sm hover:shadow-md"
           aria-label="Deschide coșul de cumpărături"
         >
-          <div className="flex items-center gap-2 w-full">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="text-indigo-600 dark:text-indigo-400"
-            >
-              <path
-                d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.2 16.5H17M17 16.5C15.9 16.5 15 17.4 15 18.5C15 19.6 15.9 20.5 17 20.5C18.1 20.5 19 19.6 19 18.5C19 17.4 18.1 16.5 17 16.5ZM9 18.5C9 19.6 8.1 20.5 7 20.5C5.9 20.5 5 19.6 5 18.5C5 17.4 5.9 16.5 7 16.5C8.1 16.5 9 17.4 9 18.5Z"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <div className="flex flex-col items-start">
-              <span className="text-indigo-600 dark:text-indigo-400 text-xs font-semibold leading-none">
-                Coș ({cartCount})
-              </span>
-              <span className="text-slate-900 dark:text-white text-sm font-bold leading-none mt-0.5">
-                {formatMoneyDisplay(cartTotal)}
-              </span>
-            </div>
-            {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-indigo-600 text-white text-[11px] font-semibold min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full shadow-sm">
-                {cartCount}
-              </span>
-            )}
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            className="text-indigo-600 dark:text-indigo-400"
+          >
+            <path
+              d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.2 16.5H17M17 16.5C15.9 16.5 15 17.4 15 18.5C15 19.6 15.9 20.5 17 20.5C18.1 20.5 19 19.6 19 18.5C19 17.4 18.1 16.5 17 16.5ZM9 18.5C9 19.6 8.1 20.5 7 20.5C5.9 20.5 5 19.6 5 18.5C5 17.4 5.9 16.5 7 16.5C8.1 16.5 9 17.4 9 18.5Z"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <div className="flex flex-col items-start">
+            <span className="text-indigo-600 dark:text-indigo-400 text-xs font-semibold leading-none">
+              Coș ({cartCount})
+            </span>
+            <span className="text-slate-900 dark:text-white text-sm font-bold leading-none mt-0.5">
+              {formatMoneyDisplay(cartTotal)}
+            </span>
           </div>
-          {/* Progress bar pentru livrare gratuită */}
-          {cartTotal > 0 && remainingForFreeShipping > 0 && (
-            <div className="w-full mt-1">
-              <div className="h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-indigo-500 transition-all duration-300"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-              <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5 leading-none">
-                +{formatMoneyDisplay(remainingForFreeShipping)} → livrare gratuită
-              </p>
-            </div>
-          )}
-          {cartTotal >= FREE_SHIPPING_THRESHOLD && cartTotal > 0 && (
-            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 leading-none">
-              🎉 Livrare GRATUITĂ!
-            </p>
+          {cartCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 bg-indigo-600 text-white text-[11px] font-semibold min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full shadow-sm">
+              {cartCount}
+            </span>
           )}
         </button>
       </DialogTrigger>
