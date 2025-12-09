@@ -46,3 +46,4 @@ SUPPORT_EMAIL = contact@prynt.ro
 
 ## Dacă tot nu merge după redeploy:
 Înseamnă că Vercel nu are toate Environment Variables. Verifică din nou Settings → Environment Variables.
+This document was removed because it contained sensitive environment examples. Please refer to Vercel Environment Variables and local `.env.local` for configuration.
