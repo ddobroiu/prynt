@@ -8,7 +8,6 @@ import { ChevronDown, Menu, X, User, LogOut, Package, Settings, MapPin, CreditCa
 // 1. IMPORTĂM WIDGETUL DE CART
 import CartWidget from "./CartWidget";
 import SearchBox from "./SearchBox";
-import FreeShippingIndicator from "./FreeShippingIndicator";
 
 // --- SUB-COMPONENTS ---
 
@@ -368,11 +367,8 @@ export default function Header() {
         </div>
 
         {/* Center: Search */}
-        <div className="hidden lg:flex items-center gap-3 flex-1 max-w-3xl mx-8">
-          <div className="flex-1 max-w-2xl">
-            <SearchBox placeholder="Caută produse..." />
-          </div>
-          <FreeShippingIndicator />
+        <div className="hidden lg:block flex-1 max-w-2xl mx-8">
+          <SearchBox placeholder="Caută produse..." />
         </div>
 
 

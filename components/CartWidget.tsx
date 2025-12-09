@@ -175,35 +175,47 @@ export default function CartWidget() {
           )}
         </div>
 
-        {/* BARĂ LIVRARE GRATUITĂ */}
+        {/* BARĂ LIVRARE GRATUITĂ - Enhanced Design */}
         {items.length > 0 && (
-          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900/50">
+          <div className="px-4 py-4 border-y-2 border-indigo-100 dark:border-indigo-900/30 shrink-0 bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30">
             {remainingForFreeShipping > 0 ? (
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-xs font-bold text-black dark:text-slate-300 flex items-center gap-1.5">
-                    <Truck size={12} className="text-indigo-600" />
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
+                      <Truck size={16} className="text-white" />
+                    </div>
                     Livrare Gratuită
                   </span>
-                  <span className="text-[10px] text-black dark:text-slate-400 font-semibold">
+                  <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold bg-white dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">
                     încă{" "}
-                    <span className="text-indigo-600 dark:text-indigo-400">
-                      {formatMoneyDisplay(remainingForFreeShipping)}
+                    <span className="text-indigo-600 dark:text-indigo-400 font-bold">
+                      +{formatMoneyDisplay(remainingForFreeShipping)} RON
                     </span>
                   </span>
                 </div>
 
-                <div className="relative h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="relative h-3 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden shadow-inner">
                   <div
-                    className="absolute top-0 left-0 h-full bg-indigo-500 transition-all duration-700 ease-out rounded-full"
+                    className="absolute top-0 left-0 h-full bg-linear-to-r from-indigo-500 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-lg"
                     style={{ width: `${progressPercent}%` }}
                   />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-white drop-shadow-md">
+                      {Math.round(progressPercent)}%
+                    </span>
+                  </div>
                 </div>
+                <p className="text-xs text-center text-slate-600 dark:text-slate-400">
+                  Mai adaugă <span className="font-bold text-indigo-600 dark:text-indigo-400">{formatMoneyDisplay(remainingForFreeShipping)} RON</span> pentru transport gratuit
+                </p>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 text-xs font-bold justify-center">
-                <Gift size={14} />
-                Beneficiezi de Livrare Gratuită!
+              <div className="flex items-center gap-3 text-emerald-700 dark:text-emerald-400 text-sm font-bold justify-center bg-emerald-50 dark:bg-emerald-950/30 py-3 px-4 rounded-xl border-2 border-emerald-200 dark:border-emerald-800">
+                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center animate-pulse">
+                  <Gift size={16} className="text-white" />
+                </div>
+                <span>🎉 Beneficiezi de Livrare Gratuită!</span>
               </div>
             )}
           </div>
