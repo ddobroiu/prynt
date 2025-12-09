@@ -557,9 +557,9 @@ export default function CheckoutPage() {
           "Comanda ta a fost plasată cu succes! Vei primi un email cu detaliile.",
           "success"
         );
-        window.location.href = `/thank-you?orderId=${encodeURIComponent(
-          data.orderId
-        )}`;
+        window.location.href = `/checkout/success?o=${encodeURIComponent(
+          data.orderNo || ''
+        )}&pm=${encodeURIComponent(paymentMethod === 'bank_transfer' ? 'OP' : 'Ramburs')}`;
       }
     } catch (err: any) {
       console.error(err);
