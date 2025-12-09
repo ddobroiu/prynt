@@ -73,10 +73,10 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl lg:text-4xl font-bold text-black dark:text-white">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black dark:text-white">
                   Bun venit înapoi!
                 </h1>
-                <p className="text-gray-700 dark:text-gray-400 text-sm mt-1">
+                <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mt-1">
                   <span className="font-semibold text-black dark:text-white">{session.user?.name || session.user?.email}</span>
                 </p>
               </div>
