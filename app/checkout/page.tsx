@@ -270,6 +270,8 @@ export default function CheckoutPage() {
     return {
       ...prev,
       type: tip_factura,
+      email: formBill?.email ?? prev.email,
+      phone: formBill?.telefon ?? prev.phone,
       firstName: tip_factura === "individual" ? firstName : prev.firstName,
       lastName: tip_factura === "individual" ? lastName : prev.lastName,
       companyName: tip_factura === "company" ? (formBill?.denumire_companie ?? prev.companyName) : prev.companyName,
