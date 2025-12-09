@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Stripe from "stripe";
 import { getOrderNoByStripeSession } from "../../../lib/orderStore";
+import ConversionTracker from "@/components/ConversionTracker";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,6 +47,9 @@ export default async function SuccessPage({ searchParams }: PageProps) {
 
   return (
     <main className="min-h-[60vh] bg-ui">
+      {/* Google Analytics Conversion Tracking */}
+      <ConversionTracker orderNo={orderNo} />
+      
       <div className="max-w-2xl mx-auto px-4 py-12">
         <div className="rounded-2xl border card-bg p-8 text-ui">
           <div className="flex items-start gap-4">
