@@ -12,6 +12,21 @@ build/
 /*.log
 /.DS_Store
 node_modules/.prisma/client
+
+# Monorepo packages
+packages/*/node_modules
+packages/*/dist
+packages/*/.turbo
+
+# Mobile app has its own .git - don't ignore the directory
+# but ignore its build artifacts
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/android/
+mobile/ios/
+mobile/.expo-shared/
+
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
