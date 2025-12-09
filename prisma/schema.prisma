@@ -59,6 +59,7 @@ model Address {
   userId     String?
   label      String?
   nume       String?
+  email      String?
   telefon    String?
   judet      String
   localitate String
