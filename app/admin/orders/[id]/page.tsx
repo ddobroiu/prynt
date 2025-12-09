@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/adminSession";
 import EditOrderClient from "./EditOrderClient"; // Vom crea această componentă client mai jos
 import AdminAwbControl from "@/components/AdminAwbControl";
+import AdminInvoiceControl from "@/components/AdminInvoiceControl";
 import { getOrder } from '@/lib/orderStore';
 
 export default async function AdminOrderPage({ params }: { params: Promise<{ id: string }> }) {
@@ -89,10 +90,24 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
                   <hr className="my-2 border-dashed" />
                   <p>{(order.address as any).localitate}, {(order.address as any).judet}</p>
                   <p>{(order.address as any).strada_nr}</p>
+                  {(order.address as any).postCode && <p>Cod poștal: {(order.address as any).postCode}</p>}
+                  {((order.address as any).bloc || (order.address as any).scara || (order.address as any).etaj || (order.address as any).ap) && (
+                    <p className="text-xs text-gray-500">
+                      {[(order.address as any).bloc && `Bloc ${(order.address as any).bloc}`, 
+                        (order.address as any).scara && `Sc. ${(order.address as any).scara}`,
+                        (order.address as any).etaj && `Et. ${(order.address as any).etaj}`,
+                        (order.address as any).ap && `Ap. ${(order.address as any).ap}`].filter(Boolean).join(', ')}
+                    </p>
+                  )}
+                  {(order.address as any).interfon && <p className="text-xs text-gray-500">Interfon: {(order.address as any).interfon}</p>}
                 </div>
                 {/* AWB control - tracking + download */}
                 <div className="mt-4">
                   <AdminAwbControl orderId={order.id} currentAwb={order.awbNumber} />
+                </div>
+                {/* Invoice control */}
+                <div className="mt-4">
+                  <AdminInvoiceControl id={order.id} invoiceLink={order.invoiceLink} />
                 </div>
             </div>
           </div>
