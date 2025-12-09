@@ -58,14 +58,14 @@ export default function HomePage() {
       <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all">
         <div className="container mx-auto px-0 sm:px-4 relative group">
             
-            {/* Buton Stânga - VIZIBIL PE MOBIL */}
-            <div className="absolute left-0 top-0 bottom-0 z-20 bg-linear-to-r from-white via-white to-transparent pl-1 sm:pl-2 pr-2 sm:pr-4 flex items-center pointer-events-none">
+            {/* Buton Stânga - VIZIBIL PESTE TOT */}
+            <div className="absolute left-0 top-0 bottom-0 z-20 bg-linear-to-r from-white via-white to-transparent pl-2 pr-4 flex items-center pointer-events-none">
                 <button 
                   onClick={scrollLeft}
-                  className="p-2 sm:p-1.5 rounded-full bg-white border-2 sm:border border-indigo-300 sm:border-slate-200 text-indigo-600 sm:text-slate-500 hover:text-indigo-600 hover:border-indigo-300 shadow-lg sm:shadow-sm transition-all active:scale-90 flex items-center justify-center pointer-events-auto"
+                  className="p-3 rounded-full bg-white border-2 border-indigo-400 hover:border-indigo-500 text-indigo-600 hover:text-indigo-700 shadow-xl hover:shadow-2xl transition-all active:scale-95 hover:scale-110 flex items-center justify-center pointer-events-auto"
                   aria-label="Scroll Left"
                 >
-                  <ChevronLeft size={24} className="sm:w-5 sm:h-5" />
+                  <ChevronLeft size={28} strokeWidth={2.5} />
                 </button>
             </div>
 
@@ -90,14 +90,14 @@ export default function HomePage() {
                 ))}
             </div>
 
-            {/* Buton Dreapta - VIZIBIL PE MOBIL */}
-            <div className="absolute right-0 top-0 bottom-0 z-20 bg-linear-to-l from-white via-white to-transparent pr-1 sm:pr-2 pl-2 sm:pl-4 flex items-center pointer-events-none">
+            {/* Buton Dreapta - VIZIBIL PESTE TOT */}
+            <div className="absolute right-0 top-0 bottom-0 z-20 bg-linear-to-l from-white via-white to-transparent pr-2 pl-4 flex items-center pointer-events-none">
                 <button 
                   onClick={scrollRight}
-                  className="p-2 sm:p-1.5 rounded-full bg-white border-2 sm:border border-indigo-300 sm:border-slate-200 text-indigo-600 sm:text-slate-500 hover:text-indigo-600 hover:border-indigo-300 shadow-lg sm:shadow-sm transition-all active:scale-90 flex items-center justify-center pointer-events-auto"
+                  className="p-3 rounded-full bg-white border-2 border-indigo-400 hover:border-indigo-500 text-indigo-600 hover:text-indigo-700 shadow-xl hover:shadow-2xl transition-all active:scale-95 hover:scale-110 flex items-center justify-center pointer-events-auto"
                   aria-label="Scroll Right"
                 >
-                  <ChevronRight size={24} className="sm:w-5 sm:h-5" />
+                  <ChevronRight size={28} strokeWidth={2.5} />
                 </button>
             </div>
 
