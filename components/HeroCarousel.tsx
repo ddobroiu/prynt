@@ -275,23 +275,23 @@ export default function HeroCarousel() {
                 </div>
              </div>
 
-             {/* --- VARIANTA DESKTOP: SINGLE SLIDE (NESCHIMBATĂ) --- */}
+             {/* --- VARIANTA DESKTOP: SINGLE SLIDE --- */}
              <div className="hidden lg:block h-[550px] relative">
                  
-                 {/* SĂGEȚI POZIȚIONARE RELATIVĂ LA IMAGINEA DESKTOP */}
+                 {/* SĂGEȚI MARI ȘI VIZIBILE */}
                  <button 
                      onClick={prevSlide} 
-                     className="absolute -left-6 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 shadow-2xl text-white transition-all"
+                     className="absolute -left-8 top-1/2 -translate-y-1/2 z-40 p-4 rounded-full bg-white border-4 border-indigo-500 hover:border-indigo-600 shadow-2xl text-indigo-600 hover:text-indigo-700 transition-all hover:scale-110 active:scale-95"
                      aria-label="Previous Slide"
                  >
-                     <ChevronLeft size={20} />
+                     <ChevronLeft size={32} strokeWidth={3} />
                  </button>
                  <button 
                      onClick={nextSlide} 
-                     className="absolute -right-6 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 shadow-2xl text-white transition-all"
+                     className="absolute -right-8 top-1/2 -translate-y-1/2 z-40 p-4 rounded-full bg-white border-4 border-indigo-500 hover:border-indigo-600 shadow-2xl text-indigo-600 hover:text-indigo-700 transition-all hover:scale-110 active:scale-95"
                      aria-label="Next Slide"
                  >
-                     <ChevronRight size={20} />
+                     <ChevronRight size={32} strokeWidth={3} />
                  </button>
                  
                  <div key={currentSlide.id} className="relative w-full h-full animate-in fade-in duration-700">
