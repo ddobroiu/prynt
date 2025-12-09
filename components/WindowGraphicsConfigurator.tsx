@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 import { useToast } from "@/components/ToastProvider";
-import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Upload, TrendingUp, Percent } from "lucide-react";
+import { Ruler, Layers, Plus, Minus, ShoppingCart, Info, ChevronDown, X, UploadCloud, Upload, TrendingUp, Percent, MessageCircle } from "lucide-react";
 import DeliveryEstimation from "./DeliveryEstimation";
 import FaqAccordion from "./FaqAccordion";
 import Reviews from "./Reviews";
