@@ -239,6 +239,8 @@ export default function CheckoutPage() {
     return {
       tip_factura,
       name: tip_factura === "persoana_fizica" ? fullName : undefined,
+      email: b.email || undefined,
+      telefon: b.phone || undefined,
       denumire_companie: tip_factura === "persoana_juridica" ? (b.companyName || "") : undefined,
       cui: tip_factura === "persoana_juridica" ? (b.cui || "") : undefined,
       reg_com: tip_factura === "persoana_juridica" ? (b.regCom || "") : undefined,
