@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { MessageCircle, Mail } from "lucide-react";
+import { MessageCircle, Mail, X } from "lucide-react";
 
 export default function ContactButton() {
   const [open, setOpen] = useState(false);
