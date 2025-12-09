@@ -1,0 +1,35 @@
+{
+  "items": [
+    {"id":"banner-1","title":"Banner 200x100","price":400,"quantity":1,"metadata":{"Material":"frontlit_510","Finisaje":"Tiv si capse","Grafica":"Vreau grafica","designOption":"upload","textDesign":"PROMOTIE"}},
+    {"id":"autocolant-1","title":"Autocolant 10x10","price":30,"quantity":50,"width_cm":10,"height_cm":10,"metadata":{"Material":"paper_gloss","Finisaje":"Laminat, Die-cut","Grafica":"Grafica proprie"}}
+  ],
+  "address": {
+    "nume_prenume": "Ion Popescu",
+    "email": "contact@prynt.ro",
+    "telefon": "+40700111222",
+    "judet": "Bucuresti",
+    "localitate": "Sector 3",
+    "strada_nr": "Str. Unirii 10",
+    "postCode": "030001"
+  },
+  "billing": {
+    "tip_factura": "persoana_fizica",
+    "name": "Ion Popescu",
+    "email": "contact@prynt.ro",
+    "telefon": "+40700111222",
+    "judet": "Bucuresti",
+    "localitate": "Sector 3",
+    "strada_nr": "Str. Unirii 10",
+    "postCode": "030001"
+  },
+  "sameAsDelivery": true,
+  "createAccount": false,
+  "paymentMethod": "cash_on_delivery",
+  "acceptTerms": true,
+  "newsletter": false,
+  "discountCode": "",
+  "discountAmount": 0,
+  "subtotal": 430,
+  "shippingCost": 19.99,
+  "totalWithShipping": 449.99
+}
