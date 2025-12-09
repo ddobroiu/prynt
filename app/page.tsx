@@ -58,21 +58,21 @@ export default function HomePage() {
       <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all">
         <div className="container mx-auto px-0 sm:px-4 relative group">
             
-            {/* Buton Stânga */}
-            <div className="absolute left-0 top-0 bottom-0 z-20 bg-linear-to-r from-white via-white/95 to-transparent pl-2 pr-4 flex items-center">
+            {/* Buton Stânga - VIZIBIL PE MOBIL */}
+            <div className="absolute left-0 top-0 bottom-0 z-20 bg-linear-to-r from-white via-white to-transparent pl-1 sm:pl-2 pr-2 sm:pr-4 flex items-center pointer-events-none">
                 <button 
                   onClick={scrollLeft}
-                  className="p-1.5 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200 shadow-sm transition-all active:scale-90 flex items-center justify-center"
+                  className="p-2 sm:p-1.5 rounded-full bg-white border-2 sm:border border-indigo-300 sm:border-slate-200 text-indigo-600 sm:text-slate-500 hover:text-indigo-600 hover:border-indigo-300 shadow-lg sm:shadow-sm transition-all active:scale-90 flex items-center justify-center pointer-events-auto"
                   aria-label="Scroll Left"
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={24} className="sm:w-5 sm:h-5" />
                 </button>
             </div>
 
             {/* Container Scrollabil */}
             <div 
                 ref={scrollContainerRef}
-                className="flex items-center gap-2 sm:gap-3 overflow-x-auto py-3 no-scrollbar snap-x scroll-smooth px-10 sm:px-12"
+                className="flex items-center gap-2 sm:gap-3 overflow-x-auto py-3 no-scrollbar snap-x scroll-smooth px-12 sm:px-12"
             >
                 {QUICK_NAV_ITEMS.map((item) => (
                     <Link 
@@ -90,14 +90,14 @@ export default function HomePage() {
                 ))}
             </div>
 
-            {/* Buton Dreapta */}
-            <div className="absolute right-0 top-0 bottom-0 z-20 bg-linear-to-l from-white via-white/95 to-transparent pr-2 pl-4 flex items-center">
+            {/* Buton Dreapta - VIZIBIL PE MOBIL */}
+            <div className="absolute right-0 top-0 bottom-0 z-20 bg-linear-to-l from-white via-white to-transparent pr-1 sm:pr-2 pl-2 sm:pl-4 flex items-center pointer-events-none">
                 <button 
                   onClick={scrollRight}
-                  className="p-1.5 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200 shadow-sm transition-all active:scale-90 flex items-center justify-center"
+                  className="p-2 sm:p-1.5 rounded-full bg-white border-2 sm:border border-indigo-300 sm:border-slate-200 text-indigo-600 sm:text-slate-500 hover:text-indigo-600 hover:border-indigo-300 shadow-lg sm:shadow-sm transition-all active:scale-90 flex items-center justify-center pointer-events-auto"
                   aria-label="Scroll Right"
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={24} className="sm:w-5 sm:h-5" />
                 </button>
             </div>
 
