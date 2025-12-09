@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
     const origin =
       req.headers.get('origin') ||
       process.env.PUBLIC_BASE_URL ||
+      process.env.NEXTAUTH_URL ||
       'http://localhost:3000';
 
     const secret = process.env.STRIPE_SECRET_KEY;

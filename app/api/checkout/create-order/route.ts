@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       const costLivrare = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
 
       try {
-        const origin = req.headers.get('origin') || process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
+        const origin = req.headers.get('origin') || process.env.PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
         const secret = process.env.STRIPE_SECRET_KEY;
         
         if (!secret) {
