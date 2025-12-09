@@ -14,7 +14,19 @@ export async function POST(req: NextRequest) {
     
     const paymentMethod = orderData.paymentMethod || 'cash_on_delivery';
 
-    console.log(`[API /checkout/create-order] Payment method: ${paymentMethod}, User: ${userId || 'GUEST'}`);
+    // Diagnostic: log payload essentials without sensitive data
+    const diag = {
+      pm: paymentMethod,
+      user: userId || 'GUEST',
+      addressEmail: orderData?.address?.email,
+      addressPhone: orderData?.address?.telefon,
+      addressName: orderData?.address?.nume_prenume,
+      billingEmail: orderData?.billing?.email,
+      billingPhone: orderData?.billing?.telefon || orderData?.billing?.phone,
+      billingType: orderData?.billing?.tip_factura,
+      itemsCount: Array.isArray(orderData?.items) ? orderData.items.length : 0,
+    };
+    console.log('[API /checkout/create-order] diag', diag);
 
     if (!orderData?.address || !orderData?.billing || !orderData?.items) {
       return NextResponse.json({ error: 'Date de comandă invalide.' }, { status: 400 });
@@ -115,6 +127,12 @@ export async function POST(req: NextRequest) {
         });
       } catch (error: any) {
         console.error('[API /checkout/create-order] EROARE la fulfillOrder:', error?.message || error);
+        console.error('[API /checkout/create-order] ENV check:', {
+          hasDB: Boolean(process.env.DATABASE_URL || process.env.DATABASE_INTERNAL_URL),
+          hasResend: Boolean(process.env.RESEND_API_KEY),
+          emailFromSet: Boolean(process.env.EMAIL_FROM),
+          adminEmailSet: Boolean(process.env.ADMIN_EMAIL),
+        });
         return NextResponse.json({ error: 'Eroare la procesarea comenzii.' }, { status: 500 });
       }
     }
