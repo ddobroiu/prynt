@@ -179,9 +179,34 @@ export async function sendNewOrderAdminEmail(order: any) {
   
   const adminEmail = process.env.ADMIN_EMAIL || 'contact@prynt.ro'; 
 
+  // Extrage datele clientului
+  const clientName = order.shippingAddress?.name || 'Necunoscut';
+  const clientPhone = order.shippingAddress?.phone || 'Nespecificat';
+  const clientEmail = order.shippingAddress?.email || order.user?.email || 'Nespecificat';
+  const deliveryAddress = order.shippingAddress 
+    ? `${order.shippingAddress.street || ''}, ${order.shippingAddress.city || ''}, ${order.shippingAddress.county || ''}, ${order.shippingAddress.postalCode || ''}`
+    : 'Nespecificată';
+
+  const message = `
+    <strong>Comandă nouă #${orderIdShort}</strong><br/><br/>
+    
+    <strong>📦 Detalii comandă:</strong><br/>
+    • Total: <strong>${order.total} ${order.currency}</strong><br/>
+    • Metodă plată: ${order.paymentType || 'N/A'}<br/>
+    • Produse: ${order.items?.length || 0} articole<br/><br/>
+    
+    <strong>👤 Date client:</strong><br/>
+    • Nume: <strong>${clientName}</strong><br/>
+    • Telefon: <strong>${clientPhone}</strong><br/>
+    • Email: ${clientEmail}<br/><br/>
+    
+    <strong>🚚 Adresă livrare:</strong><br/>
+    ${deliveryAddress}
+  `;
+
   const html = getHtmlTemplate({
     title: "Comandă Nouă!",
-    message: `O nouă comandă (#${orderIdShort}) a fost plasată prin asistentul virtual sau site. Client: ${order.shippingAddress?.name}. Total: ${order.total} ${order.currency}. Metodă plată: ${order.paymentType || 'N/A'}`,
+    message: message,
     buttonText: "Gestionează în Admin",
     buttonUrl: adminUrl,
     footerText: "Notificare internă sistem."
@@ -190,7 +215,7 @@ export async function sendNewOrderAdminEmail(order: any) {
   await resend.emails.send({
     from: 'Prynt System <no-reply@prynt.ro>',
     to: adminEmail,
-    subject: `[ADMIN] Comandă Nouă #${orderIdShort}`,
+    subject: `[ADMIN] Comandă Nouă #${orderIdShort} - ${clientName}`,
     html,
   });
 }
