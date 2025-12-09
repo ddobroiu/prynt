@@ -23,6 +23,8 @@ type Address = {
 type Billing = {
   tip_factura: "persoana_fizica" | "persoana_juridica";
   name?: string;
+  email?: string;
+  telefon?: string;
   denumire_companie?: string;
   cui?: string;
   reg_com?: string;
@@ -257,6 +259,28 @@ export default function CheckoutForm({
                   placeholder="Numele companiei cum apare în actele oficiale"
                 />
               </Field>
+              <Field id="billing.email" label="Email companie *" error={errors["billing.email"]}>
+                <input
+                  data-field="billing.email"
+                  type="email"
+                  className={inputCls(errors["billing.email"])}
+                  value={billing.email ?? ""}
+                  onChange={(e) => onBill("email", e.target.value)}
+                  autoComplete="section-billing email"
+                  placeholder="contact@companie.ro"
+                />
+              </Field>
+              <Field id="billing.telefon" label="Telefon companie *" error={errors["billing.telefon"]}>
+                <input
+                  data-field="billing.telefon"
+                  type="tel"
+                  className={inputCls(errors["billing.telefon"])}
+                  value={billing.telefon ?? ""}
+                  onChange={(e) => onBill("telefon", e.target.value)}
+                  autoComplete="section-billing tel"
+                  placeholder="0712345678"
+                />
+              </Field>
             </div>
           </div>
         )}
@@ -275,6 +299,30 @@ export default function CheckoutForm({
                     />
                   </Field>
                 </div>
+                
+                <Field id="billing.email" label="Email (facturare) *" error={errors["billing.email"]}>
+                  <input
+                    data-field="billing.email"
+                    type="email"
+                    className={inputCls(errors["billing.email"])}
+                    value={billing.email ?? ""}
+                    onChange={(e) => onBill("email", e.target.value)}
+                    autoComplete="section-billing email"
+                    placeholder="email@exemplu.ro"
+                  />
+                </Field>
+                
+                <Field id="billing.telefon" label="Telefon (facturare) *" error={errors["billing.telefon"]}>
+                  <input
+                    data-field="billing.telefon"
+                    type="tel"
+                    className={inputCls(errors["billing.telefon"])}
+                    value={billing.telefon ?? ""}
+                    onChange={(e) => onBill("telefon", e.target.value)}
+                    autoComplete="section-billing tel"
+                    placeholder="0712345678"
+                  />
+                </Field>
 
              <div data-field="billing.judet">
                 <JudetSelector
