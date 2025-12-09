@@ -20,7 +20,11 @@ export type Address = {
 export type Billing = {
   tip_factura: 'persoana_fizica' | 'companie' | 'persoana_juridica';
   cui?: string;
+  reg_com?: string;
+  denumire_companie?: string;
   name?: string;
+  email?: string;
+  telefon?: string;
   judet?: string;
   localitate?: string;
   strada_nr?: string;
@@ -148,6 +152,7 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
             type: 'shipping',
             isDefault: true,
             nume: a.nume_prenume || null,
+            email: a.email || null,
             telefon: a.telefon || null,
             judet: a.judet || '',
             localitate: a.localitate || '',
@@ -170,7 +175,8 @@ export async function appendOrder(input: NewOrder): Promise<StoredOrder> {
             type: 'billing',
             isDefault: false,
             nume: b.name || a.nume_prenume || null,
-            telefon: a.telefon || null,
+            email: (b as any).email || a.email || null,
+            telefon: (b as any).telefon || a.telefon || null,
             judet: b.judet || a.judet || '',
             localitate: b.localitate || a.localitate || '',
             strada_nr: b.strada_nr || a.strada_nr || '',
