@@ -199,20 +199,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             }),
           }}
         />
-        {/* Google Analytics - în head pentru mai bun tracking */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-VG21Z7L33S"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-VG21Z7L33S', {
-                page_path: window.location.pathname,
-              });
-            `,
-          }}
-        />
         
         <Script
           id="tiktok-pixel"
