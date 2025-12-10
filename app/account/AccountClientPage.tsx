@@ -44,6 +44,16 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
     const url = new URL(window.location.href);
     url.searchParams.set('tab', newTab);
     window.history.pushState({}, '', url);
+
+    // Scroll smooth la conținut pe mobil
+    if (window.innerWidth < 1024) { // lg breakpoint
+      setTimeout(() => {
+        const mainContent = document.querySelector('main[data-content-area]');
+        if (mainContent) {
+          mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
   };
 
   if (status === "loading") return <div className="p-10 text-center text-gray-600 dark:text-gray-400">Se încarcă...</div>;
@@ -150,15 +160,15 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* SIDEBAR */}
-          <aside className="w-full lg:w-72 shrink-0 animate-in fade-in slide-in-from-left-4" style={{ animationDelay: "100ms" }}>
-            <div className="sticky top-20">
+          {/* SIDEBAR - Sticky pe mobil și desktop */}
+          <aside className="w-full lg:w-72 shrink-0 animate-in fade-in slide-in-from-left-4 sticky top-16 lg:top-20 z-20 bg-white dark:bg-slate-900 lg:bg-transparent py-4 lg:py-0 -mx-4 px-4 lg:mx-0 lg:px-0 border-b lg:border-b-0 border-gray-200 dark:border-gray-700" style={{ animationDelay: "100ms" }}>
+            <div className="lg:sticky lg:top-20">
               <AccountNavTab activeTab={tab} onTabChange={handleTabChange} />
             </div>
           </aside>
 
           {/* MAIN CONTENT AREA */}
-          <main className="flex-1 bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-lg border-2 border-gray-200 dark:border-gray-700">
+          <main data-content-area className="flex-1 bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-lg border-2 border-gray-200 dark:border-gray-700 scroll-mt-32">
             {tab === 'profile' && (
               <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
                 <div className="space-y-8">

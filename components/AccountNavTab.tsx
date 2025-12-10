@@ -177,9 +177,9 @@ export default function AccountNavTab({ activeTab, onTabChange }: AccountNavTabP
   }, {} as Record<string, NavTabItem[]>);
 
   return (
-    <nav className="flex flex-col gap-4 sm:gap-6 bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-gray-200 dark:border-gray-700 shadow-lg">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-1 pb-2 border-b border-gray-200/50 dark:border-gray-700/50">
+    <nav className="flex flex-col gap-4 sm:gap-6 bg-white dark:bg-slate-800 p-3 lg:p-6 rounded-xl lg:rounded-3xl border-2 border-gray-200 dark:border-gray-700 shadow-lg">
+      {/* Header - ascuns pe mobil */}
+      <div className="hidden lg:flex items-center gap-3 px-1 pb-2 border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
           <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -191,7 +191,33 @@ export default function AccountNavTab({ activeTab, onTabChange }: AccountNavTabP
         </div>
       </div>
 
-      {/* Navigation Groups */}
+      {/* Mobile: Horizontal Scroll - Toate items-urile într-un singur row */}
+      <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 -mx-3 px-3 no-scrollbar">
+        {NAV_ITEMS.map((item) => {
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onTabChange(item.id)}
+              className={`shrink-0 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
+                isActive
+                  ? `bg-linear-to-r ${item.color.activeGradient} text-white shadow-lg`
+                  : "text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700/60 hover:shadow-md"
+              }`}
+            >
+              <div className={`shrink-0 w-5 h-5 flex items-center justify-center ${
+                !isActive ? item.color.icon : ""
+              }`}>
+                {item.icon}
+              </div>
+              <span className="text-sm font-semibold whitespace-nowrap">{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Desktop: Navigation Groups */}
+      <div className="hidden lg:block space-y-4 sm:space-y-6">
       {Object.entries(groupedItems).map(([categoryKey, items]) => {
         const category = categories[categoryKey as keyof typeof categories];
         return (
@@ -265,6 +291,7 @@ export default function AccountNavTab({ activeTab, onTabChange }: AccountNavTabP
           </div>
         );
       })}
+      </div>
     </nav>
   );
 }
