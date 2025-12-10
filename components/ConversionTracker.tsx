@@ -2,6 +2,12 @@
 
 import { useEffect } from "react";
 
+declare global {
+  interface Window {
+    dataLayer?: any[];
+  }
+}
+
 export default function ConversionTracker({ orderNo }: { orderNo: number | null }) {
   useEffect(() => {
     if (!orderNo) return;
