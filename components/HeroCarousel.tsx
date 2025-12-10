@@ -263,16 +263,16 @@ export default function HeroCarousel() {
             </div>
 
             {/* Badges */}
-            <div className="flex flex-nowrap items-center justify-start lg:justify-start gap-2 sm:gap-4 pt-4 opacity-90 overflow-x-auto no-scrollbar w-full pb-2">
-               <div className="shrink-0 flex items-center gap-1.5 text-[11px] sm:text-sm font-semibold text-slate-600 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 whitespace-nowrap">
+            <div className="flex flex-nowrap items-center justify-start lg:justify-start gap-2 sm:gap-4 pt-4 overflow-x-auto no-scrollbar w-full pb-2">
+               <div className="shrink-0 flex items-center gap-1.5 text-[11px] sm:text-sm font-semibold text-slate-800 bg-white px-3 py-2 rounded-xl border-2 border-slate-200 shadow-sm whitespace-nowrap">
                   <Truck size={16} className="text-indigo-600 shrink-0" />
                   <span>Livrare Gratuită {'>'} 500 RON</span>
                </div>
-               <div className="shrink-0 flex items-center gap-1.5 text-[11px] sm:text-sm font-semibold text-slate-600 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 whitespace-nowrap">
+               <div className="shrink-0 flex items-center gap-1.5 text-[11px] sm:text-sm font-semibold text-slate-800 bg-white px-3 py-2 rounded-xl border-2 border-slate-200 shadow-sm whitespace-nowrap">
                   <Zap size={16} className="text-amber-500 shrink-0" />
                   <span>Producție Rapidă</span>
                </div>
-               <div className="shrink-0 flex items-center gap-1.5 text-[11px] sm:text-sm font-semibold text-slate-600 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 whitespace-nowrap">
+               <div className="shrink-0 flex items-center gap-1.5 text-[11px] sm:text-sm font-semibold text-slate-800 bg-white px-3 py-2 rounded-xl border-2 border-slate-200 shadow-sm whitespace-nowrap">
                   <ShieldCheck size={16} className="text-emerald-600 shrink-0" />
                   <span>Calitate Garantată</span>
                </div>
