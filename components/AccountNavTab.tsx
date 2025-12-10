@@ -191,6 +191,26 @@ export default function AccountNavTab({ activeTab, onTabChange }: AccountNavTabP
         </div>
       </div>
 
+      {/* Mobile: Horizontal Scroll - DOAR PE MOBIL */}
+      <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 -mx-3 px-3 no-scrollbar">
+        {NAV_ITEMS.map((item) => {
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onTabChange(item.id)}
+              className={`shrink-0 px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                isActive
+                  ? `bg-linear-to-r ${item.color.activeGradient} text-white`
+                  : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+              }`}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Desktop: Navigation Groups - DOAR PE DESKTOP */}
       <div className="hidden lg:block space-y-4 lg:space-y-6">
       {Object.entries(groupedItems).map(([categoryKey, items]) => {
