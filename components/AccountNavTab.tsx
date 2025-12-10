@@ -191,33 +191,8 @@ export default function AccountNavTab({ activeTab, onTabChange }: AccountNavTabP
         </div>
       </div>
 
-      {/* Mobile: Horizontal Scroll - Toate items-urile într-un singur row */}
-      <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 -mx-3 px-3 no-scrollbar">
-        {NAV_ITEMS.map((item) => {
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onTabChange(item.id)}
-              className={`shrink-0 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
-                isActive
-                  ? `bg-linear-to-r ${item.color.activeGradient} text-white shadow-lg`
-                  : "text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700/60 hover:shadow-md"
-              }`}
-            >
-              <div className={`shrink-0 w-5 h-5 flex items-center justify-center ${
-                !isActive ? item.color.icon : ""
-              }`}>
-                {item.icon}
-              </div>
-              <span className="text-sm font-semibold whitespace-nowrap">{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Desktop: Navigation Groups */}
-      <div className="hidden lg:block space-y-4 sm:space-y-6">
+      {/* Desktop: Navigation Groups - DOAR PE DESKTOP */}
+      <div className="hidden lg:block space-y-4 lg:space-y-6">
       {Object.entries(groupedItems).map(([categoryKey, items]) => {
         const category = categories[categoryKey as keyof typeof categories];
         return (

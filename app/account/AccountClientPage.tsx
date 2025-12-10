@@ -160,8 +160,8 @@ export default function AccountClientPage({ orders = [] }: AccountClientPageProp
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* SIDEBAR - Sticky pe mobil și desktop */}
-          <aside className="w-full lg:w-72 shrink-0 animate-in fade-in slide-in-from-left-4 sticky top-16 lg:top-20 z-20 bg-white dark:bg-slate-900 lg:bg-transparent py-4 lg:py-0 -mx-4 px-4 lg:mx-0 lg:px-0 border-b lg:border-b-0 border-gray-200 dark:border-gray-700" style={{ animationDelay: "100ms" }}>
+          {/* SIDEBAR - Sticky doar pe mobil */}
+          <aside className="w-full lg:w-72 shrink-0 animate-in fade-in slide-in-from-left-4 sticky lg:relative top-16 lg:top-0 z-20 lg:z-auto bg-white dark:bg-slate-900 py-4 lg:py-0 -mx-4 px-4 lg:mx-0 lg:px-0 border-b lg:border-b-0 border-gray-200 dark:border-gray-700 lg:border-transparent" style={{ animationDelay: "100ms" }}>
             <div className="lg:sticky lg:top-20">
               <AccountNavTab activeTab={tab} onTabChange={handleTabChange} />
             </div>
