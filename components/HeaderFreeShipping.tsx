@@ -16,11 +16,11 @@ export default function HeaderFreeShipping() {
   if (cartTotal === 0) return null;
 
   return (
-    <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+    <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-indigo-950/30 border-2 border-slate-200 dark:border-indigo-800 rounded-lg shadow-sm">
       {remainingForFreeShipping > 0 ? (
         <>
           <Truck size={16} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
-          <span className="text-xs font-semibold text-slate-900 dark:text-white whitespace-nowrap">
+          <span className="text-xs font-semibold text-slate-800 dark:text-white whitespace-nowrap">
             +{formatMoneyDisplay(remainingForFreeShipping)} pentru livrare gratuită
           </span>
           <div className="relative h-1.5 w-16 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden shrink-0">

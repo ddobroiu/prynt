@@ -177,7 +177,7 @@ export default function CartWidget() {
 
         {/* BARĂ LIVRARE GRATUITĂ - Enhanced Design */}
         {items.length > 0 && (
-          <div className="px-4 py-4 border-y-2 border-indigo-100 dark:border-indigo-900/30 shrink-0 bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30">
+          <div className="px-4 py-4 border-y-2 border-slate-200 dark:border-indigo-900/30 shrink-0 bg-white dark:from-indigo-950/30 dark:to-purple-950/30">
             {remainingForFreeShipping > 0 ? (
               <div className="space-y-2.5">
                 <div className="flex justify-between items-center">
@@ -187,7 +187,7 @@ export default function CartWidget() {
                     </div>
                     Livrare Gratuită
                   </span>
-                  <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold bg-white dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">
+                  <span className="text-xs text-slate-800 dark:text-slate-300 font-semibold bg-white dark:bg-slate-800 px-3 py-1 rounded-full border-2 border-slate-300 dark:border-slate-700 shadow-sm">
                     încă{" "}
                     <span className="text-indigo-600 dark:text-indigo-400 font-bold">
                       +{formatMoneyDisplay(remainingForFreeShipping)} RON
