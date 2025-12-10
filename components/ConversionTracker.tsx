@@ -1,74 +1,23 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from "react";
 
-type ConversionTrackerProps = {
-  orderNo: number | null;
-};
-
-// Extend Window interface to include dataLayer
-declare global {
-  interface Window {
-    dataLayer?: Array<Record<string, any>>;
-  }
-}
-
-export default function ConversionTracker({ orderNo }: ConversionTrackerProps) {
-  const hasTracked = useRef(false);
-
+export default function ConversionTracker({ orderNo }: { orderNo: number | null }) {
   useEffect(() => {
-    // Only track once and only if we have an order number
-    if (hasTracked.current || !orderNo) return;
+    if (!orderNo) return;
 
-    const trackConversion = async () => {
-      try {
-        // Fetch order details from API
-        const response = await fetch(`/api/order/${orderNo}`);
-        
-        if (!response.ok) {
-          console.warn('[ConversionTracker] Failed to fetch order details');
-          return;
-        }
+    window.dataLayer = window.dataLayer || [];
 
-        const order = await response.json();
+    window.dataLayer.push({
+      event: "CE – purchase",    // numele EXACT al triggerului din GTM
+      transaction_id: orderNo,   // variabila folosită în tag
+      value: 1,                  // sau total comandă dacă îl ai
+      currency: "RON"
+    });
 
-        // Push conversion event to Google Analytics dataLayer
-        if (typeof window !== "undefined") {
-          window.dataLayer = window.dataLayer || [];
-          window.dataLayer.push({
-            event: "CE – purchase", // EXACT ca numele triggerului din GTM
-            order_id: orderNo,
-            transaction_id: order.id,
-            value: order.total,
-            currency: "RON",
-            items: order.items.map((item: any) => ({
-              item_id: item.id,
-              item_name: item.name,
-              price: item.price,
-              quantity: item.quantity
-            }))
-          });
+    console.log("Pushed CE – purchase event:", orderNo);
 
-          console.log('[ConversionTracker] CE – purchase event pushed to dataLayer:', {
-            order_id: orderNo,
-            transaction_id: order.id,
-            value: order.total,
-            items_count: order.items.length
-          });
-        }
-
-        hasTracked.current = true;
-      } catch (error) {
-        console.error('[ConversionTracker] Error tracking conversion:', error);
-      }
-    };
-
-    // Small delay to ensure page is fully loaded
-    const timeoutId = setTimeout(trackConversion, 500);
-
-    return () => clearTimeout(timeoutId);
   }, [orderNo]);
 
-  // This component doesn't render anything
   return null;
 }
