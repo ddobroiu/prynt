@@ -161,9 +161,59 @@ const HERO_ITEMS = [
 
 export default function HeroCarousel() {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [activeMobileSlide, setActiveMobileSlide] = useState(0);
+  const mobileScrollRef = useRef<HTMLDivElement>(null);
 
   const nextSlide = () => setActiveSlide((prev) => (prev + 1) % HERO_ITEMS.length);
   const prevSlide = () => setActiveSlide((prev) => (prev - 1 + HERO_ITEMS.length) % HERO_ITEMS.length);
+
+  // Mobile carousel navigation functions
+  const scrollToMobileSlide = (index: number) => {
+    const container = mobileScrollRef.current;
+    if (!container) return;
+    const cards = container.querySelectorAll('a');
+    cards[index]?.scrollIntoView({
+      behavior: 'smooth',
+      inline: 'center',
+      block: 'nearest'
+    });
+    setActiveMobileSlide(index);
+  };
+
+  const nextMobileSlide = () => {
+    const next = (activeMobileSlide + 1) % HERO_ITEMS.length;
+    scrollToMobileSlide(next);
+  };
+
+  const prevMobileSlide = () => {
+    const prev = (activeMobileSlide - 1 + HERO_ITEMS.length) % HERO_ITEMS.length;
+    scrollToMobileSlide(prev);
+  };
+
+  // Track mobile scroll position to update active slide indicator
+  const handleMobileScroll = () => {
+    const container = mobileScrollRef.current;
+    if (!container) return;
+
+    const cards = container.querySelectorAll('a');
+    const containerCenter = container.scrollLeft + container.clientWidth / 2;
+
+    let closestIndex = 0;
+    let closestDistance = Infinity;
+
+    cards.forEach((card, index) => {
+      const cardElement = card as HTMLElement;
+      const cardCenter = cardElement.offsetLeft + cardElement.clientWidth / 2;
+      const distance = Math.abs(containerCenter - cardCenter);
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = index;
+      }
+    });
+
+    setActiveMobileSlide(closestIndex);
+  };
 
   // Auto-play doar pentru Desktop (Mobilul e scroll manual)
   useEffect(() => {
@@ -232,13 +282,35 @@ export default function HeroCarousel() {
           {/* 2. ZONA VIZUALĂ (Hibrid: Mobil = Listă Pătrate, Desktop = Slide Mare) */}
           <div className="w-full lg:flex-1 relative order-2 lg:order-2">
              
-             {/* --- VARIANTA MOBIL: LISTA DE PĂTRATE (CARDURI) --- 
+             {/* --- VARIANTA MOBIL: LISTA DE PĂTRATE (CARDURI) ---
                  MODIFICARE: min-w-[90vw] pentru a fi "ÎNTREG" (unul pe ecran).
                  snap-center pentru a se opri fix pe mijloc.
              */}
-             <div className="block lg:hidden">
-                <div 
+             <div className="block lg:hidden relative">
+                {/* Săgeată Stânga - Subtilă */}
+                <button
+                  onClick={prevMobileSlide}
+                  disabled={activeMobileSlide === 0}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-white/70 backdrop-blur-sm border border-white/50 shadow-md text-slate-600 transition-all hover:scale-105 hover:bg-white/80 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                  aria-label="Slide anterior"
+                >
+                  <ChevronLeft size={20} strokeWidth={2.5} />
+                </button>
+
+                {/* Săgeată Dreapta - Subtilă */}
+                <button
+                  onClick={nextMobileSlide}
+                  disabled={activeMobileSlide === HERO_ITEMS.length - 1}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-white/70 backdrop-blur-sm border border-white/50 shadow-md text-slate-600 transition-all hover:scale-105 hover:bg-white/80 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                  aria-label="Slide următor"
+                >
+                  <ChevronRight size={20} strokeWidth={2.5} />
+                </button>
+
+                <div
+                    ref={mobileScrollRef}
                     className="flex gap-4 overflow-x-auto pb-8 pt-4 px-4 snap-x snap-mandatory no-scrollbar scroll-smooth"
+                    onScroll={handleMobileScroll}
                 >
                     {HERO_ITEMS.map((item) => (
                     <Link 
@@ -271,7 +343,23 @@ export default function HeroCarousel() {
                         </div>
                     </Link>
                     ))}
-                    <div className="min-w-2.5 shrink-0" /> 
+                    <div className="min-w-2.5 shrink-0" />
+                </div>
+
+                {/* Pagination Dots - Subtile */}
+                <div className="flex justify-center gap-1.5 pt-2">
+                  {HERO_ITEMS.map((item, idx) => (
+                    <button
+                      key={item.id}
+                      onClick={() => scrollToMobileSlide(idx)}
+                      className={`transition-all duration-300 rounded-full ${
+                        idx === activeMobileSlide
+                          ? 'w-6 h-1.5 bg-indigo-500/80'
+                          : 'w-1.5 h-1.5 bg-slate-300/60 hover:bg-slate-400/70'
+                      }`}
+                      aria-label={`Mergi la ${item.title}`}
+                    />
+                  ))}
                 </div>
              </div>
 
