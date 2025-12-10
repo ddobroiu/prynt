@@ -36,7 +36,8 @@ export default function ConversionTracker({ orderNo }: ConversionTrackerProps) {
         if (typeof window !== "undefined") {
           window.dataLayer = window.dataLayer || [];
           window.dataLayer.push({
-            event: "purchase",
+            event: "CE – purchase", // EXACT ca numele triggerului din GTM
+            order_id: orderNo,
             transaction_id: order.id,
             value: order.total,
             currency: "RON",
@@ -48,7 +49,8 @@ export default function ConversionTracker({ orderNo }: ConversionTrackerProps) {
             }))
           });
 
-          console.log('[ConversionTracker] Purchase event pushed to dataLayer:', {
+          console.log('[ConversionTracker] CE – purchase event pushed to dataLayer:', {
+            order_id: orderNo,
             transaction_id: order.id,
             value: order.total,
             items_count: order.items.length
