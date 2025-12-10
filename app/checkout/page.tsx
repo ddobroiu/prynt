@@ -607,7 +607,7 @@ export default function CheckoutPage() {
   return (
     <main className="bg-slate-100 dark:bg-slate-950 min-h-screen pb-12" style={{ isolation: 'isolate' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10">
-        <nav className="mb-6 text-sm text-slate-700 dark:text-slate-300 flex items-center gap-1 flex-wrap">
+        <nav className="mb-6 text-sm text-slate-900 dark:text-slate-300 flex items-center gap-1 flex-wrap bg-white dark:bg-slate-900/50 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
           <Link
             href="/"
             className="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium"

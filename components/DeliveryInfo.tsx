@@ -81,17 +81,17 @@ export default function DeliveryInfo({ county, className = "", shippingFrom, sho
   }
 
   return (
-    <div className={`flex items-center gap-3 text-sm ${className}`}>
+    <div className={`flex items-center gap-3 text-sm bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm ${className}`}>
       <div className="flex items-center gap-2">
-        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-green-600/10 text-green-700">✓</span>
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-green-600/10 dark:bg-green-600/20 text-green-700 dark:text-green-400">✓</span>
         <div className="leading-tight">
-          <div className="font-medium">Livrare estimată</div>
-          <div className="text-gray-600">{loading ? "Se calculează…" : label}</div>
+          <div className="font-medium text-slate-900 dark:text-white">Livrare estimată</div>
+          <div className="text-slate-600 dark:text-slate-400">{loading ? "Se calculează…" : label}</div>
         </div>
       </div>
       {shipText && showShippingFrom && (
-          <div className="ml-auto text-gray-700">
-            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1">{shipText}</span>
+          <div className="ml-auto">
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-slate-800 dark:text-slate-300 font-medium">{shipText}</span>
           </div>
         )}
     </div>

@@ -264,11 +264,11 @@ export default function CartWidget() {
                   <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                     {(() => {
                       // Căutăm imaginea în mai multe locuri
-                      let imgSrc = item.metadata?.productImage || 
-                                   anyItem.image || 
-                                   anyItem.src || 
-                                   anyItem.imageUrl || 
-                                   anyItem.thumbnail ||
+                      let imgSrc = item.metadata?.productImage ||
+                                   item.metadata?.image ||
+                                   item.metadata?.src ||
+                                   item.metadata?.imageUrl ||
+                                   item.metadata?.thumbnail ||
                                    item.metadata?.artworkUrl;
 
                       // Dacă nu găsim imagine, încercăm să generăm una default bazată pe slug
