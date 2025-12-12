@@ -38,19 +38,12 @@ interface TikTokPixel {
   push: (args: any[]) => void;
 }
 
-interface Window {
-  ttq: TikTokPixel;
-  TiktokAnalyticsObject: string;
-  dataLayer: any[];
-  gtag: (...args: any[]) => void;
-}
-
 declare global {
   interface Window {
-    ttq: TikTokPixel;
-    TiktokAnalyticsObject: string;
-    dataLayer: any[];
-    gtag: (...args: any[]) => void;
+    ttq?: TikTokPixel;
+    TiktokAnalyticsObject?: string;
+    dataLayer?: any[];
+    gtag?: (...args: any[]) => void;
   }
 }
 
